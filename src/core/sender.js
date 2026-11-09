@@ -17,7 +17,6 @@
 export const PRIVILEGED_MESSAGES = new Set([
   'GET_SETTINGS',
   'SET_SETTINGS',
-  'TEST_API_KEY',
   'GET_PROOF',
   'BUILD_LETTER',
 ]);

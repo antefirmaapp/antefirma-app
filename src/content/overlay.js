@@ -220,7 +220,6 @@
        Serve a chi vuole controllare, non a chi deve decidere in tre secondi. */
     .provenance { font-size: 11px; color: #6b7280; padding: 0 22px 4px; line-height: 1.5; }
     .disclaimer { font-size: 11px; color: #6b7280; padding: 0 22px 12px; line-height: 1.45; }
-    .refining { color: #1d4ed8; font-weight: 700; animation: pulse 1.4s ease-in-out infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
     .loading { padding: 40px 22px; text-align: center; }
     .spinner {
@@ -267,7 +266,6 @@
       .proceed[aria-disabled='true']:hover { color: #9aa2ae; border-color: #3a414d; }
       .timeline::before { background: #2a2f38; }
       .spinner { border-color: #2a2f38; border-top-color: #e8eaef; }
-      .refining { color: #8ab4ff; }
       .error { background: #2a1616; border-color: #5a2626; color: #f5b5b5; }
     }
 
@@ -280,14 +278,13 @@
         transition-duration: .01ms !important;
         scroll-behavior: auto !important;
       }
-      .refining { animation: none; opacity: 1; }
       /* Lo stato "in corso" resta leggibile senza rotazione: un anello pieno
          invece di uno che gira. */
       .spinner { animation: none; border-style: dotted; border-color: #8a919d; }
     }
   `;
 
-  const HOST_TAG = 'vincolo-alert';
+  const HOST_TAG = 'antefirma-alert';
 
   /** Quanto resta bloccato "Continua comunque" dal primo disegno della card. */
   const ARM_MS = 3000;
@@ -336,7 +333,7 @@
      * Gli stili dell'host vanno scritti inline e in !important.
      *
      * Il foglio di stile del sito ha la stessa dignità del nostro: gli
-     * basterebbe un `vincolo-alert { display: none }` per far sparire
+     * basterebbe un `antefirma-alert { display: none }` per far sparire
      * l'avviso lasciando il click sospeso — cioè per rompere la pagina e
      * insieme la protezione.
      */
@@ -467,18 +464,70 @@
       this.bind();
     }
 
+    /**
+     * Il consenso alla prima analisi. Il testo della pagina parte verso il
+     * server di AnteFirma solo dopo questo sì, e il sì vale per le analisi
+     * successive finché non lo si ritira dalle impostazioni.
+     *
+     * I due pulsanti accettano solo click veri (`isTrusted`): l'avviso sta in
+     * uno shadow root aperto, e uno script della pagina potrebbe altrimenti
+     * premere «Analizza» al posto della persona.
+     *
+     * @returns {Promise<'accept'|'skip'>} `cancel` passa da `wait()`, come sempre.
+     */
+    askConsent() {
+      return new Promise((resolve) => {
+        this.render(
+          `
+          <div class="card" style="--level-color:#15203A">
+            <div class="bar"></div>
+            <header>
+              <div class="eyebrow"><span class="badge">AnteFirma*</span><span>prima analisi</span></div>
+              <h1 id="v-title">Posso leggere questa pagina per te?</h1>
+            </header>
+            <div class="body">
+              <p class="summary">Per dirti a che cosa ti stai impegnando, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic) e ti risponde con le clausole che ti impegnano, ciascuna con la frase esatta da cui nasce.</p>
+              <p class="summary">Il server non conserva il testo né l'indirizzo. Nessun account, nessun dato che ti identifichi. Puoi ritirare il consenso quando vuoi dalle impostazioni.</p>
+            </div>
+            <footer>
+              <button class="cancel" data-act="cancel">Torna indietro</button>
+              <span class="spacer"></span>
+              <button class="link" data-consent="skip">Prosegui senza analisi</button>
+              <button class="proceed" data-consent="accept">Sì, analizza</button>
+            </footer>
+          </div>
+        `,
+          { role: 'alertdialog', labelledby: 'v-title' }
+        );
+        this.bind();
+        for (const btn of this.root.querySelectorAll('[data-consent]')) {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!e.isTrusted) return;
+            if (btn.dataset.consent === 'skip') {
+              resolve('skip');
+              this.finish('proceed');
+            } else {
+              resolve('accept');
+            }
+          });
+        }
+        this.root.querySelector('[data-consent="accept"]')?.focus?.();
+      });
+    }
+
     /** L'avviso è ancora in attesa di una decisione dell'utente? */
     isOpen() {
       return Boolean(this.resolve && this.host?.isConnected);
     }
 
-    showVerdict(verdict, { blocking = true, refining = false } = {}) {
+    showVerdict(verdict, { blocking = true } = {}) {
       const level = verdict.level || {};
       const cost = verdict.cost || {};
       const findings = verdict.findings || [];
       const timeline = verdict.timeline || [];
       const consumer = verdict.consumer || {};
-      const llmError = verdict.engine?.llmError;
       const ink = paletteFor(level.id);
 
       const remember = verdict.mustRemember
@@ -572,8 +621,8 @@
            </details>`
         : '';
 
-      const errorBlock = llmError?.surfaced
-        ? `<div class="error">Analisi AI non disponibile (${esc(llmError.message)}). Il verdetto qui sotto viene dal solo motore a regole.</div>`
+      const errorBlock = verdict.engine?.truncated
+        ? `<div class="error">La pagina era molto lunga: è stata analizzata solo in parte.</div>`
         : '';
 
       this.render(
@@ -610,7 +659,7 @@
                  </p>`
               : ''
           }
-          <div class="provenance">Verdetto da ${esc(engineLabel(verdict.engine))} · rischio della decisione ${esc(String(verdict.score))}/100${refining ? ' · <span class="refining">sto approfondendo…</span>' : ''}</div>
+          <div class="provenance">Verdetto da ${esc(engineLabel(verdict.engine))} · rischio della decisione ${esc(String(verdict.score))}/100</div>
           <div class="disclaimer">${esc(consumer.disclaimer || 'Analisi automatica a scopo informativo. Non è un parere legale.')}</div>
         </div>
       `,
@@ -741,18 +790,14 @@
 
   /** Da dove viene questo verdetto: conta per la fiducia che merita. */
   function engineLabel(engine = {}) {
-    if (engine.model === 'remote') return 'regole + AI';
-    if (engine.model === 'local') return 'regole + modello sul dispositivo';
-    return 'solo motore locale';
+    return engine.cached ? 'AI (analisi già fatta per questo testo)' : 'AI';
   }
 
   function renderFinding(f) {
     const ink = sevPalette(f.severity);
     const tags = [];
     if (f.personalized && f.personalReasons?.length) tags.push(`rilevante per: ${f.personalReasons.join(', ')}`);
-    if (f.sources?.length === 2) tags.push('confermata da regole + AI');
-    else if (f.source === 'llm') tags.push('rilevata dall’AI');
-    if (f.certainty === 'inferred') tags.push('dedotta, non testuale');
+    if (f.quotes?.length) tags.push(`citata in ${f.quotes.length + 1} punti della pagina`);
 
     return `<li class="finding" style="--sev-color:${ink.light};--sev-color-dark:${ink.dark}">
       <div class="top">

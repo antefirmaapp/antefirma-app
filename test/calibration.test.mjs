@@ -22,6 +22,10 @@ import { DEFAULT_SETTINGS } from '../src/core/constants.js';
 import { shouldBlock, compressSeverity, aggregateSeverity, moneyPressure } from '../src/core/scoring.js';
 import { multiplierFor } from '../src/core/profile.js';
 import { CORPUS, ORDERING, BAND_ORDER } from './fixtures/corpus.mjs';
+import { RESPONSES } from './fixtures/responses.mjs';
+
+/** Il server sostituito dalla sua risposta registrata per quel testo. */
+const recorded = (id) => async () => structuredClone(RESPONSES[id]);
 
 const T0 = new Date('2026-08-15T10:00:00Z').getTime();
 
@@ -32,10 +36,9 @@ for (const c of CORPUS) {
     text: c.text,
     ctx: { url: `https://${c.id}.test`, title: c.label, pricing: c.pricing || {}, terms: {}, form: {} },
     actionType: c.actionType,
+    remote: recorded(c.id),
     settings: {
       ...DEFAULT_SETTINGS,
-      useLLM: false,
-      useLocalModel: false,
       profile: c.profile || DEFAULT_SETTINGS.profile,
     },
     now: T0,
@@ -165,8 +168,8 @@ test('le fasce attese sono valori legittimi', () => {
 // ── 5. il profilo sposta, ma non stravolge ──────────────────────────────────
 
 test('il profilo creativo alza il contratto di cessione, non gli altri', async () => {
-  const withIp = { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: false, profile: { money: true, ip: true, freelance: true } };
-  const withoutIp = { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: false, profile: { money: true } };
+  const withIp = { ...DEFAULT_SETTINGS, profile: { money: true, ip: true, freelance: true } };
+  const withoutIp = { ...DEFAULT_SETTINGS, profile: { money: true } };
 
   const run = async (id, settings) => {
     const c = CORPUS.find((x) => x.id === id);
@@ -174,6 +177,8 @@ test('il profilo creativo alza il contratto di cessione, non gli altri', async (
       text: c.text,
       ctx: { url: 'https://x.test', pricing: c.pricing || {}, terms: {}, form: {} },
       actionType: c.actionType,
+    remote: recorded(c.id),
+      remote: recorded(c.id),
       settings,
       now: T0,
     });
@@ -204,7 +209,9 @@ test('un contratto grave senza prezzo può arrivare a HIGH RISK', async () => {
       text: c.text,
       ctx: { url: 'https://x.test', title: c.label, pricing: {}, terms: {}, form: {} },
       actionType: c.actionType,
-      settings: { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: false, jurisdiction, profile: c.profile },
+    remote: recorded(c.id),
+      remote: recorded(c.id),
+      settings: { ...DEFAULT_SETTINGS, jurisdiction, profile: c.profile },
       now: T0,
     });
     assert.ok(verdict.cost?.worstCase == null, 'questo caso deve restare senza prezzo');

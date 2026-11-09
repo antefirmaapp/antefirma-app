@@ -11,8 +11,6 @@ import assert from 'node:assert/strict';
 
 import { analyze } from '../src/core/analyzer.js';
 import { DEFAULT_SETTINGS } from '../src/core/constants.js';
-import { runRules } from '../src/core/rules.js';
-import { computeCost } from '../src/core/consequence.js';
 import { createSnapshot, compareSnapshot, sha256, attestation } from '../src/core/proof.js';
 import {
   buildCommitment, planReminders, dueReminder, missedWindow, commitmentState,
@@ -20,7 +18,6 @@ import {
 } from '../src/core/commitments.js';
 import { buildIcs } from '../src/core/ics.js';
 import { buildLetter, suggestKind, LETTER_KINDS } from '../src/core/letter.js';
-import { resolveApi, localModelStatus, buildCompactPrompt, analyzeLocally, resetSession } from '../src/core/local-llm.js';
 
 const CONTRACT = `
 1. Corrispettivo. Il canone è pari a € 19,99 al mese, oltre a spese di attivazione una tantum di € 49,00.
@@ -41,210 +38,48 @@ const CTX = {
 
 const T0 = new Date('2026-08-15T10:00:00Z').getTime();
 
-async function verdictFor(settings = {}) {
+/**
+ * La risposta che il server darebbe al contratto: le citazioni sono copiate dal
+ * testo, le cifre portano il passo da cui vengono. `text` permette di usarla
+ * anche su una versione modificata del contratto.
+ */
+function serverResponse(text = CONTRACT, { penalty = 120, extra = [] } = {}) {
+  const f = (category, quote) => {
+    assert.ok(text.includes(quote), `citazione assente: ${quote}`);
+    return { category, quote, why: '', confidence: 0.95 };
+  };
+  return {
+    findings: [
+      f('minimum_term', 'durata minima di 24 mesi'),
+      f('auto_renewal', 'si rinnova automaticamente per un uguale periodo'),
+      f('notice_period', 'preavviso di almeno 60 giorni'),
+      f('early_termination_penalty', 'è dovuta una penale pari a'),
+      f('no_refund', 'Gli importi versati non sono rimborsabili in alcun caso'),
+      f('arbitration', 'Ogni controversia sarà devoluta ad arbitrato rituale'),
+      ...extra.map(([c, q]) => f(c, q)),
+    ],
+    terms: {
+      price: { value: 19.99, quote: '€ 19,99 al mese' },
+      currency: { value: 'EUR', quote: '€ 19,99' },
+      billing_period: { value: 'month', quote: 'al mese' },
+      minimum_term_months: { value: 24, quote: 'durata minima di 24 mesi' },
+      notice_days: { value: 60, quote: 'preavviso di almeno 60 giorni' },
+      exit_fee: { value: penalty, quote: 'penale pari a' },
+    },
+    summary: 'Abbonamento di due anni con penale di uscita.',
+  };
+}
+
+async function verdictFor(settings = {}, response = serverResponse()) {
   return analyze({
     text: CONTRACT,
     ctx: CTX,
     actionType: 'subscribe',
-    settings: { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: false, ...settings },
+    settings: { ...DEFAULT_SETTINGS, remoteConsentAt: '2026-08-01T00:00:00.000Z', ...settings },
     now: T0,
+    remote: async () => response,
   });
 }
-
-// ── 1. modello on-device ────────────────────────────────────────────────────
-
-/** Finto modello integrato, per verificare il collegamento senza un browser. */
-function fakeScope(response, { fail = false, supportsSchema = true, destroyedOnce = false } = {}) {
-  const calls = [];
-  const sessions = { create: 0 };
-  let expired = destroyedOnce;
-  return {
-    calls,
-    sessions,
-    scope: {
-      LanguageModel: {
-        async availability() {
-          return fail ? 'unavailable' : 'available';
-        },
-        async create() {
-          if (fail) throw new Error('modello non scaricabile');
-          sessions.create += 1;
-          return {
-            async prompt(text, opts = {}) {
-              calls.push({ text, opts });
-              // Il service worker è stato sospeso fra la pre-analisi e il click:
-              // la sessione muore con lui, ed è il caso più comune sul campo.
-              if (expired) {
-                expired = false;
-                throw new Error('The model execution session has been destroyed.');
-              }
-              if (!supportsSchema && opts.responseConstraint) {
-                throw new Error('responseConstraint not supported');
-              }
-              return JSON.stringify(response);
-            },
-            destroy() {},
-          };
-        },
-      },
-    },
-  };
-}
-
-const LOCAL_ANSWER = {
-  headline: 'Ti stai impegnando per due anni',
-  summary: 'Abbonamento con vincolo di 24 mesi e penale di uscita.',
-  clauses: [
-    { category: 'auto_renewal', severity: 70, title: 'Rinnovo tacito', quote: 'si rinnova automaticamente', plain: 'riparte da solo' },
-  ],
-  economics: { minimumTermMonths: 24, noticeDays: 60, penaltyAmount: 120, autoRenewal: true, worstCaseTotal: 648.76 },
-  mustRemember: 'Disdici entro giugno 2028',
-};
-
-test('il modello on-device viene usato quando è disponibile', async () => {
-  resetSession();
-  const { scope, calls } = fakeScope(LOCAL_ANSWER);
-  const v = await analyze({
-    text: CONTRACT,
-    ctx: CTX,
-    actionType: 'subscribe',
-    settings: { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: true },
-    scope,
-    now: T0,
-  });
-
-  assert.equal(v.engine.model, 'local');
-  assert.equal(v.engine.llm, true);
-  assert.equal(v.headline, 'Ti stai impegnando per due anni');
-  assert.equal(calls.length, 1, 'deve interpellare il modello una sola volta');
-  resetSession();
-});
-
-test('il prompt on-device è compatto e parte da ciò che le regole hanno già trovato', () => {
-  const { findings } = runRules(CONTRACT, CTX);
-  const prompt = buildCompactPrompt({
-    text: CONTRACT,
-    ctx: CTX,
-    ruleFindings: findings,
-    actionType: 'subscribe',
-    profile: { money: true },
-  });
-  assert.ok(prompt.length < 9000, `prompt troppo lungo: ${prompt.length}`);
-  assert.ok(prompt.includes('auto_renewal'), 'deve passare i finding delle regole');
-  assert.ok(prompt.includes('19,99'), 'deve passare il prezzo letto dalla pagina');
-});
-
-test('se il browser non accetta lo schema, si riprova senza vincolo', async () => {
-  resetSession();
-  const { scope, calls } = fakeScope(LOCAL_ANSWER, { supportsSchema: false });
-  const out = await analyzeLocally({ text: CONTRACT, ctx: CTX, ruleFindings: [], actionType: 'subscribe', scope });
-  assert.equal(out.headline, 'Ti stai impegnando per due anni');
-  assert.equal(calls.length, 2, 'primo tentativo con schema, secondo senza');
-  resetSession();
-});
-
-test('senza modello integrato l’analisi prosegue con le sole regole', async () => {
-  resetSession();
-  const { scope } = fakeScope(null, { fail: true });
-  const v = await analyze({
-    text: CONTRACT,
-    ctx: CTX,
-    actionType: 'subscribe',
-    settings: { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: true },
-    scope,
-    now: T0,
-  });
-  assert.equal(v.engine.model, null);
-  // Il messaggio è per una persona, non per un log: la stringa tecnica di
-  // Chrome resta in `detail`, e `surfaced: false` tiene la nota fuori dalla
-  // card — un modello on-device assente non è un errore su cui agire.
-  assert.equal(v.engine.llmError.message, 'Modello on-device non disponibile');
-  assert.equal(v.engine.llmError.surfaced, false);
-  assert.ok(v.engine.llmError.detail, 'il dettaglio tecnico deve restare per la diagnostica');
-  assert.equal(v.cost.worstCase, 648.76, 'il motore locale deve comunque produrre i numeri');
-  resetSession();
-});
-
-test('lo stato del modello è leggibile e non esplode se manca l’API', async () => {
-  const missing = await localModelStatus({});
-  assert.equal(missing.supported, false);
-  assert.equal(missing.status, 'unsupported');
-
-  const { scope } = fakeScope(LOCAL_ANSWER);
-  const present = await localModelStatus(scope);
-  assert.equal(present.status, 'available');
-  assert.ok(resolveApi(scope));
-});
-
-// ── 2. analisi speculativa ──────────────────────────────────────────────────
-
-test('la modalità speculativa non chiama mai il modello remoto', async () => {
-  const originalFetch = globalThis.fetch;
-  let promptCalls = 0;
-  globalThis.fetch = async () => {
-    promptCalls += 1;
-    throw new Error('la pre-analisi non deve uscire in rete');
-  };
-  try {
-    const v = await analyze({
-      text: CONTRACT,
-      ctx: CTX,
-      actionType: 'subscribe',
-      settings: { ...DEFAULT_SETTINGS, useLLM: true, remoteConsentAt: '2026-01-01T00:00:00.000Z', provider: 'anthropic', apiKey: 'k', useLocalModel: false },
-      mode: 'speculative',
-      now: T0,
-    });
-    assert.equal(promptCalls, 0);
-    assert.equal(v.engine.mode, 'speculative');
-    assert.equal(v.engine.partial, true, 'deve dichiararsi parziale: c’è un gradino ancora da salire');
-    assert.equal(v.cost.worstCase, 648.76, 'il verdetto speculativo è già utilizzabile');
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
-
-test('il verdetto speculativo non è parziale se non c’è nulla da raffinare', async () => {
-  const v = await analyze({
-    text: CONTRACT,
-    ctx: CTX,
-    actionType: 'subscribe',
-    settings: { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: false },
-    mode: 'speculative',
-    now: T0,
-  });
-  assert.equal(v.engine.partial, false);
-});
-
-test('la modalità completa raffina il verdetto speculativo', async () => {
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () =>
-    new Response(
-      JSON.stringify({
-        content: [{
-          text: JSON.stringify({
-            headline: 'Impegno reale: 648,76 €',
-            summary: 's',
-            clauses: [],
-            economics: { minimumTermMonths: 24, worstCaseTotal: 648.76 },
-            confidence: 0.9,
-          }).slice(1),
-        }],
-      }),
-      { status: 200 }
-    );
-  try {
-    const settings = { ...DEFAULT_SETTINGS, useLLM: true, remoteConsentAt: '2026-01-01T00:00:00.000Z', provider: 'anthropic', apiKey: 'k', useLocalModel: false };
-    const spec = await analyze({ text: CONTRACT, ctx: CTX, actionType: 'subscribe', settings, mode: 'speculative', now: T0 });
-    const full = await analyze({ text: CONTRACT, ctx: CTX, actionType: 'subscribe', settings, mode: 'full', now: T0 });
-
-    assert.equal(spec.engine.model, null);
-    assert.equal(full.engine.model, 'remote');
-    assert.equal(full.engine.partial, false);
-    assert.equal(full.headline, 'Impegno reale: 648,76 €');
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
-});
 
 // ── 3. prova di cosa hai accettato ──────────────────────────────────────────
 
@@ -255,7 +90,7 @@ test('lo snapshot fissa impronta, data e numeri del verdetto', async () => {
   assert.match(snap.hash, /^[0-9a-f]{64}$/);
   assert.equal(snap.hash, await sha256(snap.text));
   assert.equal(snap.at, new Date(T0).toISOString());
-  assert.equal(snap.verdict.worstCase, 648.76);
+  assert.equal(snap.verdict.worstCase, 599.76);
   assert.ok(snap.verdict.categories.includes('auto_renewal'));
   assert.ok(snap.excerpt.length > 100);
 });
@@ -276,10 +111,14 @@ test('il confronto dice di quanto è cambiato l’impegno, non che "i termini so
   const after = CONTRACT
     .replace('€ 120,00', '€ 300,00')
     .concat('\n7. Il fornitore può modificare unilateralmente il prezzo del servizio.');
-  const { findings } = runRules(after, CTX);
-  const newVerdict = {
-    ...(await analyze({ text: after, ctx: CTX, actionType: 'subscribe', settings: { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: false }, now: T0 })),
-  };
+  const newVerdict = await analyze({
+    text: after,
+    ctx: CTX,
+    actionType: 'subscribe',
+    settings: DEFAULT_SETTINGS,
+    now: T0,
+    remote: async () => serverResponse(after, { penalty: 300, extra: [['price_change', 'può modificare unilateralmente il prezzo del servizio']] }),
+  });
 
   const diff = compareSnapshot(snap, { text: after, verdict: newVerdict, newHash: await sha256(after) });
 
@@ -289,7 +128,6 @@ test('il confronto dice di quanto è cambiato l’impegno, non che "i termini so
   assert.equal(diff.costDelta, 180, 'la penale è passata da 120 a 300');
   assert.ok(diff.added.includes('price_change'));
   assert.match(diff.summary, /impegno potenziale è salito/);
-  assert.ok(findings.length > 0);
 });
 
 test('condizioni invariate non generano allarmi', async () => {
@@ -319,7 +157,7 @@ test('l’impegno nasce dal verdetto con scadenze coerenti', async () => {
   assert.equal(c.status, COMMITMENT_STATUS.ACTIVE);
   assert.equal(c.horizonMonths, 24);
   assert.equal(Math.round(c.noticeMonths * 30), 60);
-  assert.equal(c.worstCase, 648.76);
+  assert.equal(c.worstCase, 599.76);
   assert.equal(c.penalty, 120);
   assert.equal(c.autoRenewal, true);
   assert.equal(c.provider, 'Streampro');
@@ -425,7 +263,7 @@ test('il riepilogo somma l’esposizione e trova la prossima scadenza', async ()
 
   const s = portfolioSummary([a, b, c], T0);
   assert.equal(s.count, 2, 'gli impegni disdetti non contano nell’esposizione');
-  assert.equal(s.totals[0].amount, 748.76);
+  assert.equal(s.totals[0].amount, 699.76);
   assert.equal(s.next.c.id, 'b');
   assert.equal(s.urgent, 1);
 });
@@ -485,10 +323,10 @@ test('senza i dati dell’utente la lettera resta usabile, con i segnaposto', as
 test('la lettera di recesso per modifica richiama la clausola cambiata', async () => {
   const c = {
     ...buildCommitment({ verdict: await verdictFor(), now: T0 }),
-    changes: [{ severity: 'major', summary: 'Il tuo impegno potenziale è salito da 648,76 € a 828,76 €.' }],
+    changes: [{ severity: 'major', summary: 'Il tuo impegno potenziale è salito da 599,76 € a 779,76 €.' }],
   };
   const letter = buildLetter(c, { name: 'Mario Rossi' }, LETTER_KINDS.CHANGE, T0 + 300 * 86_400_000);
-  assert.ok(letter.text.includes('828,76'));
+  assert.ok(letter.text.includes('779,76'));
   assert.ok(letter.text.includes('senza penali'));
   assert.ok(letter.text.includes('art. 33 c. 2 lett. m)'));
 });
@@ -532,83 +370,4 @@ test('l’impronta della stringa vuota non deve poter passare per una verifica r
   // Le due impronte coincidono: è esattamente il motivo per cui il flag serve.
   assert.equal(a.hash, b.hash);
   assert.ok(a.empty && b.empty, 'senza il flag, la verifica direbbe «✓ corrisponde»');
-});
-
-// ── consenso all'analisi remota ─────────────────────────────────────────────
-
-test('senza consenso esplicito il testo non esce, anche con la chiave configurata', async () => {
-  let called = false;
-  const settings = {
-    ...DEFAULT_SETTINGS,
-    useLLM: true,
-    provider: 'anthropic',
-    apiKey: 'sk-finta',
-    remoteConsentAt: null,
-    useLocalModel: false,
-  };
-  // Se il modello remoto venisse interpellato, la fetch fallirebbe e il
-  // verdetto porterebbe un llmError: è quello il segnale che cerchiamo.
-  const verdict = await analyze({
-    text: CONTRACT,
-    ctx: { url: 'https://x.test', pricing: {}, terms: {}, form: {} },
-    actionType: 'subscribe',
-    settings,
-  });
-  assert.equal(verdict.engine.llm, false, 'il modello remoto è stato interpellato');
-  assert.equal(verdict.engine.llmError, null, `errore inatteso: ${JSON.stringify(verdict.engine.llmError)}`);
-  assert.ok(verdict.score > 0, 'il verdetto locale deve restare pieno');
-  assert.equal(called, false);
-});
-
-test('il verdetto non è dichiarato parziale se il remoto non è utilizzabile', async () => {
-  const verdict = await analyze({
-    text: CONTRACT,
-    ctx: { url: 'https://x.test', pricing: {}, terms: {}, form: {} },
-    actionType: 'subscribe',
-    settings: { ...DEFAULT_SETTINGS, useLLM: true, provider: 'anthropic', apiKey: 'sk-finta', remoteConsentAt: null },
-    mode: 'speculative',
-  });
-  assert.equal(verdict.engine.partial, false, 'promette un raffinamento che non può avvenire');
-});
-
-// ── la sessione on-device scade: si ricrea, non si annuncia ─────────────────
-
-test('una sessione on-device scaduta viene ricreata invece che riportata', async () => {
-  resetSession();
-  const { scope, sessions, calls } = fakeScope(LOCAL_ANSWER, { destroyedOnce: true });
-  const v = await analyze({
-    text: CONTRACT,
-    ctx: CTX,
-    actionType: 'subscribe',
-    settings: { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: true },
-    scope,
-    now: T0,
-  });
-  assert.equal(sessions.create, 2, 'la sessione non è stata ricreata');
-  assert.equal(calls.length, 2, `prompt inviati: ${calls.length}`);
-  assert.equal(v.engine.model, 'local', 'il modello doveva rispondere al secondo tentativo');
-  assert.equal(v.engine.llmError, null, 'un ritentativo riuscito non è un errore');
-  resetSession();
-});
-
-test('un guasto vero del modello non viene ritentato all’infinito', async () => {
-  resetSession();
-  const { scope, calls } = fakeScope(LOCAL_ANSWER, { fail: false });
-  // Una sessione che fallisce sempre per un motivo diverso dalla scadenza.
-  scope.LanguageModel.create = async () => ({
-    async prompt() { calls.push({}); throw new Error('modello in fiamme'); },
-    destroy() {},
-  });
-  const v = await analyze({
-    text: CONTRACT,
-    ctx: CTX,
-    actionType: 'subscribe',
-    settings: { ...DEFAULT_SETTINGS, useLLM: false, useLocalModel: true },
-    scope,
-    now: T0,
-  });
-  assert.equal(calls.length, 1, `un solo tentativo atteso, fatti ${calls.length}`);
-  assert.equal(v.engine.llmError.surfaced, false);
-  assert.equal(v.cost.worstCase, 648.76, 'il verdetto locale resta pieno');
-  resetSession();
 });

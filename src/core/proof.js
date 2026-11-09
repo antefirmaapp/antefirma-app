@@ -146,7 +146,7 @@ function describe({ changed, costDelta, currency, oldCost, newCost, added, remov
 export function attestation(snapshot, { host } = {}) {
   const d = new Date(snapshot.at);
   return [
-    'ATTESTAZIONE DI CONTENUTO (generata localmente da Vincolo)',
+    'ATTESTAZIONE DI CONTENUTO (generata localmente da AnteFirma)',
     '',
     `Fonte:            ${snapshot.url || host || '—'}`,
     `Data e ora:       ${d.toLocaleString('it-IT')} (${snapshot.at})`,

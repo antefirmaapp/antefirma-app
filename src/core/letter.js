@@ -226,7 +226,7 @@ function signature(you, today) {
 
 function footer(refs) {
   return ['—', 'Riferimenti normativi utili:', ...refs.map((r) => `  · ${r}`), '',
-    'Documento generato automaticamente da Vincolo a partire dalle condizioni',
+    'Documento generato automaticamente da AnteFirma a partire dalle condizioni',
     'contrattuali analizzate. Verifica i dati fra parentesi quadre prima di inviarlo. Non',
     'costituisce consulenza legale.'].join('\n');
 }

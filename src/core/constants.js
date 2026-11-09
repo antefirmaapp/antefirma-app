@@ -2,7 +2,7 @@
  * Vocabolario condiviso del motore: categorie di rischio, aree di protezione
  * del profilo personale, livelli di verdetto, tipi di azione intercettata.
  *
- * Tutto il resto del motore (regole, LLM, scoring, UI) parla questa lingua.
+ * Tutto il resto del motore (analisi del server, scoring, UI) parla questa lingua.
  */
 
 /** Tipi di azione che il detector considera un "commitment". */
@@ -283,33 +283,23 @@ export function levelForScore(score) {
 
 export const DEFAULT_SETTINGS = {
   enabled: true,
-  provider: 'anthropic', // 'anthropic' | 'openai' | 'none'
-  model: 'claude-sonnet-4-5',
-  apiKey: '',
-  useLLM: true,
-  llmThreshold: 15, // sotto questo punteggio locale non si scomoda l'LLM
-
-  /** Modello integrato in Chrome: primo passaggio, sul dispositivo. */
-  useLocalModel: true,
-  /** Pre-analisi prima del click, così l'avviso è istantaneo. */
-  speculative: true,
   /** Registro degli impegni e promemoria delle scadenze. */
   trackCommitments: true,
   reminders: true,
   /** Controllo periodico delle condizioni già accettate. */
   watchChanges: true,
   /**
-   * Il controllo automatico può usare il modello remoto?
-   * No, e deve restare no per difetto: un'estensione che ogni settimana manda
-   * i tuoi contratti a un'API a pagamento senza che tu abbia chiesto niente
-   * sta rompendo la promessa che fa nella schermata delle impostazioni.
+   * Il controllo automatico può far rileggere al server le condizioni già
+   * accettate? Solo quando il loro testo pubblico è cambiato, e solo con il
+   * consenso all'analisi. Sì per difetto: senza, il controllo può dire soltanto
+   * «il testo è cambiato», che per un anno di copyright è un falso allarme.
    */
-  watchUsesRemote: false,
+  watchUsesRemote: true,
   /**
-   * Istante del consenso esplicito all'invio del testo a un provider esterno.
+   * Istante del consenso esplicito all'invio del testo al server di AnteFirma.
    *
-   * `null` significa «mai dato»: finché resta così il modello remoto non viene
-   * interpellato, nemmeno con una chiave configurata. La policy del Chrome Web
+   * `null` significa «mai dato»: finché resta così nessun testo esce dal
+   * browser e l'avviso, alla prima analisi, chiede il permesso. La policy del Chrome Web
    * Store non chiede solo di dichiarare il trasferimento nella privacy policy,
    * chiede una disclosure *dentro l'interfaccia* e un atto esplicito di
    * accettazione prima della raccolta. Registrare la data serve anche al

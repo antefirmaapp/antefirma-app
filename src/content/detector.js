@@ -263,6 +263,27 @@
     return decision;
   }
 
+  /**
+   * Chiede l'analisi al service worker. La prima volta il service worker
+   * risponde che manca il consenso: l'avviso lo chiede, e solo dopo un sì il
+   * testo della pagina parte verso il server. Un no lascia procedere l'azione
+   * senza analisi, come se l'estensione non ci fosse.
+   */
+  async function requestAnalysis(overlay, waiting, payload, label) {
+    const aborted = waiting.then((d) => ({ __userAborted: d }));
+    let res = await Promise.race([CF.bridge.send('ANALYZE_ACTION', payload), aborted]);
+    if (!res?.needsConsent) return res;
+
+    const choice = await Promise.race([overlay.askConsent(), aborted]);
+    if (choice?.__userAborted) return choice;
+    if (choice !== 'accept') return { skip: true, reason: 'no_consent' };
+
+    await CF.bridge.send('GRANT_CONSENT', {});
+    overlay.showLoading(label);
+    res = await Promise.race([CF.bridge.send('ANALYZE_ACTION', payload), aborted]);
+    return res?.needsConsent ? { skip: true, reason: 'no_consent' } : res;
+  }
+
   async function handleAction(found, event) {
     const overlay = new CF.overlay.Overlay();
     const waiting = overlay.wait();
@@ -273,13 +294,13 @@
     let via = 'blocked';
     try {
       const { ctx, text } = CF.context.build(found.el, found.type);
-      const res = await Promise.race([
-        CF.bridge.send('ANALYZE_ACTION', { actionType: found.type, ctx, text }),
-        waiting.then((d) => ({ __userAborted: d })),
-      ]);
+      const res = await requestAnalysis(overlay, waiting, { actionType: found.type, ctx, text }, ACTION_LABELS[found.type]);
 
       if (res?.__userAborted) {
         decision = res.__userAborted;
+      } else if (res?.error) {
+        overlay.showError(res.error.message);
+        decision = await waiting;
       } else if (res?.skip) {
         overlay.destroy();
         decision = 'proceed';
@@ -296,19 +317,7 @@
           via = 'auto';
           flash(verdict);
         } else {
-          overlay.showVerdict(verdict, { blocking: true, refining: res.refinable });
-
-          /**
-           * Il verdetto veniva dalla pre-analisi: l'utente lo sta già leggendo
-           * mentre il modello remoto lo raffina. È il motivo per cui l'avviso
-           * appare istantaneo invece che dopo tre secondi di clessidra.
-           */
-          if (res.refinable) {
-            refine(found, overlay, verdict).then((better) => {
-              if (better) current = better;
-            });
-          }
-
+          overlay.showVerdict(verdict, { blocking: true });
           decision = await waiting;
         }
       }
@@ -403,11 +412,9 @@
     let via = 'blocked';
     try {
       const { ctx, text } = CF.context.build(submitter || form, type);
-      const res = await Promise.race([
-        CF.bridge.send('ANALYZE_ACTION', { actionType: type, ctx, text }),
-        waiting.then((d) => ({ __userAborted: d })),
-      ]);
+      const res = await requestAnalysis(overlay, waiting, { actionType: type, ctx, text }, ACTION_LABELS[type]);
       if (res?.__userAborted) decision = res.__userAborted;
+      else if (res?.error) { overlay.showError(res.error.message); decision = await waiting; }
       else if (res?.skip) { overlay.destroy(); decision = 'proceed'; }
       else if (!res.blocking) {
         overlay.destroy();
@@ -436,120 +443,7 @@
     }
   }
 
-  /**
-   * Chiede l'analisi completa e aggiorna l'avviso senza chiuderlo.
-   * Se l'utente ha già deciso nel frattempo, il risultato viene scartato.
-   */
-  async function refine(found, overlay, previous) {
-    try {
-      const { ctx, text } = CF.context.build(found.el, found.type);
-      const res = await CF.bridge.send('ANALYZE_ACTION', {
-        actionType: found.type,
-        ctx,
-        text,
-        refine: true,
-      });
-      if (!overlay.isOpen() || !res?.verdict) return null;
 
-      const verdict = { ...res.verdict, actionLabel: ACTION_LABELS[found.type] };
-      overlay.showVerdict(verdict, { blocking: true, refining: false });
-      return verdict;
-    } catch {
-      // Il raffinamento è un di più: se fallisce, resta il verdetto locale.
-      if (overlay.isOpen()) overlay.showVerdict(previous, { blocking: true, refining: false });
-      return null;
-    }
-  }
-
-  // ── analisi speculativa ────────────────────────────────────────────────────
-
-  /**
-   * L'analisi parte quando il pulsante entra nel campo visivo, non quando
-   * viene cliccato. È l'unica ottimizzazione che cambia la percezione del
-   * prodotto: al click il verdetto è già in cache e l'avviso è immediato.
-   *
-   * Costa poco perché in modalità speculativa girano solo il motore a regole e
-   * il modello on-device: niente rete, niente crediti.
-   */
-  const speculation = {
-    seen: new WeakSet(),
-    budget: 3,
-    observer: null,
-    timer: null,
-  };
-
-  function startSpeculation() {
-    if (!('IntersectionObserver' in globalThis)) return;
-
-    speculation.observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          speculation.observer.unobserve(entry.target);
-          scheduleSpeculation(entry.target);
-        }
-      },
-      { rootMargin: '120px', threshold: 0.35 }
-    );
-
-    scanForCandidates();
-
-    // Le pagine moderne montano il checkout dopo: si riguarda, ma con calma.
-    const mo = new MutationObserver(() => {
-      clearTimeout(speculation.timer);
-      speculation.timer = setTimeout(scanForCandidates, 900);
-    });
-    mo.observe(document.documentElement, { childList: true, subtree: true });
-
-    // Il passaggio del mouse è il segnale più forte di intenzione.
-    document.addEventListener('pointerover', onIntent, { capture: true, passive: true });
-    document.addEventListener('focusin', onIntent, { capture: true, passive: true });
-  }
-
-  function onIntent(event) {
-    const el = event.target?.closest?.(CLICKABLE);
-    if (!el || speculation.seen.has(el)) return;
-    if (!classify(el)) return;
-    scheduleSpeculation(el, 120);
-  }
-
-  function scanForCandidates() {
-    if (speculation.budget <= 0) return;
-    let elements = [];
-    try {
-      elements = [...document.querySelectorAll(CLICKABLE)].slice(0, 250);
-    } catch {
-      return;
-    }
-    for (const el of elements) {
-      if (speculation.seen.has(el)) continue;
-      if (!classify(el)) continue;
-      if (!isVisible(el)) continue;
-      speculation.observer?.observe(el);
-    }
-  }
-
-  function scheduleSpeculation(el, delay = 700) {
-    if (speculation.seen.has(el)) return;
-    if (speculation.budget <= 0) return;
-    speculation.seen.add(el);
-
-    setTimeout(() => {
-      if (document.hidden) return;
-      if (state.busy) return;
-      if (disabledHere()) return;
-      const type = classify(el);
-      if (!type || !isVisible(el)) return;
-
-      speculation.budget -= 1;
-      try {
-        const { ctx, text } = CF.context.build(el, type);
-        CF.bridge.send('PREFETCH_ACTION', { actionType: type, ctx, text }).catch(() => {});
-      } catch {
-        /* la pre-analisi non deve mai disturbare la pagina */
-      }
-    }, delay);
-  }
 
   // ── notifica non bloccante ─────────────────────────────────────────────────
 
@@ -663,7 +557,7 @@
 
   function mountToast() {
     if (toast.host?.isConnected) return;
-    toast.host = document.createElement('vincolo-toast');
+    toast.host = document.createElement('antefirma-toast');
     // L'host non occupa spazio (è il contenuto a essere `position: fixed`), ma
     // display e visibilità si dichiarano !important: un `* { display: none }`
     // del sito non deve poter zittire l'unico avviso della fascia REVIEW.
@@ -846,12 +740,5 @@
   document.addEventListener('click', onClick, true);
   document.addEventListener('submit', onSubmit, true);
 
-  // La speculazione parte a pagina pronta: prima ci sarebbe poco da guardare.
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => setTimeout(startSpeculation, 400), { once: true });
-  } else {
-    setTimeout(startSpeculation, 400);
-  }
-
-  CF.detector = { classify, classifyText, findTarget, startSpeculation, structuralType, contrast, palette };
+  CF.detector = { classify, classifyText, findTarget, structuralType, contrast, palette };
 })();

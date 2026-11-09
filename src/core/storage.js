@@ -1,8 +1,8 @@
 /**
  * Accesso a chrome.storage: impostazioni, cache delle analisi, storico.
  *
- * La chiave API sta in `local` e non in `sync`: non deve girare per i
- * dispositivi dell'utente attraverso l'account Google.
+ * Tutto sta in `local` e non in `sync`: i dati per le lettere di disdetta e
+ * gli impegni non devono girare per i dispositivi attraverso l'account Google.
  */
 
 import { DEFAULT_SETTINGS } from './constants.js';

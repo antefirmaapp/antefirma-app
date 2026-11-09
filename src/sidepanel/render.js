@@ -39,13 +39,13 @@ export function renderVerdict(v) {
         <h2>${esc(v.headline || level.headline || '')}</h2>
         <div class="meta">
           rischio della decisione ${esc(String(v.score))}/100 ·
-          ${v.engine?.llm ? 'regole + AI' : 'solo motore locale'}
+          ${v.engine?.cached ? 'AI · analisi già fatta per questo testo' : 'AI'}
           ${v.host ? ` · ${esc(v.host)}` : ''}
           ${v.cached ? ' · da cache' : ''}
         </div>
       </div>
       <div class="content">
-        ${v.engine?.llmError?.surfaced ? `<div class="status error" style="margin-bottom:10px">Analisi AI non disponibile: ${esc(v.engine.llmError.message)}</div>` : ''}
+        ${v.engine?.truncated ? `<div class="status error" style="margin-bottom:10px">La pagina era molto lunga: è stata analizzata solo in parte.</div>` : ''}
         ${renderCost(cost)}
         ${v.mustRemember ? `<div class="remember">📌 ${esc(v.mustRemember)}</div>` : ''}
         ${v.summary ? `<p class="summary">${esc(v.summary)}</p>` : ''}
@@ -86,9 +86,7 @@ function renderFindings(findings) {
       .map((f) => {
         const tags = [];
         if (f.personalized && f.personalReasons?.length) tags.push(`rilevante per: ${f.personalReasons.join(', ')}`);
-        if (f.sources?.length === 2) tags.push('regole + AI');
-        else if (f.source === 'llm') tags.push('rilevata dall’AI');
-        if (f.certainty === 'inferred') tags.push('dedotta');
+        if (f.quotes?.length) tags.push(`citata in ${f.quotes.length + 1} punti`);
         return `<div class="finding" style="--sev-color:${sevColor(f.severity)}">
           <div class="top">
             <span class="name">${esc(f.title || f.label)}</span>

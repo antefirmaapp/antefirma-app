@@ -1,6 +1,6 @@
 /* Solo l'host: tutto il resto vive dentro lo shadow root, così nessun CSS del
    sito può alterare l'avviso (o nasconderlo). */
-vincolo-alert {
+antefirma-alert {
   all: initial;
   position: fixed;
   inset: 0;
@@ -9,6 +9,6 @@ vincolo-alert {
   pointer-events: none;
 }
 
-vincolo-alert[data-open='1'] {
+antefirma-alert[data-open='1'] {
   pointer-events: auto;
 }

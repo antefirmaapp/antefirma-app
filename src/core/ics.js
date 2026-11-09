@@ -15,7 +15,7 @@ const CRLF = '\r\n';
  * Costruisce un file .ics con la scadenza di disdetta e, se nota, la data di
  * rinnovo. L'evento porta con sé i promemoria a 30, 7 e 1 giorno.
  */
-export function buildIcs(commitment, { now = Date.now(), prodId = '-//Vincolo//IT' } = {}) {
+export function buildIcs(commitment, { now = Date.now(), prodId = '-//AnteFirma//IT' } = {}) {
   if (!commitment?.deadlineAt && !commitment?.renewalAt) return null;
 
   const lines = [
@@ -95,7 +95,7 @@ function deadlineDescription(c) {
   }
   if (c.penalty != null) bits.push(`Penale di recesso anticipato: ${formatMoney(c.penalty, c.currency)}.`);
   if (c.url) bits.push(`Pagina: ${c.url}`);
-  bits.push('Promemoria creato da Vincolo.');
+  bits.push('Promemoria creato da AnteFirma.');
   return bits.join('\n');
 }
 

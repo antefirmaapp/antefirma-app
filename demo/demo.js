@@ -1,7 +1,7 @@
 /**
  * Solo per le pagine di prova: dà un riscontro visibile quando un pulsante
  * viene davvero premuto, così si distingue «l'estensione ha bloccato» da
- * «l'estensione ha lasciato passare». Non c'entra nulla con Vincolo.
+ * «l'estensione ha lasciato passare». Non c'entra nulla con AnteFirma.
  */
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-outcome]');

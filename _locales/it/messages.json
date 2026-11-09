@@ -1,5 +1,5 @@
 {
-  "extName":        { "message": "Vincolo", "description": "Nome dell'estensione." },
+  "extName":        { "message": "AnteFirma", "description": "Nome dell'estensione." },
   "extDescription": { "message": "Prima di accettare, sai a cosa ti leghi: quanto ti costa davvero, per quanto tempo, e come uscirne.", "description": "Descrizione breve, mostrata nello store e in chrome://extensions." },
-  "actionTitle":    { "message": "Vincolo", "description": "Tooltip dell'icona nella barra." }
+  "actionTitle":    { "message": "AnteFirma", "description": "Tooltip dell'icona nella barra." }
 }

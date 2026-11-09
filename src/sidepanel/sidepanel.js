@@ -75,13 +75,53 @@ async function trackCurrent() {
   }
 }
 
+/**
+ * Il consenso alla prima analisi, chiesto dal pannello. Il testo parte verso il
+ * server di AnteFirma solo dopo un sì.
+ */
+function askConsent() {
+  return new Promise((resolve) => {
+    commitments.openModal(
+      'Posso leggere questo testo per te?',
+      `<p>Per dirti a che cosa ti stai impegnando, AnteFirma manda il testo e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic) e risponde con le clausole che ti impegnano, ciascuna con la frase esatta da cui nasce.</p>
+       <p>Il server non conserva il testo né l'indirizzo. Nessun account. Puoi ritirare il consenso quando vuoi dalle impostazioni.</p>`,
+      [
+        { label: 'Non ora', act: () => { commitments.closeModal(); resolve(false); } },
+        {
+          label: 'Sì, analizza',
+          act: async () => {
+            commitments.closeModal();
+            try {
+              await send('GRANT_CONSENT');
+              resolve(true);
+            } catch {
+              resolve(false);
+            }
+          },
+        },
+      ]
+    );
+    // «Chiudi», aggiunto dalla finestra stessa, vale come un no.
+    document.querySelector('#modal-foot button:last-child')?.addEventListener('click', () => resolve(false), { once: true });
+  });
+}
+
 async function analyze(payload, label) {
   if (state.busy) return;
   state.busy = true;
   status(label || 'Analisi in corso…');
   $('#result').innerHTML = '';
   try {
-    const verdict = await send('ANALYZE_TEXT', payload);
+    let verdict = await send('ANALYZE_TEXT', payload);
+    if (verdict?.needsConsent) {
+      status(null);
+      if (!(await askConsent())) {
+        status('Senza il tuo consenso il testo non viene inviato e l’analisi non parte.', 'error');
+        return;
+      }
+      status(label || 'Analisi in corso…');
+      verdict = await send('ANALYZE_TEXT', payload);
+    }
     status(null);
     showResult(verdict);
   } catch (err) {
@@ -382,13 +422,9 @@ async function handlePanelRequest(req) {
 
   try {
     const settings = await send('GET_SETTINGS');
-    const local = await send('LOCAL_MODEL_STATUS').catch(() => null);
-    const parts = ['regole locali'];
-    if (settings.useLocalModel && local?.status === 'available') parts.push('modello sul dispositivo');
-    if (settings.useLLM && settings.apiKey) parts.push(settings.provider === 'openai' ? 'OpenAI' : 'Claude');
     $('#engine-note').textContent =
-      `Motore: ${parts.join(' + ')} · giurisdizione ${settings.jurisdiction}` +
-      (settings.speculative ? ' · pre-analisi attiva' : '');
+      `Analisi: server di AnteFirma · giurisdizione ${settings.jurisdiction}` +
+      (settings.remoteConsentAt ? '' : ' · alla prima analisi ti chiederò il consenso');
   } catch { /* il pannello resta usabile comunque */ }
 
   // Aperto da una notifica di scadenza: si va dritti all'impegno giusto.

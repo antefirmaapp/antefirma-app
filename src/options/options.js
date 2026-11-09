@@ -43,23 +43,12 @@ function readProfile() {
   return out;
 }
 
-/** Le impostazioni come stanno sul disco: servono a sapere se il consenso c'è già. */
-let saved = null;
-
 async function load() {
   const s = await send('GET_SETTINGS');
-  saved = s;
 
   $('#enabled').checked = s.enabled;
   $('#blockFrom').value = s.blockFrom;
   $('#jurisdiction').value = s.jurisdiction;
-  $('#useLLM').checked = s.useLLM;
-  $('#provider').value = s.provider;
-  $('#model').value = s.model || '';
-  $('#apiKey').value = s.apiKey || '';
-  $('#llmThreshold').value = s.llmThreshold;
-  $('#useLocalModel').checked = s.useLocalModel;
-  $('#speculative').checked = s.speculative;
   $('#trackCommitments').checked = s.trackCommitments;
   $('#reminders').checked = s.reminders;
   $('#watchChanges').checked = s.watchChanges;
@@ -68,65 +57,49 @@ async function load() {
   $('#id-email').value = s.identity?.email || '';
   $('#id-address').value = s.identity?.address || '';
   $('#id-customer').value = s.identity?.customerId || '';
-  showLocalStatus();
-  $('#threshold-val').textContent = s.llmThreshold;
+  showConsent(s.remoteConsentAt);
   $('#allowlist').value = (s.allowlist || []).join('\n');
 
   buildProfileGrid(s.profile);
-  syncModelPlaceholder();
 }
 
 /**
- * Il testo dei contratti esce dal browser solo dopo un sì esplicito.
- *
- * Prima bastava incollare la chiave: da quel momento il testo cominciava a
- * uscire verso Anthropic o OpenAI senza che fosse mai stato mostrato un
- * consenso. La riga informativa nella pagina è un'informazione, non un atto di
- * accettazione — e la policy del Chrome Web Store chiede l'atto.
- *
- * @returns {Promise<string|null|false>} la data del consenso, `null` se non
- *   serve (nessuna chiave configurata), `false` se l'utente ha rifiutato.
+ * Il testo delle pagine esce dal browser solo dopo un sì esplicito: qui, o
+ * nell'avviso alla prima analisi. La data resta registrata.
  */
-async function ensureRemoteConsent(apiKeyValue, previous) {
-  if (!apiKeyValue) return null;
-  if (previous) return previous;
+function showConsent(at) {
+  const box = $('#consent-box');
+  if (at) {
+    box.className = 'key-status ok';
+    box.textContent = `Hai acconsentito all'analisi il ${new Date(at).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
+  } else {
+    box.className = 'key-status';
+    box.textContent = 'Non hai ancora acconsentito: te lo chiederò alla prima analisi.';
+  }
+  $('#grant-consent').hidden = Boolean(at);
+  $('#revoke-consent').hidden = !at;
+}
 
-  const provider = $('#provider').value === 'openai' ? 'OpenAI' : 'Anthropic';
-  const ok = window.confirm(
-    'Consenso all\u2019analisi remota\n\n' +
-      `Quando il punteggio locale supera la soglia impostata — o quando stai per pagare, abbonarti o firmare — ` +
-      `il testo del contratto e il contesto economico della pagina vengono inviati a ${provider} con la tua chiave.\n\n` +
-      'Non escono: la cronologia di navigazione, i tuoi dati anagrafici, gli impegni registrati, le prove.\n\n' +
-      'Il controllo automatico settimanale resta locale: non usa il modello remoto salvo tua richiesta esplicita.\n\n' +
-      'Vuoi attivare l\u2019analisi remota?'
-  );
-  return ok ? new Date().toISOString() : false;
+/** Il server risponde? Una prova che non costa analisi. */
+async function showServerStatus() {
+  const el = $('#server-status');
+  try {
+    const st = await send('SERVER_STATUS');
+    el.textContent = st.ok ? 'raggiungibile' : 'non raggiungibile in questo momento';
+    el.style.color = st.ok ? '#14603c' : '#a12a1a';
+  } catch (err) {
+    el.textContent = `non verificabile: ${err.message}`;
+  }
 }
 
 async function save() {
   const btn = $('#save');
   btn.disabled = true;
   try {
-    const apiKeyValue = $('#apiKey').value.trim();
-    const consent = await ensureRemoteConsent(apiKeyValue, saved?.remoteConsentAt);
-    if (consent === false) {
-      flash('Analisi remota non attivata: la chiave non è stata salvata.');
-      btn.disabled = false;
-      return;
-    }
-
     await send('SET_SETTINGS', {
       enabled: $('#enabled').checked,
       blockFrom: $('#blockFrom').value,
       jurisdiction: $('#jurisdiction').value,
-      useLLM: $('#useLLM').checked,
-      provider: $('#provider').value,
-      model: $('#model').value.trim() || defaultModel($('#provider').value),
-      apiKey: consent === null ? '' : apiKeyValue,
-      remoteConsentAt: consent,
-      llmThreshold: Number($('#llmThreshold').value),
-      useLocalModel: $('#useLocalModel').checked,
-      speculative: $('#speculative').checked,
       trackCommitments: $('#trackCommitments').checked,
       reminders: $('#reminders').checked,
       watchChanges: $('#watchChanges').checked,
@@ -159,65 +132,19 @@ function flash(message) {
   }, 3000);
 }
 
-function defaultModel(provider) {
-  return provider === 'openai' ? 'gpt-4o-mini' : 'claude-sonnet-4-5';
-}
-
-function syncModelPlaceholder() {
-  $('#model').placeholder = defaultModel($('#provider').value);
-}
-
-/**
- * Il modello integrato non c'è su tutte le installazioni: meglio dirlo qui,
- * chiaramente, che lasciare l'utente a chiedersi perché non succede nulla.
- */
-async function showLocalStatus() {
-  const el = $('#local-status');
-  try {
-    const st = await send('LOCAL_MODEL_STATUS');
-    el.textContent = st.label;
-    el.style.color = st.status === 'available' ? '#14603c' : '';
-  } catch (err) {
-    el.textContent = `Stato non verificabile: ${err.message}`;
-  }
-}
-
 // ── eventi ──────────────────────────────────────────────────────────────────
 
 $('#save').addEventListener('click', save);
-$('#provider').addEventListener('change', syncModelPlaceholder);
-$('#llmThreshold').addEventListener('input', (e) => {
-  $('#threshold-val').textContent = e.target.value;
+
+$('#grant-consent').addEventListener('click', async () => {
+  const { remoteConsentAt } = await send('GRANT_CONSENT');
+  showConsent(remoteConsentAt);
 });
 
-$('#toggle-key').addEventListener('click', () => {
-  const input = $('#apiKey');
-  const shown = input.type === 'text';
-  input.type = shown ? 'password' : 'text';
-  $('#toggle-key').textContent = shown ? 'Mostra' : 'Nascondi';
-});
-
-$('#test-key').addEventListener('click', async () => {
-  const btn = $('#test-key');
-  const box = $('#key-status');
-  btn.disabled = true;
-  box.hidden = false;
-  box.className = 'key-status';
-  box.textContent = 'Provo la chiave su un contratto di esempio…';
-  try {
-    const out = await send('TEST_API_KEY', {
-      provider: $('#provider').value,
-      apiKey: $('#apiKey').value.trim(),
-      model: $('#model').value.trim() || defaultModel($('#provider').value),
-    });
-    box.className = 'key-status ok';
-    box.textContent = `Funziona. Sul contratto di prova ha riconosciuto ${out.clauses} clausole${out.worstCase ? ` e stimato un impegno di ${out.worstCase} €` : ''}.`;
-  } catch (err) {
-    box.className = 'key-status err';
-    box.textContent = err.message;
-  } finally {
-    btn.disabled = false;
-  }
+$('#revoke-consent').addEventListener('click', async () => {
+  await send('REVOKE_CONSENT');
+  showConsent(null);
+  flash('Consenso ritirato: nessun testo partirà più verso il server.');
 });
 
 $('#clear-cache').addEventListener('click', async () => {
@@ -235,3 +162,4 @@ if (new URLSearchParams(location.search).has('welcome')) {
 }
 
 load();
+showServerStatus();

@@ -17,7 +17,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { extractPdfText } from '../src/lib/pdf-text.js';
-import { runRules } from '../src/core/rules.js';
 import { makePdf, tjStream, tmStream, kernedStream } from './fixtures/pdf.mjs';
 
 /** Un contratto con dentro quattro condizioni che il motore deve riconoscere. */
@@ -29,15 +28,20 @@ const CONTRACT = [
   'Art. 4 (Penale) In caso di recesso anticipato e\' dovuta una penale di 179,40 euro.',
 ];
 
-const CATEGORIES = ['minimum_term', 'auto_renewal', 'notice_period', 'early_termination_penalty'];
+/**
+ * Le quattro condizioni che devono arrivare intatte al server. Senza il motore
+ * a regole non si chiede più «le riconosci?», ma «sono nel testo, leggibili?»:
+ * il riconoscimento è compito del server, la leggibilità del testo è nostra.
+ */
+const KEY_PHRASES = ['durata minima', 'si rinnova automaticamente', '30 giorni prima della scadenza', 'penale di 179,40 euro'];
 
-const categories = (text) => new Set(runRules(text).findings.map((f) => f.category));
+const flat = (text) => text.replace(/\s+/g, ' ').replace(/e'/g, 'e\'');
 
-/** Le quattro clausole del contratto sono tutte visibili al motore. */
+/** Le quattro clausole del contratto si leggono nel testo estratto. */
 function assertClausesVisible(text, label) {
-  const found = categories(text);
-  for (const cat of CATEGORIES) {
-    assert.ok(found.has(cat), `${label}: il motore non vede più "${cat}" — ${JSON.stringify(text.slice(0, 120))}`);
+  const t = flat(text);
+  for (const phrase of KEY_PHRASES) {
+    assert.ok(t.includes(phrase), `${label}: nel testo non si legge più «${phrase}» — ${JSON.stringify(text.slice(0, 120))}`);
   }
 }
 

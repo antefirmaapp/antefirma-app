@@ -111,12 +111,12 @@ def main():
 
             # 4. Il click viene intercettato.
             page.click("button.cta")
-            page.wait_for_selector("vincolo-alert", state="attached", timeout=10000)
+            page.wait_for_selector("antefirma-alert", state="attached", timeout=10000)
             check("il click su «Conferma abbonamento» viene intercettato", True)
 
             page.wait_for_timeout(3000)
             box = page.evaluate("""() => {
-                const h = document.querySelector('vincolo-alert');
+                const h = document.querySelector('antefirma-alert');
                 const r = h && h.getBoundingClientRect();
                 return r ? { w: r.width, h: r.height } : null;
             }""")
@@ -219,15 +219,15 @@ def main():
                 ext_page.close()
 
             # 6. Il sito non deve poter far sparire l'avviso.
-            page.evaluate("() => document.querySelector('vincolo-alert')?.remove()")
+            page.evaluate("() => document.querySelector('antefirma-alert')?.remove()")
             page.evaluate("""() => {
                 const st = document.createElement('style');
-                st.textContent = 'vincolo-alert { display: none !important; visibility: hidden !important; }';
+                st.textContent = 'antefirma-alert { display: none !important; visibility: hidden !important; }';
                 document.head.append(st);
             }""")
             page.wait_for_timeout(700)
             still_there = page.evaluate("""() => {
-                const h = document.querySelector('vincolo-alert');
+                const h = document.querySelector('antefirma-alert');
                 if (!h) return null;
                 const cs = getComputedStyle(h);
                 return { display: cs.display, visibility: cs.visibility };
@@ -240,7 +240,7 @@ def main():
                   str(still_there))
 
             # 7. "Continua comunque" riproduce fedelmente l'azione originale.
-            proceed = page.locator("vincolo-alert").locator("button.proceed")
+            proceed = page.locator("antefirma-alert").locator("button.proceed")
             proceed.wait_for(state="visible", timeout=5000)
             page.wait_for_timeout(4000)  # il pulsante si arma dopo qualche secondo
 
@@ -248,7 +248,7 @@ def main():
             # schermo come una riga di interfaccia («Ora puoi premere "Continua
             # comunque"»), che a chi vede il pulsante già attivo non dice nulla.
             live = page.evaluate("""() => {
-                const el = document.querySelector('vincolo-alert')
+                const el = document.querySelector('antefirma-alert')
                   ?.shadowRoot?.querySelector('.v-arm-live');
                 if (!el) return null;
                 const r = el.getBoundingClientRect();
@@ -263,13 +263,13 @@ def main():
             check("«Continua comunque» esegue l'azione sospesa",
                   page.evaluate("() => window.__demoSubmitted") is True)
             check("l'avviso si chiude dopo la decisione",
-                  page.locator("vincolo-alert").count() == 0)
+                  page.locator("antefirma-alert").count() == 0)
 
             # 8. Nessun falso positivo sul pulsante innocuo.
             page.click(".safe button")
             page.wait_for_timeout(800)
             check("il pulsante innocuo non viene intercettato",
-                  page.locator("vincolo-alert").count() == 0)
+                  page.locator("antefirma-alert").count() == 0)
 
             # 9. Le quattro funzionalità aggiunte, attraverso i canali reali.
             if worker:

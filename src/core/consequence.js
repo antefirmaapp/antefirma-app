@@ -8,140 +8,57 @@
  * "impegno potenziale 479,76 €".
  */
 
-import { extractDurations, extractPrices, parseAmount, formatMoney, PERIOD_MONTHS, normalize } from './text.js';
+import { formatMoney, PERIOD_MONTHS } from './text.js';
 
 const MONTHS_IT = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
 
-/** Cerca la durata minima del vincolo nel testo delle clausole rilevanti. */
-export function extractMinimumTerm(text, findings = []) {
-  const scopes = scopeTexts(text, findings, ['minimum_term', 'auto_renewal']);
-  const cues = /(?:durata\s+minima|periodo\s+minimo|vincolo|impegno\s+minimo|minimum\s+term|minimum\s+period|commitment\s+period|lock-?in|durata\s+(?:del\s+)?contratto|contract\s+(?:term|length)|si\s+rinnov\w+\s+(?:automaticamente\s+)?per|renews?\s+for|permanencia\s+m[íi]nima|compromiso\s+de\s+permanencia|duraci[óo]n\s+m[íi]nima|plazo\s+m[íi]nimo|per[íi]odo\s+m[íi]nimo|periodo\s+m[íi]nimo|duraci[óo]n\s+del\s+contrato|se\s+renueva\s+(?:autom[áa]ticamente\s+)?por)/i;
-
-  let best = null;
-  for (const scope of scopes) {
-    if (!cues.test(scope)) continue;
-    for (const d of extractDurations(scope)) {
-      if (d.months < 0.9) continue; // scarta "30 giorni di preavviso"
-      if (/preavviso|notice|disdetta|recesso|rimborso|refund|prova|trial|garanzia|warranty/i.test(d.near || d.context)) continue;
-      if (!best || d.months > best.months) best = d;
-    }
-  }
-  return best; // {value, unit, months, raw, context} | null
-}
-
-/** Cerca il preavviso necessario per disdire. */
-export function extractNoticePeriod(text, findings = []) {
-  const scopes = scopeTexts(text, findings, ['notice_period', 'auto_renewal']);
-  const cues = /(?:preavviso|disdetta|recesso|notice|cancel|preaviso|antelaci[óo]n|baja|desistimiento)/i;
-
-  let best = null;
-  for (const scope of scopes) {
-    if (!cues.test(scope)) continue;
-    for (const d of extractDurations(scope)) {
-      if (!cues.test(d.near || d.context)) continue;
-      if (d.months > 12) continue;
-      if (!best || d.months > best.months) best = d;
-    }
-  }
-  return best;
-}
-
-/** Cerca l'importo della penale di recesso. */
-export function extractPenalty(text, findings = []) {
-  const scopes = scopeTexts(text, findings, ['early_termination_penalty']);
-  const cues = /(?:penale|penalit[àa]|indennit[àa]|early\s+termination|cancellation\s+fee|exit\s+fee|break\s+fee|costi\s+di\s+(?:recesso|disattivazione)|penalizaci[óo]n|penalidad|coste\s+de\s+(?:cancelaci[óo]n|baja)|comisi[óo]n\s+por\s+(?:cancelaci[óo]n|baja)|indemnizaci[óo]n\s+por\s+(?:baja|desistimiento))/i;
-
-  const candidates = [];
-  for (const scope of scopes) {
-    if (!cues.test(scope)) continue;
-    const prices = extractPrices(scope);
-    for (const p of prices) {
-      if (!cues.test(tightContext(scope, p, prices))) continue;
-      candidates.push(p);
-    }
-    // Penale espressa come "pari a N mensilità"
-    const installments = /pari\s+a\s+(\d{1,2})\s*mensilit[àa]|(\d{1,2})\s*mensilit[àa]\s+residu\w+/i.exec(scope);
-    if (installments) {
-      candidates.push({ amount: null, months: Number(installments[1] || installments[2]), currency: null, raw: installments[0], context: scope.slice(0, 160) });
-    }
-  }
-  if (!candidates.length) return null;
-  const withAmount = candidates.filter((c) => c.amount != null);
-  if (withAmount.length) return withAmount.sort((a, b) => b.amount - a.amount)[0];
-  return candidates[0];
-}
-
-/** Costi aggiuntivi una tantum (attivazione, istruttoria, servizi obbligatori). */
-export function extractExtraCosts(text, findings = []) {
-  const scopes = scopeTexts(text, findings, ['hidden_costs']);
-  /**
-   * La causale può presentarsi in tre modi, e prima ne era coperto uno solo:
-   * la formula distesa («spese di attivazione»). In una tabella di riepilogo
-   * la cella dice solo «Attivazione», e i 49 € sparivano dal totale; qui la
-   * finestra è già stretta attorno all'importo, quindi la parola nuda basta.
-   */
-  const cues = /(?:spes\w+\s+di\s+(?:attivazione|gestione|istruttoria|incasso|spedizione)|costo\s+(?:una\s+tantum|di\s+attivazione)|contributo\s+(?:fisso|obbligatorio)|activation\s+fee|setup\s+fee|processing\s+fee|servizio\s+obbligatorio|mandatory|\battivazione\b|\bistruttoria\b|\bincasso\b|\bspese\s+di\s+bollo\b|\bcommissioni?\b|gastos\s+de\s+(?:activaci[óo]n|gesti[óo]n|tramitaci[óo]n|env[íi]o|estudio)|coste\s+de\s+alta|cuota\s+de\s+(?:alta|inscripci[óo]n)|comisi[óo]n\s+de\s+apertura|\bactivaci[óo]n\b|\btramitaci[óo]n\b)/i;
-
-  /**
-   * «Spese di incasso di € 4,00 **per ogni rata**» su 60 rate sono 240 €, e
-   * venivano contate come 4. Il caso quotidiano è il contributo di 2 € per la
-   * bolletta cartacea: ~48 € su 24 mesi.
-   */
-  const perCycleCue = /per\s+(?:ogni|ciascun\w*)\s+(?:rata|mese|mensilit[àa]|fattura|bolletta|ciclo|periodo)|\ba\s+rata\b|\bmensil\w+\b|per\s+(?:each|every)\s+(?:installment|month|invoice)|por\s+cada\s+(?:cuota|mes|factura|recibo)|\bal\s+mes\b|\bmensual(?:es)?\b/i;
-
-  const out = [];
-  const seen = new Set();
-  for (const scope of scopes) {
-    if (!cues.test(scope)) continue;
-    const prices = extractPrices(scope);
-    for (const p of prices) {
-      const near = tightContext(scope, p, prices);
-      if (!cues.test(near)) continue;
-      const key = `${p.amount}|${p.currency}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      out.push({
-        amount: p.amount,
-        currency: p.currency,
-        label: labelForExtra(near),
-        perCycle: perCycleCue.test(near),
-        raw: p.raw,
-      });
-    }
-  }
-  return out;
+/**
+ * Le condizioni economiche lette dal server.
+ *
+ * Il server le restituisce ciascuna con il passo da cui le ha ricavate, e
+ * scarta quelle la cui cifra non compare in quel passo: qui si prendono così
+ * come arrivano, senza cercare altri numeri nel testo. Una cifra che il server
+ * non ha potuto verificare non entra nel totale.
+ */
+export function termsFromServer(terms = {}) {
+  const t = terms || {};
+  const num = (x) => (x && typeof x.value === 'number' && Number.isFinite(x.value) && x.value >= 0 ? x.value : null);
+  const minMonths = num(t.minimum_term_months);
+  const noticeDays = num(t.notice_days);
+  const fee = num(t.exit_fee);
+  return {
+    price: num(t.price),
+    priceQuote: t.price?.quote || null,
+    currency: typeof t.currency?.value === 'string' ? t.currency.value.toUpperCase().slice(0, 3) : null,
+    period: typeof t.billing_period?.value === 'string' ? t.billing_period.value : null,
+    minTerm: minMonths ? { months: minMonths, raw: `${fmtNum(minMonths)} ${minMonths === 1 ? 'mese' : 'mesi'}`, quote: t.minimum_term_months.quote || null } : null,
+    notice: noticeDays ? { months: noticeDays / 30, days: noticeDays, raw: `${fmtNum(noticeDays)} ${noticeDays === 1 ? 'giorno' : 'giorni'}`, quote: t.notice_days.quote || null } : null,
+    penalty: fee != null ? { amount: fee, quote: t.exit_fee.quote || null } : null,
+  };
 }
 
 /**
- * Finestra stretta attorno a un importo.
- *
- * Serve a non attribuire a un importo la causale di quello accanto: in
- * "il canone è € 19,99 al mese, oltre a spese di attivazione di € 49,00"
- * una finestra larga farebbe passare anche 19,99 per costo di attivazione.
+ * Unisce il prezzo letto nella pagina, vicino al pulsante, con quello letto dal
+ * server nel testo. Vince la pagina: è il prezzo che la persona sta vedendo.
  */
-function tightContext(scope, price, prices = [], before = 70, after = 16) {
-  // La finestra non può scavalcare l'importo precedente: è lì che finisce la
-  // causale di questo e comincia quella dell'altro.
-  const prev = prices
-    .filter((p) => p.index < price.index)
-    .sort((a, b) => b.index - a.index)[0];
-  const floor = prev ? prev.index + prev.raw.length : 0;
-  const start = Math.max(0, floor, price.index - before);
-  return scope.slice(start, price.index + price.raw.length + after);
+export function mergePricing(pricing = {}, server = {}) {
+  const out = { ...(pricing || {}) };
+  if (out.amount == null && server.price != null && server.period !== 'once') {
+    out.amount = server.price;
+    out.period = server.period || out.period;
+    out.source = 'server';
+  } else if (out.amount == null && server.price != null) {
+    out.amount = server.price;
+    out.source = 'server';
+  }
+  if (!out.currency && server.currency) out.currency = server.currency;
+  if (!out.period && server.period && server.period !== 'once') out.period = server.period;
+  if (out.recurring == null && out.period) out.recurring = true;
+  return out;
 }
 
-function labelForExtra(context) {
-  const map = [
-    [/attivazione|activation/i, 'Attivazione'],
-    [/istruttoria/i, 'Istruttoria'],
-    [/gestione|management/i, 'Gestione'],
-    [/incasso/i, 'Incasso'],
-    [/spedizione|shipping/i, 'Spedizione'],
-    [/setup/i, 'Setup'],
-    [/obbligatori\w*|mandatory/i, 'Servizio obbligatorio'],
-  ];
-  for (const [re, label] of map) if (re.test(context)) return label;
-  return 'Costo aggiuntivo';
+function fmtNum(n) {
+  return Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10).replace('.', ',');
 }
 
 /**
@@ -151,14 +68,14 @@ function labelForExtra(context) {
  * ma dare all'utente l'ordine di grandezza corretto prima del click, con la
  * formula esplicita così può giudicare da sé.
  */
-export function computeCost({ text = '', ctx = {}, findings = [] } = {}) {
+export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
   const pricing = ctx.pricing || {};
-  const currency = pricing.currency || 'EUR';
+  const currency = pricing.currency || terms.currency || 'EUR';
 
-  const minTerm = extractMinimumTerm(text, findings);
-  const notice = extractNoticePeriod(text, findings);
-  const penalty = extractPenalty(text, findings);
-  const extras = extractExtraCosts(text, findings);
+  const minTerm = terms.minTerm || null;
+  const notice = terms.notice || null;
+  const penalty = terms.penalty || null;
+  const extras = [];
 
   const hasAutoRenewal = findings.some((f) => f.category === 'auto_renewal');
   const periodMonths = pricing.period ? PERIOD_MONTHS[pricing.period] || 1 : null;
@@ -345,20 +262,6 @@ export function buildTimeline({ ctx = {}, cost = {}, findings = [], actionType =
 
 // ── helper ──────────────────────────────────────────────────────────────────
 
-/**
- * Restituisce i frammenti di testo su cui cercare i numeri: le citazioni delle
- * categorie rilevanti più, in fallback, l'intero testo. Serve a non prendere
- * l'importo sbagliato da un punto scollegato del documento.
- */
-function scopeTexts(text, findings, categories) {
-  const scopes = findings
-    .filter((f) => categories.includes(f.category))
-    .map((f) => `${f.quote} ${f.matched || ''}`);
-  if (!scopes.length) return [normalize(text)];
-  scopes.push(normalize(text));
-  return scopes;
-}
-
 function addMonths(date, months) {
   const d = new Date(date.getTime());
   const whole = Math.trunc(months);
@@ -380,4 +283,3 @@ function round2(n) {
   return Math.round(n * 100) / 100;
 }
 
-export { parseAmount };

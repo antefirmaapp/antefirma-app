@@ -3,7 +3,7 @@
  *
  * Il content script osserva e blocca; qui si decide. Tenere l'analisi fuori
  * dalla pagina significa che nessuno script del sito può leggerla, alterarla o
- * intercettare la chiave API.
+ * intercettare il token dell'installazione.
  *
  * Da qui passano anche le tre cose che vivono più a lungo di una pagina:
  * il registro degli impegni, i promemoria delle scadenze e il controllo
@@ -19,7 +19,8 @@ import { createSnapshot, compareSnapshot, sha256, attestation } from '../core/pr
 import { buildCommitment, planReminders, dueReminder, missedWindow, commitmentState, COMMITMENT_STATUS } from '../core/commitments.js';
 import { buildIcs } from '../core/ics.js';
 import { buildLetter, suggestKind } from '../core/letter.js';
-import { localModelStatus } from '../core/local-llm.js';
+import { register, ServerError } from '../core/server.js';
+import { API_BASE } from '../core/config.js';
 import {
   getSettings, setSettings, isAllowlisted,
   getCached, setCached, clearCache,
@@ -39,18 +40,18 @@ const MAX_TERMS_BYTES = 1_500_000;
  * già un AbortSignal e lo propagava fino a fetch, ma in tutto il progetto non
  * ne veniva creato nessuno: era sempre undefined.
  *
- * Allo scadere non si annulla l'analisi: si degrada al verdetto delle sole
- * regole locali, che a quel punto è già calcolato, e lo si dichiara.
+ * Allo scadere l'avviso dice che l'analisi non è riuscita e lascia scegliere:
+ * non c'è un verdetto di ripiego da mostrare, e fingerne uno sarebbe peggio.
  */
-const ANALYSIS_BUDGET_MS = 12_000;
+const ANALYSIS_BUDGET_MS = 15_000;
 const TERMS_FETCH_BUDGET_MS = 6_000;
-const WATCH_ALARM = 'vincolo-controllo-condizioni';
+const WATCH_ALARM = 'antefirma-controllo-condizioni';
 /**
  * Un solo allarme ricorrente al posto di tre allarmi per impegno programmati a
  * due anni di distanza. Scatta due volte al giorno: se una passata salta —
  * browser chiuso, aggiornamento, sospensione — la successiva recupera.
  */
-const SWEEP_ALARM = 'vincolo-passata-quotidiana';
+const SWEEP_ALARM = 'antefirma-passata-quotidiana';
 
 // ── ciclo di vita ───────────────────────────────────────────────────────────
 
@@ -59,6 +60,10 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   setupContextMenus();
   await scheduleAlarms();
   await sweep();
+  if (details.reason === 'update') await forgetOldEngine();
+  // Il token si chiede subito, così la prima analisi non aspetta anche questo.
+  // Se il server non risponde si riproverà alla prima analisi.
+  register().catch(() => {});
   if (details.reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html?welcome=1') });
   }
@@ -78,7 +83,7 @@ function setupContextMenus() {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: 'cf-analyze-selection',
-      title: 'Analizza il testo selezionato con Vincolo',
+      title: 'Analizza il testo selezionato con AnteFirma',
       contexts: ['selection'],
     });
     chrome.contextMenus.create({
@@ -118,7 +123,6 @@ async function contentSettings() {
     enabled: s.enabled,
     allowlist: s.allowlist || [],
     blockFrom: s.blockFrom,
-    speculative: s.speculative,
   };
 }
 
@@ -141,7 +145,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   handle(msg, sender)
     .then((result) => sendResponse({ ok: true, result }))
     .catch((err) => {
-      console.error('[Vincolo]', msg?.type, err);
+      console.error('[AnteFirma]', msg?.type, err);
       sendResponse({ ok: false, error: err?.message || String(err) });
     });
   return true;
@@ -167,8 +171,10 @@ async function handle(msg, sender) {
       return contentSettings();
     case 'ALLOWLIST_ADD':
       return allowlistAdd(msg.payload?.host);
-    case 'PREFETCH_ACTION':
-      return prefetchAction(msg.payload, sender);
+    case 'GRANT_CONSENT':
+      return grantConsent();
+    case 'REVOKE_CONSENT':
+      return setSettings({ remoteConsentAt: null });
     case 'ANALYZE_ACTION':
       return analyzeAction(msg.payload, sender);
     case 'ANALYZE_TEXT':
@@ -187,10 +193,8 @@ async function handle(msg, sender) {
       return clearHistory();
     case 'CLEAR_CACHE':
       return clearCache();
-    case 'TEST_API_KEY':
-      return testApiKey(msg.payload);
-    case 'LOCAL_MODEL_STATUS':
-      return localModelStatus();
+    case 'SERVER_STATUS':
+      return serverStatus();
 
     // ── kit di uscita ──────────────────────────────────────────────────────
     case 'GET_COMMITMENTS':
@@ -220,38 +224,38 @@ async function handle(msg, sender) {
   }
 }
 
-// ── analisi speculativa ─────────────────────────────────────────────────────
+// ── consenso ────────────────────────────────────────────────────────────────
 
 /**
- * Gira *prima* del click, quando il pulsante entra nel campo visivo o l'utente
- * ci passa sopra. Usa solo ciò che non costa nulla — regole locali e modello
- * on-device — e scalda la stessa cache che userà il click. Non tocca lo
- * storico, non aggiorna il badge, non deve lasciare tracce.
+ * Le versioni fino alla 0.4 mandavano il testo direttamente ad Anthropic o a
+ * OpenAI con una chiave della persona. Con il passaggio al server cambia chi
+ * riceve il testo: il consenso dato allora non vale per questo, e la chiave
+ * non serve più e non deve restare sul disco.
  */
-async function prefetchAction(payload = {}, sender) {
-  const settings = await getSettings();
-  if (!settings.enabled || !settings.speculative) return { skipped: true };
+async function forgetOldEngine() {
+  const { settings } = await chrome.storage.local.get('settings');
+  if (!settings || !('apiKey' in settings || 'provider' in settings)) return;
+  const { apiKey, provider, model, useLLM, llmThreshold, useLocalModel, speculative, ...rest } = settings;
+  await chrome.storage.local.set({ settings: { ...rest, remoteConsentAt: null } });
+  await clearCache();
+}
 
-  const ctx = payload.ctx || {};
-  ctx.url = ctx.url || sender?.tab?.url || sender?.url;
-  if (isAllowlisted(ctx.url, settings)) return { skipped: true };
+/**
+ * Il consenso all'invio del testo al server. Si chiede alla prima analisi,
+ * dentro l'avviso o nel pannello: il Chrome Web Store vuole una spiegazione
+ * nell'interfaccia e un atto esplicito prima che qualcosa esca dal browser.
+ * La data serve anche a sapere chi ha accettato quale versione delle pratiche.
+ */
+async function grantConsent() {
+  const remoteConsentAt = new Date().toISOString();
+  await setSettings({ remoteConsentAt });
+  return { remoteConsentAt };
+}
 
-  const text = normalize(payload.text || '');
-  if (text.length < 200) return { skipped: true };
-
-  const key = cacheKey(text, payload.actionType, settings);
-  if (await getCached(key, settings.cacheTtlHours)) return { cached: true };
-
-  const verdict = await analyze({
-    text,
-    ctx,
-    actionType: payload.actionType || ACTION_TYPES.ACCEPT_TERMS,
-    settings,
-    mode: 'speculative',
-  });
-  await setCached(key, verdict);
-
-  return { prepared: true, level: verdict.level.id, partial: verdict.engine.partial };
+/** Per tradurre un errore del server in una risposta per l'interfaccia. */
+function failure(err) {
+  if (err instanceof ServerError) return { error: { code: err.code, message: err.message, retryAfter: err.retryAfter } };
+  return { error: { code: 'internal', message: 'L’analisi non è riuscita.' } };
 }
 
 // ── analisi di un'azione intercettata ───────────────────────────────────────
@@ -280,31 +284,27 @@ async function analyzeAction(payload = {}, sender) {
     }
   }
 
-  const key = cacheKey(text, payload.actionType, settings);
-  const remoteConfigured = settings.useLLM && settings.provider !== 'none' && Boolean((settings.apiKey || '').trim());
+  if (!settings.remoteConsentAt) return { needsConsent: true };
 
-  let verdict = payload.refine ? null : await getCached(key, settings.cacheTtlHours);
-  let cached = Boolean(verdict);
+  const key = cacheKey(text, payload.actionType, settings);
+  let verdict = await getCached(key, settings.cacheTtlHours);
+  const cached = Boolean(verdict);
 
   if (!verdict) {
-    verdict = await analyze({
-      text,
-      ctx,
-      actionType: payload.actionType || ACTION_TYPES.ACCEPT_TERMS,
-      settings,
-      mode: 'full',
-      signal: AbortSignal.timeout(ANALYSIS_BUDGET_MS),
-    });
-    if (!verdict.engine.llmError) await setCached(key, verdict);
+    try {
+      verdict = await analyze({
+        text,
+        ctx,
+        actionType: payload.actionType || ACTION_TYPES.ACCEPT_TERMS,
+        settings,
+        signal: AbortSignal.timeout(ANALYSIS_BUDGET_MS),
+      });
+    } catch (err) {
+      console.warn('[AnteFirma] analisi non riuscita', err?.code, err?.detail || err);
+      return failure(err);
+    }
+    await setCached(key, verdict);
   }
-
-  /**
-   * Il verdetto veniva dalla pre-analisi e c'è ancora un gradino da salire:
-   * lo si mostra subito e si dice all'interfaccia che può chiedere il
-   * raffinamento. Meglio un avviso istantaneo e poi più preciso, che tre
-   * secondi di clessidra.
-   */
-  const refinable = cached && verdict.engine?.partial && remoteConfigured;
 
   verdict = { ...verdict, cached, termsSource };
   const blocking = shouldBlock(verdict.level.id, settings.blockFrom);
@@ -336,7 +336,7 @@ async function analyzeAction(payload = {}, sender) {
 
   await updateBadge(sender?.tab?.id, verdict.level);
 
-  return { skip: false, blocking, refinable, verdict: { ...verdict, historyId: id } };
+  return { skip: false, blocking, verdict: { ...verdict, historyId: id } };
 }
 
 /** Analisi lanciata dal side panel (incolla, PDF, pagina, URL). */
@@ -353,19 +353,22 @@ async function analyzeText(payload = {}) {
     ...(payload.ctx || {}),
   };
 
+  if (!settings.remoteConsentAt) return { needsConsent: true };
+
   const actionType = payload.actionType || ACTION_TYPES.MANUAL;
   const key = cacheKey(text, actionType, settings);
 
   if (!payload.force) {
     const cached = await getCached(key, settings.cacheTtlHours);
-    if (cached && !cached.engine?.partial) return { ...cached, cached: true };
+    if (cached) return { ...cached, cached: true };
   }
 
+  // Dal pannello l'errore sale come eccezione: il pannello mostra il messaggio.
   const verdict = await analyze({
-    text, ctx, actionType, settings, mode: 'full',
+    text, ctx, actionType, settings,
     signal: AbortSignal.timeout(ANALYSIS_BUDGET_MS),
   });
-  if (!verdict.engine.llmError) await setCached(key, verdict);
+  await setCached(key, verdict);
 
   // Anche le analisi manuali possono diventare impegni da sorvegliare.
   const id = `manual-${Date.now().toString(36)}`;
@@ -550,7 +553,7 @@ async function notify({ id, title, message, commitmentId }) {
   } catch (err) {
     // Le notifiche possono essere negate dal sistema operativo: è un peccato,
     // non un errore fatale. La scadenza resta nel pannello e nel calendario.
-    console.warn('[Vincolo] notifica non mostrata:', err?.message);
+    console.warn('[AnteFirma] notifica non mostrata:', err?.message);
   }
 }
 
@@ -602,11 +605,17 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
     return recordCheck(id, unchangedDiff('Le condizioni sono identiche a quelle che avevi accettato.'), commitment);
   }
 
-  // ── Cancello 3: le regole locali. Costo nullo, nessuna rete. ─────────────
+  // ── Cancello 3: il server. ───────────────────────────────────────────────
   // Un hash diverso non significa che il *tuo impegno* sia cambiato: basta un
   // anno di copyright o un contatore. Quello che conta sono i fatti derivati —
-  // costo, durata, preavviso, penale, categorie — e per ricavarli le regole
-  // bastano.
+  // costo, durata, preavviso, penale, categorie — e per ricavarli serve
+  // l'analisi. Il documento è quello pubblico che avevi accettato; il server
+  // ricorda le analisi per impronta del testo, quindi le stesse condizioni
+  // lette da più persone si analizzano una volta sola.
+  //
+  // Un controllo che parte da solo interroga il server solo se l'opzione è
+  // attiva e il consenso c'è; altrimenti si limita a dire che il testo è
+  // cambiato, senza notificare.
   const snapshot = { ...(commitment.snapshot || {}), verdict: snapshotVerdict(commitment) };
   // Stesso contesto economico dell'analisi originale: confrontare un verdetto
   // calcolato con il prezzo contro uno calcolato senza è un falso allarme
@@ -618,36 +627,34 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
     terms: { textInPage: true },
   };
 
-  const local = await analyze({
-    text: clean,
-    ctx: recheckCtx,
-    actionType: commitment.actionType || ACTION_TYPES.ACCEPT_TERMS,
-    settings,
-    mode: 'rules',
-  });
-  let diff = compareSnapshot(snapshot, { text: clean, verdict: local, newHash });
-
-  if (diff.severity !== 'major') {
-    return recordCheck(id, { ...diff, escalated: false }, commitment);
+  const serverAllowed = Boolean(settings.remoteConsentAt) && (trigger === 'manual' || settings.watchUsesRemote !== false);
+  if (!serverAllowed) {
+    return recordCheck(id, {
+      ...unchangedDiff('Il testo delle condizioni è cambiato. Premi «Verifica modifiche» per sapere se cambia il tuo impegno.'),
+      changed: true,
+      hashChanged: true,
+      severity: 'minor',
+    }, commitment);
   }
 
-  // ── Solo ora, e solo se qualcosa di sostanziale si è mosso. ──────────────
-  // Un controllo che parte da solo non può spendere i tuoi crediti né far
-  // uscire il contratto dal browser: se è automatico usa al massimo il modello
-  // on-device. Il modello remoto entra in gioco quando sei tu a chiedere il
-  // controllo — quello è un consenso esplicito — o se hai attivato l'opzione
-  // apposita.
-  const remoteAllowed = trigger === 'manual' || settings.watchUsesRemote === true;
-  const mode = remoteAllowed ? 'full' : 'speculative';
-  if (mode !== 'rules') {
-    const better = await analyze({
+  let better;
+  try {
+    better = await analyze({
       text: clean,
       ctx: recheckCtx,
       actionType: commitment.actionType || ACTION_TYPES.ACCEPT_TERMS,
       settings,
-      mode,
+      signal: AbortSignal.timeout(ANALYSIS_BUDGET_MS),
     });
-    diff = { ...compareSnapshot(snapshot, { text: clean, verdict: better, newHash }), escalated: true, model: better.engine.model };
+  } catch (err) {
+    if (trigger === 'manual') throw err;
+    // Un controllo automatico che non riesce si ripete alla passata successiva.
+    return commitment;
+  }
+  const diff = { ...compareSnapshot(snapshot, { text: clean, verdict: better, newHash }), escalated: true };
+
+  if (diff.severity !== 'major') {
+    return recordCheck(id, diff, commitment);
   }
 
   const saved = await recordCheck(id, diff, commitment);
@@ -791,20 +798,14 @@ async function fetchDocument(url, validators = {}, { signal } = {}) {
 
 // ── varie ───────────────────────────────────────────────────────────────────
 
-async function testApiKey({ provider, apiKey, model } = {}) {
-  const settings = { provider, apiKey, model, useLLM: true };
-  const { analyzeWithLLM } = await import('../core/llm.js');
-  const probe = 'Il servizio si rinnova automaticamente ogni 12 mesi salvo disdetta con 30 giorni di preavviso. Costo 19,99 euro al mese. Penale di recesso anticipato: 49 euro.';
-  const out = await analyzeWithLLM({
-    text: probe,
-    ctx: { url: 'https://example.test', pricing: { amount: 19.99, currency: 'EUR', period: 'month' } },
-    ruleFindings: [],
-    actionType: ACTION_TYPES.SUBSCRIBE,
-    profile: { money: true },
-    jurisdiction: 'IT',
-    settings,
-  });
-  return { ok: true, clauses: out.clauses.length, worstCase: out.economics.worstCaseTotal };
+/** Il server risponde? Serve alle impostazioni, non costa analisi. */
+async function serverStatus() {
+  try {
+    const res = await fetch(`${API_BASE}/v1/health`, { signal: AbortSignal.timeout(5000) });
+    return { ok: res.ok, status: res.status };
+  } catch (err) {
+    return { ok: false, error: String(err?.message || err) };
+  }
 }
 
 async function updateBadge(tabId, level) {
@@ -817,7 +818,7 @@ async function updateBadge(tabId, level) {
 }
 
 function cacheKey(text, actionType, settings) {
-  return `${hashText(text)}|${actionType}|${settings.jurisdiction}|${profileKey(settings.profile)}`;
+  return `${hashText(text)}|${actionType}|${settings.jurisdiction}|${settings.uiLang || 'it'}|${profileKey(settings.profile)}`;
 }
 
 function profileKey(profile = {}) {

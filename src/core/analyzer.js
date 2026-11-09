@@ -1,26 +1,29 @@
 /**
- * Orchestratore dell'analisi: la pipeline descritta nell'architettura.
+ * Orchestratore dell'analisi.
  *
  *   testo + contesto
- *        ↓  regole locali          (sempre, offline)
- *        ↓  LLM                    (solo se serve davvero)
- *        ↓  merge dei finding
- *        ↓  consequence engine     (€ / durata / date)
+ *        ↓  server di AnteFirma    (il modello legge la pagina; il server scarta
+ *        ↓                          ogni rischio la cui citazione non c'è)
+ *        ↓  severità ed etichette  (costanti dell'estensione)
+ *        ↓  consequence engine     (€ / durata / date, dalle cifre verificate)
  *        ↓  personal risk profile
  *        ↓  motore consumer UE/IT
  *        ↓  decision risk score
  *   verdetto
+ *
+ * Non c'è più un motore a regole locale: ogni avviso nasce da una frase della
+ * pagina che il server ha ritrovato nel testo. Se il server non risponde,
+ * l'analisi fallisce con un `ServerError` e l'interfaccia lo dice — non si
+ * finge un verdetto «sicuro» che nessuno ha calcolato.
  */
 
-import { runRules } from './rules.js';
-import { analyzeWithLLM, LLMError } from './llm.js';
-import { analyzeLocally, resolveApi } from './local-llm.js';
-import { computeCost, buildTimeline } from './consequence.js';
+import { analyzeRemote } from './server.js';
+import { computeCost, buildTimeline, termsFromServer, mergePricing } from './consequence.js';
 import { personalize } from './profile.js';
 import { runConsumerChecks } from './eu.js';
-import { computeScore, aggregateSeverity } from './scoring.js';
+import { computeScore } from './scoring.js';
 import { RISK_CATEGORIES, DEFAULT_SETTINGS, ACTION_TYPES } from './constants.js';
-import { hashText, normalize, formatMoney, PERIOD_MONTHS } from './text.js';
+import { hashText, normalize } from './text.js';
 
 /**
  * @param {object} p
@@ -28,164 +31,52 @@ import { hashText, normalize, formatMoney, PERIOD_MONTHS } from './text.js';
  * @param {object} p.ctx         Contesto estratto dalla pagina.
  * @param {string} p.actionType  Tipo di azione intercettata.
  * @param {object} p.settings    Impostazioni utente.
- * @param {'full'|'speculative'|'rules'} [p.mode]
- *        'speculative' gira prima del click: usa solo ciò che non costa nulla
- *        — regole locali e modello on-device — e marca il verdetto come
- *        parziale, così al click si sa che vale la pena raffinarlo.
- *        'rules' non interpella alcun modello: serve ai controlli automatici,
- *        dove l'estensione agisce di propria iniziativa e non può permettersi
- *        di spendere né di far uscire il testo dal browser.
  * @param {AbortSignal} [p.signal]
  * @param {number} [p.now]       Istante di riferimento (per i test).
- * @param {object} [p.scope]     Contesto globale (iniettabile per i test del modello locale).
+ * @param {Function} [p.remote]  La chiamata al server (sostituibile nei test).
+ * @throws {ServerError}         Se il server non ha potuto analizzare.
  */
-/**
- * Tempo massimo concesso al modello integrato in Chrome.
- *
- * È il gradino gratuito, ma non per questo può tenere in ostaggio il click:
- * `create()` resta in attesa finché il modello non è scaricato, e su una
- * pagina qualsiasi — senza il pannello aperto a svegliare il service worker —
- * l'avviso restava su «Sto verificando…» a tempo indeterminato, con l'azione
- * dell'utente sospesa e due sole vie d'uscita, entrambe cieche.
- *
- * Cinque secondi, poi si prosegue con le regole. Il verdetto resta pieno.
- */
-const LOCAL_BUDGET_MS = 5000;
-
-/** Come Promise.race, ma senza lasciare il timer acceso a lavoro finito. */
-function withDeadline(promise, ms, reason) {
-  return new Promise((resolve, reject) => {
-    const t = setTimeout(() => reject(new Error(reason)), ms);
-    const settle = (fn) => (v) => { clearTimeout(t); fn(v); };
-    promise.then(settle(resolve), settle(reject));
-  });
-}
-
-export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.MANUAL, settings = DEFAULT_SETTINGS, signal, now = Date.now(), mode = 'full', scope = globalThis } = {}) {
+export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.MANUAL, settings = DEFAULT_SETTINGS, signal, now = Date.now(), remote = analyzeRemote } = {}) {
   const started = now;
+  const clock = Date.now();
   const clean = normalize(text);
   const profile = settings.profile || DEFAULT_SETTINGS.profile;
   const jurisdiction = settings.jurisdiction || 'IT';
 
-  // 1. Regole locali — sempre, senza rete.
-  // La giurisdizione serve alle regole quanto al motore consumer: senza, «foro
-  // di Roma» veniva presentato a un utente italiano come foro estero.
-  const { findings: ruleFindings, stats } = runRules(clean, { ...ctx, jurisdiction });
+  // 1. Il server.
+  const response = await remote({
+    text: clean,
+    url: ctx.url || null,
+    actionType,
+    button: ctx.button?.text || ctx.buttonText || null,
+    uiLang: settings.uiLang || 'it',
+    jurisdiction,
+    signal,
+  });
 
-  // 2. Modelli. Due gradini, con costi molto diversi.
-  const localPreview = aggregateSeverity(ruleFindings);
-  const substantial = clean.length > 200;
-  const highStakes = [ACTION_TYPES.PURCHASE, ACTION_TYPES.SUBSCRIBE, ACTION_TYPES.SIGN, ACTION_TYPES.MANUAL].includes(actionType);
-  const worthModel = substantial && (localPreview >= (settings.llmThreshold ?? 15) || highStakes);
+  // 2. Severità ed etichette: le decide l'estensione, non il modello.
+  const raw = fromServer(response?.findings || []);
 
-  const remoteConfigured =
-    settings.useLLM &&
-    settings.provider !== 'none' &&
-    Boolean((settings.apiKey || '').trim()) &&
-    // Il consenso è una precondizione, non una preferenza: senza, il testo del
-    // contratto non esce dal browser nemmeno se la chiave c'è.
-    Boolean(settings.remoteConsentAt);
+  // 3. Conseguenze economiche, dalle sole cifre che il server ha verificato.
+  const terms = termsFromServer(response?.terms);
+  const enrichedCtx = { ...ctx, pricing: mergePricing(ctx.pricing, terms) };
+  const cost = computeCost({ ctx: enrichedCtx, findings: raw, terms });
 
-  let llm = null;
-  let llmError = null;
-  let modelUsed = null;
+  // 4. Personalizzazione sul profilo.
+  const findings = personalize(raw, profile);
 
-  // 2a. Modello on-device: non manda nulla fuori e non costa crediti, quindi
-  //     può girare anche in modo speculativo, prima che l'utente clicchi.
-  const localEnabled = mode !== 'rules' && settings.useLocalModel !== false && Boolean(resolveApi(scope));
-  if (worthModel && localEnabled) {
-    try {
-      llm = await withDeadline(
-        analyzeLocally({ text: clean, ctx, ruleFindings, actionType, profile, signal, scope }),
-        LOCAL_BUDGET_MS,
-        'il modello on-device non ha risposto in tempo'
-      );
-      modelUsed = 'local';
-    } catch (err) {
-      /**
-       * Il modello on-device assente o caduto **non è un errore**: il verdetto
-       * resta pieno, viene dalle regole, e la riga di provenienza in fondo alla
-       * card lo dice già. Segnalarlo in rosso sopra il numero — con la stringa
-       * tecnica inglese di Chrome dentro — occupava il posto più prominente
-       * dell'avviso per una cosa su cui l'utente non può né deve fare nulla.
-       * Il dettaglio resta, ma per la diagnostica, non per la card.
-       */
-      llmError = {
-        message: 'Modello on-device non disponibile',
-        detail: String(err?.message || err),
-        retriable: false,
-        surfaced: false,
-        source: 'local',
-      };
-    }
-  }
-
-  // 2b. Modello remoto: più accurato, ma il testo esce dal browser e costa.
-  //     Mai in modalità speculativa.
-  const useRemote = mode === 'full' && worthModel && remoteConfigured;
-  if (useRemote) {
-    try {
-      llm = await analyzeWithLLM({
-        text: clean,
-        ctx,
-        ruleFindings,
-        actionType,
-        profile,
-        jurisdiction,
-        settings,
-        signal,
-      });
-      modelUsed = 'remote';
-      llmError = null;
-    } catch (err) {
-      const timedOut = signal?.aborted || err?.name === 'TimeoutError' || err?.name === 'AbortError';
-      llmError = {
-        message: timedOut
-          ? 'tempo massimo superato'
-          : err instanceof LLMError
-            ? err.message
-            : 'Analisi AI non riuscita.',
-        retriable: timedOut || Boolean(err?.retriable),
-        timedOut: Boolean(timedOut),
-        // Il modello remoto l'utente l'ha configurato apposta e lo paga: se non
-        // è stato interpellato deve saperlo.
-        surfaced: true,
-        source: 'remote',
-      };
-    }
-  }
-
-  /**
-   * Il verdetto è "parziale" quando esiste un gradino successivo non ancora
-   * salito: è il segnale che dice all'interfaccia di mostrare subito questo
-   * risultato e poi aggiornarlo.
-   */
-  const partial = mode === 'speculative' && worthModel && remoteConfigured;
-
-  // 3. Merge: le due sorgenti si completano a vicenda.
-  const merged = mergeFindings(ruleFindings, llm?.clauses || []);
-
-  // 4. Conseguenze economiche: motore locale, poi correzione con i numeri
-  //    dell'LLM quando sono più precisi.
-  const enrichedCtx = reconcilePricing(ctx, llm);
-  let cost = computeCost({ text: clean, ctx: enrichedCtx, findings: merged });
-  cost = reconcileCost(cost, llm, enrichedCtx);
-
-  // 5. Personalizzazione sul profilo.
-  const findings = personalize(merged, profile);
-
-  // 6. Tutele consumer UE/IT.
+  // 5. Tutele consumer UE/IT.
   const consumer = runConsumerChecks({ text: clean, findings, ctx: enrichedCtx, cost, actionType, jurisdiction });
 
-  // 7. Punteggio della decisione.
+  // 6. Punteggio della decisione.
   const analyzed = clean.length > 120 || Boolean(enrichedCtx.pricing?.amount);
   const { score, level, components, drivers } = computeScore({ findings, cost, consumer, actionType, analyzed });
 
-  // 8. Timeline delle conseguenze.
+  // 7. Timeline delle conseguenze.
   const timeline = buildTimeline({ ctx: enrichedCtx, cost, findings, actionType, now: started });
 
   return {
-    version: 1,
+    version: 2,
     createdAt: new Date(started).toISOString(),
     actionType,
     url: ctx.url || null,
@@ -202,172 +93,76 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
     level,
     components,
     drivers,
-    headline: llm?.headline || fallbackHeadline({ level, cost, actionType }),
-    summary: llm?.summary || fallbackSummary({ findings, cost, consumer }),
+    headline: headlineFor({ level, cost, actionType }),
+    summary: (response?.summary || '').trim() || summaryFor({ findings, cost, consumer }),
     findings,
     cost,
     timeline,
     consumer,
-    mustRemember: llm?.mustRemember || fallbackMustRemember(cost, timeline),
-    consequences: llm?.consequences || [],
+    mustRemember: mustRememberFor(cost, timeline),
     engine: {
-      rules: true,
-      llm: Boolean(llm),
-      model: modelUsed,
-      mode,
-      partial,
-      llmError,
-      llmSkipped: !worthModel,
-      llmConfidence: llm?.confidence ?? null,
-      localPreview,
-      stats,
+      source: 'server',
+      model: response?.model || null,
+      cached: Boolean(response?.cached),
+      dropped: Number(response?.dropped) || 0,
+      truncated: Boolean(response?.truncated),
+      quota: response?.quota ?? null,
       textHash: hashText(clean),
       textLength: clean.length,
-      durationMs: Date.now() - started,
+      durationMs: Date.now() - clock,
     },
   };
 }
 
 /**
- * Unisce i finding delle due sorgenti per categoria.
- * L'LLM porta citazione e spiegazione; le regole portano affidabilità.
- * Quando entrambi vedono la stessa cosa, la fiducia sale.
+ * Dai rischi del server ai finding dell'estensione.
+ *
+ * Una categoria compare una volta sola: se il server ne cita più passi, resta
+ * quello con la fiducia più alta e gli altri vanno in `quotes`. Le categorie che
+ * l'estensione non conosce vengono ignorate: senza severità non si sa come
+ * pesarle.
  */
-export function mergeFindings(ruleFindings = [], llmClauses = []) {
-  const map = new Map();
-
-  for (const f of ruleFindings) {
-    map.set(f.category, { ...f, sources: ['rules'] });
-  }
-
-  for (const c of llmClauses) {
-    const existing = map.get(c.category);
-    if (!existing) {
-      map.set(c.category, {
-        category: c.category,
-        label: c.label,
-        title: c.title,
-        severity: c.severity,
-        confidence: c.certainty === 'explicit' ? 0.85 : 0.6,
-        quote: c.quote,
-        plain: c.plain,
-        why: c.why,
-        source: 'llm',
-        sources: ['llm'],
-        certainty: c.certainty,
-      });
-      continue;
+export function fromServer(serverFindings = []) {
+  const byCategory = new Map();
+  for (const f of serverFindings) {
+    const def = RISK_CATEGORIES[f?.category];
+    if (!def || typeof f.quote !== 'string' || !f.quote.trim()) continue;
+    const confidence = clamp01(Number(f.confidence));
+    const item = {
+      category: f.category,
+      label: def.label,
+      severity: def.base,
+      confidence,
+      quote: f.quote.trim(),
+      span: f.span || null,
+      why: (typeof f.why === 'string' && f.why.trim()) || def.why,
+      plain: (typeof f.why === 'string' && f.why.trim()) || def.why,
+      source: 'ai',
+      sources: ['ai'],
+      quotes: [],
+    };
+    const prev = byCategory.get(f.category);
+    if (!prev) {
+      byCategory.set(f.category, item);
+    } else if (confidence > prev.confidence) {
+      byCategory.set(f.category, { ...item, quotes: [prev.quote, ...prev.quotes] });
+    } else {
+      prev.quotes.push(item.quote);
     }
-    // Concordanza fra motore locale e LLM: alza la severità e la fiducia.
-    const agreement = 1.06;
-    map.set(c.category, {
-      ...existing,
-      title: c.title || existing.label,
-      severity: Math.min(100, Math.round(Math.max(existing.severity, c.severity) * agreement)),
-      confidence: Math.min(1, Math.max(existing.confidence, 0.9)),
-      quote: pickQuote(existing.quote, c.quote),
-      plain: c.plain || existing.why,
-      certainty: c.certainty,
-      source: 'both',
-      sources: ['rules', 'llm'],
-    });
   }
-
-  return [...map.values()].sort((a, b) => b.severity - a.severity);
+  /**
+   * La fiducia sposta la severità solo verso il basso, e di poco: un rischio
+   * citato ma incerto pesa meno di uno certo, ma non sparisce. Il server ha già
+   * verificato che la frase c'è.
+   */
+  return [...byCategory.values()]
+    .map((f) => ({ ...f, severity: Math.round(f.severity * (0.8 + 0.2 * f.confidence)) }))
+    .sort((a, b) => b.severity - a.severity);
 }
 
-function pickQuote(a, b) {
-  const A = (a || '').trim();
-  const B = (b || '').trim();
-  if (!A) return B;
-  if (!B) return A;
-  // La citazione più ricca ma non sproporzionata.
-  return B.length > 40 && B.length <= A.length * 1.6 ? B : A;
-}
+// ── testi del verdetto ───────────────────────────────────────────────────────
 
-/** Se l'LLM ha letto meglio il prezzo dalla pagina, usiamo il suo. */
-function reconcilePricing(ctx, llm) {
-  if (!llm?.economics) return ctx;
-  const e = llm.economics;
-  const pricing = { ...(ctx.pricing || {}) };
-
-  if (pricing.amount == null && e.recurringAmount != null) {
-    pricing.amount = e.recurringAmount;
-    pricing.currency = e.currency || pricing.currency || 'EUR';
-    pricing.period = e.period || pricing.period;
-    pricing.source = 'llm';
-  }
-  if (!pricing.period && e.period) pricing.period = e.period;
-  if (!pricing.currency && e.currency) pricing.currency = e.currency;
-  if (pricing.recurring == null && e.period) pricing.recurring = true;
-
-  return { ...ctx, pricing };
-}
-
-/**
- * I numeri dell'LLM sostituiscono quelli locali solo dove il motore locale non
- * ha trovato nulla, oppure dove l'LLM è più conservativo verso l'utente
- * (cioè indica un impegno maggiore: meglio un avviso in più).
- */
-function reconcileCost(cost, llm, ctx) {
-  if (!llm?.economics) return cost;
-  const e = llm.economics;
-  const out = { ...cost, lines: [...cost.lines] };
-  const currency = out.currency || e.currency || 'EUR';
-
-  // Fra le due letture della durata vince la più lunga: sottostimare
-  // l'orizzonte dell'impegno è l'errore che questo prodotto esiste per evitare.
-  if (e.minimumTermMonths && e.minimumTermMonths > (out.minTerm?.months || 0)) {
-    out.minTerm = { months: e.minimumTermMonths, raw: `${e.minimumTermMonths} mesi`, source: 'llm' };
-    out.horizonMonths = e.minimumTermMonths;
-    out.horizonReason = `durata minima indicata dall’analisi AI: ${e.minimumTermMonths} mesi`;
-  }
-  if (!out.notice && e.noticeDays) {
-    out.notice = { months: e.noticeDays / 30, raw: `${e.noticeDays} giorni`, source: 'llm' };
-  }
-  if (!out.penalty && e.penaltyAmount != null) {
-    out.penalty = { amount: e.penaltyAmount, currency, raw: formatMoney(e.penaltyAmount, currency), source: 'llm' };
-    out.lines.push({ label: 'Penale di recesso', amount: e.penaltyAmount, kind: 'penalty' });
-  }
-  if (e.autoRenewal === true) out.hasAutoRenewal = true;
-
-  for (const c of e.oneOffCosts || []) {
-    if (out.lines.some((l) => l.kind === 'extra' && l.amount === c.amount)) continue;
-    out.lines.push({ label: c.label, amount: c.amount, kind: 'extra' });
-  }
-
-  // Ricalcolo del totale se l'orizzonte è cambiato o mancava.
-  const pricing = ctx.pricing || {};
-  const periodMonths = pricing.period ? PERIOD_MONTHS[pricing.period] || 1 : null;
-  if (pricing.amount != null && periodMonths && out.horizonMonths) {
-    const cycles = Math.max(1, Math.round(out.horizonMonths / periodMonths));
-    const sub = Math.round(pricing.amount * cycles * 100) / 100;
-    const idx = out.lines.findIndex((l) => l.kind === 'recurring');
-    const line = { label: `${formatMoney(pricing.amount, currency)} × ${cycles} ${cycles === 1 ? 'ciclo' : 'cicli'}`, amount: sub, kind: 'recurring' };
-    if (idx >= 0) out.lines[idx] = line;
-    else out.lines.push(line);
-    out.hasRecurring = true;
-  }
-
-  const total = out.lines.reduce((s, l) => s + (l.amount || 0), 0);
-  const llmTotal = e.worstCaseTotal;
-  // Si tiene il valore più alto: sottostimare l'impegno è l'errore peggiore.
-  const best = Math.max(total || 0, llmTotal || 0);
-  if (best > 0) {
-    out.worstCase = Math.round(best * 100) / 100;
-    out.worstCaseLabel = formatMoney(out.worstCase, currency);
-    out.understated = pricing.amount != null && out.worstCase >= pricing.amount * 3;
-  }
-  if (e.worstCaseExplanation) out.explanation = e.worstCaseExplanation;
-  if (e.refundable === false && !out.lines.some((l) => l.kind === 'norefund')) out.refundable = false;
-
-  out.currency = currency;
-  return out;
-}
-
-// ── fallback testuali quando l'LLM non è disponibile ────────────────────────
-
-function fallbackHeadline({ level, cost, actionType }) {
+function headlineFor({ level, cost, actionType }) {
   if (cost.understated && cost.worstCaseLabel) {
     return `Vedi ${cost.displayed}, ma stai impegnando fino a ${cost.worstCaseLabel}`;
   }
@@ -387,13 +182,13 @@ function fallbackHeadline({ level, cost, actionType }) {
   return byAction[actionType] || level.headline;
 }
 
-function fallbackSummary({ findings, cost, consumer }) {
+function summaryFor({ findings, cost, consumer }) {
   const bits = [];
   if (findings.length) {
     const top = findings.slice(0, 3).map((f) => f.label.toLowerCase());
     bits.push(`Il testo contiene ${findings.length === 1 ? 'una condizione rilevante' : `${findings.length} condizioni rilevanti`}: ${top.join(', ')}.`);
   } else {
-    bits.push('Il motore locale non ha rilevato clausole tipiche di rischio nel testo disponibile.');
+    bits.push('Nel testo disponibile non sono state trovate clausole che ti impegnano.');
   }
   if (cost.worstCaseLabel) {
     bits.push(`L’impegno economico potenziale stimato è ${cost.worstCaseLabel}${cost.horizonReason ? ` (${cost.horizonReason})` : ''}.`);
@@ -404,13 +199,17 @@ function fallbackSummary({ findings, cost, consumer }) {
   return bits.join(' ');
 }
 
-function fallbackMustRemember(cost, timeline) {
+function mustRememberFor(cost, timeline) {
   const deadline = timeline.find((s) => s.kind === 'deadline');
   if (deadline) return `${deadline.when}: ${deadline.items[0]}`;
   if (cost.hasAutoRenewal && cost.horizonMonths) {
     return `Il contratto si rinnova da solo tra ${Math.round(cost.horizonMonths)} mesi: segna la scadenza in calendario.`;
   }
   return null;
+}
+
+function clamp01(n) {
+  return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0.5;
 }
 
 function safeHost(url) {
