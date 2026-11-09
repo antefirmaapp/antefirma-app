@@ -8,6 +8,7 @@
  */
 
 import { levelForScore, ACTION_TYPES } from './constants.js';
+import { t, tn } from '../i18n/index.js';
 
 /** Quanto il tipo di azione alza il pavimento del rischio. */
 const ACTION_FLOOR = {
@@ -156,7 +157,7 @@ function buildDrivers({ findings, cost, consumer, money, euBoost, understatedBoo
       weight: f.severity,
       label: f.label,
       detail: f.personalized && f.personalReasons?.length
-        ? `${f.why} Pesa di più per il tuo profilo: ${f.personalReasons.join(', ')}.`
+        ? `${f.why} ${t('Pesa di più per il tuo profilo: {x}.', { x: f.personalReasons.join(', ') })}`
         : f.why,
     });
   }
@@ -164,22 +165,24 @@ function buildDrivers({ findings, cost, consumer, money, euBoost, understatedBoo
     drivers.push({
       kind: 'money',
       weight: understatedBoost,
-      label: 'Il prezzo mostrato non è il costo dell’impegno',
-      detail: `Vedi ${cost.displayed}, ma l’impegno potenziale stimato è ${cost.worstCaseLabel}.`,
+      label: t('Il prezzo mostrato non è il costo dell’impegno'),
+      detail: t('Vedi {a}, ma l’impegno potenziale stimato è {b}.', { a: cost.displayed, b: cost.worstCaseLabel }),
     });
   } else if (money >= 12) {
     drivers.push({
       kind: 'money',
       weight: money,
-      label: 'Esposizione economica rilevante',
-      detail: `Impegno potenziale stimato: ${cost.worstCaseLabel}.`,
+      label: t('Esposizione economica rilevante'),
+      detail: t('Impegno potenziale stimato: {x}.', { x: cost.worstCaseLabel }),
     });
   }
   if (euBoost >= 8 && consumer.flags?.length) {
     drivers.push({
       kind: 'law',
       weight: euBoost,
-      label: `${consumer.flags.length} condizion${consumer.flags.length === 1 ? 'e' : 'i'} da verificare rispetto alle tutele ${consumer.jurisdiction === 'IT' ? 'italiane' : 'UE'}`,
+      label: consumer.jurisdiction === 'IT'
+        ? tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele italiane', '{n} condizioni da verificare rispetto alle tutele italiane')
+        : tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele UE', '{n} condizioni da verificare rispetto alle tutele UE'),
       detail: consumer.flags.map((f) => f.title).join(' · '),
     });
   }

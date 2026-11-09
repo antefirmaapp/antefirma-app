@@ -17,6 +17,9 @@
   const CF = (globalThis.__CF ||= {});
   if (CF.overlay) return;
   const esc = CF.util.escapeHtml;
+  const I = globalThis.AF_I18N;
+  const t = (s, v) => I.t(s, v);
+  const tn = (n, one, many, v) => I.tn(n, one, many, v);
 
   /**
    * Ogni livello ha due inchiostri, uno per tema.
@@ -230,6 +233,11 @@
     @keyframes spin { to { transform: rotate(360deg) } }
     .loading p { font-size: 14px; color: #414852; margin: 0; }
     .loading small { display: block; margin-top: 6px; color: #6b7280; font-size: 12px; }
+    .upsell { margin: 0 0 12px; }
+    .upgrade { all: unset; box-sizing: border-box; display: block; width: 100%; text-align: center; cursor: pointer; font: 700 14px/1.2 inherit; padding: 11px 14px; border-radius: 10px; background: #ffe04a; color: #15203a; }
+    .upgrade:focus-visible { outline: 3px solid #2f5bd3; outline-offset: 2px; }
+    .upgrade[aria-disabled="true"] { opacity: .6; cursor: default; }
+    .upsell-note { margin: 6px 0 0; font-size: 12.5px; }
     .error { background: #fff5f5; border: 1px solid #f5c6c6; border-radius: 9px; padding: 10px 12px; font-size: 12.5px; color: #7d2020; margin-bottom: 12px; }
 
     @media (prefers-color-scheme: dark) {
@@ -299,7 +307,7 @@
   function money(amount, currency = 'EUR') {
     if (amount == null || !Number.isFinite(amount)) return '';
     try {
-      return new Intl.NumberFormat('it-IT', { style: 'currency', currency }).format(amount);
+      return new Intl.NumberFormat(I.locale, { style: 'currency', currency }).format(amount);
     } catch {
       return `${amount.toFixed(2)} ${currency}`;
     }
@@ -451,8 +459,8 @@
           <div class="bar" style="--level-color:#6b7280"></div>
           <div class="loading">
             <div class="spinner"></div>
-            <p role="status">Sto verificando a cosa ti stai impegnando…</p>
-            <small>${esc(actionLabel || 'Azione in sospeso')} · il click è momentaneamente sospeso</small>
+            <p role="status">${esc(t('Sto verificando a cosa ti stai impegnando…'))}</p>
+            <small>${esc(actionLabel || t('Azione in sospeso'))} · ${esc(t('il click è momentaneamente sospeso'))}</small>
           </div>
           <footer>
             <span class="spacer"></span>
@@ -460,7 +468,7 @@
           </footer>
         </div>
       `,
-        { label: 'Verifica dell’impegno in corso' }
+        { label: t('Verifica dell’impegno in corso') }
       );
       this.bind();
     }
@@ -483,18 +491,18 @@
           <div class="card" style="--level-color:#15203A">
             <div class="bar"></div>
             <header>
-              <div class="eyebrow"><svg class="mark" viewBox="0 0 64 72" aria-hidden="true"><path d="M32 4 L55.5 10 C57.5 10.6 58.5 12.2 58.5 14.2 V34 C58.5 48.5 48.5 59.5 34.2 66.6 C33.3 67.1 30.7 67.1 29.8 66.6 C15.5 59.5 5.5 48.5 5.5 34 V14.2 C5.5 12.2 6.5 10.6 8.5 10 Z" fill="#FFE04A"/><path d="M32 6.6 L52.9 11.9 C54.9 12.4 55.9 13.8 55.9 15.5 V32.4 C55.9 46.4 46.6 56.4 33.9 62.7 C33.3 63.2 30.7 63.2 30.1 62.7 C17.4 56.4 8.1 46.4 8.1 32.4 V15.5 C8.1 13.8 9.1 12.4 11.1 11.9 Z" fill="#15203A"/><path d="M32 15.5V37.5M22.47 21L41.53 32M22.47 32L41.53 21" stroke="#FFE04A" stroke-width="6.4" stroke-linecap="round"/><path d="M19 49.5 C22 44 26 43.5 29 47 S34.5 52 38 47.5 S43 42.5 45 43" fill="none" stroke="#FFE04A" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="badge">AnteFirma*</span><span>prima analisi</span></div>
-              <h1 id="v-title">Posso leggere questa pagina per te?</h1>
+              <div class="eyebrow"><svg class="mark" viewBox="0 0 64 72" aria-hidden="true"><path d="M32 4 L55.5 10 C57.5 10.6 58.5 12.2 58.5 14.2 V34 C58.5 48.5 48.5 59.5 34.2 66.6 C33.3 67.1 30.7 67.1 29.8 66.6 C15.5 59.5 5.5 48.5 5.5 34 V14.2 C5.5 12.2 6.5 10.6 8.5 10 Z" fill="#FFE04A"/><path d="M32 6.6 L52.9 11.9 C54.9 12.4 55.9 13.8 55.9 15.5 V32.4 C55.9 46.4 46.6 56.4 33.9 62.7 C33.3 63.2 30.7 63.2 30.1 62.7 C17.4 56.4 8.1 46.4 8.1 32.4 V15.5 C8.1 13.8 9.1 12.4 11.1 11.9 Z" fill="#15203A"/><path d="M32 15.5V37.5M22.47 21L41.53 32M22.47 32L41.53 21" stroke="#FFE04A" stroke-width="6.4" stroke-linecap="round"/><path d="M19 49.5 C22 44 26 43.5 29 47 S34.5 52 38 47.5 S43 42.5 45 43" fill="none" stroke="#FFE04A" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="badge">AnteFirma*</span><span>${esc(t('prima analisi'))}</span></div>
+              <h1 id="v-title">${esc(t('Posso leggere questa pagina per te?'))}</h1>
             </header>
             <div class="body">
-              <p class="summary">Per dirti a che cosa ti stai impegnando, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic) e ti risponde con le clausole che ti impegnano, ciascuna con la frase esatta da cui nasce.</p>
-              <p class="summary">Il server non conserva il testo né l'indirizzo. Nessun account, nessun dato che ti identifichi. Puoi ritirare il consenso quando vuoi dalle impostazioni.</p>
+              <p class="summary">${esc(t('Per dirti a che cosa ti stai impegnando, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic) e ti risponde con le clausole che ti impegnano, ciascuna con la frase esatta da cui nasce.'))}</p>
+              <p class="summary">${esc(t('Il server non conserva il testo né l’indirizzo. Nessun account, nessun dato che ti identifichi. Puoi ritirare il consenso quando vuoi dalle impostazioni.'))}</p>
             </div>
             <footer>
-              <button class="cancel" data-act="cancel">Torna indietro</button>
+              <button class="cancel" data-act="cancel">${esc(t('Torna indietro'))}</button>
               <span class="spacer"></span>
-              <button class="link" data-consent="skip">Prosegui senza analisi</button>
-              <button class="proceed" data-consent="accept">Sì, analizza</button>
+              <button class="link" data-consent="skip">${esc(t('Prosegui senza analisi'))}</button>
+              <button class="proceed" data-consent="accept">${esc(t('Sì, analizza'))}</button>
             </footer>
           </div>
         `,
@@ -541,11 +549,11 @@
                .map(
                  (l) => `<li>
                    <span class="voce">${esc(l.label)}</span>
-                   <span class="cifra">${l.amount != null ? esc(money(l.amount, cost.currency)) : 'importo non quantificato'}</span>
+                   <span class="cifra">${l.amount != null ? esc(money(l.amount, cost.currency)) : esc(t('importo non quantificato'))}</span>
                  </li>`
                )
                .join('')}
-             ${cost.worstCaseLabel ? `<li class="tot"><span class="voce">totale</span><span class="cifra">${esc(cost.worstCaseLabel)}</span></li>` : ''}
+             ${cost.worstCaseLabel ? `<li class="tot"><span class="voce">${esc(t('totale'))}</span><span class="cifra">${esc(cost.worstCaseLabel)}</span></li>` : ''}
            </ul>
            ${cost.horizonReason ? `<p class="horizon">${esc(cost.horizonReason)}</p>` : ''}`
         : '';
@@ -558,9 +566,9 @@
              <div class="head">
                <div>
                  <div class="amount">${esc(cost.worstCaseLabel)}</div>
-                 <div class="caption">impegno economico potenziale stimato</div>
+                 <div class="caption">${esc(t('impegno economico potenziale stimato'))}</div>
                </div>
-               ${cost.displayed ? `<div class="displayed">prezzo mostrato in pagina<br><b>${esc(cost.displayed)}</b></div>` : ''}
+               ${cost.displayed ? `<div class="displayed">${esc(t('prezzo mostrato in pagina'))}<br><b>${esc(cost.displayed)}</b></div>` : ''}
              </div>
              ${remember}
              ${formula}
@@ -571,12 +579,12 @@
       const rest = findings.slice(FINDINGS_HEAD);
       const findingsBlock = findings.length
         ? `<section>
-             <h2>Cosa stai accettando</h2>
+             <h2>${esc(t('Cosa stai accettando'))}</h2>
              <ul>${head.map(renderFinding).join('')}</ul>
              ${
                rest.length
                  ? `<details class="more">
-                      <summary>Altre ${rest.length} condizion${rest.length === 1 ? 'e' : 'i'}</summary>
+                      <summary>${esc(tn(rest.length, 'Altra {n} condizione', 'Altre {n} condizioni'))}</summary>
                       <ul style="margin-top:8px">${rest.map(renderFinding).join('')}</ul>
                     </details>`
                  : ''
@@ -591,7 +599,7 @@
         timeline.length > 1 || (timeline.length === 1 && KEY_STEPS.has(timeline[0]?.kind));
       const timelineBlock = showTimeline
         ? `<section>
-             <h2>Che cosa succede se clicchi</h2>
+             <h2>${esc(t('Che cosa succede se clicchi'))}</h2>
              <div class="timeline">
                ${timeline
                  .map(
@@ -607,7 +615,9 @@
 
       const lawBlock = consumer.flags?.length
         ? `<details>
-             <summary>${consumer.flags.length} condizion${consumer.flags.length === 1 ? 'e' : 'i'} da verificare rispetto alle tutele ${consumer.jurisdiction === 'IT' ? 'italiane' : 'UE'} per i consumatori</summary>
+             <summary>${esc(consumer.jurisdiction === 'IT'
+               ? tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele italiane per i consumatori', '{n} condizioni da verificare rispetto alle tutele italiane per i consumatori')
+               : tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele UE per i consumatori', '{n} condizioni da verificare rispetto alle tutele UE per i consumatori'))}</summary>
              <div style="margin-top:10px">
                ${consumer.flags
                  .map(
@@ -623,7 +633,7 @@
         : '';
 
       const errorBlock = verdict.engine?.truncated
-        ? `<div class="error">La pagina era molto lunga: è stata analizzata solo in parte.</div>`
+        ? `<div class="error">${esc(t('La pagina era molto lunga: è stata analizzata solo in parte.'))}</div>`
         : '';
 
       this.render(
@@ -648,21 +658,21 @@
             ${lawBlock}
           </div>
           <footer>
-            <button class="cancel" data-act="cancel">${blocking ? 'Torna indietro' : 'Annulla'}</button>
-            <button class="proceed" data-act="proceed"${blocking ? ' data-arm="1" aria-disabled="true" aria-describedby="v-arm-why"' : ''}>Continua comunque</button>
+            <button class="cancel" data-act="cancel">${esc(blocking ? t('Torna indietro') : t('Annulla'))}</button>
+            <button class="proceed" data-act="proceed"${blocking ? ' data-arm="1" aria-disabled="true" aria-describedby="v-arm-why"' : ''}>${esc(t('Continua comunque'))}</button>
             <span class="spacer"></span>
-            <button class="link" data-act="allowlist">Non avvisarmi su ${esc(verdict.host || 'questo sito')}</button>
+            <button class="link" data-act="allowlist">${esc(t('Non avvisarmi su {x}', { x: verdict.host || t('questo sito') }))}</button>
           </footer>
           ${
             blocking
               ? `<p class="armhint">
-                   <span id="v-arm-why">«Continua comunque» si attiva fra un istante: il click che hai appena fatto è ancora in corso.</span>
+                   <span id="v-arm-why">${esc(t('«Continua comunque» si attiva fra un istante: il click che hai appena fatto è ancora in corso.'))}</span>
                    <span class="v-arm-live" role="status"></span>
                  </p>`
               : ''
           }
-          <div class="provenance">Verdetto da ${esc(engineLabel(verdict.engine))} · rischio della decisione ${esc(String(verdict.score))}/100${quotaNote(verdict)}</div>
-          <div class="disclaimer">${esc(consumer.disclaimer || 'Analisi automatica a scopo informativo. Non è un parere legale.')}</div>
+          <div class="provenance">${esc(t('Verdetto da {x} · rischio della decisione {n}/100', { x: engineLabel(verdict.engine), n: verdict.score }))}${esc(quotaNote(verdict))}</div>
+          <div class="disclaimer">${esc(consumer.disclaimer || t('Analisi automatica a scopo informativo. Non è un parere legale.'))}</div>
         </div>
       `,
         { role: 'alertdialog', labelledby: 'v-title' }
@@ -672,23 +682,30 @@
       this.armProceed();
     }
 
-    showError(message) {
+    showError(message, code = '') {
       const ink = paletteFor('review');
+      // Analisi del mese finite: il momento in cui la persona ha appena visto
+      // che il servizio le serve. Il pulsante apre il pagamento già legato a
+      // questo browser (o le impostazioni, per chi ha già un piano).
+      const upsell = code === 'quota_month'
+        ? `<div class="upsell"><button class="upgrade" type="button" data-upgrade>${esc(t('Passa a Pro · 50 analisi al mese'))}</button><p class="upsell-note" aria-live="polite"></p></div>`
+        : '';
       this.render(
         `
         <div class="card" style="--level-color:#b8860b;--level-ink:${ink.light};--level-ink-dark:${ink.dark};--badge-ink:${ink.badge}">
           <div class="bar"></div>
           <header>
-            <div class="eyebrow"><span class="badge">⚠️ ANALISI NON RIUSCITA</span></div>
-            <h1 id="v-title">Non sono riuscito a verificare questo impegno</h1>
+            <div class="eyebrow"><span class="badge">⚠️ ${esc(t('ANALISI NON RIUSCITA'))}</span></div>
+            <h1 id="v-title">${esc(t('Non sono riuscito a verificare questo impegno'))}</h1>
           </header>
           <div class="body">
             <div class="error">${esc(message)}</div>
-            <p class="summary">Puoi procedere comunque, ma lo stai facendo senza verifica. Se il documento è lungo, aprilo nel pannello laterale e incollalo lì.</p>
+            ${upsell}
+            <p class="summary">${esc(t('Puoi procedere comunque, ma lo stai facendo senza verifica. Se il documento è lungo, aprilo nel pannello laterale e incollalo lì.'))}</p>
           </div>
           <footer>
-            <button class="cancel" data-act="cancel">Torna indietro</button>
-            <button class="proceed" data-act="proceed">Continua comunque</button>
+            <button class="cancel" data-act="cancel">${esc(t('Torna indietro'))}</button>
+            <button class="proceed" data-act="proceed">${esc(t('Continua comunque'))}</button>
           </footer>
         </div>
       `,
@@ -743,7 +760,7 @@
       // lascia un vuoto sotto ai pulsanti (`.armhint:empty`).
       // Un annuncio solo, allo sblocco. Un tick al secondo riempirebbe di
       // numeri lo spazio sonoro proprio mentre c'è un contratto da ascoltare.
-      if (live) live.textContent = announce ? 'Ora puoi premere «Continua comunque».' : '';
+      if (live) live.textContent = announce ? t('Ora puoi premere «Continua comunque».') : '';
     }
 
     bind() {
@@ -757,6 +774,21 @@
           this.finish(btn.dataset.act);
         });
       }
+      const up = this.root.querySelector('[data-upgrade]');
+      up?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        up.setAttribute('aria-disabled', 'true');
+        const note = this.root.querySelector('.upsell-note');
+        try {
+          const r = await CF.bridge.send('UPGRADE');
+          if (note) note.textContent = r?.error ? r.message : r?.where === 'options'
+            ? t('Ho aperto le impostazioni del piano in una nuova scheda.')
+            : t('Ho aperto la pagina di pagamento in una nuova scheda. Dopo il pagamento il piano si attiva da solo.');
+        } catch (err) {
+          if (note) note.textContent = err?.message || t('Non riesco ad aprire la pagina di pagamento.');
+        }
+      });
       // Durante il caricamento non c'è nessun `.cancel`, solo un `.link`: la
       // ricerca per classe lasciava il focus dov'era, cioè sulla pagina sotto.
       const first = this.root.querySelector('[data-act]');
@@ -800,20 +832,21 @@
     if (!m || verdict.cached || typeof m.remaining !== 'number') return '';
     const n = m.remaining;
     const paid = verdict.engine?.quota?.plan && verdict.engine.quota.plan !== 'free';
-    const what = paid ? 'analisi' : (n === 1 ? 'analisi gratuita' : 'analisi gratuite');
-    return ` · ${n === 1 ? `ti resta 1 ${what}` : `ti restano ${n} ${what}`} questo mese`;
+    return ' · ' + (paid
+      ? tn(n, 'ti resta {n} analisi questo mese', 'ti restano {n} analisi questo mese')
+      : tn(n, 'ti resta {n} analisi gratuita questo mese', 'ti restano {n} analisi gratuite questo mese'));
   }
 
   /** Da dove viene questo verdetto: conta per la fiducia che merita. */
   function engineLabel(engine = {}) {
-    return engine.cached ? 'AI (analisi già fatta per questo testo)' : 'AI';
+    return engine.cached ? t('AI (analisi già fatta per questo testo)') : 'AI';
   }
 
   function renderFinding(f) {
     const ink = sevPalette(f.severity);
     const tags = [];
-    if (f.personalized && f.personalReasons?.length) tags.push(`rilevante per: ${f.personalReasons.join(', ')}`);
-    if (f.quotes?.length) tags.push(`citata in ${f.quotes.length + 1} punti della pagina`);
+    if (f.personalized && f.personalReasons?.length) tags.push(t('rilevante per: {x}', { x: f.personalReasons.join(', ') }));
+    if (f.quotes?.length) tags.push(t('citata in {n} punti della pagina', { n: f.quotes.length + 1 }));
 
     return `<li class="finding" style="--sev-color:${ink.light};--sev-color-dark:${ink.dark}">
       <div class="top">

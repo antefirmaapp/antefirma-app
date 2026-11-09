@@ -10,6 +10,7 @@
  */
 
 import { RISK_CATEGORIES, PROTECTION_LABELS, DEFAULT_SETTINGS } from './constants.js';
+import { t } from '../i18n/index.js';
 
 /** Quanto un'area attiva amplifica le categorie che la toccano. */
 const AREA_WEIGHT = {
@@ -76,7 +77,7 @@ export function multiplierFor(category, profile = DEFAULT_SETTINGS.profile) {
 
   return {
     multiplier: Math.min(MAX_MULTIPLIER, Math.round(multiplier * 100) / 100),
-    reasons: sorted.map((a) => PROTECTION_LABELS[a] || a),
+    reasons: sorted.map((a) => (PROTECTION_LABELS[a] ? t(PROTECTION_LABELS[a]) : a)),
   };
 }
 

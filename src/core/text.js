@@ -5,6 +5,8 @@
  * Nessuna dipendenza dal DOM: gira sia nel service worker sia nei test Node.
  */
 
+import { locale as currentLocale } from '../i18n/index.js';
+
 /** Rimuove spazi ridondanti e caratteri invisibili. */
 export function normalize(text = '') {
   return String(text)
@@ -97,7 +99,7 @@ export function hashText(text = '') {
   return (h >>> 0).toString(36);
 }
 
-export function formatMoney(amount, currency = 'EUR', locale = 'it-IT') {
+export function formatMoney(amount, currency = 'EUR', locale = currentLocale()) {
   if (amount == null || !Number.isFinite(amount)) return '—';
   try {
     return new Intl.NumberFormat(locale, {

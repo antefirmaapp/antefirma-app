@@ -8,6 +8,7 @@
 
 import { formatMoney } from './text.js';
 import { costOfDoingNothing, formatDate } from './commitments.js';
+import { t } from '../i18n/index.js';
 
 const CRLF = '\r\n';
 
@@ -31,7 +32,7 @@ export function buildIcs(commitment, { now = Date.now(), prodId = '-//AnteFirma/
       uid: `${commitment.id}-disdetta@vincolo`,
       start: new Date(commitment.deadlineAt),
       stamp: new Date(now),
-      summary: `Disdetta ${commitment.provider || commitment.host || ''}`.trim(),
+      summary: t('Disdetta {x}', { x: commitment.provider || commitment.host || '' }).trim(),
       description: deadlineDescription(commitment),
       url: commitment.url,
       alarms: [30, 7, 1],
@@ -43,7 +44,7 @@ export function buildIcs(commitment, { now = Date.now(), prodId = '-//AnteFirma/
       uid: `${commitment.id}-rinnovo@vincolo`,
       start: new Date(commitment.renewalAt),
       stamp: new Date(now),
-      summary: `Rinnovo ${commitment.provider || commitment.host || ''}`.trim(),
+      summary: t('Rinnovo {x}', { x: commitment.provider || commitment.host || '' }).trim(),
       description: renewalDescription(commitment),
       url: commitment.url,
       alarms: [],
@@ -72,7 +73,7 @@ function event({ uid, start, stamp, summary, description, url, alarms }) {
       'BEGIN:VALARM',
       'ACTION:DISPLAY',
       `TRIGGER:-P${days}D`,
-      `DESCRIPTION:${esc(`${summary} — mancano ${days} giorni`)}`,
+      `DESCRIPTION:${esc(t('{x} — mancano {n} giorni', { x: summary, n: days }))}`,
       'END:VALARM'
     );
   }
@@ -82,25 +83,25 @@ function event({ uid, start, stamp, summary, description, url, alarms }) {
 }
 
 function deadlineDescription(c) {
-  const bits = [`Ultimo giorno utile per disdire ${c.provider || c.host || 'il servizio'}.`];
+  const bits = [t('Ultimo giorno utile per disdire {x}.', { x: c.provider || c.host || t('il servizio') })];
   if (c.noticeMonths) {
-    bits.push(`Il contratto richiede un preavviso di circa ${Math.round(c.noticeMonths * 30)} giorni.`);
+    bits.push(t('Il contratto richiede un preavviso di circa {n} giorni.', { n: Math.round(c.noticeMonths * 30) }));
   }
-  if (c.renewalAt) bits.push(`Scadenza del periodo: ${formatDate(new Date(c.renewalAt))}.`);
+  if (c.renewalAt) bits.push(t('Scadenza del periodo: {d}.', { d: formatDate(new Date(c.renewalAt)) }));
 
   const doing = costOfDoingNothing(c);
   if (doing) bits.push(doing.label);
   else if (c.worstCase != null) {
-    bits.push(`Impegno stimato: ${formatMoney(c.worstCase, c.currency)}.`);
+    bits.push(t('Impegno stimato: {x}.', { x: formatMoney(c.worstCase, c.currency) }));
   }
-  if (c.penalty != null) bits.push(`Penale di recesso anticipato: ${formatMoney(c.penalty, c.currency)}.`);
-  if (c.url) bits.push(`Pagina: ${c.url}`);
-  bits.push('Promemoria creato da AnteFirma.');
+  if (c.penalty != null) bits.push(t('Penale di recesso anticipato: {x}.', { x: formatMoney(c.penalty, c.currency) }));
+  if (c.url) bits.push(t('Pagina: {x}', { x: c.url }));
+  bits.push(t('Promemoria creato da AnteFirma.'));
   return bits.join('\n');
 }
 
 function renewalDescription(c) {
-  const bits = [`Il contratto con ${c.provider || c.host || 'il fornitore'} si rinnova oggi.`];
+  const bits = [t('Il contratto con {x} si rinnova oggi.', { x: c.provider || c.host || t('il fornitore') })];
   const doing = costOfDoingNothing(c);
   if (doing) bits.push(doing.label);
   return bits.join('\n');

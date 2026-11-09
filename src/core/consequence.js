@@ -9,8 +9,7 @@
  */
 
 import { formatMoney, PERIOD_MONTHS } from './text.js';
-
-const MONTHS_IT = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+import { t, tn, locale } from '../i18n/index.js';
 
 /**
  * Le condizioni economiche lette dal server.
@@ -31,8 +30,8 @@ export function termsFromServer(terms = {}) {
     priceQuote: t.price?.quote || null,
     currency: typeof t.currency?.value === 'string' ? t.currency.value.toUpperCase().slice(0, 3) : null,
     period: typeof t.billing_period?.value === 'string' ? t.billing_period.value : null,
-    minTerm: minMonths ? { months: minMonths, raw: `${fmtNum(minMonths)} ${minMonths === 1 ? 'mese' : 'mesi'}`, quote: t.minimum_term_months.quote || null } : null,
-    notice: noticeDays ? { months: noticeDays / 30, days: noticeDays, raw: `${fmtNum(noticeDays)} ${noticeDays === 1 ? 'giorno' : 'giorni'}`, quote: t.notice_days.quote || null } : null,
+    minTerm: minMonths ? { months: minMonths, raw: tn(minMonths, '{n} mese', '{n} mesi', { n: fmtNum(minMonths) }), quote: t.minimum_term_months.quote || null } : null,
+    notice: noticeDays ? { months: noticeDays / 30, days: noticeDays, raw: tn(noticeDays, '{n} giorno', '{n} giorni', { n: fmtNum(noticeDays) }), quote: t.notice_days.quote || null } : null,
     penalty: fee != null ? { amount: fee, quote: t.exit_fee.quote || null } : null,
     extras: (Array.isArray(t.extra_fees) ? t.extra_fees : [])
       .filter((e) => e && typeof e.value === 'number' && Number.isFinite(e.value) && e.value > 0)
@@ -94,13 +93,13 @@ export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
   let horizonReason = null;
   if (minTerm) {
     horizonMonths = minTerm.months;
-    horizonReason = `durata minima dichiarata: ${minTerm.raw}`;
+    horizonReason = t('durata minima dichiarata: {x}', { x: minTerm.raw });
   } else if (hasAutoRenewal && periodMonths) {
     horizonMonths = Math.max(12, periodMonths);
-    horizonReason = 'rinnovo automatico, orizzonte prudenziale di 12 mesi';
+    horizonReason = t('rinnovo automatico, orizzonte prudenziale di 12 mesi');
   } else if (periodMonths) {
     horizonMonths = periodMonths;
-    horizonReason = 'un solo ciclo di fatturazione';
+    horizonReason = t('un solo ciclo di fatturazione');
   }
 
   const lines = [];
@@ -120,19 +119,19 @@ export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
     });
   } else if (pricing.amount != null) {
     total += pricing.amount;
-    lines.push({ label: 'Importo', amount: round2(pricing.amount), kind: 'oneoff' });
+    lines.push({ label: t('Importo'), amount: round2(pricing.amount), kind: 'oneoff' });
   }
 
   if (penalty) {
     if (penalty.amount != null) {
       total += penalty.amount;
-      lines.push({ label: 'Penale di recesso', amount: round2(penalty.amount), kind: 'penalty' });
+      lines.push({ label: t('Penale di recesso'), amount: round2(penalty.amount), kind: 'penalty' });
     } else if (penalty.months && pricing.amount != null && pricing.period === 'month') {
       const p = round2(pricing.amount * penalty.months);
       total += p;
-      lines.push({ label: `Penale (${penalty.months} mensilità)`, amount: p, kind: 'penalty' });
+      lines.push({ label: t('Penale ({n} mensilità)', { n: penalty.months }), amount: p, kind: 'penalty' });
     } else {
-      lines.push({ label: 'Penale di recesso (importo non quantificato)', amount: null, kind: 'penalty' });
+      lines.push({ label: t('Penale di recesso (importo non quantificato)'), amount: null, kind: 'penalty' });
     }
   }
 
@@ -189,26 +188,26 @@ export function buildTimeline({ ctx = {}, cost = {}, findings = [], actionType =
   const steps = [];
 
   const immediate = [];
-  if (actionType === 'signup' || ctx.form?.isSignup) immediate.push('crei l’account');
-  if (actionType === 'accept_terms' || ctx.terms?.found) immediate.push('accetti il contratto nella sua interezza');
-  if (actionType === 'purchase') immediate.push('l’ordine viene inviato');
-  if (actionType === 'subscribe' || cost.hasRecurring) immediate.push('parte l’abbonamento');
-  if (actionType === 'sign') immediate.push('il documento risulta firmato');
+  if (actionType === 'signup' || ctx.form?.isSignup) immediate.push(t('crei l’account'));
+  if (actionType === 'accept_terms' || ctx.terms?.found) immediate.push(t('accetti il contratto nella sua interezza'));
+  if (actionType === 'purchase') immediate.push(t('l’ordine viene inviato'));
+  if (actionType === 'subscribe' || cost.hasRecurring) immediate.push(t('parte l’abbonamento'));
+  if (actionType === 'sign') immediate.push(t('il documento risulta firmato'));
   if (findings.some((f) => ['data_sharing', 'profiling', 'data_sale'].includes(f.category))) {
-    immediate.push('autorizzi il trattamento dei dati descritto nell’informativa');
+    immediate.push(t('autorizzi il trattamento dei dati descritto nell’informativa'));
   }
-  if (findings.some((f) => f.category === 'auto_renewal')) immediate.push('accetti il rinnovo automatico');
-  if (!immediate.length) immediate.push('l’azione viene completata');
+  if (findings.some((f) => f.category === 'auto_renewal')) immediate.push(t('accetti il rinnovo automatico'));
+  if (!immediate.length) immediate.push(t('l’azione viene completata'));
 
-  steps.push({ when: 'Ora', at: start.toISOString(), items: immediate, kind: 'now' });
+  steps.push({ when: t('Ora'), at: start.toISOString(), items: immediate, kind: 'now' });
 
   if (ctx.pricing?.trial?.months) {
     const trialEnd = addMonths(start, ctx.pricing.trial.months);
     steps.push({
-      when: `Tra ${ctx.pricing.trial.raw}`,
+      when: t('Tra {x}', { x: ctx.pricing.trial.raw }),
       at: trialEnd.toISOString(),
       items: [
-        `finisce la prova gratuita${cost.displayed ? ` e parte l’addebito di ${cost.displayed}` : ' e parte l’addebito'}`,
+        cost.displayed ? t('finisce la prova gratuita e parte l’addebito di {x}', { x: cost.displayed }) : t('finisce la prova gratuita e parte l’addebito'),
       ],
       kind: 'billing',
     });
@@ -219,9 +218,9 @@ export function buildTimeline({ ctx = {}, cost = {}, findings = [], actionType =
     if (cost.notice?.months) {
       const deadline = addMonths(end, -cost.notice.months);
       steps.push({
-        when: `Entro il ${formatDate(deadline)}`,
+        when: t('Entro il {d}', { d: formatDate(deadline) }),
         at: deadline.toISOString(),
-        items: [`devi inviare la disdetta (preavviso di ${cost.notice.raw}) — è la data da segnare in calendario`],
+        items: [t('devi inviare la disdetta (preavviso di {x}) — è la data da segnare in calendario', { x: cost.notice.raw })],
         kind: 'deadline',
       });
     }
@@ -230,8 +229,8 @@ export function buildTimeline({ ctx = {}, cost = {}, findings = [], actionType =
       at: end.toISOString(),
       items: [
         cost.hasAutoRenewal
-          ? 'scade il periodo: se non hai disdetto, il contratto si rinnova'
-          : 'scade il periodo di impegno',
+          ? t('scade il periodo: se non hai disdetto, il contratto si rinnova')
+          : t('scade il periodo di impegno'),
       ],
       kind: cost.hasAutoRenewal ? 'renewal' : 'end',
     });
@@ -240,12 +239,12 @@ export function buildTimeline({ ctx = {}, cost = {}, findings = [], actionType =
       const nextEnd = addMonths(end, cost.horizonMonths);
       const renewalCost = cost.lines.find((l) => l.kind === 'recurring');
       steps.push({
-        when: `Poi fino al ${formatDate(nextEnd)}`,
+        when: t('Poi fino al {d}', { d: formatDate(nextEnd) }),
         at: nextEnd.toISOString(),
         items: [
           renewalCost?.amount != null
-            ? `nuovo periodo per altri ${formatMoney(renewalCost.amount, cost.currency)}`
-            : 'nuovo periodo di impegno alle stesse condizioni',
+            ? t('nuovo periodo per altri {x}', { x: formatMoney(renewalCost.amount, cost.currency) })
+            : t('nuovo periodo di impegno alle stesse condizioni'),
         ],
         kind: 'renewal',
       });
@@ -254,12 +253,12 @@ export function buildTimeline({ ctx = {}, cost = {}, findings = [], actionType =
 
   if (cost.penalty) {
     steps.push({
-      when: 'Se esci prima',
+      when: t('Se esci prima'),
       at: null,
       items: [
         cost.penalty.amount != null
-          ? `paghi una penale di ${formatMoney(cost.penalty.amount, cost.currency)}`
-          : 'è prevista una penale di recesso, di importo non chiaramente quantificato',
+          ? t('paghi una penale di {x}', { x: formatMoney(cost.penalty.amount, cost.currency) })
+          : t('è prevista una penale di recesso, di importo non chiaramente quantificato'),
       ],
       kind: 'penalty',
     });
@@ -280,11 +279,12 @@ function addMonths(date, months) {
 }
 
 function formatDate(d) {
-  return `${d.getDate()} ${MONTHS_IT[d.getMonth()]} ${d.getFullYear()}`;
+  return d.toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function periodLabel(period) {
-  return { day: 'giorno', week: 'settimana', month: 'mese', quarter: 'trimestre', year: 'anno' }[period] || period;
+  const w = { day: 'giorno', week: 'settimana', month: 'mese', quarter: 'trimestre', year: 'anno' }[period];
+  return w ? t(w) : period;
 }
 
 /** «× 12 mesi» si legge al volo, «× 12 cicli» no. */
@@ -294,7 +294,7 @@ function cycleWord(period, n) {
     quarter: ['trimestre', 'trimestri'], semester: ['semestre', 'semestri'],
   };
   const w = words[period] || ['ciclo', 'cicli'];
-  return n === 1 ? w[0] : w[1];
+  return t(n === 1 ? w[0] : w[1]);
 }
 
 function round2(n) {

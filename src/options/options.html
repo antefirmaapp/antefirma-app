@@ -40,6 +40,16 @@
       </label>
 
       <label class="field">
+        <span>Lingua</span>
+        <select id="uiLang">
+          <option value="auto">Automatica (lingua del browser)</option>
+          <option value="it" data-no-i18n>Italiano</option>
+          <option value="en" data-no-i18n>English</option>
+          <option value="es" data-no-i18n>Español</option>
+        </select>
+      </label>
+
+      <label class="field">
         <span>Le tue tutele di riferimento</span>
         <select id="jurisdiction">
           <option value="IT">🇮🇹 Italia — Codice del Consumo e Codice civile</option>
@@ -102,7 +112,7 @@
       </div>
     </section>
 
-    <section class="card" id="plan-card">
+    <section class="card" id="piano">
       <h2>Piano</h2>
       <p class="lead" id="plan-summary">Verifico il piano…</p>
       <div class="row" id="plan-buy" hidden>

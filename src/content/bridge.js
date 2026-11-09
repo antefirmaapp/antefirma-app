@@ -23,10 +23,10 @@
         res = await chrome.runtime.sendMessage({ type, payload });
       } catch (err) {
         // Tipico quando l'estensione viene ricaricata mentre la pagina è aperta.
-        throw new Error('Estensione non raggiungibile: ricarica la pagina.');
+        throw new Error(globalThis.AF_I18N.t('Estensione non raggiungibile: ricarica la pagina.'));
       }
-      if (!res) throw new Error('Nessuna risposta dal motore di analisi.');
-      if (!res.ok) throw new Error(res.error || 'Errore sconosciuto.');
+      if (!res) throw new Error(globalThis.AF_I18N.t('Nessuna risposta dal motore di analisi.'));
+      if (!res.ok) throw new Error(res.error || globalThis.AF_I18N.t('Errore sconosciuto.'));
       return res.result;
     },
 
@@ -37,6 +37,8 @@
     async settings(force = false) {
       if (!force && CF.state.settings) return CF.state.settings;
       CF.state.settings = await this.send('GET_CONTENT_SETTINGS');
+      // La lingua dell'avviso: la sceglie l'estensione (impostazioni o lingua del browser).
+      globalThis.AF_I18N?.setLang(CF.state.settings?.uiLang);
       return CF.state.settings;
     },
   };

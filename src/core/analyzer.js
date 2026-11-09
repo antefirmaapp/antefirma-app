@@ -24,6 +24,7 @@ import { runConsumerChecks } from './eu.js';
 import { computeScore } from './scoring.js';
 import { RISK_CATEGORIES, DEFAULT_SETTINGS, ACTION_TYPES } from './constants.js';
 import { hashText, normalize } from './text.js';
+import { t, tn, setLang } from '../i18n/index.js';
 
 /**
  * @param {object} p
@@ -40,6 +41,8 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
   const started = now;
   const clock = Date.now();
   const clean = normalize(text);
+  // La lingua dei testi del verdetto e delle risposte del server.
+  const lang = setLang(settings.uiLang || 'it');
   const profile = settings.profile || DEFAULT_SETTINGS.profile;
   const jurisdiction = settings.jurisdiction || 'IT';
 
@@ -49,7 +52,7 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
     url: ctx.url || null,
     actionType,
     button: ctx.button?.text || ctx.buttonText || null,
-    uiLang: settings.uiLang || 'it',
+    uiLang: lang,
     jurisdiction,
     signal,
   });
@@ -90,7 +93,7 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
     host: safeHost(ctx.url),
     title: ctx.title || null,
     score,
-    level,
+    level: { ...level, label: t(level.label), headline: t(level.headline) },
     components,
     drivers,
     headline: headlineFor({ level, cost, actionType }),
@@ -130,13 +133,13 @@ export function fromServer(serverFindings = []) {
     const confidence = clamp01(Number(f.confidence));
     const item = {
       category: f.category,
-      label: def.label,
+      label: t(def.label),
       severity: def.base,
       confidence,
       quote: f.quote.trim(),
       span: f.span || null,
-      why: (typeof f.why === 'string' && f.why.trim()) || def.why,
-      plain: (typeof f.why === 'string' && f.why.trim()) || def.why,
+      why: (typeof f.why === 'string' && f.why.trim()) || t(def.why),
+      plain: (typeof f.why === 'string' && f.why.trim()) || t(def.why),
       source: 'ai',
       sources: ['ai'],
       quotes: [],
@@ -164,10 +167,10 @@ export function fromServer(serverFindings = []) {
 
 function headlineFor({ level, cost, actionType }) {
   if (cost.understated && cost.worstCaseLabel) {
-    return `Vedi ${cost.displayed}, ma stai impegnando fino a ${cost.worstCaseLabel}`;
+    return t('Vedi {a}, ma stai impegnando fino a {b}', { a: cost.displayed, b: cost.worstCaseLabel });
   }
   if (cost.worstCaseLabel) {
-    return `Stai per assumere un impegno economico stimato in ${cost.worstCaseLabel}`;
+    return t('Stai per assumere un impegno economico stimato in {x}', { x: cost.worstCaseLabel });
   }
   const byAction = {
     accept_terms: 'Stai accettando un contratto con condizioni da verificare',
@@ -179,22 +182,22 @@ function headlineFor({ level, cost, actionType }) {
     oauth: 'Stai dando a un servizio accesso a un altro tuo account',
     manual: 'Analisi del documento',
   };
-  return byAction[actionType] || level.headline;
+  return byAction[actionType] ? t(byAction[actionType]) : t(level.headline);
 }
 
 function summaryFor({ findings, cost, consumer }) {
   const bits = [];
   if (findings.length) {
     const top = findings.slice(0, 3).map((f) => f.label.toLowerCase());
-    bits.push(`Il testo contiene ${findings.length === 1 ? 'una condizione rilevante' : `${findings.length} condizioni rilevanti`}: ${top.join(', ')}.`);
+    bits.push(tn(findings.length, 'Il testo contiene una condizione rilevante: {list}.', 'Il testo contiene {n} condizioni rilevanti: {list}.', { list: top.join(', ') }));
   } else {
-    bits.push('Nel testo disponibile non sono state trovate clausole che ti impegnano.');
+    bits.push(t('Nel testo disponibile non sono state trovate clausole che ti impegnano.'));
   }
   if (cost.worstCaseLabel) {
-    bits.push(`L’impegno economico potenziale stimato è ${cost.worstCaseLabel}${cost.horizonReason ? ` (${cost.horizonReason})` : ''}.`);
+    bits.push(t('L’impegno economico potenziale stimato è {x}.', { x: cost.worstCaseLabel + (cost.horizonReason ? ` (${cost.horizonReason})` : '') }));
   }
   if (consumer.flags?.length) {
-    bits.push(`${consumer.flags.length} ${consumer.flags.length === 1 ? 'condizione merita' : 'condizioni meritano'} una verifica rispetto alle tutele previste per i consumatori.`);
+    bits.push(tn(consumer.flags.length, '{n} condizione merita una verifica rispetto alle tutele previste per i consumatori.', '{n} condizioni meritano una verifica rispetto alle tutele previste per i consumatori.'));
   }
   return bits.join(' ');
 }
@@ -203,7 +206,7 @@ function mustRememberFor(cost, timeline) {
   const deadline = timeline.find((s) => s.kind === 'deadline');
   if (deadline) return `${deadline.when}: ${deadline.items[0]}`;
   if (cost.hasAutoRenewal && cost.horizonMonths) {
-    return `Il contratto si rinnova da solo tra ${Math.round(cost.horizonMonths)} mesi: segna la scadenza in calendario.`;
+    return t('Il contratto si rinnova da solo tra {n} mesi: segna la scadenza in calendario.', { n: Math.round(cost.horizonMonths) });
   }
   return null;
 }

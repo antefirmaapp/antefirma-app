@@ -11,6 +11,7 @@
  */
 
 import { API_BASE } from './config.js';
+import { t } from '../i18n/index.js';
 
 const AUTH_KEY = 'antefirmaAuth';
 
@@ -66,7 +67,7 @@ const MESSAGES = {
 };
 
 function messageFor(code) {
-  return MESSAGES[code] || 'L’analisi non è riuscita.';
+  return t(MESSAGES[code] || 'L’analisi non è riuscita.');
 }
 
 // ── token dell'installazione ────────────────────────────────────────────────

@@ -12,6 +12,8 @@
  * dipende dal contratto, dalle parti e dalla qualifica di consumatore.
  */
 
+import { t } from '../i18n/index.js';
+
 export const DISCLAIMER =
   'Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.';
 
@@ -184,7 +186,7 @@ export function runConsumerChecks({ text = '', findings = [], ctx = {}, cost = {
   if (jurisdiction === 'ES') jurisdiction = 'EU';
   const applicable = jurisdiction === 'IT' || jurisdiction === 'EU';
   if (!applicable) {
-    return { applicable: false, jurisdiction, flags: [], boost: 0, disclaimer: DISCLAIMER };
+    return { applicable: false, jurisdiction, flags: [], boost: 0, disclaimer: t(DISCLAIMER) };
   }
 
   const found = new Set(findings.map((f) => f.category));
@@ -222,5 +224,8 @@ export function runConsumerChecks({ text = '', findings = [], ctx = {}, cost = {
   const raw = flags.reduce((s, f) => s + f.boost, 0);
   const boost = Math.round(Math.min(25, raw * 0.35));
 
-  return { applicable: true, jurisdiction, flags, boost, disclaimer: DISCLAIMER };
+  return {
+    applicable: true, jurisdiction, boost, disclaimer: t(DISCLAIMER),
+    flags: flags.map((f) => ({ ...f, title: t(f.title), note: t(f.note) })),
+  };
 }

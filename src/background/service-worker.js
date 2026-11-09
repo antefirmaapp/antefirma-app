@@ -21,8 +21,9 @@ import { buildIcs } from '../core/ics.js';
 import { buildLetter, suggestKind } from '../core/letter.js';
 import { register, ServerError, getLicense, startCheckout, activateLicense, deactivateLicense } from '../core/server.js';
 import { API_BASE } from '../core/config.js';
+import { t, setLang, resolveLang } from '../i18n/index.js';
 import {
-  getSettings, setSettings, isAllowlisted,
+  getSettings as readSettings, setSettings, isAllowlisted,
   getCached, setCached, clearCache,
   pushHistory, getHistory, updateHistoryEntry, clearHistory,
   getCommitments, getCommitment, saveCommitment, updateCommitment, deleteCommitment,
@@ -30,6 +31,15 @@ import {
 } from '../core/storage.js';
 
 const MAX_TERMS_BYTES = 1_500_000;
+
+/**
+ * Le impostazioni con la lingua già risolta («auto» → lingua del browser), che
+ * diventa anche la lingua dei testi prodotti qui: verdetti, notifiche, menu.
+ */
+async function getSettings() {
+  const s = await readSettings();
+  return { ...s, uiLang: setLang(resolveLang(s.uiLang, chrome.i18n?.getUILanguage?.())) };
+}
 
 /**
  * Tempo massimo di un'analisi, e del solo scaricamento dei termini.
@@ -83,17 +93,17 @@ function setupContextMenus() {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: 'cf-analyze-selection',
-      title: 'Analizza il testo selezionato con AnteFirma',
+      title: t('Analizza il testo selezionato con AnteFirma'),
       contexts: ['selection'],
     });
     chrome.contextMenus.create({
       id: 'cf-analyze-page',
-      title: 'Analizza questa pagina (contratto, termini, checkout)',
+      title: t('Analizza questa pagina (contratto, termini, checkout)'),
       contexts: ['page'],
     });
     chrome.contextMenus.create({
       id: 'cf-analyze-link',
-      title: 'Analizza il documento collegato',
+      title: t('Analizza il documento collegato'),
       contexts: ['link'],
     });
   });
@@ -123,6 +133,7 @@ async function contentSettings() {
     enabled: s.enabled,
     allowlist: s.allowlist || [],
     blockFrom: s.blockFrom,
+    uiLang: s.uiLang,
   };
 }
 
@@ -182,9 +193,13 @@ async function handle(msg, sender) {
     case 'FETCH_DOCUMENT':
       return fetchDocument(msg.payload?.url);
     case 'GET_SETTINGS':
-      return getSettings();
-    case 'SET_SETTINGS':
-      return setSettings(msg.payload || {});
+      return readSettings();
+    case 'SET_SETTINGS': {
+      const saved = await setSettings(msg.payload || {});
+      // Cambiata la lingua: i menu contestuali si riscrivono nella nuova.
+      if (msg.payload && 'uiLang' in msg.payload) { await getSettings(); setupContextMenus(); }
+      return saved;
+    }
     case 'GET_HISTORY':
       return getHistory();
     case 'RECORD_DECISION':
@@ -195,6 +210,11 @@ async function handle(msg, sender) {
       return clearCache();
     case 'SERVER_STATUS':
       return serverStatus();
+
+    // Dall'avviso, a analisi finite: il pagamento (o le impostazioni, se c'è già un piano).
+    // La pagina non riceve né il codice dell'acquisto né il token.
+    case 'UPGRADE':
+      return upgrade();
 
     // ── piano (solo dalle pagine dell'estensione) ─────────────────────────
     case 'GET_LICENSE':
@@ -266,7 +286,7 @@ async function grantConsent() {
 /** Per tradurre un errore del server in una risposta per l'interfaccia. */
 function failure(err) {
   if (err instanceof ServerError) return { error: { code: err.code, message: err.message, retryAfter: err.retryAfter } };
-  return { error: { code: 'internal', message: 'L’analisi non è riuscita.' } };
+  return { error: { code: 'internal', message: t('L’analisi non è riuscita.') } };
 }
 
 // ── analisi di un'azione intercettata ───────────────────────────────────────
@@ -354,7 +374,7 @@ async function analyzeAction(payload = {}, sender) {
 async function analyzeText(payload = {}) {
   const settings = await getSettings();
   const text = normalize(payload.text || '');
-  if (text.length < 40) throw new Error('Testo troppo breve per un’analisi sensata.');
+  if (text.length < 40) throw new Error(t('Testo troppo breve per un’analisi sensata.'));
 
   const ctx = {
     url: payload.url || null,
@@ -507,10 +527,10 @@ async function sweep(now = Date.now()) {
       const renewalAmount = c.recurringTotal ?? c.worstCase;
       await notify({
         id: `missed-${c.id}`,
-        title: `${c.provider || c.host}: finestra di disdetta chiusa`,
+        title: t('{x}: finestra di disdetta chiusa', { x: c.provider || c.host }),
         message: renewalAmount != null
-          ? `Il termine per disdire è passato e il contratto si rinnova: ${formatMoney(renewalAmount, c.currency)}. Apri per vedere cosa puoi ancora fare.`
-          : 'Il termine per disdire è passato. Apri per vedere cosa puoi ancora fare.',
+          ? t('Il termine per disdire è passato e il contratto si rinnova: {x}. Apri per vedere cosa puoi ancora fare.', { x: formatMoney(renewalAmount, c.currency) })
+          : t('Il termine per disdire è passato. Apri per vedere cosa puoi ancora fare.'),
         commitmentId: c.id,
       });
       await updateCommitment(c.id, { missedNotified: true });
@@ -525,10 +545,10 @@ async function sweep(now = Date.now()) {
     const renewalAmount = c.recurringTotal ?? c.worstCase;
     await notify({
       id: `reminder-${c.id}-${due.days}`,
-      title: `Disdetta ${c.provider || c.host}: mancano ${due.days} giorni`,
+      title: t('Disdetta {x}: mancano {n} giorni', { x: c.provider || c.host, n: due.days }),
       message: renewalAmount != null
-        ? `Se non disdici entro il termine, parte un nuovo periodo da ${formatMoney(renewalAmount, c.currency)}. ${state.label}.`
-        : `${state.label}. Apri per generare la lettera di disdetta.`,
+        ? `${t('Se non disdici entro il termine, parte un nuovo periodo da {x}.', { x: formatMoney(renewalAmount, c.currency) })} ${state.label}.`
+        : `${state.label}. ${t('Apri per generare la lettera di disdetta.')}`,
       commitmentId: c.id,
     });
 
@@ -558,7 +578,7 @@ async function notify({ id, title, message, commitmentId }) {
       message,
       priority: 2,
       requireInteraction: true,
-      buttons: [{ title: 'Apri il kit di uscita' }],
+      buttons: [{ title: t('Apri il kit di uscita') }],
     });
     await chrome.storage.session.set({ [`notif:${id}`]: commitmentId });
   } catch (err) {
@@ -590,10 +610,10 @@ chrome.notifications?.onButtonClicked.addListener((id) => openCommitment(id));
  */
 async function checkChanges(id, { trigger = 'manual' } = {}) {
   const commitment = await getCommitment(id);
-  if (!commitment) throw new Error('Impegno non trovato.');
+  if (!commitment) throw new Error(t('Impegno non trovato.'));
 
   const source = commitment.termsUrl || commitment.url;
-  if (!source) throw new Error('Per questo impegno non è stato registrato un indirizzo da ricontrollare.');
+  if (!source) throw new Error(t('Per questo impegno non è stato registrato un indirizzo da ricontrollare.'));
 
   const settings = await getSettings();
 
@@ -602,10 +622,10 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
   // nulla: si chiude qui, senza leggere, senza analizzare, senza spendere.
   const doc = await fetchDocument(source, commitment.http || {});
   if (doc.notModified) {
-    return recordCheck(id, unchangedDiff('Il documento non è cambiato dall’ultimo controllo.'), commitment);
+    return recordCheck(id, unchangedDiff(t('Il documento non è cambiato dall’ultimo controllo.')), commitment);
   }
   if (!doc.text || doc.text.length < 200) {
-    throw new Error('Il documento non è più leggibile automaticamente da questo indirizzo.');
+    throw new Error(t('Il documento non è più leggibile automaticamente da questo indirizzo.'));
   }
   if (doc.http) await updateCommitment(id, { http: doc.http });
 
@@ -613,7 +633,7 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
   const clean = normalize(doc.text);
   const newHash = await sha256(clean);
   if (commitment.snapshot?.hash && newHash === commitment.snapshot.hash) {
-    return recordCheck(id, unchangedDiff('Le condizioni sono identiche a quelle che avevi accettato.'), commitment);
+    return recordCheck(id, unchangedDiff(t('Le condizioni sono identiche a quelle che avevi accettato.')), commitment);
   }
 
   // ── Cancello 3: il server. ───────────────────────────────────────────────
@@ -641,7 +661,7 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
   const serverAllowed = Boolean(settings.remoteConsentAt) && (trigger === 'manual' || settings.watchUsesRemote !== false);
   if (!serverAllowed) {
     return recordCheck(id, {
-      ...unchangedDiff('Il testo delle condizioni è cambiato. Premi «Verifica modifiche» per sapere se cambia il tuo impegno.'),
+      ...unchangedDiff(t('Il testo delle condizioni è cambiato. Premi «Verifica modifiche» per sapere se cambia il tuo impegno.')),
       changed: true,
       hashChanged: true,
       severity: 'minor',
@@ -672,7 +692,7 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
 
   await notify({
     id: `change-${id}-${Date.now()}`,
-    title: `Condizioni cambiate: ${commitment.provider || commitment.host}`,
+    title: t('Condizioni cambiate: {x}', { x: commitment.provider || commitment.host }),
     message: diff.summary,
     commitmentId: id,
   });
@@ -728,22 +748,22 @@ async function watchAllCommitments() {
 
 async function letterFor({ id, kind } = {}) {
   const commitment = await getCommitment(id);
-  if (!commitment) throw new Error('Impegno non trovato.');
+  if (!commitment) throw new Error(t('Impegno non trovato.'));
   const settings = await getSettings();
   return buildLetter(commitment, settings.identity || {}, kind || suggestKind(commitment));
 }
 
 async function icsFor(id) {
   const commitment = await getCommitment(id);
-  if (!commitment) throw new Error('Impegno non trovato.');
+  if (!commitment) throw new Error(t('Impegno non trovato.'));
   const content = buildIcs(commitment);
-  if (!content) throw new Error('Questo impegno non ha una scadenza da mettere in calendario.');
+  if (!content) throw new Error(t('Questo impegno non ha una scadenza da mettere in calendario.'));
   return { content, filename: `scadenza-${(commitment.provider || 'impegno').toLowerCase()}.ics` };
 }
 
 async function proofFor(id) {
   const commitment = await getCommitment(id);
-  if (!commitment) throw new Error('Impegno non trovato.');
+  if (!commitment) throw new Error(t('Impegno non trovato.'));
   const text = await getSnapshotText(id);
   const snapshot = commitment.snapshot || {};
 
@@ -787,7 +807,7 @@ async function fetchDocument(url, validators = {}, { signal } = {}) {
   if (res.status === 304) {
     return { url, notModified: true, text: '', http: validators };
   }
-  if (!res.ok) throw new Error(`Il documento non è raggiungibile (HTTP ${res.status}).`);
+  if (!res.ok) throw new Error(t('Il documento non è raggiungibile (HTTP {n}).', { n: res.status }));
 
   const http = {
     etag: res.headers.get('etag') || null,
@@ -796,7 +816,7 @@ async function fetchDocument(url, validators = {}, { signal } = {}) {
 
   const type = res.headers.get('content-type') || '';
   if (type.includes('application/pdf')) {
-    return { url: res.url, isPdf: true, text: '', note: 'PDF: aprilo nel pannello laterale per l’analisi.' };
+    return { url: res.url, isPdf: true, text: '', note: t('PDF: aprilo nel pannello laterale per l’analisi.') };
   }
 
   const buf = await res.arrayBuffer();
@@ -810,6 +830,18 @@ async function fetchDocument(url, validators = {}, { signal } = {}) {
 // ── varie ───────────────────────────────────────────────────────────────────
 
 /** Il server risponde? Serve alle impostazioni, non costa analisi. */
+async function upgrade() {
+  const lic = await withCode(getLicense());
+  if (lic?.plan && lic.plan !== 'free') {
+    await chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#piano') });
+    return { where: 'options' };
+  }
+  const r = await withCode(startCheckout('pro'));
+  if (r.error) return r;
+  await chrome.tabs.create({ url: r.url });
+  return { where: 'checkout' };
+}
+
 /** Gli errori del server arrivano alla pagina come { error, message }, non come eccezioni. */
 async function withCode(promise) {
   try {

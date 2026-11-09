@@ -10,6 +10,7 @@
  */
 
 import { formatMoney, PERIOD_MONTHS } from './text.js';
+import { t, tn, locale } from '../i18n/index.js';
 
 export const COMMITMENT_STATUS = {
   ACTIVE: 'active',
@@ -170,27 +171,27 @@ export function missedWindow(commitment, now = Date.now()) {
 export function commitmentState(commitment, now = Date.now()) {
   if (!commitment) return { label: '—', urgency: 'none', daysLeft: null };
   if (commitment.status === COMMITMENT_STATUS.CANCELLED) {
-    return { label: 'Disdetto', urgency: 'done', daysLeft: null };
+    return { label: t('Disdetto'), urgency: 'done', daysLeft: null };
   }
   if (commitment.status === COMMITMENT_STATUS.IGNORED) {
-    return { label: 'Ignorato', urgency: 'none', daysLeft: null };
+    return { label: t('Ignorato'), urgency: 'none', daysLeft: null };
   }
   if (!commitment.deadlineAt) {
-    return { label: 'Nessuna scadenza rilevata', urgency: 'none', daysLeft: null };
+    return { label: t('Nessuna scadenza rilevata'), urgency: 'none', daysLeft: null };
   }
 
   const daysLeft = Math.ceil((new Date(commitment.deadlineAt).getTime() - now) / DAY);
   if (daysLeft < 0) {
     const renewalPassed = commitment.renewalAt && new Date(commitment.renewalAt).getTime() < now;
     return {
-      label: renewalPassed ? 'Rinnovato: la finestra di disdetta è passata' : 'Finestra di disdetta scaduta',
+      label: renewalPassed ? t('Rinnovato: la finestra di disdetta è passata') : t('Finestra di disdetta scaduta'),
       urgency: 'passed',
       daysLeft,
     };
   }
-  if (daysLeft <= 7) return { label: `Disdici entro ${daysLeft} giorni`, urgency: 'critical', daysLeft };
-  if (daysLeft <= 30) return { label: `Disdici entro ${daysLeft} giorni`, urgency: 'soon', daysLeft };
-  return { label: `Disdetta entro il ${formatDate(new Date(commitment.deadlineAt))}`, urgency: 'later', daysLeft };
+  if (daysLeft <= 7) return { label: tn(daysLeft, 'Disdici entro {n} giorno', 'Disdici entro {n} giorni'), urgency: 'critical', daysLeft };
+  if (daysLeft <= 30) return { label: tn(daysLeft, 'Disdici entro {n} giorno', 'Disdici entro {n} giorni'), urgency: 'soon', daysLeft };
+  return { label: t('Disdetta entro il {d}', { d: formatDate(new Date(commitment.deadlineAt)) }), urgency: 'later', daysLeft };
 }
 
 /**
@@ -203,7 +204,7 @@ export function costOfDoingNothing(commitment) {
   return {
     amount,
     currency: commitment.currency || 'EUR',
-    label: `Se non disdici, parte un nuovo periodo da ${formatMoney(amount, commitment.currency || 'EUR')}.`,
+    label: t('Se non disdici, parte un nuovo periodo da {x}.', { x: formatMoney(amount, commitment.currency || 'EUR') }),
   };
 }
 
@@ -240,10 +241,9 @@ export function unitPrice(commitment) {
 
 // ── helper ──────────────────────────────────────────────────────────────────
 
-const MONTHS_IT = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
 
-export function formatDate(d) {
-  return `${d.getDate()} ${MONTHS_IT[d.getMonth()]} ${d.getFullYear()}`;
+export function formatDate(d, loc = locale()) {
+  return d.toLocaleDateString(loc, { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function addMonths(date, months) {

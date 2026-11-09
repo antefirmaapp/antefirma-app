@@ -15,6 +15,7 @@
   const { labelOf, composedPath, isVisible } = CF.util;
 
   const { ACTION_LABELS, classifyText, classifyDetail } = CF.actions;
+  const t = (s, v) => globalThis.AF_I18N.t(s, v);
 
   const CLICKABLE = 'button, a[href], input[type="submit"], input[type="button"], [role="button"], [type="submit"]';
 
@@ -287,25 +288,25 @@
   async function handleAction(found, event) {
     const overlay = new CF.overlay.Overlay();
     const waiting = overlay.wait();
-    overlay.showLoading(ACTION_LABELS[found.type]);
+    overlay.showLoading(t(ACTION_LABELS[found.type]));
 
     let decision = 'cancel';
     let current = null;
     let via = 'blocked';
     try {
       const { ctx, text } = CF.context.build(found.el, found.type);
-      const res = await requestAnalysis(overlay, waiting, { actionType: found.type, ctx, text }, ACTION_LABELS[found.type]);
+      const res = await requestAnalysis(overlay, waiting, { actionType: found.type, ctx, text }, t(ACTION_LABELS[found.type]));
 
       if (res?.__userAborted) {
         decision = res.__userAborted;
       } else if (res?.error) {
-        overlay.showError(res.error.message);
+        overlay.showError(res.error.message, res.error.code);
         decision = await waiting;
       } else if (res?.skip) {
         overlay.destroy();
         decision = 'proceed';
       } else {
-        const verdict = { ...res.verdict, actionLabel: ACTION_LABELS[found.type] };
+        const verdict = { ...res.verdict, actionLabel: t(ACTION_LABELS[found.type]) };
         current = verdict;
         if (!res.blocking) {
           // Sotto la soglia scelta dall'utente: non si interrompe il flusso.
@@ -322,7 +323,7 @@
         }
       }
     } catch (err) {
-      overlay.showError(err?.message || 'Errore durante l’analisi.');
+      overlay.showError(err?.message || t('Errore durante l’analisi.'));
       decision = await waiting;
     } finally {
       state.busy = false;
@@ -405,16 +406,16 @@
   async function handleSubmit(form, submitter, type) {
     const overlay = new CF.overlay.Overlay();
     const waiting = overlay.wait();
-    overlay.showLoading(ACTION_LABELS[type]);
+    overlay.showLoading(t(ACTION_LABELS[type]));
 
     let decision = 'cancel';
     let current = null;
     let via = 'blocked';
     try {
       const { ctx, text } = CF.context.build(submitter || form, type);
-      const res = await requestAnalysis(overlay, waiting, { actionType: type, ctx, text }, ACTION_LABELS[type]);
+      const res = await requestAnalysis(overlay, waiting, { actionType: type, ctx, text }, t(ACTION_LABELS[type]));
       if (res?.__userAborted) decision = res.__userAborted;
-      else if (res?.error) { overlay.showError(res.error.message); decision = await waiting; }
+      else if (res?.error) { overlay.showError(res.error.message, res.error.code); decision = await waiting; }
       else if (res?.skip) { overlay.destroy(); decision = 'proceed'; }
       else if (!res.blocking) {
         overlay.destroy();
@@ -424,11 +425,11 @@
         flash(res.verdict);
       } else {
         current = res.verdict;
-        overlay.showVerdict({ ...res.verdict, actionLabel: ACTION_LABELS[type] }, { blocking: true });
+        overlay.showVerdict({ ...res.verdict, actionLabel: t(ACTION_LABELS[type]) }, { blocking: true });
         decision = await waiting;
       }
     } catch (err) {
-      overlay.showError(err?.message || 'Errore durante l’analisi.');
+      overlay.showError(err?.message || t('Errore durante l’analisi.'));
       decision = await waiting;
     } finally {
       state.busy = false;
@@ -602,13 +603,13 @@
     box.innerHTML = `
       <span class="ico" aria-hidden="true">${esc(level.icon || '•')}</span>
       <div class="txt">
-        <p class="headline">${esc(verdict.headline || level.headline || 'Condizioni da verificare')}</p>
+        <p class="headline">${esc(verdict.headline || level.headline || t('Condizioni da verificare'))}</p>
         ${verdict.mustRemember ? `<p class="note">📌 ${esc(verdict.mustRemember)}</p>` : ''}
         ${toast.queue.length ? `<p class="queued">${esc(queuedLabel(toast.queue.length))}</p>` : ''}
       </div>
-      <button class="x" type="button" aria-label="Chiudi questa notifica">✕</button>
+      <button class="x" type="button" aria-label="${esc(t('Chiudi questa notifica'))}">✕</button>
       <div class="actions">
-        <button class="why" type="button">Vedi perché →</button>
+        <button class="why" type="button">${esc(t('Vedi perché →'))}</button>
       </div>
       ${sticky ? '' : '<div class="life" aria-hidden="true"></div>'}
     `;
@@ -641,7 +642,7 @@
   }
 
   function queuedLabel(n) {
-    return n === 1 ? 'un altro avviso in attesa' : `altri ${n} avvisi in attesa`;
+    return n === 1 ? t('un altro avviso in attesa') : t('altri {n} avvisi in attesa', { n });
   }
 
   /** Aggiorna il contatore della coda sulla notifica già a schermo. */

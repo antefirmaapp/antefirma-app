@@ -31,6 +31,8 @@
       "all_frames": true,
       "run_at": "document_start",
       "js": [
+        "src/i18n/i18n.js",
+        "src/i18n/dict.js",
         "src/content/bridge.js",
         "src/content/actions.js",
         "src/content/context.js",

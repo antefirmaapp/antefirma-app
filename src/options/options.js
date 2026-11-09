@@ -3,6 +3,8 @@
  */
 
 import { PROTECTION_LABELS } from '../core/constants.js';
+import { t, setLang, resolveLang, locale } from '../i18n/index.js';
+import { translateDom } from '../i18n/dom.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -18,7 +20,7 @@ const AREA_HINTS = {
 
 async function send(type, payload) {
   const res = await chrome.runtime.sendMessage({ type, payload });
-  if (!res) throw new Error('Nessuna risposta dal motore.');
+  if (!res) throw new Error(t('Nessuna risposta dal motore.'));
   if (!res.ok) throw new Error(res.error);
   return res.result;
 }
@@ -29,8 +31,8 @@ function buildProfileGrid(profile) {
       ([key, label]) => `<label class="area">
         <input type="checkbox" data-area="${key}" ${profile[key] ? 'checked' : ''}>
         <span>
-          <strong>${label}</strong>
-          <em>${AREA_HINTS[key] || ''}</em>
+          <strong>${t(label)}</strong>
+          <em>${AREA_HINTS[key] ? t(AREA_HINTS[key]) : ''}</em>
         </span>
       </label>`
     )
@@ -49,6 +51,7 @@ async function load() {
   $('#enabled').checked = s.enabled;
   $('#blockFrom').value = s.blockFrom;
   $('#jurisdiction').value = s.jurisdiction;
+  $('#uiLang').value = s.uiLang || 'auto';
   $('#trackCommitments').checked = s.trackCommitments;
   $('#reminders').checked = s.reminders;
   $('#watchChanges').checked = s.watchChanges;
@@ -71,10 +74,10 @@ function showConsent(at) {
   const box = $('#consent-box');
   if (at) {
     box.className = 'key-status ok';
-    box.textContent = `Hai acconsentito all'analisi il ${new Date(at).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
+    box.textContent = t('Hai acconsentito all’analisi il {d}.', { d: new Date(at).toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' }) });
   } else {
     box.className = 'key-status';
-    box.textContent = 'Non hai ancora acconsentito: te lo chiederò alla prima analisi.';
+    box.textContent = t('Non hai ancora acconsentito: te lo chiederò alla prima analisi.');
   }
   $('#grant-consent').hidden = Boolean(at);
   $('#revoke-consent').hidden = !at;
@@ -85,10 +88,10 @@ async function showServerStatus() {
   const el = $('#server-status');
   try {
     const st = await send('SERVER_STATUS');
-    el.textContent = st.ok ? 'raggiungibile' : 'non raggiungibile in questo momento';
+    el.textContent = st.ok ? t('raggiungibile') : t('non raggiungibile in questo momento');
     el.style.color = st.ok ? '#14603c' : '#a12a1a';
   } catch (err) {
-    el.textContent = `non verificabile: ${err.message}`;
+    el.textContent = t('non verificabile: {x}', { x: err.message });
   }
 }
 
@@ -100,6 +103,7 @@ async function save() {
       enabled: $('#enabled').checked,
       blockFrom: $('#blockFrom').value,
       jurisdiction: $('#jurisdiction').value,
+      uiLang: $('#uiLang').value,
       trackCommitments: $('#trackCommitments').checked,
       reminders: $('#reminders').checked,
       watchChanges: $('#watchChanges').checked,
@@ -116,9 +120,11 @@ async function save() {
         .filter(Boolean),
       profile: readProfile(),
     });
-    flash('Impostazioni salvate.');
+    // Cambiata la lingua: la pagina si ridisegna nella nuova.
+    if ($('#uiLang').value !== initialLang) { location.reload(); return; }
+    flash(t('Impostazioni salvate.'));
   } catch (err) {
-    flash(`Errore: ${err.message}`);
+    flash(t('Errore: {x}', { x: err.message }));
   } finally {
     btn.disabled = false;
   }
@@ -137,7 +143,8 @@ function flash(message) {
 // ── piano ───────────────────────────────────────────────────────────────────
 
 const PLAN_NAMES = { free: 'Gratuito', pro: 'Pro', max: 'Max', team: 'Team' };
-const day = (iso) => (iso ? new Date(iso).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '');
+const planName = (p) => (PLAN_NAMES[p] ? t(PLAN_NAMES[p]) : p);
+const day = (iso) => (iso ? new Date(iso).toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' }) : '');
 
 function planStatus(text, ok) {
   const el = $('#plan-status');
@@ -148,16 +155,16 @@ function planStatus(text, ok) {
 
 async function showPlan() {
   let lic;
-  try { lic = await send('GET_LICENSE'); } catch (err) { $('#plan-summary').textContent = `Piano non verificabile: ${err.message}`; return; }
+  try { lic = await send('GET_LICENSE'); } catch (err) { $('#plan-summary').textContent = t('Piano non verificabile: {x}', { x: err.message }); return; }
   if (lic.error) { $('#plan-summary').textContent = lic.message; $('#plan-buy').hidden = lic.error === 'billing_off'; return; }
   const m = lic.quota?.month;
-  const left = m ? ` Restano ${m.remaining} analisi su ${m.limit} questo mese.` : '';
+  const left = m ? ' ' + t('Restano {a} analisi su {b} questo mese.', { a: m.remaining, b: m.limit }) : '';
   if (lic.plan === 'free') {
-    $('#plan-summary').textContent = `Piano gratuito.${left}`;
+    $('#plan-summary').textContent = t('Piano gratuito.') + left;
   } else {
-    const when = lic.cancelAt ? ` Disdetto: resta attivo fino al ${day(lic.cancelAt)}.` : lic.periodEnd ? ` Rinnovo il ${day(lic.periodEnd)}.` : '';
-    const where = lic.activations ? ` Attivo su ${lic.activations.used} browser su ${lic.activations.limit}.` : '';
-    $('#plan-summary').textContent = `${PLAN_NAMES[lic.plan] || lic.plan}.${left}${where}${when}`;
+    const when = lic.cancelAt ? ' ' + t('Disdetto: resta attivo fino al {d}.', { d: day(lic.cancelAt) }) : lic.periodEnd ? ' ' + t('Rinnovo il {d}.', { d: day(lic.periodEnd) }) : '';
+    const where = lic.activations ? ' ' + t('Attivo su {a} browser su {b}.', { a: lic.activations.used, b: lic.activations.limit }) : '';
+    $('#plan-summary').textContent = `${planName(lic.plan)}.${left}${where}${when}`;
   }
   const paid = lic.plan !== 'free';
   $('#plan-buy').hidden = paid;
@@ -170,29 +177,29 @@ document.querySelectorAll('#plan-buy [data-plan]').forEach((b) => b.addEventList
   try {
     const r = await send('START_CHECKOUT', { plan: b.dataset.plan });
     if (r.error) planStatus(r.message, false);
-    else planStatus('Pagina di pagamento aperta. Quando hai finito, torna qui: il piano compare da solo.', true);
+    else planStatus(t('Pagina di pagamento aperta. Quando hai finito, torna qui: il piano compare da solo.'), true);
   } catch (err) { planStatus(err.message, false); }
   b.disabled = false;
 }));
 
 $('#plan-activate').addEventListener('click', async () => {
   const key = $('#plan-key').value.trim();
-  if (!key) { planStatus('Scrivi la chiave.', false); return; }
+  if (!key) { planStatus(t('Scrivi la chiave.'), false); return; }
   try {
     const r = await send('ACTIVATE_LICENSE', { key });
     if (r.error) { planStatus(r.message, false); return; }
     $('#plan-key').value = '';
-    planStatus(`Chiave attivata: ${PLAN_NAMES[r.plan] || r.plan} su questo browser.`, true);
+    planStatus(t('Chiave attivata: {x} su questo browser.', { x: planName(r.plan) }), true);
     showPlan();
   } catch (err) { planStatus(err.message, false); }
 });
 
 $('#plan-remove').addEventListener('click', async () => {
-  if (!confirm('Togliere il piano da questo browser? La chiave resta valida e puoi usarla su un altro browser.')) return;
+  if (!confirm(t('Togliere il piano da questo browser? La chiave resta valida e puoi usarla su un altro browser.'))) return;
   try {
     const r = await send('DEACTIVATE_LICENSE');
     if (r.error) { planStatus(r.message, false); return; }
-    planStatus('Piano tolto da questo browser.', true);
+    planStatus(t('Piano tolto da questo browser.'), true);
     showPlan();
   } catch (err) { planStatus(err.message, false); }
 });
@@ -210,23 +217,34 @@ $('#grant-consent').addEventListener('click', async () => {
 $('#revoke-consent').addEventListener('click', async () => {
   await send('REVOKE_CONSENT');
   showConsent(null);
-  flash('Consenso ritirato: nessun testo partirà più verso il server.');
+  flash(t('Consenso ritirato: nessun testo partirà più verso il server.'));
 });
 
 $('#clear-cache').addEventListener('click', async () => {
   await send('CLEAR_CACHE');
-  flash('Cache svuotata.');
+  flash(t('Cache svuotata.'));
 });
 
 $('#clear-history').addEventListener('click', async () => {
   await send('CLEAR_HISTORY');
-  flash('Storico cancellato.');
+  flash(t('Storico cancellato.'));
 });
 
 if (new URLSearchParams(location.search).has('welcome')) {
   $('#welcome').hidden = false;
 }
 
-load();
-showServerStatus();
-showPlan();
+// La lingua prima di tutto: la pagina è scritta in italiano e si traduce qui.
+let initialLang = 'auto';
+(async () => {
+  try {
+    const s = await send('GET_SETTINGS');
+    initialLang = s.uiLang || 'auto';
+    setLang(resolveLang(initialLang, chrome.i18n.getUILanguage()));
+  } catch { /* resta l'italiano */ }
+  translateDom(document.body);
+  document.title = t('AnteFirma — Impostazioni');
+  load();
+  showServerStatus();
+  showPlan();
+})();

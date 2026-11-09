@@ -310,6 +310,7 @@ export const DEFAULT_SETTINGS = {
   identity: { name: '', address: '', email: '', customerId: '' },
   blockFrom: 'commitment', // livello minimo che blocca davvero il click
   jurisdiction: 'IT', // IT | ES | EU | UK | US | OTHER
+  uiLang: 'auto', // auto (lingua del browser) | it | en | es
   profile: {
     money: true,
     privacy: true,

@@ -11,8 +11,12 @@
  *  - RECESSO_MOD   — uscire perché il fornitore ha cambiato le condizioni
  */
 
-import { formatMoney } from './text.js';
-import { formatDate } from './commitments.js';
+import { formatMoney as fm } from './text.js';
+import { formatDate as fd } from './commitments.js';
+
+// La lettera è un documento per il fornitore italiano: date e importi restano in italiano qualunque sia la lingua dell'estensione.
+const formatDate = (d) => fd(d, 'it-IT');
+const formatMoney = (a, c) => fm(a, c, 'it-IT');
 
 export const LETTER_KINDS = {
   WITHDRAWAL: 'withdrawal',
