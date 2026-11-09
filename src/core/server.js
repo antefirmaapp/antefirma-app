@@ -55,6 +55,7 @@ const MESSAGES = {
   key_inactive: 'La licenza di questa chiave non è attiva.',
   activations: 'La chiave è già attiva sul numero massimo di browser: toglila da uno.',
   billing_off: 'I piani a pagamento non sono ancora attivi.',
+  paused: 'Le analisi gratuite sono sospese per oggi. Riprovano domani; con un piano a pagamento continuano.',
   timeout: 'L’analisi ha impiegato troppo tempo.',
   network: 'Il server di AnteFirma non è raggiungibile. Controlla la connessione.',
   busy: 'Il servizio è molto richiesto in questo momento. Riprova fra poco.',
@@ -164,6 +165,8 @@ export const getLicense = (o) => authed('/v1/license', undefined, { ...o, method
 export const startCheckout = (plan, o) => authed('/v1/pro/checkout', { plan }, o);
 export const activateLicense = (key, o) => authed('/v1/license/activate', { key: String(key || '').trim() }, o);
 export const deactivateLicense = (o) => authed('/v1/license/deactivate', {}, o);
+/** «Avviso sbagliato»: solo la categoria, per migliorare l'analisi. */
+export const sendFeedback = (category, o) => authed('/v1/feedback', { category: String(category || '').slice(0, 40) }, o);
 
 async function call(fetchImpl, url, payload, { bearer = null, signal, method = 'POST' } = {}) {
   const headers = method === 'GET' ? {} : { 'content-type': 'application/json' };

@@ -24,6 +24,7 @@ const { chromium } = require('playwright');
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const results = [];
 /** Con SHOTS=cartella salva anche le schermate dei passaggi principali. */
+const alert = (pg) => pg.locator('antefirma-alert');
 const shot = (pg, name) => (process.env.SHOTS ? pg.screenshot({ path: join(process.env.SHOTS, `${name}.png`) }) : null);
 const check = (name, ok, detail = '') => {
   results.push(ok);
@@ -41,7 +42,7 @@ await new Promise((r) => site.listen(0, '127.0.0.1', r));
 const BASE = `http://127.0.0.1:${site.address().port}/`;
 
 // Il server finto: risposte come quelle vere, con le frasi della pagina demo.
-const fake = { mode: 'ok', analyzeCalls: 0, lastLang: null };
+const fake = { mode: 'ok', analyzeCalls: 0, lastLang: null, feedback: [] };
 const VERDICT = {
   findings: [
     { category: 'auto_renewal', quote: 'Alla scadenza il contratto si rinnova automaticamente per un uguale', why: 'x', confidence: 0.9 },
@@ -67,6 +68,7 @@ async function api(route) {
     if (fake.mode === 'quota') return json(429, { error: 'quota_month', message: 'server' });
     return json(200, { ...VERDICT, findings: VERDICT.findings.map((f) => ({ ...f, why: fake.lastLang === 'en' ? 'English reason.' : 'Motivo.' })) });
   }
+  if (path === '/v1/feedback') { fake.feedback.push(JSON.parse(req.postData() || '{}').category); return json(200, { ok: true }); }
   if (path === '/v1/license') return json(200, { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 3 } } });
   if (path === '/v1/pro/checkout') return json(200, { claim: 'c'.repeat(32), url: `https://antefirma.app/pro/#c=${'c'.repeat(32)}&p=pro` });
   return json(404, { error: 'not_found' });
@@ -103,7 +105,7 @@ try {
   // Il pulsante innocuo non si ferma.
   await page.click('text=Iscriviti alla newsletter');
   await page.waitForTimeout(400);
-  check('il pulsante innocuo non viene intercettato', (await page.locator('antefirma-alert').count()) === 0);
+  check('il pulsante innocuo non viene intercettato', (await alert(page).count()) === 0);
 
   // Il click che impegna: consenso, poi il verdetto.
   await page.click('button.cta');
@@ -113,18 +115,21 @@ try {
   await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('[data-consent="accept"]'), null, { timeout: 8000 });
   check('alla prima analisi chiede il consenso', (await shadow('h1')).includes('Posso leggere'));
   // Il consenso accetta solo click veri: si clicca come la persona.
-  await page.locator('antefirma-alert').locator('[data-consent="accept"]').click();
+  await alert(page).locator('[data-consent="accept"]').click();
   await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.cost .amount'), null, { timeout: 10000 });
   const cost = await shadow('.cost .amount');
   check('il costo potenziale è calcolato', /599,76|599.76/.test(cost.replace(/\s/g, '')), cost);
   check('l’avviso dice quante analisi gratuite restano', (await shadow('.provenance')).includes('ti restano 4 analisi gratuite'));
   const box = await page.evaluate(() => { const r = document.querySelector('antefirma-alert').getBoundingClientRect(); return { w: r.width, h: r.height }; });
   check('l’avviso copre la pagina', box.w > 300 && box.h > 300);
+  await alert(page).locator('[data-feedback]').first().click();
+  await page.waitForTimeout(500);
+  check('«Avviso sbagliato?» manda solo la categoria', fake.feedback.length === 1 && /^[a-z_]+$/.test(fake.feedback[0]) && (await shadow('[data-feedback]')).includes('Grazie'), fake.feedback.join(','));
   await page.waitForTimeout(3200); // «Continua comunque» si arma dopo un attimo
-  await page.locator('antefirma-alert').locator('[data-act="proceed"]').click();
+  await alert(page).locator('[data-act="proceed"]').click();
   await page.waitForTimeout(500);
   check('«Continua comunque» esegue l’azione sospesa', await page.evaluate(() => window.__demoSubmitted === true));
-  check('l’avviso si chiude dopo la decisione', (await page.locator('antefirma-alert').count()) === 0);
+  check('l’avviso si chiude dopo la decisione', (await alert(page).count()) === 0);
 
   // Analisi del mese finite: il pulsante per passare a Pro apre il pagamento.
   // La cache locale ricorderebbe il verdetto di prima: si svuota.
@@ -139,12 +144,12 @@ try {
   await shot(page, 'passa-a-pro');
   const [tab] = await Promise.all([
     context.waitForEvent('page', { timeout: 8000 }),
-    page.locator('antefirma-alert').locator('[data-upgrade]').click(),
+    alert(page).locator('[data-upgrade]').click(),
   ]);
   await tab.waitForLoadState().catch(() => {});
   check('«Passa a Pro» apre il pagamento legato a questo browser', /antefirma\.app\/pro\/#c=c{32}&p=pro/.test(tab.url()), tab.url());
   await tab.close();
-  await page.locator('antefirma-alert').locator('[data-act="cancel"]').click();
+  await alert(page).locator('[data-act="cancel"]').click();
 
   // Le impostazioni, in spagnolo.
   await opt.bringToFront();
@@ -171,7 +176,7 @@ try {
   check('l’avviso è in inglese', (await shadow('.cancel')) === 'Go back' && (await shadow('.cost .caption')).includes('estimated potential'));
   check('al server si chiede l’analisi in inglese', fake.lastLang === 'en');
   check('la cronologia del verdetto è in inglese', (await shadow('.timeline')).includes('Now'));
-  await page.locator('antefirma-alert').locator('[data-act="cancel"]').click();
+  await alert(page).locator('[data-act="cancel"]').click();
 
   // Il pannello laterale, aperto come pagina.
   const panel = await context.newPage();

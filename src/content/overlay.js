@@ -233,6 +233,9 @@
     @keyframes spin { to { transform: rotate(360deg) } }
     .loading p { font-size: 14px; color: #414852; margin: 0; }
     .loading small { display: block; margin-top: 6px; color: #6b7280; font-size: 12px; }
+    .finding .wrong { all: unset; cursor: pointer; display: inline-block; margin-top: 6px; font-size: 11.5px; text-decoration: underline; opacity: .7; }
+    .finding .wrong:hover, .finding .wrong:focus-visible { opacity: 1; }
+    .finding .wrong:disabled { text-decoration: none; cursor: default; }
     .upsell { margin: 0 0 12px; }
     .upgrade { all: unset; box-sizing: border-box; display: block; width: 100%; text-align: center; cursor: pointer; font: 700 14px/1.2 inherit; padding: 11px 14px; border-radius: 10px; background: #ffe04a; color: #15203a; }
     .upgrade:focus-visible { outline: 3px solid #2f5bd3; outline-offset: 2px; }
@@ -774,6 +777,16 @@
           this.finish(btn.dataset.act);
         });
       }
+      // «Avviso sbagliato?»: al server va solo la categoria, mai il testo.
+      for (const b of this.root.querySelectorAll('[data-feedback]')) {
+        b.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!e.isTrusted || b.disabled) return;
+          b.disabled = true;
+          try { await CF.bridge.send('FEEDBACK', { category: b.dataset.feedback }); b.textContent = t('Grazie, segnalato'); } catch { b.disabled = false; }
+        });
+      }
       const up = this.root.querySelector('[data-upgrade]');
       up?.addEventListener('click', async (e) => {
         e.preventDefault();
@@ -856,6 +869,7 @@
       <div class="plain">${esc(f.plain || f.why || '')}</div>
       ${f.quote ? `<div class="quote">“${esc(f.quote)}”</div>` : ''}
       ${tags.length ? `<span class="tag">${esc(tags.join(' · '))}</span>` : ''}
+      ${f.category ? `<button type="button" class="wrong" data-feedback="${esc(f.category)}">${esc(t('Avviso sbagliato?'))}</button>` : ''}
     </li>`;
   }
 

@@ -19,7 +19,7 @@ import { createSnapshot, compareSnapshot, sha256, attestation } from '../core/pr
 import { buildCommitment, planReminders, dueReminder, missedWindow, commitmentState, COMMITMENT_STATUS } from '../core/commitments.js';
 import { buildIcs } from '../core/ics.js';
 import { buildLetter, suggestKind } from '../core/letter.js';
-import { register, ServerError, getLicense, startCheckout, activateLicense, deactivateLicense } from '../core/server.js';
+import { register, ServerError, getLicense, startCheckout, activateLicense, deactivateLicense, sendFeedback } from '../core/server.js';
 import { API_BASE } from '../core/config.js';
 import { t, setLang, resolveLang } from '../i18n/index.js';
 import {
@@ -215,6 +215,8 @@ async function handle(msg, sender) {
     // La pagina non riceve né il codice dell'acquisto né il token.
     case 'UPGRADE':
       return upgrade();
+    case 'FEEDBACK':
+      return withCode(sendFeedback(msg.payload?.category));
 
     // ── piano (solo dalle pagine dell'estensione) ─────────────────────────
     case 'GET_LICENSE':
