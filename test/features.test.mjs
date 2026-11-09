@@ -65,6 +65,7 @@ function serverResponse(text = CONTRACT, { penalty = 120, extra = [] } = {}) {
       minimum_term_months: { value: 24, quote: 'durata minima di 24 mesi' },
       notice_days: { value: 60, quote: 'preavviso di almeno 60 giorni' },
       exit_fee: { value: penalty, quote: 'penale pari a' },
+      extra_fees: [{ label: 'Attivazione', value: 49, per_cycle: false, quote: 'spese di attivazione una tantum di € 49,00' }],
     },
     summary: 'Abbonamento di due anni con penale di uscita.',
   };
@@ -90,7 +91,7 @@ test('lo snapshot fissa impronta, data e numeri del verdetto', async () => {
   assert.match(snap.hash, /^[0-9a-f]{64}$/);
   assert.equal(snap.hash, await sha256(snap.text));
   assert.equal(snap.at, new Date(T0).toISOString());
-  assert.equal(snap.verdict.worstCase, 599.76);
+  assert.equal(snap.verdict.worstCase, 648.76);
   assert.ok(snap.verdict.categories.includes('auto_renewal'));
   assert.ok(snap.excerpt.length > 100);
 });
@@ -157,7 +158,7 @@ test('l’impegno nasce dal verdetto con scadenze coerenti', async () => {
   assert.equal(c.status, COMMITMENT_STATUS.ACTIVE);
   assert.equal(c.horizonMonths, 24);
   assert.equal(Math.round(c.noticeMonths * 30), 60);
-  assert.equal(c.worstCase, 599.76);
+  assert.equal(c.worstCase, 648.76);
   assert.equal(c.penalty, 120);
   assert.equal(c.autoRenewal, true);
   assert.equal(c.provider, 'Streampro');
@@ -263,7 +264,7 @@ test('il riepilogo somma l’esposizione e trova la prossima scadenza', async ()
 
   const s = portfolioSummary([a, b, c], T0);
   assert.equal(s.count, 2, 'gli impegni disdetti non contano nell’esposizione');
-  assert.equal(s.totals[0].amount, 699.76);
+  assert.equal(s.totals[0].amount, 748.76);
   assert.equal(s.next.c.id, 'b');
   assert.equal(s.urgent, 1);
 });
@@ -323,10 +324,10 @@ test('senza i dati dell’utente la lettera resta usabile, con i segnaposto', as
 test('la lettera di recesso per modifica richiama la clausola cambiata', async () => {
   const c = {
     ...buildCommitment({ verdict: await verdictFor(), now: T0 }),
-    changes: [{ severity: 'major', summary: 'Il tuo impegno potenziale è salito da 599,76 € a 779,76 €.' }],
+    changes: [{ severity: 'major', summary: 'Il tuo impegno potenziale è salito da 648,76 € a 828,76 €.' }],
   };
   const letter = buildLetter(c, { name: 'Mario Rossi' }, LETTER_KINDS.CHANGE, T0 + 300 * 86_400_000);
-  assert.ok(letter.text.includes('779,76'));
+  assert.ok(letter.text.includes('828,76'));
   assert.ok(letter.text.includes('senza penali'));
   assert.ok(letter.text.includes('art. 33 c. 2 lett. m)'));
 });

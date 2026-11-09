@@ -34,6 +34,14 @@ export function termsFromServer(terms = {}) {
     minTerm: minMonths ? { months: minMonths, raw: `${fmtNum(minMonths)} ${minMonths === 1 ? 'mese' : 'mesi'}`, quote: t.minimum_term_months.quote || null } : null,
     notice: noticeDays ? { months: noticeDays / 30, days: noticeDays, raw: `${fmtNum(noticeDays)} ${noticeDays === 1 ? 'giorno' : 'giorni'}`, quote: t.notice_days.quote || null } : null,
     penalty: fee != null ? { amount: fee, quote: t.exit_fee.quote || null } : null,
+    extras: (Array.isArray(t.extra_fees) ? t.extra_fees : [])
+      .filter((e) => e && typeof e.value === 'number' && Number.isFinite(e.value) && e.value > 0)
+      .map((e) => ({
+        amount: e.value,
+        label: (typeof e.label === 'string' && e.label.trim()) || 'Costo aggiuntivo',
+        perCycle: e.per_cycle === true,
+        raw: e.quote || null,
+      })),
   };
 }
 
@@ -75,7 +83,7 @@ export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
   const minTerm = terms.minTerm || null;
   const notice = terms.notice || null;
   const penalty = terms.penalty || null;
-  const extras = [];
+  const extras = terms.extras || [];
 
   const hasAutoRenewal = findings.some((f) => f.category === 'auto_renewal');
   const periodMonths = pricing.period ? PERIOD_MONTHS[pricing.period] || 1 : null;

@@ -10,8 +10,8 @@ impegnando: costo reale, durata minima, rinnovo automatico, penali, preavvisi,
 arbitrato, licenze sui contenuti, uso dei dati. Il risultato non è
 `Risk score 73/100`, ma:
 
-> **Vedi 19,99 €/mese, ma stai impegnando fino a 599,76 €**
-> 19,99 € × 24 cicli + penale 120,00 €
+> **Vedi 19,99 €/mese, ma stai impegnando fino a 648,76 €**
+> 19,99 € × 24 cicli + penale 120,00 € + attivazione 49,00 €
 > 📌 Entro il 16 giugno 2028 devi inviare la disdetta.
 
 Ogni avviso cita la frase esatta della pagina da cui nasce: se la frase non c'è,
@@ -45,7 +45,9 @@ pulsante premuto ──► content script (sospende il click, legge la pagina)
   (`src/core/constants.js`), non il modello. La fiducia del modello sposta la
   severità solo verso il basso, e di poco.
 - **Il costo** si calcola soltanto con le cifre che il server ha verificato nel
-  passo citato, più il prezzo letto nella pagina vicino al pulsante (che vince
+  passo citato — canone, durata, preavviso, penale e costi accessori
+  (`extra_fees`: attivazione, istruttoria, spese per rata moltiplicate per i
+  cicli) — più il prezzo letto nella pagina vicino al pulsante (che vince
   su quello letto nel testo).
 - **Profilo personale, tutele UE/IT, punteggio, scadenze**: tutto in locale,
   come prima.
@@ -190,9 +192,6 @@ italiano. Nessun segreto nel codice.
 - **L'interfaccia è solo in italiano.** Nome e descrizione del manifest sono in
   tre lingue; i testi dell'avviso, del pannello e delle impostazioni vanno
   ancora tradotti in inglese e spagnolo.
-- **Le spese una tantum (attivazione, istruttoria) non entrano più nel
-  totale**: il server non le restituisce come cifra. Per riaverle va aggiunto un
-  campo allo schema di `terms` nel server.
 - **Il modello può tacere un rischio**: la verifica delle citazioni impedisce
   che ne inventi, non che ne ometta. Una pagina può provare a convincerlo a
   tacere.

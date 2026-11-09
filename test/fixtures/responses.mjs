@@ -23,7 +23,8 @@ export const RESPONSES = {
    "billing_period": null,
    "minimum_term_months": null,
    "notice_days": null,
-   "exit_fee": null
+   "exit_fee": null,
+   "extra_fees": []
   },
   "summary": ""
  },
@@ -48,7 +49,8 @@ export const RESPONSES = {
    "billing_period": null,
    "minimum_term_months": null,
    "notice_days": null,
-   "exit_fee": null
+   "exit_fee": null,
+   "extra_fees": []
   },
   "summary": ""
  },
@@ -67,7 +69,8 @@ export const RESPONSES = {
    "billing_period": null,
    "minimum_term_months": null,
    "notice_days": null,
-   "exit_fee": null
+   "exit_fee": null,
+   "extra_fees": []
   },
   "summary": ""
  },
@@ -92,7 +95,8 @@ export const RESPONSES = {
    "billing_period": null,
    "minimum_term_months": null,
    "notice_days": null,
-   "exit_fee": null
+   "exit_fee": null,
+   "extra_fees": []
   },
   "summary": ""
  },
@@ -147,7 +151,8 @@ export const RESPONSES = {
    "billing_period": null,
    "minimum_term_months": null,
    "notice_days": null,
-   "exit_fee": null
+   "exit_fee": null,
+   "extra_fees": []
   },
   "summary": ""
  },
@@ -202,7 +207,8 @@ export const RESPONSES = {
     "value": 30,
     "quote": "30 giorni"
    },
-   "exit_fee": null
+   "exit_fee": null,
+   "extra_fees": []
   },
   "summary": ""
  },
@@ -272,7 +278,15 @@ export const RESPONSES = {
    "exit_fee": {
     "value": 120,
     "quote": "120,00 euro"
-   }
+   },
+   "extra_fees": [
+    {
+     "label": "Attivazione",
+     "value": 49,
+     "per_cycle": false,
+     "quote": "49,00 euro"
+    }
+   ]
   },
   "summary": ""
  },
@@ -315,7 +329,8 @@ export const RESPONSES = {
    "billing_period": null,
    "minimum_term_months": null,
    "notice_days": null,
-   "exit_fee": null
+   "exit_fee": null,
+   "extra_fees": []
   },
   "summary": ""
  },
@@ -376,7 +391,21 @@ export const RESPONSES = {
    "exit_fee": {
     "value": 900,
     "quote": "900,00 euro"
-   }
+   },
+   "extra_fees": [
+    {
+     "label": "Istruttoria",
+     "value": 350,
+     "per_cycle": false,
+     "quote": "350,00 euro"
+    },
+    {
+     "label": "Incasso",
+     "value": 4,
+     "per_cycle": true,
+     "quote": "4,00 euro"
+    }
+   ]
   },
   "summary": ""
  },
@@ -446,7 +475,15 @@ export const RESPONSES = {
    "exit_fee": {
     "value": 120,
     "quote": "120,00 euro"
-   }
+   },
+   "extra_fees": [
+    {
+     "label": "Attivazione",
+     "value": 49,
+     "per_cycle": false,
+     "quote": "49,00 euro"
+    }
+   ]
   },
   "summary": ""
  },
@@ -498,7 +535,15 @@ export const RESPONSES = {
    "exit_fee": {
     "value": 120,
     "quote": "120,00 euro"
-   }
+   },
+   "extra_fees": [
+    {
+     "label": "Attivazione",
+     "value": 49,
+     "per_cycle": false,
+     "quote": "49,00 euro"
+    }
+   ]
   },
   "summary": ""
  },
@@ -544,7 +589,15 @@ export const RESPONSES = {
    "exit_fee": {
     "value": 120,
     "quote": "120,00 €"
-   }
+   },
+   "extra_fees": [
+    {
+     "label": "Attivazione",
+     "value": 49,
+     "per_cycle": false,
+     "quote": "49,00 €"
+    }
+   ]
   },
   "summary": ""
  }

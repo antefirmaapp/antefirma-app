@@ -87,6 +87,7 @@ const RESPONSE = () => ({
     minimum_term_months: { value: 12, quote: 'durata minima di 12 mesi' },
     notice_days: { value: 30, quote: 'preavviso di almeno 30 giorni' },
     exit_fee: { value: 79, quote: 'penale pari a € 79,00' },
+    extra_fees: [{ label: 'Attivazione', value: 49, per_cycle: false, quote: 'spese di attivazione una tantum di € 49,00' }],
   },
   summary: 'Ti impegni per un anno a 19,99 € al mese, con rinnovo automatico.',
   dropped: 0,
@@ -188,14 +189,29 @@ test('il prezzo della pagina vince su quello letto nel testo', () => {
   assert.equal(fromText.source, 'server');
 });
 
-test('il costo worst-case somma canone e penale', () => {
+test('il costo worst-case somma canone, penale e costi una tantum', () => {
   const findings = fromServer(RESPONSE().findings);
   const terms = termsFromServer(RESPONSE().terms);
   const cost = computeCost({ ctx: CTX_SUBSCRIPTION, findings, terms });
-  // 19,99 × 12 = 239,88  +  79 penale  =  318,88
-  assert.equal(cost.worstCase, 318.88);
+  // 19,99 × 12 = 239,88  +  79 penale  +  49 attivazione  =  367,88
+  assert.equal(cost.worstCase, 367.88);
+  assert.ok(cost.lines.some((l) => l.kind === 'extra' && l.label === 'Attivazione' && l.amount === 49));
   assert.equal(cost.horizonMonths, 12);
   assert.ok(cost.understated, 'il prezzo mostrato sottostima nettamente l’impegno');
+});
+
+test('una spesa per ogni rata viene moltiplicata per i cicli', () => {
+  const terms = termsFromServer({ ...RESPONSE().terms, exit_fee: null, extra_fees: [{ label: 'Incasso', value: 2, per_cycle: true, quote: 'x' }] });
+  const cost = computeCost({ ctx: CTX_SUBSCRIPTION, findings: [], terms });
+  const line = cost.lines.find((l) => l.kind === 'extra');
+  assert.equal(line.amount, 24, '2 € per 12 rate');
+  assert.match(line.label, /× 12/);
+});
+
+test('un costo accessorio senza cifra valida non entra nei conti', () => {
+  const t = termsFromServer({ extra_fees: [{ label: 'x', value: 0, per_cycle: false, quote: 'q' }, { label: 'y', value: 'tanti', quote: 'q' }, null] });
+  assert.deepEqual(t.extras, []);
+  assert.deepEqual(termsFromServer({}).extras, []);
 });
 
 test('senza durata minima ma con rinnovo automatico si assume un anno', () => {
@@ -340,10 +356,10 @@ test('analisi end-to-end: numeri, livello e scadenza', async () => {
   const settings = { ...SETTINGS, jurisdiction: 'IT', profile: { money: true, privacy: true, identity: true } };
   const v = await analyze({ text: CONTRACT, ctx: CTX_SUBSCRIPTION, actionType: 'subscribe', settings, now: T0, remote: remoteWith(RESPONSE()) });
 
-  assert.equal(v.cost.worstCase, 318.88);
+  assert.equal(v.cost.worstCase, 367.88);
   assert.ok(['high_risk', 'critical'].includes(v.level.id), `livello inatteso: ${v.level.id}`);
   assert.match(v.mustRemember, /luglio 2027/);
-  assert.ok(v.headline.includes('318'), `headline poco concreta: ${v.headline}`);
+  assert.ok(v.headline.includes('367'), `headline poco concreta: ${v.headline}`);
   assert.equal(v.summary, RESPONSE().summary);
   assert.ok(v.consumer.flags.length >= 3);
   assert.equal(v.engine.source, 'server');
