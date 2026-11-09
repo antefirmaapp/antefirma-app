@@ -134,6 +134,72 @@ function flash(message) {
 
 // ── eventi ──────────────────────────────────────────────────────────────────
 
+// ── piano ───────────────────────────────────────────────────────────────────
+
+const PLAN_NAMES = { free: 'Gratuito', pro: 'Pro', max: 'Max', team: 'Team' };
+const day = (iso) => (iso ? new Date(iso).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '');
+
+function planStatus(text, ok) {
+  const el = $('#plan-status');
+  el.hidden = !text;
+  el.textContent = text || '';
+  el.className = `key-status ${ok ? 'ok' : 'err'}`;
+}
+
+async function showPlan() {
+  let lic;
+  try { lic = await send('GET_LICENSE'); } catch (err) { $('#plan-summary').textContent = `Piano non verificabile: ${err.message}`; return; }
+  if (lic.error) { $('#plan-summary').textContent = lic.message; $('#plan-buy').hidden = lic.error === 'billing_off'; return; }
+  const m = lic.quota?.month;
+  const left = m ? ` Restano ${m.remaining} analisi su ${m.limit} questo mese.` : '';
+  if (lic.plan === 'free') {
+    $('#plan-summary').textContent = `Piano gratuito.${left}`;
+  } else {
+    const when = lic.cancelAt ? ` Disdetto: resta attivo fino al ${day(lic.cancelAt)}.` : lic.periodEnd ? ` Rinnovo il ${day(lic.periodEnd)}.` : '';
+    const where = lic.activations ? ` Attivo su ${lic.activations.used} browser su ${lic.activations.limit}.` : '';
+    $('#plan-summary').textContent = `${PLAN_NAMES[lic.plan] || lic.plan}.${left}${where}${when}`;
+  }
+  const paid = lic.plan !== 'free';
+  $('#plan-buy').hidden = paid;
+  $('#plan-buy-note').hidden = paid;
+  $('#plan-remove').hidden = !paid;
+}
+
+document.querySelectorAll('#plan-buy [data-plan]').forEach((b) => b.addEventListener('click', async () => {
+  b.disabled = true;
+  try {
+    const r = await send('START_CHECKOUT', { plan: b.dataset.plan });
+    if (r.error) planStatus(r.message, false);
+    else planStatus('Pagina di pagamento aperta. Quando hai finito, torna qui: il piano compare da solo.', true);
+  } catch (err) { planStatus(err.message, false); }
+  b.disabled = false;
+}));
+
+$('#plan-activate').addEventListener('click', async () => {
+  const key = $('#plan-key').value.trim();
+  if (!key) { planStatus('Scrivi la chiave.', false); return; }
+  try {
+    const r = await send('ACTIVATE_LICENSE', { key });
+    if (r.error) { planStatus(r.message, false); return; }
+    $('#plan-key').value = '';
+    planStatus(`Chiave attivata: ${PLAN_NAMES[r.plan] || r.plan} su questo browser.`, true);
+    showPlan();
+  } catch (err) { planStatus(err.message, false); }
+});
+
+$('#plan-remove').addEventListener('click', async () => {
+  if (!confirm('Togliere il piano da questo browser? La chiave resta valida e puoi usarla su un altro browser.')) return;
+  try {
+    const r = await send('DEACTIVATE_LICENSE');
+    if (r.error) { planStatus(r.message, false); return; }
+    planStatus('Piano tolto da questo browser.', true);
+    showPlan();
+  } catch (err) { planStatus(err.message, false); }
+});
+
+// Di ritorno dalla pagina di pagamento, il piano si aggiorna da solo.
+document.addEventListener('visibilitychange', () => { if (!document.hidden) showPlan(); });
+
 $('#save').addEventListener('click', save);
 
 $('#grant-consent').addEventListener('click', async () => {
@@ -163,3 +229,4 @@ if (new URLSearchParams(location.search).has('welcome')) {
 
 load();
 showServerStatus();
+showPlan();

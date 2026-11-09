@@ -46,7 +46,14 @@ export class ServerError extends Error {
 
 const MESSAGES = {
   quota: 'Hai usato tutte le analisi di oggi. Domani il conteggio riparte.',
-  quota_month: 'Hai usato le analisi gratuite di questo mese. Il conteggio riparte il primo del mese.',
+  quota_month: 'Hai usato le analisi di questo mese. Il conteggio riparte il primo del mese; per averne di più, Impostazioni → Piano.',
+  quota_day: 'Hai usato le analisi di oggi del tuo piano. Domani il conteggio riparte.',
+  key_format: 'La chiave ha la forma AF-XXXX-XXXX-XXXX-XXXX.',
+  key_unknown: 'Chiave sconosciuta. Controlla di averla copiata tutta.',
+  key_admin: 'Questa è la chiave di amministrazione del Team: qui serve la chiave di un posto.',
+  key_inactive: 'La licenza di questa chiave non è attiva.',
+  activations: 'La chiave è già attiva sul numero massimo di browser: toglila da uno.',
+  billing_off: 'I piani a pagamento non sono ancora attivi.',
   timeout: 'L’analisi ha impiegato troppo tempo.',
   network: 'Il server di AnteFirma non è raggiungibile. Controlla la connessione.',
   busy: 'Il servizio è molto richiesto in questo momento. Riprova fra poco.',
@@ -134,11 +141,34 @@ export async function analyzeRemote(
   throw new ServerError('auth', { status: 401 });
 }
 
-async function call(fetchImpl, url, payload, { bearer = null, signal } = {}) {
-  const headers = { 'content-type': 'application/json' };
+// ── piano ───────────────────────────────────────────────────────────────────
+
+/** Una chiamata con il token, con un nuovo tentativo dopo un 401. */
+async function authed(path, payload, { storage = chrome.storage.local, fetchImpl = fetch, base = API_BASE, method = 'POST' } = {}) {
+  const opts = { storage, fetchImpl, base };
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const bearer = await token(opts);
+    const res = await call(fetchImpl, `${base}${path}`, payload, { bearer, method, signal: AbortSignal.timeout(10000) });
+    const body = await readJson(res);
+    if (res.ok) return body;
+    if (res.status === 401 && attempt === 0) { await writeAuth(storage, { token: null }); continue; }
+    throw errorFrom(res, body);
+  }
+  throw new ServerError('auth', { status: 401 });
+}
+
+/** `{ plan: 'free'|'pro'|'max'|'team', active, status, periodEnd, cancelAt, activations, quota }` */
+export const getLicense = (o) => authed('/v1/license', undefined, { ...o, method: 'GET' });
+/** `{ claim, url }`: la pagina di acquisto, legata a questa installazione. */
+export const startCheckout = (plan, o) => authed('/v1/pro/checkout', { plan }, o);
+export const activateLicense = (key, o) => authed('/v1/license/activate', { key: String(key || '').trim() }, o);
+export const deactivateLicense = (o) => authed('/v1/license/deactivate', {}, o);
+
+async function call(fetchImpl, url, payload, { bearer = null, signal, method = 'POST' } = {}) {
+  const headers = method === 'GET' ? {} : { 'content-type': 'application/json' };
   if (bearer) headers.authorization = `Bearer ${bearer}`;
   try {
-    return await fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(payload), signal });
+    return await fetchImpl(url, { method, headers, body: method === 'GET' ? undefined : JSON.stringify(payload), signal });
   } catch (err) {
     if (signal?.aborted || err?.name === 'TimeoutError' || err?.name === 'AbortError') {
       throw new ServerError('timeout', { detail: String(err?.message || err) });

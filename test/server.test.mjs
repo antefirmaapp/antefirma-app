@@ -119,7 +119,7 @@ test('finite le analisi gratuite del mese, il messaggio lo dice', async () => {
   const { fetchImpl } = fakeServer({ '/v1/analyze': () => json(429, { error: 'quota_month' }, { 'retry-after': '1950000' }) });
   await assert.rejects(analyzeRemote({ text: 'x' }, { storage, fetchImpl, base: BASE }), (e) => {
     assert.equal(e.code, 'quota_month');
-    assert.match(e.message, /analisi gratuite di questo mese/);
+    assert.match(e.message, /analisi di questo mese.*Piano/);
     assert.equal(e.retryAfter, 1950000);
     return true;
   });
@@ -151,4 +151,49 @@ test('una risposta senza JSON non fa esplodere il client', async () => {
   await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });
   const fetchImpl = async () => new Response('<html>gateway</html>', { status: 502 });
   await assert.rejects(analyzeRemote({ text: 'x' }, { storage, fetchImpl, base: BASE }), (e) => e.code === 'upstream');
+});
+
+// ── piano ───────────────────────────────────────────────────────────────────
+
+import { getLicense, startCheckout, activateLicense, deactivateLicense } from '../src/core/server.js';
+
+function planServer(routes) {
+  const calls = [];
+  const fetchImpl = async (url, init) => {
+    const path = new URL(url).pathname;
+    calls.push({ path, method: init.method, body: init.body ? JSON.parse(init.body) : null, auth: init.headers.authorization || null });
+    return routes[path](calls);
+  };
+  return { fetchImpl, calls };
+}
+
+test('piano: lettura con GET e token, nuovo token dopo un 401', async () => {
+  const storage = memoryStorage();
+  let n = 0;
+  const { fetchImpl, calls } = planServer({
+    '/v1/register': () => json(200, { token: `v1.tok${++n}` }),
+    '/v1/license': (c) => (c.filter((x) => x.path === '/v1/license').length === 1 ? json(401, { error: 'auth' }) : json(200, { plan: 'pro', active: true })),
+  });
+  const r = await getLicense({ storage, fetchImpl, base: BASE });
+  assert.equal(r.plan, 'pro');
+  const lic = calls.filter((x) => x.path === '/v1/license');
+  assert.equal(lic[0].method, 'GET');
+  assert.equal(lic[0].body, null);
+  assert.equal(lic[1].auth, 'Bearer v1.tok2');
+});
+
+test('piano: acquisto, attivazione e rimozione', async () => {
+  const storage = memoryStorage();
+  const { fetchImpl, calls } = planServer({
+    '/v1/register': () => json(200, { token: 'v1.t' }),
+    '/v1/pro/checkout': () => json(200, { claim: 'c', url: 'https://antefirma.app/pro/#c=c&p=max' }),
+    '/v1/license/activate': () => json(409, { error: 'activations', message: 'server' }),
+    '/v1/license/deactivate': () => json(200, { removed: true }),
+  });
+  const o = { storage, fetchImpl, base: BASE };
+  assert.match((await startCheckout('max', o)).url, /p=max/);
+  assert.deepEqual(calls.find((c) => c.path === '/v1/pro/checkout').body, { plan: 'max' });
+  await assert.rejects(activateLicense(' AF-AAAA-BBBB-CCCC-DDDD ', o), (e) => e instanceof ServerError && e.code === 'activations' && /massimo di browser/.test(e.message));
+  assert.equal(calls.find((c) => c.path === '/v1/license/activate').body.key, 'AF-AAAA-BBBB-CCCC-DDDD');
+  assert.equal((await deactivateLicense(o)).removed, true);
 });

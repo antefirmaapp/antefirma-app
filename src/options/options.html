@@ -102,10 +102,31 @@
       </div>
     </section>
 
+    <section class="card" id="plan-card">
+      <h2>Piano</h2>
+      <p class="lead" id="plan-summary">Verifico il piano…</p>
+      <div class="row" id="plan-buy" hidden>
+        <button class="primary" type="button" data-plan="pro">Passa a Pro</button>
+        <button class="secondary" type="button" data-plan="max">Max</button>
+        <button class="secondary" type="button" data-plan="team">Team</button>
+      </div>
+      <p class="lead small" id="plan-buy-note" hidden>Il pagamento si apre sul sito di AnteFirma, con Paddle. Dopo il pagamento il piano si attiva da solo in questo browser. Pro: 50 analisi al mese su 3 browser. Max: 150 su 5. Team: da 3 persone, una chiave ciascuna.</p>
+      <div class="row" style="margin-top:12px">
+        <label class="field">Hai una chiave?
+          <input type="text" id="plan-key" placeholder="AF-XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">
+        </label>
+      </div>
+      <div class="row">
+        <button class="secondary" id="plan-activate" type="button">Inserisci la chiave</button>
+        <button class="secondary danger" id="plan-remove" type="button" hidden>Togli il piano da questo browser</button>
+      </div>
+      <div id="plan-status" class="key-status" hidden></div>
+    </section>
+
     <section class="card">
       <h2>Analisi</h2>
       <p class="lead">Quando premi un pulsante che ti impegna, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic). Il server risponde con le clausole che ti impegnano, ciascuna con la frase esatta della pagina, e scarta ogni avviso la cui frase non c'è.</p>
-      <p class="lead small">Non escono: la cronologia di navigazione, i dati per le lettere di disdetta, gli impegni registrati, le prove. Il server non conserva il testo né l'indirizzo e non ti chiede un account: riconosce soltanto un numero casuale di questa installazione, per contare le analisi di ogni giorno.</p>
+      <p class="lead small">Non escono: la cronologia di navigazione, i dati per le lettere di disdetta, gli impegni registrati, le prove. Il server non conserva il testo né l'indirizzo e non ti chiede un account: riconosce soltanto un numero casuale di questa installazione, per contare le analisi. Con un piano a pagamento conosce anche la licenza legata a questo browser, mai il tuo nome o la tua email.</p>
       <div id="consent-box" class="key-status"></div>
       <div class="row">
         <button class="primary" id="grant-consent" type="button" hidden>Acconsento all'analisi</button>

@@ -799,7 +799,9 @@
     const m = verdict.engine?.quota?.month;
     if (!m || verdict.cached || typeof m.remaining !== 'number') return '';
     const n = m.remaining;
-    return ` · ${n === 1 ? 'ti resta 1 analisi gratuita' : `ti restano ${n} analisi gratuite`} questo mese`;
+    const paid = verdict.engine?.quota?.plan && verdict.engine.quota.plan !== 'free';
+    const what = paid ? 'analisi' : (n === 1 ? 'analisi gratuita' : 'analisi gratuite');
+    return ` · ${n === 1 ? `ti resta 1 ${what}` : `ti restano ${n} ${what}`} questo mese`;
   }
 
   /** Da dove viene questo verdetto: conta per la fiducia che merita. */

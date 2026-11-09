@@ -19,7 +19,7 @@ import { createSnapshot, compareSnapshot, sha256, attestation } from '../core/pr
 import { buildCommitment, planReminders, dueReminder, missedWindow, commitmentState, COMMITMENT_STATUS } from '../core/commitments.js';
 import { buildIcs } from '../core/ics.js';
 import { buildLetter, suggestKind } from '../core/letter.js';
-import { register, ServerError } from '../core/server.js';
+import { register, ServerError, getLicense, startCheckout, activateLicense, deactivateLicense } from '../core/server.js';
 import { API_BASE } from '../core/config.js';
 import {
   getSettings, setSettings, isAllowlisted,
@@ -195,6 +195,17 @@ async function handle(msg, sender) {
       return clearCache();
     case 'SERVER_STATUS':
       return serverStatus();
+
+    // ── piano (solo dalle pagine dell'estensione) ─────────────────────────
+    case 'GET_LICENSE':
+      return withCode(getLicense());
+    case 'START_CHECKOUT':
+      return withCode(startCheckout(['pro', 'max', 'team'].includes(msg.payload?.plan) ? msg.payload.plan : 'pro')
+        .then(async (r) => { await chrome.tabs.create({ url: r.url }); return { opened: true }; }));
+    case 'ACTIVATE_LICENSE':
+      return withCode(activateLicense(msg.payload?.key));
+    case 'DEACTIVATE_LICENSE':
+      return withCode(deactivateLicense());
 
     // ── kit di uscita ──────────────────────────────────────────────────────
     case 'GET_COMMITMENTS':
@@ -799,6 +810,16 @@ async function fetchDocument(url, validators = {}, { signal } = {}) {
 // ── varie ───────────────────────────────────────────────────────────────────
 
 /** Il server risponde? Serve alle impostazioni, non costa analisi. */
+/** Gli errori del server arrivano alla pagina come { error, message }, non come eccezioni. */
+async function withCode(promise) {
+  try {
+    return await promise;
+  } catch (err) {
+    if (err instanceof ServerError) return { error: err.code, message: err.message };
+    throw err;
+  }
+}
+
 async function serverStatus() {
   try {
     const res = await fetch(`${API_BASE}/v1/health`, { signal: AbortSignal.timeout(5000) });
