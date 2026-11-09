@@ -229,7 +229,7 @@ function renderItem(c, state = commitmentState(c)) {
       ${lastChange && lastChange.changed ? `<div class="c-change">⚠️ ${esc(lastChange.summary)}</div>` : ''}
       ${lastChange && !lastChange.changed ? `<div class="c-nothing">✓ ${esc(t('Verificato il {d}: condizioni invariate.', { d: new Date(lastChange.checkedAt).toLocaleDateString(locale()) }))}</div>` : ''}
       ${state.urgency !== 'done' && c.deadlineAt && !c.inCalendar
-        ? `<div class="c-hint">${esc(t('Il promemoria del browser funziona solo con Chrome aperto: metti la scadenza anche in calendario.'))}</div>`
+        ? `<div class="c-hint">${esc(t('I promemoria funzionano solo con il browser aperto: metti la scadenza anche in calendario.'))}</div>`
         : ''}
       <div class="c-actions">
         <button class="strong" data-act="ics" data-id="${id}">${esc(t('Calendario'))}</button>
