@@ -227,7 +227,7 @@ export const RISK_CATEGORIES = {
 export const LEVELS = [
   {
     id: 'safe',
-    label: 'SAFE',
+    label: 'Tranquillo',
     headline: 'Nessuna conseguenza significativa rilevata',
     min: 0,
     color: '#1a7f52',
@@ -236,7 +236,7 @@ export const LEVELS = [
   },
   {
     id: 'review',
-    label: 'REVIEW',
+    label: 'Da rivedere',
     headline: 'Ci sono condizioni che meritano attenzione',
     min: 22,
     color: '#b8860b',
@@ -245,7 +245,7 @@ export const LEVELS = [
   },
   {
     id: 'commitment',
-    label: 'COMMITMENT',
+    label: 'Impegno',
     headline: 'Stai assumendo un obbligo economico o legale significativo',
     min: 55,
     color: '#c2620f',
@@ -254,7 +254,7 @@ export const LEVELS = [
   },
   {
     id: 'high_risk',
-    label: 'HIGH RISK',
+    label: 'Rischio alto',
     headline: 'Sono presenti clausole potenzialmente molto sfavorevoli',
     min: 86,
     color: '#c0392b',
@@ -263,7 +263,7 @@ export const LEVELS = [
   },
   {
     id: 'critical',
-    label: 'CRITICAL',
+    label: 'Critico',
     headline: 'L’azione può creare conseguenze rilevanti e difficili da annullare',
     min: 92,
     color: '#7d0a0a',

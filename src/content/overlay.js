@@ -89,7 +89,7 @@
     @keyframes rise { from { opacity: 0; transform: translateY(12px) } to { opacity: 1; transform: none } }
     .card {
       width: min(680px, 100%); max-height: min(86vh, 900px);
-      background: #fff; color: #16191f; border-radius: 14px;
+      background: #fff; color: #15203a; border-radius: 14px;
       box-shadow: 0 24px 70px rgba(0,0,0,.45);
       display: flex; flex-direction: column; overflow: hidden;
       animation: rise .2s cubic-bezier(.2,.7,.3,1);
@@ -104,6 +104,7 @@
       font-size: 11px; letter-spacing: .09em; text-transform: uppercase;
       color: #6b7280; font-weight: 600;
     }
+    .eyebrow .mark { width: 16px; height: auto; flex: none; }
     .badge {
       display: inline-flex; align-items: center; gap: 6px;
       background: var(--level-color, #888); color: var(--badge-ink, #fff);
@@ -117,10 +118,10 @@
       padding: 14px 16px; margin-bottom: 14px;
     }
     .cost .head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
-    .cost .amount { font-size: 30px; font-weight: 680; letter-spacing: -.02em; color: var(--level-ink, #16191f); }
+    .cost .amount { font-size: 30px; font-weight: 680; letter-spacing: -.02em; color: var(--level-ink, #15203a); }
     .cost .caption { font-size: 12px; color: #6b7280; }
     .cost .displayed { font-size: 13px; color: #6b7280; }
-    .cost .displayed b { color: #16191f; }
+    .cost .displayed b { color: #15203a; }
 
     /* La formula come elenco verticale: chi deve giudicare da sé ha bisogno di
        leggere gli addendi uno per uno, non una riga di somme. */
@@ -133,7 +134,7 @@
 
     .remember {
       display: flex; gap: 10px; align-items: flex-start;
-      background: #fff8e6; border: 1px solid #f2dfa6; border-radius: 10px;
+      background: #fff7cc; border: 1px solid #ffe04a; border-radius: 10px;
       padding: 11px 13px; margin-bottom: 14px; font-size: 13.5px; line-height: 1.45;
     }
     /* Dentro il blocco costo la scadenza è la seconda riga, non un box a parte:
@@ -173,7 +174,7 @@
     .step[data-kind='deadline']::before { background: var(--ink-commitment); }
     .step[data-kind='renewal']::before { background: var(--ink-high); }
     .step[data-kind='penalty']::before { background: var(--ink-critical); }
-    .step .when { font-size: 12px; font-weight: 650; color: #16191f; }
+    .step .when { font-size: 12px; font-weight: 650; color: #15203a; }
     .step .items { font-size: 13px; color: #414852; line-height: 1.5; }
     .law { border: 1px solid #dfe7f5; background: #f5f8fe; border-radius: 10px; padding: 11px 13px; margin-bottom: 8px; }
     .law .title { font-weight: 620; font-size: 13.5px; }
@@ -194,11 +195,11 @@
       font: inherit; font-size: 14px; font-weight: 600; border-radius: 9px;
       padding: 10px 16px; cursor: pointer; border: 1px solid transparent; transition: .12s;
     }
-    button:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
-    .cancel { background: #16191f; color: #fff; }
-    .cancel:hover { background: #000; }
+    button:focus-visible { outline: 2px solid #2f5bd3; outline-offset: 2px; }
+    .cancel { background: #15203a; color: #fff; }
+    .cancel:hover { background: #0d1424; }
     .proceed { background: #fff; color: #6b7280; border-color: #d7dbe2; font-weight: 500; }
-    .proceed:hover { color: #16191f; border-color: #b9bfca; }
+    .proceed:hover { color: #15203a; border-color: #b9bfca; }
     .proceed[aria-disabled='true'] { opacity: .45; cursor: not-allowed; }
     .proceed[aria-disabled='true']:hover { color: #6b7280; border-color: #d7dbe2; }
     .link { background: none; border: none; color: #6b7280; font-size: 12.5px; font-weight: 500; padding: 6px 4px; text-decoration: underline; }
@@ -223,7 +224,7 @@
     @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
     .loading { padding: 40px 22px; text-align: center; }
     .spinner {
-      width: 26px; height: 26px; border: 3px solid #e3e6ec; border-top-color: #16191f;
+      width: 26px; height: 26px; border: 3px solid #e3e6ec; border-top-color: #15203a;
       border-radius: 50%; margin: 0 auto 14px; animation: spin .8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg) } }
@@ -233,7 +234,7 @@
 
     @media (prefers-color-scheme: dark) {
       .card {
-        background: #16191f; color: #e8eaef;
+        background: #15203a; color: #e8eaef;
         --ink-safe: #57d08f; --ink-review: #e3b341; --ink-commitment: #f59b4a;
         --ink-high: #ff8a80; --ink-critical: #ff9b9b;
       }
@@ -247,7 +248,7 @@
       .summary, .finding .plain, .step .items, .law .note, .loading p, .formula { color: #c3c8d1; }
       h1, .finding .name, .step .when, .law .title, .cost .displayed b { color: #f2f4f8; }
       summary, .more > summary { color: #c3c8d1; }
-      /* Il grigio dei testi secondari è tarato sul fondo chiaro: su #16191f
+      /* Il grigio dei testi secondari è tarato sul fondo chiaro: su #15203a
          scende a 3,64:1, sotto la soglia per corpi da 11-12 px. */
       .eyebrow, .action, h2, .cost .caption, .cost .displayed, .formula .voce, .horizon,
       .finding .sev, .finding .tag, .law .refs, .loading small, .link,
@@ -258,9 +259,9 @@
       /* Sul fondo scuro il pill e la barra prendono l'inchiostro chiaro: il
          colore di livello pieno (1,61:1 per CRITICAL) sparirebbe nella card. */
       .bar { background: var(--level-ink-dark, var(--level-color, #888)); }
-      .badge { background: var(--level-ink-dark, var(--level-color, #888)); color: #16191f; }
+      .badge { background: var(--level-ink-dark, var(--level-color, #888)); color: #15203a; }
       .cost .amount { color: var(--level-ink-dark, #f2f4f8); }
-      .cancel { background: #f2f4f8; color: #16191f; }
+      .cancel { background: #f2f4f8; color: #15203a; }
       .proceed { background: transparent; border-color: #3a414d; color: #9aa2ae; }
       .proceed:hover { color: #f2f4f8; border-color: #5a6472; }
       .proceed[aria-disabled='true']:hover { color: #9aa2ae; border-color: #3a414d; }
@@ -482,7 +483,7 @@
           <div class="card" style="--level-color:#15203A">
             <div class="bar"></div>
             <header>
-              <div class="eyebrow"><span class="badge">AnteFirma*</span><span>prima analisi</span></div>
+              <div class="eyebrow"><svg class="mark" viewBox="0 0 64 72" aria-hidden="true"><path d="M32 4 L55.5 10 C57.5 10.6 58.5 12.2 58.5 14.2 V34 C58.5 48.5 48.5 59.5 34.2 66.6 C33.3 67.1 30.7 67.1 29.8 66.6 C15.5 59.5 5.5 48.5 5.5 34 V14.2 C5.5 12.2 6.5 10.6 8.5 10 Z" fill="#FFE04A"/><path d="M32 6.6 L52.9 11.9 C54.9 12.4 55.9 13.8 55.9 15.5 V32.4 C55.9 46.4 46.6 56.4 33.9 62.7 C33.3 63.2 30.7 63.2 30.1 62.7 C17.4 56.4 8.1 46.4 8.1 32.4 V15.5 C8.1 13.8 9.1 12.4 11.1 11.9 Z" fill="#15203A"/><path d="M32 15.5V37.5M22.47 21L41.53 32M22.47 32L41.53 21" stroke="#FFE04A" stroke-width="6.4" stroke-linecap="round"/><path d="M19 49.5 C22 44 26 43.5 29 47 S34.5 52 38 47.5 S43 42.5 45 43" fill="none" stroke="#FFE04A" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="badge">AnteFirma*</span><span>prima analisi</span></div>
               <h1 id="v-title">Posso leggere questa pagina per te?</h1>
             </header>
             <div class="body">
@@ -631,6 +632,7 @@
           <div class="bar"></div>
           <header>
             <div class="eyebrow">
+              <svg class="mark" viewBox="0 0 64 72" aria-hidden="true"><path d="M32 4 L55.5 10 C57.5 10.6 58.5 12.2 58.5 14.2 V34 C58.5 48.5 48.5 59.5 34.2 66.6 C33.3 67.1 30.7 67.1 29.8 66.6 C15.5 59.5 5.5 48.5 5.5 34 V14.2 C5.5 12.2 6.5 10.6 8.5 10 Z" fill="#FFE04A"/><path d="M32 6.6 L52.9 11.9 C54.9 12.4 55.9 13.8 55.9 15.5 V32.4 C55.9 46.4 46.6 56.4 33.9 62.7 C33.3 63.2 30.7 63.2 30.1 62.7 C17.4 56.4 8.1 46.4 8.1 32.4 V15.5 C8.1 13.8 9.1 12.4 11.1 11.9 Z" fill="#15203A"/><path d="M32 15.5V37.5M22.47 21L41.53 32M22.47 32L41.53 21" stroke="#FFE04A" stroke-width="6.4" stroke-linecap="round"/><path d="M19 49.5 C22 44 26 43.5 29 47 S34.5 52 38 47.5 S43 42.5 45 43" fill="none" stroke="#FFE04A" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span class="badge">${esc(level.icon || '')} ${esc(level.label || '')}</span>
               <span>${esc(verdict.actionLabel || '')}</span>
             </div>

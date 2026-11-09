@@ -114,7 +114,7 @@ export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
     total += sub;
     hasRecurring = true;
     lines.push({
-      label: `${formatMoney(pricing.amount, currency)} × ${cycles} ${cycles === 1 ? 'ciclo' : 'cicli'}`,
+      label: `${formatMoney(pricing.amount, currency)} × ${cycles} ${cycleWord(pricing.period, cycles)}`,
       amount: sub,
       kind: 'recurring',
     });
@@ -285,6 +285,16 @@ function formatDate(d) {
 
 function periodLabel(period) {
   return { day: 'giorno', week: 'settimana', month: 'mese', quarter: 'trimestre', year: 'anno' }[period] || period;
+}
+
+/** «× 12 mesi» si legge al volo, «× 12 cicli» no. */
+function cycleWord(period, n) {
+  const words = {
+    month: ['mese', 'mesi'], year: ['anno', 'anni'], week: ['settimana', 'settimane'],
+    quarter: ['trimestre', 'trimestri'], semester: ['semestre', 'semestri'],
+  };
+  const w = words[period] || ['ciclo', 'cicli'];
+  return n === 1 ? w[0] : w[1];
 }
 
 function round2(n) {
