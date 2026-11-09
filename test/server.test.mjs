@@ -113,6 +113,18 @@ test('la quota esaurita arriva come errore con un messaggio per la persona', asy
   });
 });
 
+test('finite le analisi gratuite del mese, il messaggio lo dice', async () => {
+  const storage = memoryStorage();
+  await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });
+  const { fetchImpl } = fakeServer({ '/v1/analyze': () => json(429, { error: 'quota_month' }, { 'retry-after': '1950000' }) });
+  await assert.rejects(analyzeRemote({ text: 'x' }, { storage, fetchImpl, base: BASE }), (e) => {
+    assert.equal(e.code, 'quota_month');
+    assert.match(e.message, /analisi gratuite di questo mese/);
+    assert.equal(e.retryAfter, 1950000);
+    return true;
+  });
+});
+
 test('il servizio occupato riporta quando riprovare', async () => {
   const storage = memoryStorage();
   await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });

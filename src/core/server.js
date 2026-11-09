@@ -46,6 +46,7 @@ export class ServerError extends Error {
 
 const MESSAGES = {
   quota: 'Hai usato tutte le analisi di oggi. Domani il conteggio riparte.',
+  quota_month: 'Hai usato le analisi gratuite di questo mese. Il conteggio riparte il primo del mese.',
   timeout: 'L’analisi ha impiegato troppo tempo.',
   network: 'Il server di AnteFirma non è raggiungibile. Controlla la connessione.',
   busy: 'Il servizio è molto richiesto in questo momento. Riprova fra poco.',

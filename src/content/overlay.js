@@ -661,7 +661,7 @@
                  </p>`
               : ''
           }
-          <div class="provenance">Verdetto da ${esc(engineLabel(verdict.engine))} · rischio della decisione ${esc(String(verdict.score))}/100</div>
+          <div class="provenance">Verdetto da ${esc(engineLabel(verdict.engine))} · rischio della decisione ${esc(String(verdict.score))}/100${quotaNote(verdict)}</div>
           <div class="disclaimer">${esc(consumer.disclaimer || 'Analisi automatica a scopo informativo. Non è un parere legale.')}</div>
         </div>
       `,
@@ -788,6 +788,18 @@
         this.resolve = resolve;
       });
     }
+  }
+
+  /**
+   * Quante analisi gratuite restano nel mese. Solo per un verdetto appena
+   * arrivato dal server: uno dalla cache locale non ha consumato niente, e il
+   * suo numero sarebbe vecchio.
+   */
+  function quotaNote(verdict = {}) {
+    const m = verdict.engine?.quota?.month;
+    if (!m || verdict.cached || typeof m.remaining !== 'number') return '';
+    const n = m.remaining;
+    return ` · ${n === 1 ? 'ti resta 1 analisi gratuita' : `ti restano ${n} analisi gratuite`} questo mese`;
   }
 
   /** Da dove viene questo verdetto: conta per la fiducia che merita. */
