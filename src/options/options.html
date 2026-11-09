@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vincolo — Impostazioni</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img src="../icons/icon48.png" alt="" width="34" height="34">
+      <div>
+        <h1>Vincolo</h1>
+        <p>Prima di accettare, sai a cosa ti leghi.</p>
+      </div>
+    </header>
+
+    <div id="welcome" class="welcome" hidden>
+      <strong>Benvenuto.</strong> L'estensione funziona già con il solo motore locale, senza inviare nulla fuori dal browser.
+      Se vuoi anche l'analisi approfondita — costo reale, conseguenze, spiegazioni — configura una chiave API qui sotto.
+    </div>
+
+    <section class="card">
+      <h2>Protezione</h2>
+      <label class="switch">
+        <input type="checkbox" id="enabled">
+        <span><strong>Firewall attivo</strong><em>Intercetta i pulsanti di accettazione, acquisto, firma e consenso.</em></span>
+      </label>
+
+      <label class="field">
+        <span>Blocca il click a partire dal livello</span>
+        <select id="blockFrom">
+          <option value="review">🟡 REVIEW — anche per condizioni da rivedere</option>
+          <option value="commitment">🟠 COMMITMENT — quando c'è un obbligo significativo (consigliato)</option>
+          <option value="high_risk">🔴 HIGH RISK — solo per clausole molto sfavorevoli</option>
+          <option value="critical">⛔ CRITICAL — solo per conseguenze difficili da annullare</option>
+        </select>
+        <em>Sotto questa soglia ricevi solo una notifica discreta, senza interruzione.</em>
+      </label>
+
+      <label class="field">
+        <span>Le tue tutele di riferimento</span>
+        <select id="jurisdiction">
+          <option value="IT">🇮🇹 Italia — Codice del Consumo e Codice civile</option>
+          <option value="ES">🇪🇸 Spagna — direttive UE</option>
+          <option value="EU">🇪🇺 Unione Europea</option>
+          <option value="UK">🇬🇧 Regno Unito</option>
+          <option value="US">🇺🇸 Stati Uniti</option>
+          <option value="OTHER">Altro</option>
+        </select>
+        <em>Con Italia, Spagna e UE viene attivato il motore che confronta le clausole con le tutele previste per i consumatori. I riferimenti al Codice del Consumo e al codice civile valgono solo per l’Italia: altrove restano le direttive europee.</em>
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>Cosa vuoi proteggere</h2>
+      <p class="lead">La stessa clausola non pesa uguale per tutti. Una licenza mondiale sui contenuti è un dettaglio per chi carica foto delle vacanze e un problema serio per chi vive del proprio lavoro creativo.</p>
+      <div class="grid" id="profile-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2>Kit di uscita</h2>
+      <p class="lead">Sapere che devi disdire entro il 15 giugno non basta: il costo vero è scrivere la lettera. Questi dati restano su questo dispositivo e servono solo a precompilarla.</p>
+
+      <label class="switch">
+        <input type="checkbox" id="trackCommitments">
+        <span><strong>Registra gli impegni che accetti</strong><em>Scadenze, penali e prova di cosa avevi accettato.</em></span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="reminders">
+        <span><strong>Avvisami prima della scadenza</strong><em>Notifiche a 30, 7 e 1 giorno dal termine di disdetta.</em></span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="watchChanges">
+        <span><strong>Sorveglia le condizioni già accettate</strong><em>Controllo settimanale. Prima verifica se il documento è cambiato, poi se il tuo impegno è cambiato: nella maggior parte dei casi si ferma al primo passo, senza scaricare né analizzare nulla.</em></span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="watchUsesRemote">
+        <span><strong>Il controllo automatico può usare l'AI remota</strong><em>Lasciato spento, un controllo che parte da solo usa al massimo il modello sul dispositivo: non spende crediti e non fa uscire i tuoi contratti. Quando sei tu a premere «Verifica modifiche», l'AI viene usata comunque.</em></span>
+      </label>
+
+      <div class="row">
+        <label class="field">
+          <span>Nome e cognome</span>
+          <input type="text" id="id-name" placeholder="Mario Rossi">
+        </label>
+        <label class="field">
+          <span>Email</span>
+          <input type="text" id="id-email" placeholder="mario.rossi@esempio.it">
+        </label>
+      </div>
+      <div class="row">
+        <label class="field">
+          <span>Indirizzo</span>
+          <input type="text" id="id-address" placeholder="Via Roma 1, 20100 Milano">
+        </label>
+        <label class="field">
+          <span>Codice cliente ricorrente (facoltativo)</span>
+          <input type="text" id="id-customer" placeholder="lasciato vuoto se cambia ogni volta">
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Analisi AI</h2>
+      <p class="lead">Il motore locale gira sempre e non manda nulla fuori dal browser. L'AI viene interpellata solo quando il motore locale trova qualcosa che merita approfondimento — o quando stai per pagare o firmare.</p>
+
+      <label class="switch">
+        <input type="checkbox" id="useLocalModel">
+        <span>
+          <strong>Modello integrato in Chrome (sul dispositivo)</strong>
+          <em>Primo passaggio: il contratto non esce dal computer e non consuma crediti. <span id="local-status">verifico…</span></em>
+        </span>
+      </label>
+
+      <label class="switch">
+        <input type="checkbox" id="speculative">
+        <span><strong>Pre-analisi prima del click</strong><em>L'analisi parte quando il pulsante entra nel campo visivo, così l'avviso è istantaneo. Usa solo regole locali e modello on-device: nessuna chiamata remota.</em></span>
+      </label>
+
+      <label class="switch">
+        <input type="checkbox" id="useLLM">
+        <span><strong>Usa l'analisi AI remota</strong><em>Serve una chiave API tua. Il testo analizzato viene inviato al provider scelto.</em></span>
+      </label>
+
+      <div class="row">
+        <label class="field">
+          <span>Provider</span>
+          <select id="provider">
+            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="openai">OpenAI</option>
+            <option value="none">Nessuno — solo regole locali</option>
+          </select>
+        </label>
+        <label class="field">
+          <span>Modello</span>
+          <input type="text" id="model" placeholder="claude-sonnet-4-5">
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Chiave API</span>
+        <div class="key-row">
+          <input type="password" id="apiKey" placeholder="sk-…" autocomplete="off" spellcheck="false">
+          <button class="secondary" id="toggle-key" type="button">Mostra</button>
+          <button class="secondary" id="test-key" type="button">Prova</button>
+        </div>
+        <em>Resta in <code>chrome.storage.local</code>, su questo dispositivo. Non viene sincronizzata sull'account.</em>
+      </label>
+      <div id="key-status" class="key-status" hidden></div>
+
+      <label class="field">
+        <span>Soglia di attivazione dell'AI: <b id="threshold-val">15</b></span>
+        <input type="range" id="llmThreshold" min="0" max="60" step="5">
+        <em>Sotto questo punteggio del motore locale, l'AI non viene chiamata. Zero = sempre.</em>
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>Siti esclusi</h2>
+      <p class="lead">Un dominio per riga. Su questi siti il firewall non interviene.</p>
+      <textarea id="allowlist" rows="4" placeholder="esempio.it&#10;intranet.azienda.com"></textarea>
+    </section>
+
+    <section class="card">
+      <h2>Dati locali</h2>
+      <div class="row">
+        <button class="secondary" id="clear-cache" type="button">Svuota la cache delle analisi</button>
+        <button class="secondary danger" id="clear-history" type="button">Cancella lo storico</button>
+      </div>
+      <p class="lead small">Cache e storico restano su questo dispositivo. Lo storico serve a ritrovare le scadenze di disdetta.</p>
+    </section>
+
+    <div class="save-bar">
+      <span id="save-status"></span>
+      <button class="primary" id="save" type="button">Salva</button>
+    </div>
+
+    <p class="foot-note">
+      Analisi automatica a scopo informativo: non è consulenza legale. I riferimenti normativi servono a indicarti dove guardare, non a stabilire la validità di una clausola nel tuo caso concreto.
+    </p>
+  </div>
+
+  <script type="module" src="options.js"></script>
+</body>
+</html>

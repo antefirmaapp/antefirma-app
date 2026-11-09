@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StreamPro — Attiva il tuo piano</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    body { margin: 0; background: #f2f4f7; color: #16191f; }
+    .wrap { max-width: 560px; margin: 40px auto; padding: 0 18px 60px; }
+    .card { background: #fff; border-radius: 14px; padding: 26px; box-shadow: 0 2px 14px rgba(0,0,0,.07); }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    .sub { color: #6b7280; font-size: 14px; margin: 0 0 22px; }
+    .price { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+    .price .big { font-size: 40px; font-weight: 700; letter-spacing: -.02em; }
+    .price .per { color: #6b7280; font-size: 15px; }
+    .badge { display: inline-block; background: #e8f6ee; color: #14603c; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; margin-bottom: 18px; }
+    ul.features { list-style: none; padding: 0; margin: 0 0 22px; font-size: 14px; color: #414852; }
+    ul.features li { padding: 5px 0 5px 22px; position: relative; }
+    ul.features li::before { content: '✓'; position: absolute; left: 0; color: #1a7f52; font-weight: 700; }
+    label.consent { display: flex; gap: 9px; align-items: flex-start; font-size: 13px; color: #414852; margin-bottom: 10px; line-height: 1.5; }
+    button.cta { width: 100%; background: #111827; color: #fff; border: none; border-radius: 10px; padding: 15px; font-size: 16px; font-weight: 650; cursor: pointer; }
+    button.cta:hover { background: #000; }
+    .fineprint { font-size: 9px; color: #9aa2ae; line-height: 1.45; margin-top: 14px; }
+    .terms { background: #fff; border-radius: 14px; padding: 24px; margin-top: 18px; font-size: 12.5px; line-height: 1.65; color: #414852; }
+    .terms h2 { font-size: 14px; margin: 0 0 12px; color: #16191f; }
+    .terms p { margin: 0 0 10px; }
+    .note { background: #fffbe6; border: 1px solid #f0e0a8; border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-bottom: 18px; line-height: 1.5; }
+    .safe { margin-top: 18px; background: #fff; border-radius: 14px; padding: 22px; }
+    .safe button { background: #fff; border: 1px solid #d7dbe2; border-radius: 9px; padding: 11px 16px; font-size: 14px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="note">
+      <strong>Pagina di prova.</strong> Serve a verificare il firewall: il pulsante qui sotto contiene tutte le trappole classiche
+      — rinnovo tacito, durata minima nascosta, penale, costo di attivazione in caratteri minuscoli, consenso già spuntato.
+      Nessun dato viene inviato da nessuna parte.
+    </div>
+
+    <div class="card">
+      <h1>StreamPro Premium</h1>
+      <p class="sub">Tutto il catalogo, senza pubblicità, su quattro dispositivi.</p>
+
+      <span class="badge">Primo mese gratis</span>
+      <div class="price">
+        <span class="big">€ 19,99</span>
+        <span class="per">/ mese</span>
+      </div>
+
+      <ul class="features">
+        <li>4K su quattro schermi</li>
+        <li>Download offline illimitati</li>
+        <li>Disdici quando vuoi*</li>
+      </ul>
+
+      <form id="checkout">
+        <label class="consent">
+          <input type="checkbox" id="terms" checked>
+          <span>Accetto i <a href="#terms">Termini e condizioni di abbonamento</a> e l'informativa privacy, e acconsento all'invio di comunicazioni di marketing e alla condivisione dei miei dati con partner terzi per finalità di profilazione.</span>
+        </label>
+
+        <button type="submit" class="cta">Conferma abbonamento</button>
+
+        <p class="fineprint">
+          *Il piano prevede una durata minima di 24 mesi. Alla scadenza il contratto si rinnova automaticamente per un uguale
+          periodo salvo disdetta da inviare con preavviso di almeno 60 giorni. Spese di attivazione una tantum di € 49,00.
+          In caso di recesso anticipato è dovuta una penale di € 120,00. Gli importi versati non sono rimborsabili.
+        </p>
+      </form>
+    </div>
+
+    <div class="safe">
+      <p style="margin:0 0 12px;font-size:13.5px;color:#414852">Controprova — questo pulsante non deve far scattare nulla:</p>
+      <button type="button" onclick="document.getElementById('out').textContent = 'Nessun blocco: corretto.'">Iscriviti alla newsletter</button>
+      <p id="out" style="font-size:12.5px;color:#6b7280;margin:10px 0 0"></p>
+    </div>
+
+    <div class="terms" id="terms">
+      <h2>Termini e condizioni di abbonamento</h2>
+      <p><strong>1. Corrispettivo.</strong> Il canone è pari a € 19,99 al mese, oltre a spese di attivazione una tantum di € 49,00. Il fornitore si riserva il diritto di modificare unilateralmente il prezzo del servizio dandone comunicazione sul proprio sito.</p>
+      <p><strong>2. Durata.</strong> Il contratto ha una durata minima di 24 mesi a decorrere dalla data di attivazione.</p>
+      <p><strong>3. Rinnovo.</strong> Alla scadenza il contratto si rinnova automaticamente per un uguale periodo, salvo disdetta da comunicarsi con preavviso di almeno 60 giorni.</p>
+      <p><strong>4. Recesso anticipato.</strong> In caso di recesso prima della scadenza del periodo minimo è dovuta una penale pari a € 120,00.</p>
+      <p><strong>5. Rimborsi.</strong> Gli importi versati non sono rimborsabili in alcun caso, nemmeno in caso di mancato utilizzo del servizio.</p>
+      <p><strong>6. Contenuti dell'utente.</strong> L'utente concede al fornitore una licenza mondiale, gratuita, perpetua e irrevocabile di usare, riprodurre, modificare e distribuire i contenuti caricati, anche per l'addestramento di modelli di intelligenza artificiale.</p>
+      <p><strong>7. Dati personali.</strong> I dati potranno essere condivisi con terze parti a fini di profilazione e pubblicità personalizzata, e potranno essere trasferiti al di fuori dell'Unione Europea. I dati vengono conservati anche dopo la chiusura dell'account.</p>
+      <p><strong>8. Controversie.</strong> Ogni controversia sarà devoluta ad arbitrato rituale. L'utente rinuncia a partecipare ad azioni collettive. Il foro competente esclusivo è quello di Dublino.</p>
+      <p><strong>9. Responsabilità.</strong> Il fornitore non sarà in alcun modo responsabile per danni diretti o indiretti derivanti dall'uso del servizio.</p>
+      <p><strong>10. Account.</strong> Il fornitore può sospendere o chiudere l'account in qualsiasi momento a proprio insindacabile giudizio.</p>
+    </div>
+  </div>
+
+  <script>
+    window.__demoSubmitted = false;
+    document.getElementById('checkout').addEventListener('submit', (e) => {
+      e.preventDefault();
+      window.__demoSubmitted = true;
+      document.getElementById('out').textContent =
+        'Abbonamento attivato. (Se leggi questo senza aver visto l\'avviso, il firewall non è intervenuto.)';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,609 @@
+/**
+ * Il kit di uscita, lato interfaccia.
+ *
+ * Ogni impegno registrato porta con sé quattro azioni, che sono le quattro
+ * cose che servono davvero quando arriva il momento:
+ *   · la scadenza nel calendario, perché l'estensione non può ricordartelo
+ *     se Chrome è chiuso;
+ *   · la lettera già scritta, perché il costo vero della disdetta è scriverla;
+ *   · la prova di cosa avevi accettato;
+ *   · il confronto con le condizioni di oggi.
+ *
+ * Due di queste quattro sono in prima fila; le altre stanno nel menu «⋯»,
+ * insieme all'unica azione che distrugge qualcosa. Sei pulsanti identici
+ * larghi 11,5 px in una colonna da 350 px non sono una scelta: sono un invito
+ * a premere quello sbagliato.
+ */
+
+import { esc } from './render.js';
+import { formatMoney } from '../core/text.js';
+import { commitmentState, costOfDoingNothing, portfolioSummary, formatDate } from '../core/commitments.js';
+import { LETTER_LABELS } from '../core/letter.js';
+
+const $ = (sel) => document.querySelector(sel);
+
+let send = async () => { throw new Error('bridge non inizializzato'); };
+let cache = [];
+
+/** Ricerca e filtri sopravvivono al re-render: sono lo sguardo dell'utente. */
+const view = { query: '', filter: 'all' };
+
+/** L'eliminazione in attesa di conferma silenziosa: vedi `startDelete`. */
+let pending = null;
+
+/** Oltre questa soglia setacciare a occhio non funziona più. */
+const SEARCH_THRESHOLD = 8;
+
+// ── ordinamento e raggruppamento ────────────────────────────────────────────
+
+/**
+ * Lo storage impila con `unshift`: l'ordine naturale della lista è quello di
+ * registrazione, dal più recente. È l'ordine sbagliato — l'unica cosa che
+ * conta qui è quanto manca alla scadenza. Con venti impegni, quello da
+ * disdire fra tre giorni finiva in fondo.
+ */
+const GROUPS = [
+  { id: 'week', label: 'Entro 7 giorni' },
+  { id: 'month', label: 'Entro 30 giorni' },
+  { id: 'later', label: 'Più avanti' },
+  { id: 'passed', label: 'Finestra scaduta' },
+  { id: 'closed', label: 'Disdetti' },
+];
+
+function groupOf(c, state) {
+  if (c.status !== 'active') return 'closed';
+  if (state.daysLeft == null) return 'later';
+  if (state.daysLeft < 0) return 'passed';
+  if (state.daysLeft <= 7) return 'week';
+  if (state.daysLeft <= 30) return 'month';
+  return 'later';
+}
+
+const CHIP_LABELS = {
+  all: 'Tutti',
+  urgent: 'Entro 30 giorni',
+  active: 'Attivi',
+  cancelled: 'Disdetti',
+};
+
+function matchesFilter(c, filter) {
+  if (filter === 'all') return true;
+  if (filter === 'active') return c.status === 'active';
+  if (filter === 'cancelled') return c.status !== 'active';
+  if (filter === 'urgent') {
+    if (c.status !== 'active') return false;
+    const { daysLeft } = commitmentState(c);
+    return daysLeft != null && daysLeft >= 0 && daysLeft <= 30;
+  }
+  return true;
+}
+
+function matchesQuery(c, query) {
+  if (!query) return true;
+  const haystack = [c.provider, c.host, c.headline].filter(Boolean).join(' ').toLowerCase();
+  // Ogni parola deve comparire: chi scrive due termini sta restringendo.
+  return query.split(/\s+/).filter(Boolean).every((word) => haystack.includes(word));
+}
+
+// ── avvio ───────────────────────────────────────────────────────────────────
+
+export function init(sender) {
+  send = sender;
+  $('#modal-close').addEventListener('click', closeModal);
+  $('#modal').addEventListener('click', (e) => {
+    if (e.target === $('#modal')) closeModal();
+  });
+  $('#commitments-list').addEventListener('click', onAction);
+
+  $('#c-search').addEventListener('input', (e) => {
+    view.query = e.target.value.trim().toLowerCase();
+    render(cache);
+  });
+  $('#c-filters').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    view.filter = chip.dataset.filter;
+    render(cache);
+  });
+
+  // Un menu aperto che resta aperto mentre si clicca altrove è un menu che
+  // finisce sopra la card sbagliata: in cattura, così vale anche per i click
+  // che vengono fermati più in basso.
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.c-menu-wrap')) closeMenus();
+  }, true);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!$('#modal').hidden) { closeModal(); return; }
+    closeMenus();
+  });
+}
+
+export async function load({ focusId = null } = {}) {
+  cache = await send('GET_COMMITMENTS');
+  render(cache);
+  if (focusId) {
+    const el = document.querySelector(`[data-commitment="${CSS.escape(focusId)}"]`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el?.classList.add('focus');
+  }
+}
+
+// ── rendering ───────────────────────────────────────────────────────────────
+
+function render(list) {
+  const summary = portfolioSummary(list);
+  $('#portfolio').innerHTML = list.length ? renderPortfolio(summary) : '';
+
+  // La riga in attesa di eliminazione sparisce subito dalla vista, ma dallo
+  // storage non è ancora uscita: è quello che rende annullabile il gesto.
+  const alive = list.filter((c) => c.id !== pending?.id);
+
+  $('#c-tools').hidden = alive.length <= SEARCH_THRESHOLD;
+  if ($('#c-tools').hidden) {
+    // Nascondere i filtri lasciandoli attivi renderebbe invisibile metà lista.
+    view.query = '';
+    view.filter = 'all';
+    $('#c-search').value = '';
+  }
+  paintChips(alive);
+
+  if (!list.length) {
+    $('#commitments-list').innerHTML = `<div class="empty">
+      Nessun impegno registrato.<br>
+      Quando prosegui su un contratto o un abbonamento, la scadenza di disdetta finisce qui —
+      con la lettera già pronta e la prova di cosa avevi accettato.
+    </div>`;
+    return;
+  }
+
+  const shown = alive
+    .filter((c) => matchesFilter(c, view.filter) && matchesQuery(c, view.query))
+    .map((c) => ({ c, state: commitmentState(c) }));
+
+  if (!shown.length) {
+    $('#commitments-list').innerHTML = `<div class="empty">
+      Nessun impegno corrisponde a questa ricerca.<br>
+      <button class="link" data-act="reset-view">Mostra tutti gli impegni</button>
+    </div>`;
+    return;
+  }
+
+  const buckets = new Map(GROUPS.map((g) => [g.id, []]));
+  for (const item of shown) buckets.get(groupOf(item.c, item.state)).push(item);
+
+  const html = GROUPS.map((g) => {
+    const items = buckets.get(g.id);
+    if (!items.length) return '';
+    // Dentro il gruppo si va dal più imminente al più lontano; fra le finestre
+    // già chiuse invece conta l'opposto, la più fresca è quella su cui si può
+    // ancora tentare qualcosa.
+    items.sort((a, b) =>
+      g.id === 'passed'
+        ? (b.state.daysLeft ?? -Infinity) - (a.state.daysLeft ?? -Infinity)
+        : (a.state.daysLeft ?? Infinity) - (b.state.daysLeft ?? Infinity)
+    );
+    return `<h3 class="c-group" data-group="${g.id}">${esc(g.label)}<span>${items.length}</span></h3>
+      ${items.map(({ c, state }) => renderItem(c, state)).join('')}`;
+  }).join('');
+
+  $('#commitments-list').innerHTML = html;
+}
+
+function paintChips(list) {
+  for (const chip of $('#c-filters').querySelectorAll('.chip')) {
+    const f = chip.dataset.filter;
+    const on = f === view.filter;
+    chip.classList.toggle('active', on);
+    chip.setAttribute('aria-pressed', String(on));
+    chip.textContent = `${CHIP_LABELS[f]} · ${list.filter((c) => matchesFilter(c, f)).length}`;
+  }
+}
+
+function renderPortfolio(s) {
+  const totals = s.totals.map((t) => formatMoney(t.amount, t.currency)).join(' · ') || '—';
+  return `
+    <div class="big">${esc(totals)}</div>
+    <div class="cap">esposizione complessiva su ${s.count} ${s.count === 1 ? 'impegno attivo' : 'impegni attivi'}</div>
+    ${s.next ? `<div class="next">Prossima scadenza: <strong>${esc(s.next.c.provider || s.next.c.host || '')}</strong> — ${esc(s.next.state.label.toLowerCase())}</div>` : ''}
+  `;
+}
+
+function renderItem(c, state = commitmentState(c)) {
+  const doing = costOfDoingNothing(c);
+  const lastChange = (c.changes || []).slice(-1)[0];
+  const id = esc(c.id);
+
+  return `
+    <div class="c-item" data-commitment="${id}">
+      <div class="c-top">
+        <span class="c-name">${esc(c.provider || c.host || 'Impegno')}</span>
+        <span class="c-amount">${c.worstCase != null ? esc(formatMoney(c.worstCase, c.currency)) : ''}</span>
+      </div>
+      ${c.headline ? `<div class="c-head">${esc(c.headline)}</div>` : ''}
+      <span class="c-state" data-urgency="${esc(state.urgency)}">${esc(state.label)}</span>
+      ${doing && state.urgency !== 'done' ? `<div class="c-nothing">${esc(doing.label)}</div>` : ''}
+      ${c.renewalAt ? `<div class="c-nothing">Scadenza del periodo: ${esc(formatDate(new Date(c.renewalAt)))}${c.noticeMonths ? ` · preavviso ${Math.round(c.noticeMonths * 30)} giorni` : ''}</div>` : ''}
+      ${lastChange && lastChange.changed ? `<div class="c-change">⚠️ ${esc(lastChange.summary)}</div>` : ''}
+      ${lastChange && !lastChange.changed ? `<div class="c-nothing">✓ Verificato il ${esc(new Date(lastChange.checkedAt).toLocaleDateString('it-IT'))}: condizioni invariate.</div>` : ''}
+      ${state.urgency !== 'done' && c.deadlineAt && !c.inCalendar
+        ? `<div class="c-hint">Il promemoria del browser funziona solo con Chrome aperto: metti la scadenza anche in calendario.</div>`
+        : ''}
+      <div class="c-actions">
+        <button class="strong" data-act="ics" data-id="${id}">Calendario</button>
+        <button data-act="letter" data-id="${id}">Lettera</button>
+        <div class="c-menu-wrap">
+          <button class="c-more" data-act="menu" data-id="${id}"
+                  aria-haspopup="true" aria-expanded="false" aria-label="Altre azioni">⋯</button>
+          <div class="c-menu" data-menu="${id}" hidden>${renderMenu(c)}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMenu(c) {
+  const id = esc(c.id);
+  return `
+    <button data-act="check" data-id="${id}">Verifica modifiche</button>
+    <button data-act="proof" data-id="${id}">Prova di cosa hai accettato</button>
+    <button data-act="export" data-id="${id}">Esporta l’archivio</button>
+    ${c.status === 'active'
+      ? `<button data-act="cancelled" data-id="${id}">Segna come disdetto</button>`
+      : `<button data-act="reactivate" data-id="${id}">Riattiva</button>`}
+    <button class="danger" data-act="delete-ask" data-id="${id}">Elimina definitivamente…</button>
+  `;
+}
+
+/**
+ * Il secondo passo dell'eliminazione. Non è una formalità: qui sparisce lo
+ * snapshot integrale, l'impronta SHA-256 che lo rende opponibile e il piano
+ * delle scadenze. Va detto per intero, e va offerta la via d'uscita — portarsi
+ * via l'archivio prima di bruciarlo.
+ */
+function renderConfirm(c) {
+  const id = esc(c.id);
+  return `
+    <p class="c-confirm-text">
+      Elimini <strong>${esc(c.provider || c.host || 'questo impegno')}</strong>?
+      Sparisce anche la prova: il testo conservato, l’impronta SHA-256 che lo certifica
+      e le scadenze. Non si recupera.
+    </p>
+    <button data-act="export" data-id="${id}">Esporta prima di eliminare</button>
+    <button class="danger" data-act="delete-confirm" data-id="${id}">Sì, elimina</button>
+    <button class="link" data-act="menu-close" data-id="${id}">Annulla</button>
+  `;
+}
+
+// ── menu ────────────────────────────────────────────────────────────────────
+
+function closeMenus() {
+  for (const menu of document.querySelectorAll('.c-menu')) {
+    if (menu.hidden) continue;
+    menu.hidden = true;
+    // Il secondo passo non sopravvive alla chiusura: riaprire il menu deve
+    // ripartire dal menu, non dalla conferma di eliminazione già armata.
+    const c = cache.find((x) => x.id === menu.dataset.menu);
+    if (c) menu.innerHTML = renderMenu(c);
+    menu.closest('.c-menu-wrap')?.querySelector('.c-more')?.setAttribute('aria-expanded', 'false');
+  }
+}
+
+function toggleMenu(id) {
+  const menu = document.querySelector(`.c-menu[data-menu="${CSS.escape(id)}"]`);
+  if (!menu) return;
+  const wasOpen = !menu.hidden;
+  closeMenus();
+  if (wasOpen) return;
+  menu.hidden = false;
+  menu.closest('.c-menu-wrap')?.querySelector('.c-more')?.setAttribute('aria-expanded', 'true');
+  menu.querySelector('button')?.focus();
+}
+
+// ── azioni ──────────────────────────────────────────────────────────────────
+
+/** Azioni che non parlano con il service worker: nessuna attesa da mostrare. */
+const INSTANT = new Set(['menu', 'menu-close', 'delete-ask', 'delete-confirm', 'reset-view']);
+
+async function onAction(event) {
+  const btn = event.target.closest('button[data-act]');
+  if (!btn) return;
+  const { act, id } = btn.dataset;
+
+  if (INSTANT.has(act)) {
+    if (act === 'menu') toggleMenu(id);
+    if (act === 'menu-close') closeMenus();
+    if (act === 'delete-ask') {
+      const c = cache.find((x) => x.id === id);
+      const menu = document.querySelector(`.c-menu[data-menu="${CSS.escape(id)}"]`);
+      if (c && menu) {
+        menu.innerHTML = renderConfirm(c);
+        menu.classList.add('confirming');
+        menu.querySelector('.danger')?.focus();
+      }
+    }
+    if (act === 'delete-confirm') startDelete(id);
+    if (act === 'reset-view') {
+      view.query = '';
+      view.filter = 'all';
+      $('#c-search').value = '';
+      render(cache);
+    }
+    return;
+  }
+
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '…';
+
+  try {
+    if (act === 'letter') await showLetter(id);
+    if (act === 'ics') await downloadIcs(id);
+    if (act === 'check') await showChanges(id);
+    if (act === 'proof') await showProof(id);
+    if (act === 'export') await exportArchive(id);
+    if (act === 'cancelled') {
+      await send('UPDATE_COMMITMENT', { id, patch: { status: 'cancelled' } });
+      await load();
+    }
+    if (act === 'reactivate') {
+      await send('UPDATE_COMMITMENT', { id, patch: { status: 'active' } });
+      await load();
+    }
+  } catch (err) {
+    openModal('Non è stato possibile completare l’operazione', `<div class="status error">${esc(err.message)}</div>`, []);
+  } finally {
+    // Dopo un `load()` il pulsante è staccato dal documento: innocuo.
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
+// ── eliminazione con finestra di ripensamento ───────────────────────────────
+
+const UNDO_MS = 8000;
+
+/**
+ * `DELETE_COMMITMENT` è irreversibile e non esiste il messaggio inverso: la
+ * sola forma onesta di «annulla» è **non eliminare ancora**. La card sparisce
+ * subito, ma la cancellazione parte solo allo scadere della finestra. Se il
+ * pannello viene chiuso prima, l'impegno resta: l'errore cade dalla parte
+ * giusta.
+ */
+function startDelete(id) {
+  const c = cache.find((x) => x.id === id);
+  if (!c) return;
+  closeMenus();
+  if (pending) finalizeDelete();          // una eliminazione in sospeso per volta
+
+  pending = { id, commitment: c, endsAt: Date.now() + UNDO_MS, timer: null, tick: null };
+  pending.timer = setTimeout(finalizeDelete, UNDO_MS);
+  pending.tick = setInterval(tickUndo, 500);
+  render(cache);
+  showUndoBar(c);
+}
+
+function showUndoBar(c) {
+  const bar = $('#undo-bar');
+  const name = c.provider || c.host || 'Impegno';
+  // La barra si scrive una volta sola: riscrivere l'HTML a ogni secondo
+  // toglierebbe il fuoco dal pulsante «Annulla» proprio a chi lo sta cercando
+  // con la tastiera.
+  bar.innerHTML = `<span>Eliminato «${esc(name)}» con la sua prova.</span>
+    <button class="link" id="undo-delete">Annulla (<span id="undo-count">${Math.ceil(UNDO_MS / 1000)}</span>)</button>`;
+  bar.hidden = false;
+  $('#undo-delete').addEventListener('click', undoDelete);
+}
+
+function tickUndo() {
+  const el = document.getElementById('undo-count');
+  if (!el || !pending) return;
+  el.textContent = String(Math.max(1, Math.ceil((pending.endsAt - Date.now()) / 1000)));
+}
+
+function hideUndoBar() {
+  const bar = $('#undo-bar');
+  bar.hidden = true;
+  bar.innerHTML = '';
+}
+
+function undoDelete() {
+  if (!pending) return;
+  clearTimeout(pending.timer);
+  clearInterval(pending.tick);
+  const { id } = pending;
+  pending = null;
+  hideUndoBar();
+  render(cache);
+  document.querySelector(`[data-commitment="${CSS.escape(id)}"]`)?.classList.add('focus');
+}
+
+async function finalizeDelete() {
+  if (!pending) return;
+  const { id } = pending;
+  clearTimeout(pending.timer);
+  clearInterval(pending.tick);
+  pending = null;
+  hideUndoBar();
+  try {
+    await send('DELETE_COMMITMENT', { id });
+    await load();
+  } catch (err) {
+    openModal('Non è stato possibile eliminare l’impegno', `<div class="status error">${esc(err.message)}</div>`, []);
+    await load();
+  }
+}
+
+// ── le quattro azioni ───────────────────────────────────────────────────────
+
+async function showLetter(id, kind = null) {
+  const letter = await send('BUILD_LETTER', { id, kind });
+
+  const options = Object.entries(LETTER_LABELS)
+    .map(([k, label]) => `<option value="${k}" ${k === letter.kind ? 'selected' : ''}>${esc(label)}</option>`)
+    .join('');
+
+  openModal(
+    'Lettera pronta da inviare',
+    `
+      <select id="letter-kind">${options}</select>
+      <ul class="checklist">${letter.checklist.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>
+      <pre id="letter-text">${esc(letter.text)}</pre>
+    `,
+    [
+      { label: 'Copia', act: (btn) => copy(letter.text, btn) },
+      { label: 'Scarica .txt', act: () => download(letter.filename, letter.text, 'text/plain') },
+    ]
+  );
+
+  $('#letter-kind').addEventListener('change', (e) => showLetter(id, e.target.value));
+}
+
+async function downloadIcs(id) {
+  const { content, filename } = await send('BUILD_ICS', { id });
+  download(filename, content, 'text/calendar');
+  // Una volta in calendario la scadenza non dipende più da noi: si smette di insistere.
+  await send('UPDATE_COMMITMENT', { id, patch: { inCalendar: true } });
+  await load();
+}
+
+async function showChanges(id) {
+  const diff = await send('CHECK_CHANGES', { id });
+  await load();
+
+  const body = diff.changed
+    ? `
+      <p class="summary">${esc(diff.summary)}</p>
+      ${diff.added.length ? `<p class="muted small"><strong>Condizioni comparse:</strong> ${esc(diff.added.join(', '))}</p>` : ''}
+      ${diff.removed.length ? `<p class="muted small"><strong>Condizioni sparite:</strong> ${esc(diff.removed.join(', '))}</p>` : ''}
+      ${diff.severity === 'major'
+        ? `<p class="muted small">Una modifica unilaterale sfavorevole può aprire la strada al recesso senza penali: nella lettera trovi la variante apposita.</p>`
+        : ''}
+    `
+    : `<p class="summary">${esc(diff.summary)}</p>`;
+
+  openModal('Confronto con le condizioni che avevi accettato', body,
+    diff.severity === 'major' ? [{ label: 'Lettera di recesso', act: () => showLetter(id, LETTER_KINDS.CHANGE) }] : []);
+}
+
+async function showProof(id) {
+  const proof = await send('GET_PROOF', { id });
+  const when = proof.snapshot?.at ? new Date(proof.snapshot.at).toLocaleString('it-IT') : '—';
+
+  openModal(
+    'Prova di cosa hai accettato',
+    `
+      ${proof.valid
+        ? '<div class="proof-ok">✓ Il testo conservato corrisponde all’impronta registrata.</div>'
+        : '<div class="proof-bad">⚠️ Il testo conservato non corrisponde all’impronta: non usarlo come prova.</div>'}
+      <p class="muted small">Accettato il ${esc(when)} · ${esc(String(proof.snapshot?.chars ?? 0))} caratteri</p>
+      <pre>${esc(proof.attestation)}</pre>
+      <p class="muted small">Estratto:</p>
+      <pre>${esc((proof.snapshot?.excerpt || '').slice(0, 700))}…</pre>
+    `,
+    [
+      { label: 'Scarica attestazione', act: () => download(proof.filename, proof.attestation, 'text/plain') },
+      {
+        label: 'Scarica il testo integrale',
+        act: () => download(proof.filename.replace('prova-', 'testo-'), proof.text || '', 'text/plain'),
+      },
+    ]
+  );
+}
+
+/**
+ * Attestazione e testo integrale in un file solo: se stai per cancellare la
+ * prova, scaricarla in due pezzi da due menu diversi è una richiesta che nessuno
+ * soddisfa.
+ */
+async function exportArchive(id) {
+  const proof = await send('GET_PROOF', { id });
+  const c = cache.find((x) => x.id === id) || {};
+  const state = commitmentState(c);
+  const header = [
+    `Impegno: ${c.provider || c.host || '—'}`,
+    c.headline ? `Sintesi: ${c.headline}` : null,
+    c.worstCase != null ? `Impegno economico stimato: ${formatMoney(c.worstCase, c.currency || 'EUR')}` : null,
+    c.deadlineAt ? `Disdetta entro: ${formatDate(new Date(c.deadlineAt))}` : null,
+    c.renewalAt ? `Scadenza del periodo: ${formatDate(new Date(c.renewalAt))}` : null,
+    `Stato: ${state.label}`,
+  ].filter(Boolean).join('\n');
+
+  const body = [
+    header,
+    '',
+    '── attestazione ────────────────────────────────────────────',
+    proof.attestation || '',
+    '',
+    '── testo integrale conservato ──────────────────────────────',
+    proof.text || proof.snapshot?.excerpt || '',
+  ].join('\n');
+
+  download((proof.filename || `archivio-${id}.txt`).replace('prova-', 'archivio-'), body, 'text/plain');
+}
+
+// ── modale e download ───────────────────────────────────────────────────────
+
+export function openModal(title, bodyHtml, actions = []) {
+  $('#modal-title').textContent = title;
+  $('#modal-body').innerHTML = bodyHtml;
+  $('#modal-foot').innerHTML = '';
+  for (const a of actions) {
+    const btn = document.createElement('button');
+    btn.className = 'secondary';
+    btn.textContent = a.label;
+    // L'azione riceve il proprio pulsante: è lì che deve comparire l'esito.
+    btn.addEventListener('click', () => a.act(btn));
+    $('#modal-foot').append(btn);
+  }
+  const close = document.createElement('button');
+  close.className = 'link';
+  close.textContent = 'Chiudi';
+  close.addEventListener('click', closeModal);
+  $('#modal-foot').append(close);
+  $('#modal').hidden = false;
+}
+
+export function closeModal() {
+  $('#modal').hidden = true;
+}
+
+function download(filename, content, mime) {
+  const blob = new Blob([content], { type: `${mime};charset=utf-8` });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+/**
+ * Copiare negli appunti è un'operazione che può fallire in silenzio (permesso
+ * negato, documento non a fuoco) e riuscire altrettanto in silenzio. In
+ * entrambi i casi l'utente premeva «Copia» e non succedeva niente di visibile:
+ * qui l'esito lo dice il pulsante stesso.
+ */
+async function copy(text, btn) {
+  try {
+    await navigator.clipboard.writeText(text);
+    flash(btn, 'Copiato ✓', 2000);
+  } catch {
+    flash(btn, 'Copia non riuscita: usa Scarica .txt', 4000, 'failed');
+  }
+}
+
+function flash(btn, message, ms, kind = 'ok') {
+  if (!btn) return;
+  if (btn.dataset.restore == null) btn.dataset.restore = btn.textContent;
+  clearTimeout(Number(btn.dataset.timer));
+  btn.textContent = message;
+  btn.classList.toggle('flash-failed', kind === 'failed');
+  btn.dataset.timer = String(setTimeout(() => {
+    btn.textContent = btn.dataset.restore;
+    btn.classList.remove('flash-failed');
+    delete btn.dataset.restore;
+    delete btn.dataset.timer;
+  }, ms));
+}

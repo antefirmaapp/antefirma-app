@@ -1,0 +1,442 @@
+/**
+ * `[hidden] { display: none }` è una regola dello user-agent: qualunque
+ * `display` dichiarato qui la batte, a prescindere dalla specificità. Senza
+ * questa riga `.modal` e `.input-block` — che sono `display: flex` e vengono
+ * pilotate con l'attributo `hidden` — restavano visibili sempre: il modale
+ * stava aperto sopra il pannello dall'apertura, intercettando ogni click.
+ */
+[hidden] {
+  display: none !important;
+}
+
+:root {
+  --bg: #ffffff;
+  --fg: #16191f;
+  --muted: #6b7280;
+  --line: #e8eaef;
+  --soft: #f7f8fa;
+  --accent: #16191f;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14171d;
+    --fg: #e8eaef;
+    --muted: #9aa2ae;
+    --line: #2a2f38;
+    --soft: #1b1f26;
+    --accent: #f2f4f8;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 12px 14px; border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 9px; }
+.brand strong { display: block; font-size: 13.5px; }
+.brand span { display: block; font-size: 11px; color: var(--muted); }
+
+.icon-btn {
+  background: none; border: 1px solid var(--line); border-radius: 8px;
+  width: 30px; height: 30px; cursor: pointer; color: var(--muted); font-size: 15px;
+}
+.icon-btn:hover { color: var(--fg); }
+
+.tabs { display: flex; gap: 2px; padding: 8px 10px 0; border-bottom: 1px solid var(--line); }
+.tab {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  padding: 8px 12px; font: inherit; font-size: 13px; font-weight: 600;
+  color: var(--muted); cursor: pointer;
+}
+.tab.active { color: var(--fg); border-bottom-color: var(--fg); }
+
+main { flex: 1; overflow-y: auto; }
+.panel { padding: 12px 14px 20px; }
+
+.sources { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.source {
+  text-align: left; background: var(--soft); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px; cursor: pointer; font: inherit; color: var(--fg);
+  display: flex; flex-direction: column; gap: 2px; transition: .12s;
+}
+.source:hover { border-color: var(--muted); }
+.source.active { border-color: var(--fg); background: var(--bg); box-shadow: inset 0 0 0 1px var(--fg); }
+.source .ico { font-size: 16px; }
+.source .lbl { font-weight: 620; font-size: 13px; }
+.source .hint { font-size: 11px; color: var(--muted); line-height: 1.35; }
+
+.input-block { margin-bottom: 12px; display: flex; flex-direction: column; gap: 9px; }
+
+textarea, input[type="text"], input[type="url"], select {
+  width: 100%; font: inherit; font-size: 13px; padding: 9px 10px;
+  border: 1px solid var(--line); border-radius: 9px;
+  background: var(--bg); color: var(--fg); resize: vertical;
+}
+textarea:focus, input:focus, select:focus { outline: 2px solid #2563eb; outline-offset: -1px; }
+
+/* Prezzo e periodicità affiancati in una colonna da 350 px si comprimono fino
+   all'illeggibile: sotto i 150 px per campo vanno uno sotto l'altro. */
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 150px; }
+.field span { font-size: 11px; color: var(--muted); font-weight: 600; }
+
+button.primary, button.secondary {
+  font: inherit; font-size: 13.5px; font-weight: 620; border-radius: 9px;
+  padding: 10px 14px; cursor: pointer; border: 1px solid transparent;
+}
+button.primary { background: var(--accent); color: var(--bg); }
+button.secondary { background: var(--bg); color: var(--fg); border-color: var(--line); }
+button.primary:disabled { opacity: .5; cursor: progress; }
+button.link { background: none; border: none; color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; text-decoration: underline; }
+
+.dropzone {
+  border: 2px dashed var(--line); border-radius: 12px; padding: 22px 14px;
+  text-align: center; transition: .15s;
+}
+.dropzone.over { border-color: #2563eb; background: var(--soft); }
+.dropzone p { margin: 0 0 6px; font-size: 13px; }
+
+.muted { color: var(--muted); }
+.small { font-size: 11.5px; line-height: 1.45; }
+
+.status {
+  padding: 10px 12px; border-radius: 9px; background: var(--soft);
+  border: 1px solid var(--line); font-size: 12.5px; margin-bottom: 10px;
+}
+.status.error { background: #fff5f5; border-color: #f5c6c6; color: #7d2020; }
+@media (prefers-color-scheme: dark) {
+  .status.error { background: #2a1616; border-color: #5a2626; color: #f5b5b5; }
+}
+
+/* ── risultato ───────────────────────────────────────────────────────────── */
+.verdict { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.verdict .bar { height: 4px; background: var(--level-color, #888); }
+.verdict .head { padding: 12px 13px; border-bottom: 1px solid var(--line); }
+.verdict .badge {
+  display: inline-block; background: var(--level-color, #888); color: #fff;
+  font-size: 10.5px; letter-spacing: .07em; font-weight: 700;
+  padding: 3px 8px; border-radius: 999px;
+}
+.verdict h2 { margin: 8px 0 0; font-size: 15.5px; line-height: 1.35; }
+.verdict .meta { font-size: 11px; color: var(--muted); margin-top: 5px; }
+.verdict .content { padding: 12px 13px; }
+
+.cost-box {
+  background: var(--soft); border: 1px solid var(--line); border-radius: 10px;
+  padding: 12px; margin-bottom: 11px;
+}
+.cost-box .amount { font-size: 26px; font-weight: 680; color: var(--level-color, var(--fg)); letter-spacing: -.02em; }
+.cost-box .cap { font-size: 11.5px; color: var(--muted); }
+.cost-box .formula { font-size: 11.5px; color: var(--muted); margin-top: 7px; }
+
+.remember {
+  background: #fff8e6; border: 1px solid #f2dfa6; border-radius: 9px;
+  padding: 10px; font-size: 12.5px; line-height: 1.45; margin-bottom: 11px;
+}
+@media (prefers-color-scheme: dark) {
+  .remember { background: #2a2312; border-color: #4a3d18; color: #f0e6cf; }
+}
+
+.summary { font-size: 13px; line-height: 1.55; margin: 0 0 12px; }
+
+h3.section { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 7px; }
+
+.finding {
+  border: 1px solid var(--line); border-left: 3px solid var(--sev-color, var(--line));
+  border-radius: 9px; padding: 9px 11px; margin-bottom: 7px;
+}
+.finding .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.finding .name { font-weight: 620; font-size: 13px; }
+.finding .sev { font-size: 10.5px; color: var(--muted); }
+.finding .plain { font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+.finding .quote {
+  font-size: 11.5px; margin-top: 6px; padding: 6px 8px; background: var(--soft);
+  border-radius: 6px; font-style: italic; line-height: 1.45; color: var(--muted);
+}
+
+.timeline { position: relative; padding-left: 16px; margin-bottom: 12px; }
+.timeline::before { content: ''; position: absolute; left: 4px; top: 5px; bottom: 5px; width: 2px; background: var(--line); }
+.step { position: relative; margin-bottom: 9px; }
+.step::before {
+  content: ''; position: absolute; left: -15px; top: 4px; width: 8px; height: 8px;
+  border-radius: 50%; background: var(--muted);
+}
+.step[data-kind='deadline']::before { background: #c2620f; }
+.step[data-kind='renewal']::before { background: #c0392b; }
+.step[data-kind='penalty']::before { background: #7d0a0a; }
+.step .when { font-size: 11.5px; font-weight: 650; }
+.step .items { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+
+.law { border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; margin-bottom: 7px; background: var(--soft); }
+.law .title { font-weight: 620; font-size: 12.5px; }
+.law .note { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+.law .refs { font-size: 10.5px; color: var(--muted); margin-top: 4px; opacity: .8; }
+
+details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-weight: 600; padding: 6px 0; }
+
+.disclaimer { font-size: 10.5px; color: var(--muted); padding: 10px 13px; border-top: 1px solid var(--line); line-height: 1.45; }
+
+/* ── storico ─────────────────────────────────────────────────────────────── */
+.history-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+.h-item {
+  border: 1px solid var(--line); border-left: 3px solid var(--level-color, var(--line));
+  border-radius: 9px; padding: 9px 11px; margin-bottom: 7px;
+}
+.h-item .h-top { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); }
+.h-item .h-top > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.h-item .h-top > span:last-child { white-space: nowrap; flex: 0 0 auto; }
+.h-item .h-title { font-size: 12.5px; font-weight: 600; margin-top: 3px; line-height: 1.4; }
+.h-item .h-cost { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.h-item .h-deadline { font-size: 11.5px; color: #c2620f; margin-top: 4px; font-weight: 600; }
+.h-item .h-decision { font-size: 10.5px; margin-top: 4px; color: var(--muted); }
+
+.foot { padding: 8px 14px; border-top: 1px solid var(--line); }
+.empty { text-align: center; color: var(--muted); font-size: 12.5px; padding: 26px 10px; line-height: 1.5; }
+
+/* ── impegni ─────────────────────────────────────────────────────────────── */
+.portfolio {
+  border: 1px solid var(--line); border-radius: 11px; padding: 12px;
+  margin-bottom: 12px; background: var(--soft);
+}
+.portfolio .big { font-size: 22px; font-weight: 680; letter-spacing: -.02em; }
+.portfolio .cap { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.portfolio .next { font-size: 12.5px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+
+.c-item { border: 1px solid var(--line); border-radius: 11px; padding: 11px 12px; margin-bottom: 9px; }
+.c-item .c-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+/* Un flex item non scende sotto la larghezza del suo contenuto se non gli si
+   dice `min-width: 0`: senza, un fornitore dal nome lungo spingeva l'importo
+   fuori dalla card invece di troncarsi. */
+.c-item .c-name {
+  font-weight: 650; font-size: 13.5px;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.c-item .c-amount { font-size: 13px; font-weight: 620; white-space: nowrap; flex: 0 0 auto; }
+.c-item .c-head { font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+.c-item .c-state {
+  display: inline-block; margin-top: 8px; font-size: 11.5px; font-weight: 650;
+  padding: 3px 9px; border-radius: 999px;
+}
+.c-state[data-urgency='critical'] { background: #fdecea; color: #a4262c; }
+.c-state[data-urgency='soon'] { background: #fff4e5; color: #a35a12; }
+.c-state[data-urgency='later'] { background: var(--soft); color: var(--muted); }
+.c-state[data-urgency='passed'] { background: #f0f0f0; color: #6b7280; }
+.c-state[data-urgency='done'] { background: #e8f6ee; color: #14603c; }
+@media (prefers-color-scheme: dark) {
+  .c-state[data-urgency='critical'] { background: #3a1a1a; color: #f0a0a0; }
+  .c-state[data-urgency='soon'] { background: #35270f; color: #e8bd7a; }
+  .c-state[data-urgency='done'] { background: #10281c; color: #86d9ab; }
+  .c-state[data-urgency='passed'] { background: #22262e; color: #98a0ac; }
+}
+.c-nothing { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.45; }
+.c-change {
+  font-size: 12px; margin-top: 8px; padding: 8px 10px; border-radius: 8px;
+  background: #fff4e5; border: 1px solid #f0dcb8; line-height: 1.45;
+}
+@media (prefers-color-scheme: dark) { .c-change { background: #2c2210; border-color: #4a3a18; color: #edd7ab; } }
+.c-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.c-actions button {
+  font: inherit; font-size: 11.5px; font-weight: 600; padding: 6px 10px;
+  border-radius: 8px; border: 1px solid var(--line); background: var(--bg);
+  color: var(--fg); cursor: pointer;
+}
+.c-actions button:hover { border-color: var(--muted); }
+.c-actions button.strong { background: var(--accent); color: var(--bg); border-color: transparent; }
+
+/* ── modale ──────────────────────────────────────────────────────────────── */
+.modal {
+  position: fixed; inset: 0; background: rgba(10, 12, 16, .55);
+  display: flex; align-items: center; justify-content: center; padding: 14px; z-index: 50;
+}
+.modal-card {
+  background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+  /* Il pannello si apre anche come scheda intera (dalla notifica): senza un
+     tetto, la lettera di disdetta si stirava su 1600 px di riga. */
+  width: 100%; max-width: 560px; max-height: 88vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 13px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.modal-body { padding: 12px 13px; overflow-y: auto; }
+.modal-foot { padding: 10px 13px; border-top: 1px solid var(--line); display: flex; gap: 8px; flex-wrap: wrap; }
+.modal-body pre {
+  white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, Menlo, monospace;
+  font-size: 11.5px; line-height: 1.55; margin: 0; background: var(--soft);
+  border: 1px solid var(--line); border-radius: 8px; padding: 11px;
+}
+.modal-body .checklist { font-size: 12.5px; line-height: 1.6; margin: 0 0 10px; padding-left: 18px; }
+.modal-body select { margin-bottom: 10px; }
+.proof-ok { font-size: 12px; color: #14603c; font-weight: 600; margin-bottom: 8px; }
+.proof-bad { font-size: 12px; color: #a4262c; font-weight: 600; margin-bottom: 8px; }
+
+.c-hint {
+  font-size: 11.5px; color: var(--muted); margin-top: 8px; line-height: 1.45;
+  padding-left: 16px; position: relative;
+}
+.c-hint::before { content: '📅'; position: absolute; left: 0; }
+
+/* ── ricerca e filtri degli impegni ──────────────────────────────────────── */
+.c-tools { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.c-tools input[type="search"] { font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font: inherit; font-size: 11.5px; font-weight: 600; padding: 5px 10px;
+  border-radius: 999px; border: 1px solid var(--line); background: var(--bg);
+  color: var(--muted); cursor: pointer;
+}
+.chip:hover { border-color: var(--muted); color: var(--fg); }
+.chip.active { background: var(--accent); color: var(--bg); border-color: transparent; }
+
+/* Le fasce di urgenza: l'ordine è il messaggio, l'etichetta lo rende leggibile. */
+.c-group {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); margin: 14px 0 7px; font-weight: 700;
+}
+.c-group:first-child { margin-top: 0; }
+.c-group span {
+  font-size: 10.5px; letter-spacing: 0; font-weight: 650;
+  background: var(--soft); border: 1px solid var(--line);
+  border-radius: 999px; padding: 1px 7px;
+}
+.c-group[data-group='week'] { color: #a4262c; }
+.c-group[data-group='month'] { color: #a35a12; }
+
+/* ── menu «⋯» e azioni distruttive ───────────────────────────────────────── */
+.c-menu-wrap { position: relative; margin-left: auto; }
+.c-more { min-width: 34px; letter-spacing: .1em; line-height: 1; }
+.c-menu {
+  position: absolute; right: 0; top: calc(100% + 5px); z-index: 20;
+  min-width: 232px; max-width: min(280px, 78vw);
+  display: flex; flex-direction: column; gap: 3px; padding: 5px;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
+  box-shadow: 0 10px 28px rgba(10, 12, 16, .22);
+}
+.c-actions .c-menu button {
+  width: 100%; text-align: left; border-color: transparent; background: none;
+  padding: 7px 9px; font-weight: 600;
+}
+.c-actions .c-menu button:hover { background: var(--soft); border-color: transparent; }
+
+/*
+ * «Elimina» non è la sesta voce di un elenco di sei: è l'unica che distrugge
+ * la prova. Colore, separatore e posizione in fondo servono a farla sembrare
+ * quello che è, e il secondo passo a impedire che parta per sbaglio.
+ */
+.c-actions .c-menu button.danger {
+  color: #a4262c; margin-top: 3px; padding-top: 9px;
+  border-top: 1px solid var(--line); border-radius: 0 0 7px 7px;
+}
+.c-actions .c-menu button.danger:hover { background: #fdecea; }
+.c-menu.confirming { padding: 10px; gap: 6px; }
+.c-menu.confirming button.danger { border-top: none; margin-top: 0; border-radius: 8px; }
+.c-confirm-text { margin: 0 0 4px; font-size: 12px; line-height: 1.45; color: var(--fg); }
+.c-menu .link { align-self: flex-start; padding: 2px 0; }
+
+/* La finestra di ripensamento: l'impegno è già sparito dalla vista, ma dallo
+   storage esce solo allo scadere del conto alla rovescia. */
+.undo-bar {
+  position: sticky; bottom: 8px; z-index: 30;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-top: 10px; padding: 10px 12px; border-radius: 10px;
+  background: var(--accent); color: var(--bg);
+  box-shadow: 0 8px 24px rgba(10, 12, 16, .28); font-size: 12.5px;
+}
+.undo-bar .link { color: var(--bg); font-weight: 700; font-size: 12.5px; white-space: nowrap; }
+
+/* Esito della copia sul pulsante che l'ha chiesta. */
+button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
+
+/*
+ * Arrivare qui da una notifica e non capire quale card sia la propria rende
+ * inutile il salto: la scheda si illumina per qualche secondo e poi torna
+ * normale, senza restare accesa per sempre.
+ */
+.c-item.focus {
+  border-color: var(--fg);
+  box-shadow: 0 0 0 2px var(--fg), 0 0 0 6px rgba(37, 99, 235, .18);
+  animation: focus-fade 4s ease-out forwards;
+}
+@keyframes focus-fade {
+  0%, 55% { box-shadow: 0 0 0 2px var(--fg), 0 0 0 6px rgba(37, 99, 235, .18); }
+  100% { box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .c-item.focus { animation: none; }
+}
+
+/* Il pattern delle schede si vede anche con la tastiera. */
+.tab:focus-visible, .chip:focus-visible, .c-actions button:focus-visible, .icon-btn:focus-visible {
+  outline: 2px solid #2563eb; outline-offset: 2px;
+}
+
+/* ── contrasto in tema scuro ─────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  /*
+   * I colori di fascia arrivano come stile inline (`--level-color`) da
+   * constants.js e sono tarati sul bianco: su fondo scuro CRITICAL #7d0a0a fa
+   * 1,6:1 — un importo di 26 px che non si legge. Uno stile inline batte
+   * qualunque selettore, quindi qui l'unico strumento è `!important`. Il
+   * riferimento resta constants.js, che non viene toccato: queste sono solo
+   * le stesse fasce ritarate sul fondo #14171d (≥ 7:1).
+   */
+  [data-level='safe'] { --level-color: #5fd39b !important; }
+  [data-level='review'] { --level-color: #e0b750 !important; }
+  [data-level='commitment'] { --level-color: #f2a35a !important; }
+  [data-level='high_risk'] { --level-color: #ff8b7a !important; }
+  [data-level='critical'] { --level-color: #ff7b7b !important; }
+  /* Il badge ha per sfondo la fascia: al chiaro sopra ci va il testo scuro. */
+  .verdict .badge { color: #10131a; }
+
+  .proof-ok { color: #86d9ab; }
+  .proof-bad { color: #f0a0a0; }
+  .h-item .h-deadline { color: #f2a35a; }
+  .c-group[data-group='week'] { color: #f0a0a0; }
+  .c-group[data-group='month'] { color: #e8bd7a; }
+  .c-actions .c-menu button.danger { color: #f0a0a0; }
+  .c-actions .c-menu button.danger:hover { background: #3a1a1a; }
+  button.flash-failed { color: #f0a0a0; border-color: #5a2626; }
+  .step[data-kind='deadline']::before { background: #f2a35a; }
+  .step[data-kind='renewal']::before { background: #ff8b7a; }
+  .step[data-kind='penalty']::before { background: #ff7b7b; }
+}
+
+/* ── larghezze ───────────────────────────────────────────────────────────── */
+
+/* Il pannello laterale si può stringere fin quasi a 250 px: due colonne di
+   sorgenti a quel punto non ci stanno più. */
+@media (max-width: 330px) {
+  .sources { grid-template-columns: 1fr; }
+  .c-actions { gap: 5px; }
+}
+
+/*
+ * Il salto dalla notifica apre `sidepanel.html` come **scheda intera**
+ * (`chrome.tabs.create`, non `sidePanel.open`): senza questa regola un layout
+ * pensato per 350 px si stira su tutta la finestra, con righe di testo da
+ * 1600 px e una card di impegno larga quanto lo schermo.
+ */
+@media (min-width: 700px) {
+  .top, .tabs, .foot { padding-inline: max(14px, calc((100% - 820px) / 2)); }
+  .panel { max-width: 820px; margin: 0 auto; padding: 18px 14px 30px; }
+  .sources { grid-template-columns: repeat(4, 1fr); }
+  .modal-card { max-width: 720px; }
+  .c-item { padding: 13px 15px; }
+  .c-actions button { font-size: 12.5px; padding: 7px 12px; }
+  .verdict h2 { font-size: 17px; }
+  .summary, .finding .plain { font-size: 13px; }
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AssicuraSubito — Conferma la polizza</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <div class="wrap">
+    <nav class="torna"><a href="index.html">&larr; Tutte le pagine di prova</a></nav>
+    <div class="expected"><strong>Cosa deve succedere.</strong> Compila un campo e premi <code>Invio</code> senza toccare il
+    pulsante: il modulo parte dal <code>submit</code>, non dal click. Deve comparire lo stesso avviso, e —
+    se prosegui — l'impegno deve finire nel registro del pannello. Fino alla correzione di
+    <code>handleSubmit</code> questo percorso non registrava nulla, e «Non avvisarmi su questo sito»
+    non aveva alcun effetto: il click spariva nel nulla.</div>
+    <div class="card">
+      <h1>Polizza Viaggio Plus</h1>
+      <p class="sub">Copertura annuale con rinnovo automatico.</p>
+      <div class="price"><span class="big">14,90 €</span><span class="per">/ mese</span></div>
+
+      <form id="policy-form">
+        <input type="text" name="nome" placeholder="Nome e cognome" autocomplete="off">
+        <input type="email" name="email" placeholder="Email" autocomplete="off">
+        <label class="consent"><input type="checkbox" checked> Accetto le condizioni e acconsento alle comunicazioni commerciali</label>
+        <button type="submit" class="cta">Conferma la polizza</button>
+      </form>
+      <p class="outcome" id="outcome"></p>
+
+      <div class="terms" style="margin-top:18px">
+        <p>La polizza ha una durata minima di 24 mesi e si rinnova tacitamente per un uguale periodo,
+        salvo disdetta da inviare con un preavviso di 60 giorni.</p>
+        <p>In caso di recesso anticipato è dovuta una penalità pari a 90,00 euro.
+        Sono previste spese di gestione di 3,00 euro per ogni rata mensile.</p>
+        <p>Il foro competente è quello di Dublino. Ogni controversia sarà devoluta ad arbitrato.</p>
+      </div>
+    </div>
+    <script>
+      document.getElementById('policy-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        document.getElementById("outcome").textContent = 'Modulo inviato (nessun blocco).';
+      });
+    </script>
+  </div>
+</body>
+</html>

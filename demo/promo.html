@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NotaPro — Passa a Pro</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <div class="wrap">
+    <nav class="torna"><a href="index.html">&larr; Tutte le pagine di prova</a></nav>
+    <div class="expected"><strong>Cosa deve succedere.</strong> In pagina ci sono tre prezzi: uno barrato, uno
+    promozionale per i primi tre mesi e uno a regime. Il motore deve prendere <strong>19,99 € a regime</strong>,
+    non il 9,99 € della promo né il 39,99 € barrato. Prima prendeva il primo che trovava in ordine di
+    documento — cioè il barrato — e su altre pagine il promozionale, dimezzando l'impegno stimato.</div>
+    <div class="card">
+      <h1>NotaPro</h1>
+      <p class="sub">Appunti sincronizzati, senza limiti di dispositivi.</p>
+
+      <span class="badge">Offerta di lancio</span>
+      <div class="price">
+        <s class="old">39,99 €</s>
+        <span class="big">9,99 €</span><span class="per">/ mese per i primi 3 mesi</span>
+      </div>
+      <p class="sub">Poi 19,99 €/mese. Rinnovo automatico.</p>
+
+      <div class="terms">
+        <p>Il prezzo promozionale di 9,99 € al mese è riservato ai primi tre mesi di abbonamento.
+        A partire dal quarto mese il canone è di 19,99 € al mese.</p>
+        <p>Il contratto ha una durata minima di 12 mesi e si rinnova automaticamente per un uguale
+        periodo, salvo disdetta da comunicarsi con preavviso di almeno 30 giorni.</p>
+        <p>In caso di recesso anticipato è dovuta una penale pari a 60,00 euro.</p>
+      </div>
+
+      <button type="button" class="cta" data-outcome="Piano attivato (nessun blocco).">Passa a Pro</button>
+      <p class="outcome" id="outcome"></p>
+    </div>
+  </div>
+  <script src="demo.js"></script>
+</body>
+</html>

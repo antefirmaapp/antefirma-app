@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Due pulsanti «Continua»</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <div class="wrap">
+    <nav class="torna"><a href="index.html">&larr; Tutte le pagine di prova</a></nav>
+    <div class="expected"><strong>Cosa deve succedere: uno sì, l'altro no.</strong> Le due etichette sono identiche —
+    «Continua» — ma solo la prima sta dentro un checkout, con campi carta e un prezzo ricorrente accanto.
+    Il motore deve intercettare quella e <strong>lasciar passare la seconda</strong>. È il fallback
+    strutturale: il testo del pulsante da solo non basta e non basterà mai.</div>
+    <div class="card">
+      <h1>Pagamento</h1>
+      <p class="sub">Abbonamento Premium — 24,90 €/mese, rinnovo automatico ogni 12 mesi.</p>
+      <input type="text" placeholder="Numero della carta" autocomplete="cc-number" name="cardnumber">
+      <input type="text" placeholder="Scadenza (MM/AA)" autocomplete="cc-exp">
+      <input type="password" placeholder="CVV" autocomplete="cc-csc">
+      <div class="terms">
+        <p>L'abbonamento ha una durata minima di 12 mesi e si rinnova automaticamente.
+        In caso di recesso anticipato è dovuta una penale di 80,00 euro.</p>
+      </div>
+      <button type="button" class="cta" data-outcome="Pagamento confermato (nessun blocco).">Continua</button>
+      <p class="outcome" id="outcome"></p>
+    </div>
+
+    <div class="card">
+      <h2>Questionario di gradimento</h2>
+      <p class="sub">Due domande, trenta secondi. Non è previsto alcun pagamento.</p>
+      <label class="consent"><input type="radio" name="q"> Sono soddisfatto del servizio</label>
+      <label class="consent"><input type="radio" name="q"> Potrebbe migliorare</label>
+      <button type="button" class="plain" data-outcome="Questionario inviato: nessun blocco, corretto.">Continua</button>
+    </div>
+  </div>
+  <script src="demo.js"></script>
+</body>
+</html>

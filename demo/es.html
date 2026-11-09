@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MóvilYa — Contrata tu tarifa</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <div class="wrap">
+    <nav class="torna"><a href="index.html">&larr; Tutte le pagine di prova</a></nav>
+    <div class="expected"><strong>Cosa deve succedere.</strong> Pagina interamente in spagnolo, con le stesse trappole
+    della demo italiana. Il verdetto deve essere equivalente: permanenza di 24 mesi, penale, attivazione,
+    nessun rimborso. Le tutele citate saranno quelle delle direttive europee, non del Codice del Consumo —
+    per averle, imposta la giurisdizione su <code>🇪🇸 Spagna</code> nelle opzioni.</div>
+    <div class="card">
+      <h1>MóvilYa Ilimitada</h1>
+      <p class="sub">Datos ilimitados, llamadas sin límite, 5G incluido.</p>
+      <div class="price"><span class="big">29,90 €</span><span class="per">/ al mes</span></div>
+
+      <label class="consent"><input type="checkbox" checked> Acepto recibir comunicaciones comerciales de terceros</label>
+
+      <div class="terms">
+        <p>La cuota mensual es de 29,90 euros, más unos gastos de activación de 49,00 euros.
+        El contrato tiene una permanencia mínima de veinticuatro meses desde el alta.</p>
+        <p>El contrato se renueva automáticamente por periodos iguales, salvo cancelación
+        comunicada con un preaviso de sesenta días de antelación.</p>
+        <p>La baja anticipada conlleva una penalización de 120,00 euros.
+        Las cantidades abonadas no son reembolsables en ningún caso.</p>
+        <p>El proveedor podrá modificar unilateralmente el precio del servicio.
+        Toda controversia se resolverá mediante arbitraje vinculante y las partes se someten
+        a los juzgados y tribunales de Dublín.</p>
+      </div>
+
+      <button type="button" class="cta" data-outcome="Contratada (sin bloqueo).">Contratar ahora</button>
+      <p class="outcome" id="outcome"></p>
+    </div>
+
+    <div class="card">
+      <h2>Contraprueba</h2>
+      <p class="sub">Este botón <strong>no</strong> debe activar el aviso.</p>
+      <button type="button" class="plain" data-outcome="Sin bloqueo: correcto.">Rechazar todas las cookies</button>
+    </div>
+  </div>
+  <script src="demo.js"></script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vincolo — pagine di prova</title>
+  <link rel="stylesheet" href="demo.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Pagine di prova</h1>
+      <p class="sub">Nessun dato esce da queste pagine. Servono a vedere il firewall al lavoro,
+      e soprattutto a vederlo <em>stare fermo</em> quando deve.</p>
+
+      <div class="expected">
+        <strong>Come si legge.</strong> Ogni pagina dichiara in cima cosa deve succedere.
+        Gli esiti qui sotto sono <strong>misurati</strong>, non attesi a memoria:
+        <code>python3 demo/verify.py</code> apre queste pagine in Chromium con l'estensione
+        caricata, preme i pulsanti e controlla che il verdetto sia quello scritto. Se un numero
+        qui non torna più, o è cambiato il motore o è da aggiornare la riga.
+      </div>
+
+      <ul class="scen">
+        <li>
+          <a href="checkout.html">Checkout con tutte le trappole</a>
+          <p>La pagina storica: rinnovo tacito, durata minima, penale, attivazione in caratteri
+          minuscoli, consenso già spuntato, termini solo come link.
+          <br>→ <strong>blocca</strong> · CRITICAL · 648,76 € su 24 mesi.
+          Il pulsante «Iscriviti alla newsletter» non deve far scattare nulla.</p>
+        </li>
+        <li>
+          <a href="summary.html">Riepilogo in elenco e in tabella</a>
+          <p>Le condizioni non stanno in nessun paragrafo: solo voci di elenco e celle. È la forma
+          in cui un checkout mostra davvero il summary, e fino all'accorpamento delle righe corte
+          il motore ci trovava <strong>zero condizioni</strong>.
+          <br>→ <strong>blocca</strong> · rinnovo, durata minima, penale, nessun rimborso.</p>
+        </li>
+        <li>
+          <a href="promo.html">Prezzo promozionale e prezzo barrato</a>
+          <p>Tre prezzi in pagina: 39,99 € barrato, 9,99 € per tre mesi, 19,99 € a regime.
+          Deve prendere quello a regime — prima prendeva il primo in ordine di documento, cioè il
+          barrato, e altrove il promozionale, dimezzando la stima.
+          <br>→ <strong>blocca</strong> · HIGH RISK 88/100 · 299,88 €.</p>
+        </li>
+        <li>
+          <a href="onesto.html">Contratto onesto</a>
+          <p>Nessun vincolo, nessuna penale, disdetta libera, foro del consumatore.
+          <br>→ <strong>non blocca.</strong> È la controprova che conta più di tutte: un firewall
+          che blocca anche i contratti giusti insegna a ignorare l'avviso.</p>
+        </li>
+        <li>
+          <a href="tastiera.html">Invio da tastiera</a>
+          <p>Il modulo parte dal <code>submit</code>, non dal click. Fino alla correzione di
+          <code>handleSubmit</code> questo percorso non registrava alcun impegno e
+          «Non avvisarmi su questo sito» non aveva effetto.
+          <br>→ <strong>blocca</strong>, e proseguendo l'impegno compare nel pannello.</p>
+        </li>
+        <li>
+          <a href="generico.html">Due pulsanti «Continua»</a>
+          <p>Etichette identiche: uno dentro un checkout con campi carta, uno in fondo a un
+          questionario.
+          <br>→ il primo <strong>blocca</strong> (HIGH RISK 88/100 · 378,80 €), il secondo
+          <strong>no</strong>. Il testo del pulsante da solo non basta e non basterà mai.</p>
+        </li>
+        <li>
+          <a href="es.html">Checkout in spagnolo</a>
+          <p>Le stesse trappole, in un'altra lingua. Per le tutele imposta la giurisdizione su
+          <code>🇪🇸 Spagna</code> nelle opzioni.
+          <br>→ <strong>blocca</strong> · HIGH RISK 89/100 · 289,00 €.
+          «Rechazar todas las cookies» non deve far scattare nulla.</p>
+        </li>
+        <li>
+          <a href="en.html">Checkout in inglese</a>
+          <p>Con il microcopy «Subscribe — cancel anytime»: la parola «cancel» non deve impedire
+          l'intercettazione, perché l'opt-out è posizionale.
+          <br>→ <strong>blocca</strong> · HIGH RISK 90/100 · 726,00 £.</p>
+        </li>
+        <li>
+          <a href="contratto.pdf">Contratto in PDF</a>
+          <p>Non si apre: si <strong>trascina nel pannello laterale</strong>. È impaginato con la
+          crenatura negli array <code>TJ</code>, cioè come lo producono Word e InDesign — il layout
+          su cui l'estrattore perdeva tutti gli spazi e il motore non vedeva più nessuna clausola.
+          <br>→ 8 condizioni, durata minima 24 mesi letta da «24 (ventiquattro) mesi»,
+          spese di incasso moltiplicate per le rate.</p>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Cosa queste pagine non sono</h2>
+      <p class="sub" style="margin:0">Sono bersagli che conoscono già le risposte: scritti insieme al
+      motore, come i nove testi del corpus. Servono a impedire che qualcosa che funzionava smetta di
+      funzionare, non a dimostrare che il motore funziona su siti veri — quella prova richiede
+      25-30 checkout reali, e non è ancora stata fatta.</p>
+    </div>
+  </div>
+</body>
+</html>

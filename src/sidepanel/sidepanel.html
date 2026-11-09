@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vincolo</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <img src="../icons/icon32.png" alt="" width="20" height="20">
+      <div>
+        <strong>Vincolo</strong>
+        <span>Prima di accettare, sai a cosa ti leghi</span>
+      </div>
+    </div>
+    <button id="open-options" class="icon-btn" title="Impostazioni" aria-label="Impostazioni">⚙</button>
+  </header>
+
+  <!--
+    Il pattern ARIA delle schede è tutto o niente: `role="tab"` senza
+    `aria-selected` fa annunciare tre schede senza mai dire quale è aperta.
+    `aria-controls` e il `tabindex` a rotazione (uno solo a 0) completano il
+    contratto che sidepanel.js mantiene a ogni cambio scheda.
+  -->
+  <nav class="tabs" role="tablist" aria-label="Sezioni del pannello">
+    <button class="tab active" id="tab-btn-analyze" data-tab="analyze" role="tab"
+            aria-selected="true" aria-controls="tab-analyze" tabindex="0">Analizza</button>
+    <button class="tab" id="tab-btn-commitments" data-tab="commitments" role="tab"
+            aria-selected="false" aria-controls="tab-commitments" tabindex="-1">Impegni</button>
+    <button class="tab" id="tab-btn-history" data-tab="history" role="tab"
+            aria-selected="false" aria-controls="tab-history" tabindex="-1">Storico</button>
+  </nav>
+
+  <main>
+    <section id="tab-analyze" class="panel" role="tabpanel" aria-labelledby="tab-btn-analyze">
+      <div class="sources">
+        <button class="source" data-source="page">
+          <span class="ico">🌐</span>
+          <span class="lbl">Pagina corrente</span>
+          <span class="hint">Contratto, termini o checkout visualizzato</span>
+        </button>
+        <button class="source" data-source="paste">
+          <span class="ico">📋</span>
+          <span class="lbl">Incolla testo</span>
+          <span class="hint">Un contratto che hai ricevuto</span>
+        </button>
+        <button class="source" data-source="pdf">
+          <span class="ico">📄</span>
+          <span class="lbl">PDF</span>
+          <span class="hint">Trascina o scegli il file</span>
+        </button>
+        <button class="source" data-source="url">
+          <span class="ico">🔗</span>
+          <span class="lbl">Da URL</span>
+          <span class="hint">Link a termini o policy</span>
+        </button>
+      </div>
+
+      <div id="input-paste" class="input-block" hidden>
+        <textarea id="paste-text" rows="9" placeholder="Incolla qui il testo del contratto, dei termini o dell'offerta…"></textarea>
+        <div class="row">
+          <label class="field">
+            <span>Prezzo mostrato (facoltativo)</span>
+            <input id="paste-price" type="text" placeholder="es. 19,99">
+          </label>
+          <label class="field">
+            <span>Periodicità</span>
+            <select id="paste-period">
+              <option value="">nessuna / una tantum</option>
+              <option value="month">al mese</option>
+              <option value="year">all'anno</option>
+              <option value="week">a settimana</option>
+              <option value="quarter">al trimestre</option>
+            </select>
+          </label>
+        </div>
+        <button class="primary" id="run-paste">Analizza il testo</button>
+      </div>
+
+      <div id="input-pdf" class="input-block" hidden>
+        <div id="dropzone" class="dropzone">
+          <p><strong>Trascina qui il PDF</strong></p>
+          <p class="muted">oppure</p>
+          <button class="secondary" id="pick-pdf">Scegli un file</button>
+          <input type="file" id="pdf-file" accept="application/pdf,.pdf" hidden>
+        </div>
+        <p class="muted small">Il file resta sul tuo computer: viene letto qui dentro. Solo il testo estratto raggiunge il modello, se hai attivato l'analisi AI.</p>
+      </div>
+
+      <div id="input-url" class="input-block" hidden>
+        <label class="field">
+          <span>Indirizzo del documento</span>
+          <input id="url-input" type="url" placeholder="https://esempio.it/termini-e-condizioni">
+        </label>
+        <button class="primary" id="run-url">Scarica e analizza</button>
+      </div>
+
+      <!--
+        `#status` è l'unico canale per «Analisi in corso», «Non ho trovato
+        testo sufficiente», «Il file non è un PDF»: senza `role="status"`
+        cambia il testo e nessuno screen reader se ne accorge.
+      -->
+      <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+      <div id="result" class="result"></div>
+    </section>
+
+    <section id="tab-commitments" class="panel" role="tabpanel" aria-labelledby="tab-btn-commitments" hidden>
+      <div id="portfolio" class="portfolio"></div>
+
+      <!-- Ricerca e filtri compaiono solo quando la lista è abbastanza lunga
+           da doverla setacciare: sotto gli otto impegni sono rumore. -->
+      <div id="c-tools" class="c-tools" hidden>
+        <input id="c-search" type="search" autocomplete="off"
+               placeholder="Cerca fornitore, sito o clausola…" aria-label="Cerca fra gli impegni">
+        <div class="chips" id="c-filters" role="group" aria-label="Filtra per stato">
+          <button class="chip active" data-filter="all" aria-pressed="true">Tutti</button>
+          <button class="chip" data-filter="urgent" aria-pressed="false">Entro 30 giorni</button>
+          <button class="chip" data-filter="active" aria-pressed="false">Attivi</button>
+          <button class="chip" data-filter="cancelled" aria-pressed="false">Disdetti</button>
+        </div>
+      </div>
+
+      <div id="commitments-list"></div>
+      <div id="undo-bar" class="undo-bar" role="status" aria-live="polite" hidden></div>
+    </section>
+
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+      <div class="modal-card">
+        <div class="modal-head">
+          <strong id="modal-title"></strong>
+          <button class="icon-btn" id="modal-close" aria-label="Chiudi">✕</button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+        <div class="modal-foot" id="modal-foot"></div>
+      </div>
+    </div>
+
+    <section id="tab-history" class="panel" role="tabpanel" aria-labelledby="tab-btn-history" hidden>
+      <div class="history-head">
+        <p class="muted small">Gli impegni che hai incontrato, con le scadenze da ricordare.</p>
+        <button class="link" id="clear-history">Svuota</button>
+      </div>
+      <div id="history-list"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span id="engine-note" class="muted small"></span>
+  </footer>
+
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

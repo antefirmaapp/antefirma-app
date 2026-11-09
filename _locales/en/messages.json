@@ -1,0 +1,5 @@
+{
+  "extName":        { "message": "Vincolo", "description": "Extension name." },
+  "extDescription": { "message": "Before you accept, know what you are bound to: what it really costs, for how long, and how to get out.", "description": "Short description, shown in the store and in chrome://extensions." },
+  "actionTitle":    { "message": "Vincolo", "description": "Toolbar icon tooltip." }
+}

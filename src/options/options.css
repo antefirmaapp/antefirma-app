@@ -1,0 +1,99 @@
+:root {
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --fg: #16191f;
+  --muted: #6b7280;
+  --line: #e4e7ec;
+  --accent: #16191f;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #101318; --card: #171b22; --fg: #e8eaef; --muted: #98a0ac; --line: #282e38; --accent: #f2f4f8; }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0; padding: 28px 20px 60px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px; background: var(--bg); color: var(--fg);
+}
+
+.wrap { max-width: 720px; margin: 0 auto; }
+
+header { display: flex; gap: 13px; align-items: center; margin-bottom: 20px; }
+header h1 { margin: 0; font-size: 20px; }
+header p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+
+.welcome {
+  background: #eef4ff; border: 1px solid #cfe0ff; border-radius: 11px;
+  padding: 13px 15px; font-size: 13.5px; line-height: 1.55; margin-bottom: 18px;
+}
+@media (prefers-color-scheme: dark) { .welcome { background: #15203a; border-color: #23375e; } }
+
+.card {
+  background: var(--card); border: 1px solid var(--line); border-radius: 13px;
+  padding: 18px 20px; margin-bottom: 14px;
+}
+.card h2 { margin: 0 0 4px; font-size: 15px; }
+.lead { color: var(--muted); font-size: 12.5px; line-height: 1.55; margin: 0 0 14px; }
+.lead.small { margin-top: 12px; margin-bottom: 0; }
+
+.switch { display: flex; gap: 11px; align-items: flex-start; margin: 14px 0; cursor: pointer; }
+.switch input { margin-top: 3px; width: 17px; height: 17px; accent-color: #2563eb; }
+.switch strong { display: block; font-size: 13.5px; }
+.switch em { display: block; font-style: normal; color: var(--muted); font-size: 12px; line-height: 1.5; margin-top: 2px; }
+
+.field { display: block; margin: 14px 0; }
+.field > span { display: block; font-size: 12px; font-weight: 640; margin-bottom: 5px; }
+.field em { display: block; font-style: normal; color: var(--muted); font-size: 11.5px; line-height: 1.5; margin-top: 5px; }
+
+input[type="text"], input[type="password"], select, textarea {
+  width: 100%; font: inherit; font-size: 13px; padding: 9px 11px;
+  border: 1px solid var(--line); border-radius: 9px; background: var(--card); color: var(--fg);
+}
+input[type="range"] { width: 100%; accent-color: #2563eb; }
+textarea { resize: vertical; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; }
+
+.row { display: flex; gap: 11px; flex-wrap: wrap; }
+.row > .field { flex: 1; min-width: 190px; }
+
+.key-row { display: flex; gap: 7px; }
+.key-row input { flex: 1; font-family: ui-monospace, Menlo, monospace; }
+
+.key-status { font-size: 12.5px; padding: 9px 11px; border-radius: 8px; margin-top: 9px; }
+.key-status.ok { background: #e8f6ee; border: 1px solid #b6e0c8; color: #14603c; }
+.key-status.err { background: #fff2f2; border: 1px solid #f0c4c4; color: #7d2020; }
+@media (prefers-color-scheme: dark) {
+  .key-status.ok { background: #10281c; border-color: #235a3c; color: #86d9ab; }
+  .key-status.err { background: #2a1616; border-color: #5a2626; color: #f0b0b0; }
+}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 9px; }
+.area {
+  display: flex; gap: 9px; align-items: flex-start; padding: 11px;
+  border: 1px solid var(--line); border-radius: 10px; cursor: pointer; transition: .12s;
+}
+.area:hover { border-color: var(--muted); }
+.area input { margin-top: 2px; accent-color: #2563eb; width: 16px; height: 16px; }
+.area strong { display: block; font-size: 13px; }
+.area em { display: block; font-style: normal; font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 2px; }
+
+button {
+  font: inherit; font-size: 13.5px; font-weight: 620; border-radius: 9px;
+  padding: 9px 15px; cursor: pointer; border: 1px solid transparent;
+}
+button.primary { background: var(--accent); color: var(--bg); }
+button.secondary { background: var(--card); color: var(--fg); border-color: var(--line); }
+button.secondary.danger { color: #b42318; border-color: #f0c4c4; }
+button:disabled { opacity: .55; cursor: progress; }
+
+.save-bar {
+  position: sticky; bottom: 0; display: flex; align-items: center; justify-content: flex-end;
+  gap: 13px; padding: 13px 0; background: linear-gradient(transparent, var(--bg) 35%);
+}
+#save-status { font-size: 12.5px; color: var(--muted); }
+
+.foot-note { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 14px; }
+code { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; background: rgba(127,127,127,.14); padding: 1px 4px; border-radius: 4px; }
