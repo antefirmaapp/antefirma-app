@@ -4,6 +4,7 @@
  */
 
 import { formatMoney } from '../core/text.js';
+import { t, tn } from '../i18n/index.js';
 
 export function esc(s) {
   return String(s ?? '')
@@ -38,14 +39,14 @@ export function renderVerdict(v) {
         <span class="badge">${esc(level.icon || '')} ${esc(level.label || '')}</span>
         <h2>${esc(v.headline || level.headline || '')}</h2>
         <div class="meta">
-          rischio della decisione ${esc(String(v.score))}/100 ·
-          ${v.engine?.cached ? 'AI · analisi già fatta per questo testo' : 'AI'}
+          ${esc(t('rischio della decisione {n}/100', { n: v.score }))} ·
+          ${esc(v.engine?.cached ? t('AI · analisi già fatta per questo testo') : 'AI')}
           ${v.host ? ` · ${esc(v.host)}` : ''}
-          ${v.cached ? ' · da cache' : ''}
+          ${v.cached ? ' · ' + esc(t('da cache')) : ''}
         </div>
       </div>
       <div class="content">
-        ${v.engine?.truncated ? `<div class="status error" style="margin-bottom:10px">La pagina era molto lunga: è stata analizzata solo in parte.</div>` : ''}
+        ${v.engine?.truncated ? `<div class="status error" style="margin-bottom:10px">${esc(t('La pagina era molto lunga: è stata analizzata solo in parte.'))}</div>` : ''}
         ${renderCost(cost)}
         ${v.mustRemember ? `<div class="remember">📌 ${esc(v.mustRemember)}</div>` : ''}
         ${v.summary ? `<p class="summary">${esc(v.summary)}</p>` : ''}
@@ -55,7 +56,7 @@ export function renderVerdict(v) {
         ${renderLaw(consumer)}
         ${renderDebug(v)}
       </div>
-      <div class="disclaimer">${esc(consumer.disclaimer || 'Analisi automatica a scopo informativo. Non è un parere legale.')}</div>
+      <div class="disclaimer">${esc(consumer.disclaimer || t('Analisi automatica a scopo informativo. Non è un parere legale.'))}</div>
     </div>
   `;
 }
@@ -65,7 +66,7 @@ function renderCost(cost) {
     if (!cost.displayed) return '';
     return `<div class="cost-box">
       <div class="amount">${esc(cost.displayed)}</div>
-      <div class="cap">prezzo rilevato · nessun impegno pluriennale identificato nel testo</div>
+      <div class="cap">${esc(t('prezzo rilevato · nessun impegno pluriennale identificato nel testo'))}</div>
     </div>`;
   }
   const formula = (cost.lines || [])
@@ -73,7 +74,7 @@ function renderCost(cost) {
     .join('  +  ');
   return `<div class="cost-box">
     <div class="amount">${esc(cost.worstCaseLabel)}</div>
-    <div class="cap">impegno economico potenziale stimato${cost.displayed ? ` · prezzo mostrato: ${esc(cost.displayed)}` : ''}</div>
+    <div class="cap">${esc(t('impegno economico potenziale stimato'))}${cost.displayed ? ` · ${esc(t('prezzo mostrato: {x}', { x: cost.displayed }))}` : ''}</div>
     ${formula ? `<div class="formula">${esc(formula)}${cost.horizonReason ? ` · ${esc(cost.horizonReason)}` : ''}</div>` : ''}
     ${cost.explanation ? `<div class="formula">${esc(cost.explanation)}</div>` : ''}
   </div>`;
@@ -81,12 +82,12 @@ function renderCost(cost) {
 
 function renderFindings(findings) {
   if (!findings.length) return '';
-  return `<h3 class="section">Cosa stai accettando</h3>
+  return `<h3 class="section">${esc(t('Cosa stai accettando'))}</h3>
     ${findings
       .map((f) => {
         const tags = [];
-        if (f.personalized && f.personalReasons?.length) tags.push(`rilevante per: ${f.personalReasons.join(', ')}`);
-        if (f.quotes?.length) tags.push(`citata in ${f.quotes.length + 1} punti`);
+        if (f.personalized && f.personalReasons?.length) tags.push(t('rilevante per: {x}', { x: f.personalReasons.join(', ') }));
+        if (f.quotes?.length) tags.push(t('citata in {n} punti', { n: f.quotes.length + 1 }));
         return `<div class="finding" style="--sev-color:${sevColor(f.severity)}">
           <div class="top">
             <span class="name">${esc(f.title || f.label)}</span>
@@ -102,7 +103,7 @@ function renderFindings(findings) {
 
 function renderTimeline(timeline) {
   if (timeline.length < 2) return '';
-  return `<h3 class="section">Che cosa succede se accetti</h3>
+  return `<h3 class="section">${esc(t('Che cosa succede se accetti'))}</h3>
     <div class="timeline">
       ${timeline
         .map(
@@ -117,7 +118,7 @@ function renderTimeline(timeline) {
 
 function renderConsequences(list) {
   if (!list.length) return '';
-  return `<h3 class="section">In pratica</h3>
+  return `<h3 class="section">${esc(t('In pratica'))}</h3>
     <ul style="margin:0 0 12px;padding-left:18px;font-size:12.5px;line-height:1.55">
       ${list.map((c) => `<li>${esc(c)}</li>`).join('')}
     </ul>`;
@@ -126,7 +127,9 @@ function renderConsequences(list) {
 function renderLaw(consumer) {
   if (!consumer.flags?.length) return '';
   return `<details>
-    <summary>${consumer.flags.length} condizion${consumer.flags.length === 1 ? 'e' : 'i'} da verificare rispetto alle tutele ${consumer.jurisdiction === 'IT' ? 'italiane' : 'UE'}</summary>
+    <summary>${esc(consumer.jurisdiction === 'IT'
+      ? tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele italiane', '{n} condizioni da verificare rispetto alle tutele italiane')
+      : tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele UE', '{n} condizioni da verificare rispetto alle tutele UE'))}</summary>
     ${consumer.flags
       .map(
         (f) => `<div class="law">
@@ -142,14 +145,13 @@ function renderLaw(consumer) {
 function renderDebug(v) {
   const e = v.engine || {};
   return `<details>
-    <summary>Dettagli tecnici dell'analisi</summary>
+    <summary>${esc(t('Dettagli tecnici dell’analisi'))}</summary>
     <div class="small muted" style="line-height:1.7;padding:4px 0">
-      Clausole esaminate: ${esc(String(e.stats?.clauses ?? '—'))}<br>
-      Caratteri analizzati: ${esc(String(e.textLength ?? '—'))}<br>
-      Punteggio locale prima dell'AI: ${esc(String(e.localPreview ?? '—'))}<br>
-      Componenti: base ${esc(String(v.components?.base ?? '—'))} · pressione economica ${esc(String(v.components?.money ?? '—'))} · tutele consumer ${esc(String(v.components?.euBoost ?? '—'))}<br>
-      Motore AI: ${e.llm ? 'usato' : e.llmSkipped ? 'non necessario' : 'non disponibile'}${e.llmConfidence != null ? ` (confidenza ${e.llmConfidence})` : ''}<br>
-      Durata: ${esc(String(e.durationMs ?? '—'))} ms
+      ${esc(t('Caratteri analizzati: {n}', { n: e.textLength ?? '—' }))}<br>
+      ${esc(t('Citazioni scartate perché assenti dal testo: {n}', { n: e.dropped ?? 0 }))}<br>
+      ${esc(t('Componenti: base {a} · pressione economica {b} · tutele consumer {c}', { a: v.components?.base ?? '—', b: v.components?.money ?? '—', c: v.components?.euBoost ?? '—' }))}<br>
+      ${esc(t('Modello: {x}', { x: e.model || '—' }))}<br>
+      ${esc(t('Durata: {n} ms', { n: e.durationMs ?? '—' }))}
     </div>
   </details>`;
 }

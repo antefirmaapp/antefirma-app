@@ -454,7 +454,7 @@ async function commitmentFromVerdict({ historyId = null, verdict = null, text = 
 
   const snapshot = await createSnapshot({ text, verdict });
   if (snapshot.empty) {
-    throw new Error('Testo del contratto non disponibile: senza, la prova non attesterebbe nulla.');
+    throw new Error(t('Testo del contratto non disponibile: senza, la prova non attesterebbe nulla.'));
   }
   const commitment = buildCommitment({ verdict, snapshot, decision });
 

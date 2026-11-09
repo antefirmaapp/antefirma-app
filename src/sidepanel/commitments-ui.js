@@ -19,6 +19,7 @@ import { esc } from './render.js';
 import { formatMoney } from '../core/text.js';
 import { commitmentState, costOfDoingNothing, portfolioSummary, formatDate } from '../core/commitments.js';
 import { LETTER_LABELS } from '../core/letter.js';
+import { t, tn, locale } from '../i18n/index.js';
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -164,8 +165,8 @@ function render(list) {
 
   if (!shown.length) {
     $('#commitments-list').innerHTML = `<div class="empty">
-      Nessun impegno corrisponde a questa ricerca.<br>
-      <button class="link" data-act="reset-view">Mostra tutti gli impegni</button>
+      ${esc(t('Nessun impegno corrisponde a questa ricerca.'))}<br>
+      <button class="link" data-act="reset-view">${esc(t('Mostra tutti gli impegni'))}</button>
     </div>`;
     return;
   }
@@ -184,7 +185,7 @@ function render(list) {
         ? (b.state.daysLeft ?? -Infinity) - (a.state.daysLeft ?? -Infinity)
         : (a.state.daysLeft ?? Infinity) - (b.state.daysLeft ?? Infinity)
     );
-    return `<h3 class="c-group" data-group="${g.id}">${esc(g.label)}<span>${items.length}</span></h3>
+    return `<h3 class="c-group" data-group="${g.id}">${esc(t(g.label))}<span>${items.length}</span></h3>
       ${items.map(({ c, state }) => renderItem(c, state)).join('')}`;
   }).join('');
 
@@ -197,7 +198,7 @@ function paintChips(list) {
     const on = f === view.filter;
     chip.classList.toggle('active', on);
     chip.setAttribute('aria-pressed', String(on));
-    chip.textContent = `${CHIP_LABELS[f]} · ${list.filter((c) => matchesFilter(c, f)).length}`;
+    chip.textContent = `${t(CHIP_LABELS[f])} · ${list.filter((c) => matchesFilter(c, f)).length}`;
   }
 }
 
@@ -205,8 +206,8 @@ function renderPortfolio(s) {
   const totals = s.totals.map((t) => formatMoney(t.amount, t.currency)).join(' · ') || '—';
   return `
     <div class="big">${esc(totals)}</div>
-    <div class="cap">esposizione complessiva su ${s.count} ${s.count === 1 ? 'impegno attivo' : 'impegni attivi'}</div>
-    ${s.next ? `<div class="next">Prossima scadenza: <strong>${esc(s.next.c.provider || s.next.c.host || '')}</strong> — ${esc(s.next.state.label.toLowerCase())}</div>` : ''}
+    <div class="cap">${esc(tn(s.count, 'esposizione complessiva su {n} impegno attivo', 'esposizione complessiva su {n} impegni attivi'))}</div>
+    ${s.next ? `<div class="next">${esc(t('Prossima scadenza:'))} <strong>${esc(s.next.c.provider || s.next.c.host || '')}</strong> — ${esc(s.next.state.label.toLowerCase())}</div>` : ''}
   `;
 }
 
@@ -218,24 +219,24 @@ function renderItem(c, state = commitmentState(c)) {
   return `
     <div class="c-item" data-commitment="${id}">
       <div class="c-top">
-        <span class="c-name">${esc(c.provider || c.host || 'Impegno')}</span>
+        <span class="c-name">${esc(c.provider || c.host || t('Impegno'))}</span>
         <span class="c-amount">${c.worstCase != null ? esc(formatMoney(c.worstCase, c.currency)) : ''}</span>
       </div>
       ${c.headline ? `<div class="c-head">${esc(c.headline)}</div>` : ''}
       <span class="c-state" data-urgency="${esc(state.urgency)}">${esc(state.label)}</span>
       ${doing && state.urgency !== 'done' ? `<div class="c-nothing">${esc(doing.label)}</div>` : ''}
-      ${c.renewalAt ? `<div class="c-nothing">Scadenza del periodo: ${esc(formatDate(new Date(c.renewalAt)))}${c.noticeMonths ? ` · preavviso ${Math.round(c.noticeMonths * 30)} giorni` : ''}</div>` : ''}
+      ${c.renewalAt ? `<div class="c-nothing">${esc(t('Scadenza del periodo: {d}.', { d: formatDate(new Date(c.renewalAt)) }).replace(/\.$/, ''))}${c.noticeMonths ? ` · ${esc(t('preavviso {n} giorni', { n: Math.round(c.noticeMonths * 30) }))}` : ''}</div>` : ''}
       ${lastChange && lastChange.changed ? `<div class="c-change">⚠️ ${esc(lastChange.summary)}</div>` : ''}
-      ${lastChange && !lastChange.changed ? `<div class="c-nothing">✓ Verificato il ${esc(new Date(lastChange.checkedAt).toLocaleDateString('it-IT'))}: condizioni invariate.</div>` : ''}
+      ${lastChange && !lastChange.changed ? `<div class="c-nothing">✓ ${esc(t('Verificato il {d}: condizioni invariate.', { d: new Date(lastChange.checkedAt).toLocaleDateString(locale()) }))}</div>` : ''}
       ${state.urgency !== 'done' && c.deadlineAt && !c.inCalendar
-        ? `<div class="c-hint">Il promemoria del browser funziona solo con Chrome aperto: metti la scadenza anche in calendario.</div>`
+        ? `<div class="c-hint">${esc(t('Il promemoria del browser funziona solo con Chrome aperto: metti la scadenza anche in calendario.'))}</div>`
         : ''}
       <div class="c-actions">
-        <button class="strong" data-act="ics" data-id="${id}">Calendario</button>
-        <button data-act="letter" data-id="${id}">Lettera</button>
+        <button class="strong" data-act="ics" data-id="${id}">${esc(t('Calendario'))}</button>
+        <button data-act="letter" data-id="${id}">${esc(t('Lettera'))}</button>
         <div class="c-menu-wrap">
           <button class="c-more" data-act="menu" data-id="${id}"
-                  aria-haspopup="true" aria-expanded="false" aria-label="Altre azioni">⋯</button>
+                  aria-haspopup="true" aria-expanded="false" aria-label="${esc(t('Altre azioni'))}">⋯</button>
           <div class="c-menu" data-menu="${id}" hidden>${renderMenu(c)}</div>
         </div>
       </div>
@@ -246,13 +247,13 @@ function renderItem(c, state = commitmentState(c)) {
 function renderMenu(c) {
   const id = esc(c.id);
   return `
-    <button data-act="check" data-id="${id}">Verifica modifiche</button>
-    <button data-act="proof" data-id="${id}">Prova di cosa hai accettato</button>
-    <button data-act="export" data-id="${id}">Esporta l’archivio</button>
+    <button data-act="check" data-id="${id}">${esc(t('Verifica modifiche'))}</button>
+    <button data-act="proof" data-id="${id}">${esc(t('Prova di cosa hai accettato'))}</button>
+    <button data-act="export" data-id="${id}">${esc(t('Esporta l’archivio'))}</button>
     ${c.status === 'active'
-      ? `<button data-act="cancelled" data-id="${id}">Segna come disdetto</button>`
-      : `<button data-act="reactivate" data-id="${id}">Riattiva</button>`}
-    <button class="danger" data-act="delete-ask" data-id="${id}">Elimina definitivamente…</button>
+      ? `<button data-act="cancelled" data-id="${id}">${esc(t('Segna come disdetto'))}</button>`
+      : `<button data-act="reactivate" data-id="${id}">${esc(t('Riattiva'))}</button>`}
+    <button class="danger" data-act="delete-ask" data-id="${id}">${esc(t('Elimina definitivamente…'))}</button>
   `;
 }
 
@@ -266,13 +267,12 @@ function renderConfirm(c) {
   const id = esc(c.id);
   return `
     <p class="c-confirm-text">
-      Elimini <strong>${esc(c.provider || c.host || 'questo impegno')}</strong>?
-      Sparisce anche la prova: il testo conservato, l’impronta SHA-256 che lo certifica
-      e le scadenze. Non si recupera.
+      ${esc(t('Elimini {x}?', { x: c.provider || c.host || t('questo impegno') }))}
+      ${esc(t('Sparisce anche la prova: il testo conservato, l’impronta SHA-256 che lo certifica e le scadenze. Non si recupera.'))}
     </p>
-    <button data-act="export" data-id="${id}">Esporta prima di eliminare</button>
-    <button class="danger" data-act="delete-confirm" data-id="${id}">Sì, elimina</button>
-    <button class="link" data-act="menu-close" data-id="${id}">Annulla</button>
+    <button data-act="export" data-id="${id}">${esc(t('Esporta prima di eliminare'))}</button>
+    <button class="danger" data-act="delete-confirm" data-id="${id}">${esc(t('Sì, elimina'))}</button>
+    <button class="link" data-act="menu-close" data-id="${id}">${esc(t('Annulla'))}</button>
   `;
 }
 
@@ -352,7 +352,7 @@ async function onAction(event) {
       await load();
     }
   } catch (err) {
-    openModal('Non è stato possibile completare l’operazione', `<div class="status error">${esc(err.message)}</div>`, []);
+    openModal(t('Non è stato possibile completare l’operazione'), `<div class="status error">${esc(err.message)}</div>`, []);
   } finally {
     // Dopo un `load()` il pulsante è staccato dal documento: innocuo.
     btn.disabled = false;
@@ -390,8 +390,8 @@ function showUndoBar(c) {
   // La barra si scrive una volta sola: riscrivere l'HTML a ogni secondo
   // toglierebbe il fuoco dal pulsante «Annulla» proprio a chi lo sta cercando
   // con la tastiera.
-  bar.innerHTML = `<span>Eliminato «${esc(name)}» con la sua prova.</span>
-    <button class="link" id="undo-delete">Annulla (<span id="undo-count">${Math.ceil(UNDO_MS / 1000)}</span>)</button>`;
+  bar.innerHTML = `<span>${esc(t('Eliminato «{x}» con la sua prova.', { x: name }))}</span>
+    <button class="link" id="undo-delete">${esc(t('Annulla'))} (<span id="undo-count">${Math.ceil(UNDO_MS / 1000)}</span>)</button>`;
   bar.hidden = false;
   $('#undo-delete').addEventListener('click', undoDelete);
 }
@@ -430,7 +430,7 @@ async function finalizeDelete() {
     await send('DELETE_COMMITMENT', { id });
     await load();
   } catch (err) {
-    openModal('Non è stato possibile eliminare l’impegno', `<div class="status error">${esc(err.message)}</div>`, []);
+    openModal(t('Non è stato possibile eliminare l’impegno'), `<div class="status error">${esc(err.message)}</div>`, []);
     await load();
   }
 }
@@ -441,19 +441,19 @@ async function showLetter(id, kind = null) {
   const letter = await send('BUILD_LETTER', { id, kind });
 
   const options = Object.entries(LETTER_LABELS)
-    .map(([k, label]) => `<option value="${k}" ${k === letter.kind ? 'selected' : ''}>${esc(label)}</option>`)
+    .map(([k, label]) => `<option value="${k}" ${k === letter.kind ? 'selected' : ''}>${esc(t(label))}</option>`)
     .join('');
 
   openModal(
-    'Lettera pronta da inviare',
+    t('Lettera pronta da inviare'),
     `
       <select id="letter-kind">${options}</select>
       <ul class="checklist">${letter.checklist.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>
       <pre id="letter-text">${esc(letter.text)}</pre>
     `,
     [
-      { label: 'Copia', act: (btn) => copy(letter.text, btn) },
-      { label: 'Scarica .txt', act: () => download(letter.filename, letter.text, 'text/plain') },
+      { label: t('Copia'), act: (btn) => copy(letter.text, btn) },
+      { label: t('Scarica .txt'), act: () => download(letter.filename, letter.text, 'text/plain') },
     ]
   );
 
@@ -475,37 +475,37 @@ async function showChanges(id) {
   const body = diff.changed
     ? `
       <p class="summary">${esc(diff.summary)}</p>
-      ${diff.added.length ? `<p class="muted small"><strong>Condizioni comparse:</strong> ${esc(diff.added.join(', '))}</p>` : ''}
-      ${diff.removed.length ? `<p class="muted small"><strong>Condizioni sparite:</strong> ${esc(diff.removed.join(', '))}</p>` : ''}
+      ${diff.added.length ? `<p class="muted small"><strong>${esc(t('Condizioni comparse:'))}</strong> ${esc(diff.added.join(', '))}</p>` : ''}
+      ${diff.removed.length ? `<p class="muted small"><strong>${esc(t('Condizioni sparite:'))}</strong> ${esc(diff.removed.join(', '))}</p>` : ''}
       ${diff.severity === 'major'
-        ? `<p class="muted small">Una modifica unilaterale sfavorevole può aprire la strada al recesso senza penali: nella lettera trovi la variante apposita.</p>`
+        ? `<p class="muted small">${esc(t('Una modifica unilaterale sfavorevole può aprire la strada al recesso senza penali: nella lettera trovi la variante apposita.'))}</p>`
         : ''}
     `
     : `<p class="summary">${esc(diff.summary)}</p>`;
 
-  openModal('Confronto con le condizioni che avevi accettato', body,
-    diff.severity === 'major' ? [{ label: 'Lettera di recesso', act: () => showLetter(id, LETTER_KINDS.CHANGE) }] : []);
+  openModal(t('Confronto con le condizioni che avevi accettato'), body,
+    diff.severity === 'major' ? [{ label: t('Lettera di recesso'), act: () => showLetter(id, LETTER_KINDS.CHANGE) }] : []);
 }
 
 async function showProof(id) {
   const proof = await send('GET_PROOF', { id });
-  const when = proof.snapshot?.at ? new Date(proof.snapshot.at).toLocaleString('it-IT') : '—';
+  const when = proof.snapshot?.at ? new Date(proof.snapshot.at).toLocaleString(locale()) : '—';
 
   openModal(
-    'Prova di cosa hai accettato',
+    t('Prova di cosa hai accettato'),
     `
       ${proof.valid
-        ? '<div class="proof-ok">✓ Il testo conservato corrisponde all’impronta registrata.</div>'
-        : '<div class="proof-bad">⚠️ Il testo conservato non corrisponde all’impronta: non usarlo come prova.</div>'}
-      <p class="muted small">Accettato il ${esc(when)} · ${esc(String(proof.snapshot?.chars ?? 0))} caratteri</p>
+        ? `<div class="proof-ok">✓ ${esc(t('Il testo conservato corrisponde all’impronta registrata.'))}</div>`
+        : `<div class="proof-bad">⚠️ ${esc(t('Il testo conservato non corrisponde all’impronta: non usarlo come prova.'))}</div>`}
+      <p class="muted small">${esc(t('Accettato il {d}', { d: when }))} · ${esc(t('{n} caratteri', { n: proof.snapshot?.chars ?? 0 }))}</p>
       <pre>${esc(proof.attestation)}</pre>
-      <p class="muted small">Estratto:</p>
+      <p class="muted small">${esc(t('Estratto:'))}</p>
       <pre>${esc((proof.snapshot?.excerpt || '').slice(0, 700))}…</pre>
     `,
     [
-      { label: 'Scarica attestazione', act: () => download(proof.filename, proof.attestation, 'text/plain') },
+      { label: t('Scarica attestazione'), act: () => download(proof.filename, proof.attestation, 'text/plain') },
       {
-        label: 'Scarica il testo integrale',
+        label: t('Scarica il testo integrale'),
         act: () => download(proof.filename.replace('prova-', 'testo-'), proof.text || '', 'text/plain'),
       },
     ]
@@ -522,21 +522,21 @@ async function exportArchive(id) {
   const c = cache.find((x) => x.id === id) || {};
   const state = commitmentState(c);
   const header = [
-    `Impegno: ${c.provider || c.host || '—'}`,
-    c.headline ? `Sintesi: ${c.headline}` : null,
-    c.worstCase != null ? `Impegno economico stimato: ${formatMoney(c.worstCase, c.currency || 'EUR')}` : null,
-    c.deadlineAt ? `Disdetta entro: ${formatDate(new Date(c.deadlineAt))}` : null,
-    c.renewalAt ? `Scadenza del periodo: ${formatDate(new Date(c.renewalAt))}` : null,
-    `Stato: ${state.label}`,
+    `${t('Impegno:')} ${c.provider || c.host || '—'}`,
+    c.headline ? `${t('Sintesi:')} ${c.headline}` : null,
+    c.worstCase != null ? `${t('Impegno economico stimato:')} ${formatMoney(c.worstCase, c.currency || 'EUR')}` : null,
+    c.deadlineAt ? `${t('Disdetta entro:')} ${formatDate(new Date(c.deadlineAt))}` : null,
+    c.renewalAt ? `${t('Scadenza del periodo:')} ${formatDate(new Date(c.renewalAt))}` : null,
+    `${t('Stato:')} ${state.label}`,
   ].filter(Boolean).join('\n');
 
   const body = [
     header,
     '',
-    '── attestazione ────────────────────────────────────────────',
+    `── ${t('attestazione')} ──────────────────────────────`,
     proof.attestation || '',
     '',
-    '── testo integrale conservato ──────────────────────────────',
+    `── ${t('testo integrale conservato')} ──────────────────────────────`,
     proof.text || proof.snapshot?.excerpt || '',
   ].join('\n');
 
@@ -559,7 +559,7 @@ export function openModal(title, bodyHtml, actions = []) {
   }
   const close = document.createElement('button');
   close.className = 'link';
-  close.textContent = 'Chiudi';
+  close.textContent = t('Chiudi');
   close.addEventListener('click', closeModal);
   $('#modal-foot').append(close);
   $('#modal').hidden = false;
@@ -588,9 +588,9 @@ function download(filename, content, mime) {
 async function copy(text, btn) {
   try {
     await navigator.clipboard.writeText(text);
-    flash(btn, 'Copiato ✓', 2000);
+    flash(btn, t('Copiato ✓'), 2000);
   } catch {
-    flash(btn, 'Copia non riuscita: usa Scarica .txt', 4000, 'failed');
+    flash(btn, t('Copia non riuscita: usa Scarica .txt'), 4000, 'failed');
   }
 }
 

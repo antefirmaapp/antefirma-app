@@ -7,6 +7,8 @@ import { renderVerdict, esc } from './render.js';
 import * as commitments from './commitments-ui.js';
 import { extractPdfText } from '../lib/pdf-text.js';
 import { formatMoney } from '../core/text.js';
+import { t, setLang, resolveLang, locale } from '../i18n/index.js';
+import { translateDom } from '../i18n/dom.js';
 
 const $ = (sel) => document.querySelector(sel);
 const state = { source: null, busy: false };
@@ -15,7 +17,7 @@ const state = { source: null, busy: false };
 
 async function send(type, payload) {
   const res = await chrome.runtime.sendMessage({ type, payload });
-  if (!res) throw new Error('Nessuna risposta dal motore.');
+  if (!res) throw new Error(t('Nessuna risposta dal motore.'));
   if (!res.ok) throw new Error(res.error);
   return res.result;
 }
@@ -40,7 +42,7 @@ function showResult(verdict) {
   $('#result').innerHTML =
     renderVerdict(verdict) +
     (trackable
-      ? `<button class="primary" id="track" style="margin-top:10px;width:100%">Registra come impegno e ricordamelo</button>`
+      ? `<button class="primary" id="track" style="margin-top:10px;width:100%">${esc(t('Registra come impegno e ricordamelo'))}</button>`
       : '');
   if (trackable) $('#track').addEventListener('click', trackCurrent);
   $('#result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -63,11 +65,11 @@ async function trackCurrent() {
       decision: 'manual',
     });
     if (!saved) {
-      status('Da questo testo non emerge una scadenza da presidiare.', 'error');
+      status(t('Da questo testo non emerge una scadenza da presidiare.'), 'error');
       btn.disabled = false;
       return;
     }
-    btn.textContent = 'Registrato negli impegni ✓';
+    btn.textContent = t('Registrato negli impegni ✓');
     await commitments.load();
   } catch (err) {
     status(err.message, 'error');
@@ -82,13 +84,13 @@ async function trackCurrent() {
 function askConsent() {
   return new Promise((resolve) => {
     commitments.openModal(
-      'Posso leggere questo testo per te?',
-      `<p>Per dirti a che cosa ti stai impegnando, AnteFirma manda il testo e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic) e risponde con le clausole che ti impegnano, ciascuna con la frase esatta da cui nasce.</p>
-       <p>Il server non conserva il testo né l'indirizzo. Nessun account. Puoi ritirare il consenso quando vuoi dalle impostazioni.</p>`,
+      t('Posso leggere questo testo per te?'),
+      `<p>${esc(t('Per dirti a che cosa ti stai impegnando, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic) e ti risponde con le clausole che ti impegnano, ciascuna con la frase esatta da cui nasce.'))}</p>
+       <p>${esc(t('Il server non conserva il testo né l’indirizzo. Nessun account, nessun dato che ti identifichi. Puoi ritirare il consenso quando vuoi dalle impostazioni.'))}</p>`,
       [
-        { label: 'Non ora', act: () => { commitments.closeModal(); resolve(false); } },
+        { label: t('Non ora'), act: () => { commitments.closeModal(); resolve(false); } },
         {
-          label: 'Sì, analizza',
+          label: t('Sì, analizza'),
           act: async () => {
             commitments.closeModal();
             try {
@@ -109,23 +111,23 @@ function askConsent() {
 async function analyze(payload, label) {
   if (state.busy) return;
   state.busy = true;
-  status(label || 'Analisi in corso…');
+  status(label || t('Analisi in corso…'));
   $('#result').innerHTML = '';
   try {
     let verdict = await send('ANALYZE_TEXT', payload);
     if (verdict?.needsConsent) {
       status(null);
       if (!(await askConsent())) {
-        status('Senza il tuo consenso il testo non viene inviato e l’analisi non parte.', 'error');
+        status(t('Senza il tuo consenso il testo non viene inviato e l’analisi non parte.'), 'error');
         return;
       }
-      status(label || 'Analisi in corso…');
+      status(label || t('Analisi in corso…'));
       verdict = await send('ANALYZE_TEXT', payload);
     }
     status(null);
     showResult(verdict);
   } catch (err) {
-    status(err.message || 'Analisi non riuscita.', 'error');
+    status(err.message || t('Analisi non riuscita.'), 'error');
   } finally {
     state.busy = false;
   }
@@ -160,10 +162,10 @@ document.querySelectorAll('.source').forEach((btn) => {
 async function analyzeCurrentPage() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id || !/^https?:/.test(tab.url || '')) {
-    status('Questa pagina non può essere analizzata (non è una pagina web).', 'error');
+    status(t('Questa pagina non può essere analizzata (non è una pagina web).'), 'error');
     return;
   }
-  status('Leggo la pagina…');
+  status(t('Leggo la pagina…'));
   try {
     const [{ result }] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -176,15 +178,15 @@ async function analyzeCurrentPage() {
       },
     });
     if (!result?.text || result.text.trim().length < 60) {
-      status('Non ho trovato testo sufficiente in questa pagina.', 'error');
+      status(t('Non ho trovato testo sufficiente in questa pagina.'), 'error');
       return;
     }
     await analyze(
       { text: result.text, url: result.url, title: result.title, pricing: result.pricing, actionType: 'manual' },
-      'Analizzo la pagina…'
+      t('Analizzo la pagina…')
     );
   } catch (err) {
-    status(`Non riesco a leggere la pagina: ${err.message}`, 'error');
+    status(t('Non riesco a leggere la pagina: {x}', { x: err.message }), 'error');
   }
 }
 
@@ -193,7 +195,7 @@ async function analyzeCurrentPage() {
 $('#run-paste').addEventListener('click', () => {
   const text = $('#paste-text').value.trim();
   if (text.length < 40) {
-    status('Serve un testo un po’ più lungo per dire qualcosa di sensato.', 'error');
+    status(t('Serve un testo un po’ più lungo per dire qualcosa di sensato.'), 'error');
     return;
   }
   const priceRaw = $('#paste-price').value.trim();
@@ -205,7 +207,7 @@ $('#run-paste').addEventListener('click', () => {
       actionType: period ? 'subscribe' : 'manual',
       pricing: Number.isFinite(amount) ? { amount, currency: 'EUR', period, recurring: Boolean(period) } : {},
     },
-    'Analizzo il testo…'
+    t('Analizzo il testo…')
   );
 });
 
@@ -249,7 +251,7 @@ document.addEventListener('drop', (e) => {
 
 async function handlePdf(file) {
   if (!/pdf$/i.test(file.name) && file.type !== 'application/pdf') {
-    status('Il file non è un PDF.', 'error');
+    status(t('Il file non è un PDF.'), 'error');
     return;
   }
   status(`Leggo ${file.name}…`);
@@ -257,7 +259,7 @@ async function handlePdf(file) {
     const buffer = await file.arrayBuffer();
     const { text, pages, reliable, note } = await extractPdfText(buffer);
     if (!text || text.length < 60) {
-      status(note || 'Non sono riuscito a estrarre testo da questo PDF.', 'error');
+      status(note || t('Non sono riuscito a estrarre testo da questo PDF.'), 'error');
       return;
     }
     if (!reliable && note) status(note, 'error');
@@ -266,7 +268,7 @@ async function handlePdf(file) {
       `Analizzo ${file.name} (${pages} pagine)…`
     );
   } catch (err) {
-    status(err.message || 'Lettura del PDF non riuscita.', 'error');
+    status(err.message || t('Lettura del PDF non riuscita.'), 'error');
   }
 }
 
@@ -275,18 +277,18 @@ async function handlePdf(file) {
 $('#run-url').addEventListener('click', async () => {
   const url = $('#url-input').value.trim();
   if (!url) return;
-  status('Scarico il documento…');
+  status(t('Scarico il documento…'));
   try {
     const doc = await send('FETCH_DOCUMENT', { url });
     if (doc.isPdf) {
-      status('È un PDF: scaricalo e trascinalo qui, così lo leggo senza inviarlo altrove.', 'error');
+      status(t('È un PDF: scaricalo e trascinalo qui, così lo leggo senza inviarlo altrove.'), 'error');
       return;
     }
     if (!doc.text || doc.text.length < 60) {
-      status('Il documento non contiene testo analizzabile.', 'error');
+      status(t('Il documento non contiene testo analizzabile.'), 'error');
       return;
     }
-    await analyze({ text: doc.text, url: doc.url, title: url, actionType: 'manual' }, 'Analizzo il documento…');
+    await analyze({ text: doc.text, url: doc.url, title: url, actionType: 'manual' }, t('Analizzo il documento…'));
   } catch (err) {
     status(err.message, 'error');
   }
@@ -346,7 +348,7 @@ async function loadHistory() {
   const list = await send('GET_HISTORY');
   const el = $('#history-list');
   if (!list.length) {
-    el.innerHTML = `<div class="empty">Nessun impegno registrato.<br>Lo storico si riempie quando il firewall interviene su un pulsante di accettazione, acquisto o firma.</div>`;
+    el.innerHTML = `<div class="empty">${esc(t('Nessun impegno registrato.'))}<br>${esc(t('Lo storico si riempie quando il firewall interviene su un pulsante di accettazione, acquisto o firma.'))}</div>`;
     return;
   }
 
@@ -361,11 +363,11 @@ async function loadHistory() {
       return `<div class="h-item" data-level="${esc(h.level || '')}" style="--level-color:${LEVEL_COLORS[h.level] || '#888'}">
         <div class="h-top">
           <span>${esc(h.host || '—')}</span>
-          <span>${when.toLocaleDateString('it-IT')} · ${esc(String(h.score))}/100</span>
+          <span>${when.toLocaleDateString(locale())} · ${esc(String(h.score))}/100</span>
         </div>
         <div class="h-title">${esc(h.headline || '')}</div>
-        ${h.worstCase ? `<div class="h-cost">Impegno stimato: ${esc(formatMoney(h.worstCase, h.currency || 'EUR'))}</div>` : ''}
-        ${deadline && daysLeft != null ? `<div class="h-deadline">⏰ Disdetta entro il ${deadline.toLocaleDateString('it-IT')}${daysLeft >= 0 ? ` — fra ${daysLeft} giorni` : ' — scaduta'}</div>` : ''}
+        ${h.worstCase ? `<div class="h-cost">${esc(t('Impegno stimato: {x}.', { x: formatMoney(h.worstCase, h.currency || 'EUR') }))}</div>` : ''}
+        ${deadline && daysLeft != null ? `<div class="h-deadline">⏰ ${esc(t('Disdetta entro il {d}', { d: deadline.toLocaleDateString(locale()) }))}${esc(daysLeft >= 0 ? ' — ' + t('fra {n} giorni', { n: daysLeft }) : ' — ' + t('scaduta'))}</div>` : ''}
         ${h.mustRemember && !deadline ? `<div class="h-deadline">📌 ${esc(h.mustRemember)}</div>` : ''}
         <div class="h-decision">${esc(decisionLabel(h))}</div>
       </div>`;
@@ -375,10 +377,10 @@ async function loadHistory() {
 
 /** Che cosa è successo davvero, non solo se l'utente ha proseguito. */
 function decisionLabel(h) {
-  if (h.decision === 'cancel') return 'Ti sei fermato';
-  if (h.decision !== 'proceed') return 'Nessuna decisione registrata';
-  if (h.via === 'auto') return 'Proseguito senza blocco';
-  if (h.via === 'allowlist') return 'Proseguito, sito escluso dagli avvisi';
+  if (h.decision === 'cancel') return t('Ti sei fermato');
+  if (h.decision !== 'proceed') return t('Nessuna decisione registrata');
+  if (h.via === 'auto') return t('Proseguito senza blocco');
+  if (h.via === 'allowlist') return t('Proseguito, sito escluso dagli avvisi');
   return 'Hai proseguito';
 }
 
@@ -400,7 +402,7 @@ async function handlePanelRequest(req) {
   if (req.kind === 'selection' && req.text) {
     selectSource('paste');
     $('#paste-text').value = req.text;
-    await analyze({ text: req.text, url: req.url, title: req.title, actionType: 'manual' }, 'Analizzo la selezione…');
+    await analyze({ text: req.text, url: req.url, title: req.title, actionType: 'manual' }, t('Analizzo la selezione…'));
     return;
   }
   if (req.kind === 'url' && req.url) {
@@ -418,14 +420,15 @@ async function handlePanelRequest(req) {
 // ── avvio ───────────────────────────────────────────────────────────────────
 
 (async function init() {
-  commitments.init(send);
-
   try {
     const settings = await send('GET_SETTINGS');
+    setLang(resolveLang(settings.uiLang, chrome.i18n.getUILanguage()));
+    translateDom(document.body);
     $('#engine-note').textContent =
-      `Analisi: server di AnteFirma · giurisdizione ${settings.jurisdiction}` +
-      (settings.remoteConsentAt ? '' : ' · alla prima analisi ti chiederò il consenso');
+      t('Analisi: server di AnteFirma · giurisdizione {x}', { x: settings.jurisdiction }) +
+      (settings.remoteConsentAt ? '' : ' · ' + t('alla prima analisi ti chiederò il consenso'));
   } catch { /* il pannello resta usabile comunque */ }
+  commitments.init(send);
 
   // Aperto da una notifica di scadenza: si va dritti all'impegno giusto.
   const params = new URLSearchParams(location.search);

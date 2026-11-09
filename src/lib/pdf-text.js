@@ -12,6 +12,8 @@
  * così l'utente può incollare il testo a mano.
  */
 
+import { t } from '../i18n/index.js';
+
 const LATIN = new TextDecoder('latin1');
 
 /**
@@ -23,10 +25,10 @@ export async function extractPdfText(buffer) {
   const raw = LATIN.decode(bytes);
 
   if (!raw.startsWith('%PDF-') && !raw.slice(0, 1024).includes('%PDF-')) {
-    throw new Error('Il file non sembra un PDF.');
+    throw new Error(t('Il file non sembra un PDF.'));
   }
   if (/\/Encrypt\b/.test(raw)) {
-    throw new Error('PDF protetto da cifratura: non riesco a leggerne il contenuto.');
+    throw new Error(t('PDF protetto da cifratura: non riesco a leggerne il contenuto.'));
   }
 
   const pages = (raw.match(/\/Type\s*\/Page[^s]/g) || []).length || 1;
@@ -67,8 +69,8 @@ export async function extractPdfText(buffer) {
     note: reliable
       ? null
       : text.length === 0
-        ? 'Nessun testo estraibile: probabilmente è una scansione. Incolla il testo manualmente.'
-        : 'Il testo estratto sembra parziale o codificato in modo non standard: verificalo prima di fidarti dell’analisi.',
+        ? t('Nessun testo estraibile: probabilmente è una scansione. Incolla il testo manualmente.')
+        : t('Il testo estratto sembra parziale o codificato in modo non standard: verificalo prima di fidarti dell’analisi.'),
   };
 }
 

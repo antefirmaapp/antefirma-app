@@ -159,13 +159,13 @@ node --test test/*.test.mjs
 | `features.test.mjs` | prova, impegni, promemoria, `.ics`, lettere |
 | `actions.test.mjs` | quali pulsanti vengono intercettati |
 | `pdf.test.mjs` | estrazione del testo dai PDF |
+| `i18n.test.mjs` | ogni frase del codice e delle pagine ha la traduzione inglese e spagnola, con gli stessi segnaposti |
 
 Il server è sostituito da risposte scritte a mano o registrate
 (`fixtures/responses.mjs`, ricavate una volta dal vecchio motore a regole). La
 bravura del modello si misura nel server con `npm run eval`.
 
-`test/smoke.py` prova l'estensione in un Chromium vero: va aggiornato al flusso
-con il server (non usa più la pre-analisi né il modello sul dispositivo).
+`test/smoke.mjs` prova l'estensione in un Chromium vero, con il server finto: intercettazione del click, consenso, verdetto con il costo, «Continua comunque», il pulsante «Passa a Pro» a analisi finite, impostazioni in spagnolo, avviso e pannello in inglese. `node test/smoke.mjs` (con `SHOTS=cartella` salva anche le schermate).
 
 ---
 
@@ -181,17 +181,25 @@ src/core/analyzer.js                 dalla risposta del server al verdetto
 src/core/consequence.js              costo e timeline dalle cifre verificate
 src/core/{profile,eu,scoring}.js     profilo, tutele UE/IT, punteggio
 src/core/{commitments,letter,ics,proof}.js  kit di uscita e prova
-src/sidepanel/, src/options/         pannello e impostazioni
+src/sidepanel/, src/options/         pannello e impostazioni (con la sezione Piano)
+src/i18n/                            lingue: t(), dizionario it→en/es, traduzione delle pagine
 ```
 
 Convenzioni: identificatori in inglese, commenti e testi per l'utente in
 italiano. Nessun segreto nel codice.
 
+**Lingue.** I testi si scrivono in italiano dentro `t('…')` (o `tn(n, '…', '…')`
+per singolare e plurale); la traduzione inglese e spagnola va in
+`src/i18n/dict.js`, con la frase italiana come chiave. Le pagine HTML restano
+scritte in italiano e le traduce `src/i18n/dom.js` all'apertura. La lingua si
+sceglie nelle impostazioni («Automatica» segue il browser; fuori da it/es,
+inglese) e vale anche per le risposte del server. `test/i18n.test.mjs` fallisce
+se una frase non ha la traduzione. Le lettere di disdetta restano in italiano:
+sono documenti per i contratti italiani.
+
 ## Limiti noti
 
-- **L'interfaccia è solo in italiano.** Nome e descrizione del manifest sono in
-  tre lingue; i testi dell'avviso, del pannello e delle impostazioni vanno
-  ancora tradotti in inglese e spagnolo.
+- **Le lettere di disdetta sono solo in italiano**, per i contratti italiani.
 - **Il modello può tacere un rischio**: la verifica delle citazioni impedisce
   che ne inventi, non che ne ometta. Una pagina può provare a convincerlo a
   tacere.

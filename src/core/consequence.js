@@ -37,7 +37,7 @@ export function termsFromServer(terms = {}) {
       .filter((e) => e && typeof e.value === 'number' && Number.isFinite(e.value) && e.value > 0)
       .map((e) => ({
         amount: e.value,
-        label: (typeof e.label === 'string' && e.label.trim()) || 'Costo aggiuntivo',
+        label: (typeof e.label === 'string' && e.label.trim()) || t('Costo aggiuntivo'),
         perCycle: e.per_cycle === true,
         raw: e.quote || null,
       })),
