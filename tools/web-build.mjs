@@ -23,6 +23,8 @@ const require = createRequire(import.meta.url);
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(process.argv[2] || join(ROOT, '..', 'antefirma-site', 'assets', 'app'));
 const BASE = '/app/';
+// Il sito (Workers Static Assets) serve le pagine senza «.html»: si usano già gli indirizzi finali.
+const PANEL = `${BASE}src/sidepanel/sidepanel`, OPTIONS = `${BASE}src/options/options`;
 const version = JSON.parse(readFileSync(join(ROOT, 'manifest.json'), 'utf8')).version;
 
 rmSync(OUT, { recursive: true, force: true });
@@ -45,16 +47,16 @@ for (const [page, extra] of [['sidepanel/sidepanel.html', ''], ['options/options
   let html = readFileSync(f, 'utf8')
     .replace('<html lang="it">', `<html lang="it" data-version="${version}">`)
     .replace('</head>', HEAD(extra));
-  if (page.startsWith('options')) html = html.replace('<div class="wrap">', `<div class="wrap">\n    <a class="web-back" href="${BASE}src/sidepanel/sidepanel.html">← AnteFirma</a>`);
+  if (page.startsWith('options')) html = html.replace('<div class="wrap">', `<div class="wrap">\n    <a class="web-back" href="${PANEL}">← AnteFirma</a>`);
   writeFileSync(f, html);
 }
 // /app/ porta al pannello.
-writeFileSync(join(OUT, 'index.html'), `<!doctype html><meta charset="utf-8"><title>AnteFirma</title><meta http-equiv="refresh" content="0; url=${BASE}src/sidepanel/sidepanel.html"><link rel="canonical" href="${BASE}src/sidepanel/sidepanel.html"><a href="${BASE}src/sidepanel/sidepanel.html">AnteFirma</a>\n`);
+writeFileSync(join(OUT, 'index.html'), `<!doctype html><meta charset="utf-8"><title>AnteFirma</title><meta http-equiv="refresh" content="0; url=${PANEL}"><link rel="canonical" href="${PANEL}"><a href="${PANEL}">AnteFirma</a>\n`);
 
 writeFileSync(join(OUT, 'manifest.webmanifest'), JSON.stringify({
   name: 'AnteFirma', short_name: 'AnteFirma',
   description: 'Prima di accettare, sai a che cosa ti impegni: analizza contratti e condizioni, ricorda le scadenze, scrive la lettera di disdetta.',
-  id: BASE, start_url: `${BASE}src/sidepanel/sidepanel.html`, scope: BASE, display: 'standalone',
+  id: BASE, start_url: PANEL, scope: BASE, display: 'standalone',
   background_color: '#f5f6f8', theme_color: '#15203a', lang: 'it',
   icons: [
     { src: `${BASE}icons/icon-192.png`, sizes: '192x192', type: 'image/png' },
@@ -82,7 +84,7 @@ const walk = (d) => { for (const f of readdirSync(d)) { const p = join(d, f); if
 walk(OUT);
 writeFileSync(join(OUT, 'sw.js'), `/* AnteFirma web ${version}: generato da tools/web-build.mjs. */
 const CACHE = 'antefirma-web-${version}-${Date.now().toString(36)}';
-const FILES = ${JSON.stringify(files.filter((f) => !f.endsWith('/sw.js')))};
+const FILES = ${JSON.stringify(files.filter((f) => !f.endsWith('/sw.js')).map((f) => f.replace(/\/index\.html$/, '/').replace(/\.html$/, '')))};
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 // Prima la rete (gli aggiornamenti arrivano subito), la copia se la rete manca. Le API non passano di qui.

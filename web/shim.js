@@ -141,7 +141,7 @@
       getURL: appUrl,
       getManifest: () => ({ version: document.documentElement.dataset.version || '' }),
       sendMessage,
-      openOptionsPage: () => { location.assign(appUrl('src/options/options.html')); },
+      openOptionsPage: () => { location.assign(appUrl(location.pathname.endsWith('.html') ? 'src/options/options.html' : 'src/options/options')); },
       onMessage: { addListener: (f) => onMessage.push(f), removeListener: (f) => { const i = onMessage.indexOf(f); if (i >= 0) onMessage.splice(i, 1); } },
       onInstalled: { addListener: (f) => onInstalled.push(f) },
       onStartup: { addListener: (f) => onStartup.push(f) },
