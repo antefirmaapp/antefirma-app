@@ -163,6 +163,12 @@
         <button class="secondary danger" id="clear-history" type="button">Cancella lo storico</button>
       </div>
       <p class="lead small">Cache e storico restano su questo dispositivo. Lo storico serve a ritrovare le scadenze di disdetta.</p>
+      <div class="row">
+        <button class="secondary" id="export-data" type="button">Scarica i miei dati</button>
+        <button class="secondary" id="import-data" type="button">Carica da file…</button>
+        <input type="file" id="import-file" accept="application/json,.json" hidden>
+      </div>
+      <p class="lead small">Impegni, storico e dati per le lettere in un file: è la tua copia di sicurezza, e serve a portarli su un altro computer o dalla versione web all'estensione. Il codice dell'installazione e la chiave del piano non ci sono.</p>
       <p class="lead small">Codice di questa installazione: <code id="install-id" data-no-i18n>…</code> <button class="secondary" id="copy-install-id" type="button">Copia</button></p>
       <p class="lead small">È un numero casuale, non collegato a te. Per chiedere la cancellazione dei dati che il server tiene su questa installazione, scrivi a privacy@antefirma.app indicando questo codice.</p>
     </section>

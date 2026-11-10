@@ -24,6 +24,8 @@ export const PRIVILEGED_MESSAGES = new Set([
   'ACTIVATE_LICENSE',
   'DEACTIVATE_LICENSE',
   'GET_INSTALL_ID',
+  'EXPORT_DATA',
+  'IMPORT_DATA',
 ]);
 
 /**

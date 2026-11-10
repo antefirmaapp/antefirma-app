@@ -21,6 +21,7 @@ import { buildIcs } from '../core/ics.js';
 import { buildLetter, suggestKind } from '../core/letter.js';
 import { register, installId, ServerError, getLicense, startCheckout, activateLicense, deactivateLicense, sendFeedback } from '../core/server.js';
 import { API_BASE } from '../core/config.js';
+import { SAMPLES } from '../core/samples.js';
 import { t, setLang, resolveLang } from '../i18n/index.js';
 import {
   getSettings as readSettings, setSettings, isAllowlisted,
@@ -192,6 +193,12 @@ async function handle(msg, sender) {
       return analyzeAction(msg.payload, sender);
     case 'ANALYZE_TEXT':
       return analyzeText(msg.payload);
+    case 'ANALYZE_SAMPLE':
+      return analyzeSample(msg.payload?.key);
+    case 'EXPORT_DATA':
+      return exportData();
+    case 'IMPORT_DATA':
+      return importData(msg.payload);
     case 'FETCH_DOCUMENT':
       return fetchDocument(msg.payload?.url);
     case 'GET_SETTINGS':
@@ -417,6 +424,60 @@ async function analyzeText(payload = {}) {
   await chrome.storage.session.set({ [`verdict:${id}`]: { verdict, text } });
   await showQuotaBadge(verdict.engine?.quota);
   return { ...verdict, historyId: id };
+}
+
+/**
+ * Un esempio: lo stesso calcolo di un'analisi vera, con la risposta del server
+ * già scritta. Nessun testo esce dal computer, nessuna analisi viene consumata,
+ * e il risultato non si può registrare come impegno (non è un contratto tuo).
+ */
+async function analyzeSample(key) {
+  const sample = SAMPLES[key];
+  if (!sample) throw new Error(t('Esempio non trovato.'));
+  const settings = await getSettings();
+  const lang = sample.langs[settings.uiLang] ? settings.uiLang : 'it';
+  const s = sample.langs[lang];
+  const verdict = await analyze({
+    text: s.text,
+    ctx: { pricing: sample.pricing || {}, terms: { textInPage: true } },
+    actionType: sample.pricing?.period ? ACTION_TYPES.SUBSCRIBE : ACTION_TYPES.MANUAL,
+    settings,
+    remote: async () => ({ findings: s.findings, terms: s.terms, summary: s.summary, dropped: 0, truncated: false, model: 'esempio' }),
+  });
+  return { ...verdict, example: true, text: s.text };
+}
+
+/** Le chiavi che la copia di sicurezza porta con sé: mai l'identità dell'installazione né la licenza. */
+const EXPORT_KEYS = ['settings', 'history', 'commitments', 'snapshots', 'proceedByHost'];
+
+async function exportData() {
+  const data = await chrome.storage.local.get(EXPORT_KEYS);
+  if (data.settings) delete data.settings.remoteConsentAt; // il consenso si dà in ogni installazione
+  return { app: 'antefirma', version: 1, exportedAt: new Date().toISOString(), data };
+}
+
+/** Unisce una copia di sicurezza: aggiunge ciò che manca, non cancella niente di quello che c'è. */
+async function importData(file) {
+  if (!file || file.app !== 'antefirma' || typeof file.data !== 'object') throw new Error(t('Il file non è una copia di AnteFirma.'));
+  const cur = await chrome.storage.local.get(EXPORT_KEYS);
+  const byId = (a = [], b = []) => {
+    const seen = new Set(a.map((x) => x.id ?? x.at));
+    return [...a, ...b.filter((x) => !seen.has(x.id ?? x.at))];
+  };
+  const d = file.data;
+  const next = {
+    commitments: byId(cur.commitments || [], Array.isArray(d.commitments) ? d.commitments : []),
+    history: byId(cur.history || [], Array.isArray(d.history) ? d.history : []),
+    snapshots: { ...(d.snapshots || {}), ...(cur.snapshots || {}) },
+    proceedByHost: { ...(d.proceedByHost || {}), ...(cur.proceedByHost || {}) },
+    // Preferenze e dati per le lettere arrivano dalla copia; il consenso resta quello di qui.
+    settings: { ...(cur.settings || {}), ...(d.settings || {}), remoteConsentAt: cur.settings?.remoteConsentAt || null },
+  };
+  await chrome.storage.local.set(next);
+  return {
+    commitments: next.commitments.length - (cur.commitments || []).length,
+    history: next.history.length - (cur.history || []).length,
+  };
 }
 
 // ── decisione e registro degli impegni ──────────────────────────────────────

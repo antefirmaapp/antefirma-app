@@ -7,11 +7,14 @@ import { renderVerdict, esc } from './render.js';
 import * as commitments from './commitments-ui.js';
 import { extractPdfText } from '../lib/pdf-text.js';
 import { formatMoney } from '../core/text.js';
-import { t, setLang, resolveLang, locale } from '../i18n/index.js';
+import { t, setLang, resolveLang, locale, getLang } from '../i18n/index.js';
 import { translateDom } from '../i18n/dom.js';
+import { SAMPLES } from '../core/samples.js';
 
 const $ = (sel) => document.querySelector(sel);
 const state = { source: null, busy: false };
+/** La versione web (web.antefirma.app): stesso pannello, senza le funzioni che una pagina non può avere. */
+const isWeb = document.documentElement.dataset.web === '1';
 
 // ── infrastruttura ──────────────────────────────────────────────────────────
 
@@ -38,8 +41,11 @@ let lastVerdict = null;
 
 function showResult(verdict) {
   lastVerdict = verdict;
-  const trackable = verdict.cost?.horizonMonths || verdict.cost?.hasAutoRenewal || verdict.cost?.worstCase != null;
+  // Un esempio non è un contratto tuo: si guarda, non si registra.
+  const trackable = !verdict.example && (verdict.cost?.horizonMonths || verdict.cost?.hasAutoRenewal || verdict.cost?.worstCase != null);
+  if (verdict.engine?.quota) paintQuota(verdict.engine.quota);
   $('#result').innerHTML =
+    (verdict.example ? `<div class="status example-note">${esc(t('Esempio: contratto inventato, nessuna analisi usata. Incolla il tuo testo per un’analisi vera.'))}</div>` : '') +
     renderVerdict(verdict) +
     (trackable
       ? `<button class="primary" id="track" style="margin-top:10px;width:100%">${esc(t('Registra come impegno e ricordamelo'))}</button>`
@@ -70,10 +76,88 @@ async function trackCurrent() {
       return;
     }
     btn.textContent = t('Registrato negli impegni ✓');
+    offerCalendar(saved);
     await commitments.load();
   } catch (err) {
     status(err.message, 'error');
     btn.disabled = false;
+  }
+}
+
+/**
+ * Subito dopo il salvataggio, la scadenza in calendario: è l'unico promemoria
+ * che arriva anche a browser chiuso. Google Calendar o un file .ics.
+ */
+function offerCalendar(c) {
+  if (!c?.deadlineAt || $('#cal-offer')) return;
+  const day = new Date(c.deadlineAt);
+  const ymd = (d) => d.toISOString().slice(0, 10).replace(/-/g, '');
+  const next = new Date(day.getTime() + 86400000);
+  const google = 'https://calendar.google.com/calendar/render?' + new URLSearchParams({
+    action: 'TEMPLATE',
+    text: t('Disdetta {x}: ultimo giorno', { x: c.provider || c.host || '' }).trim(),
+    dates: `${ymd(day)}/${ymd(next)}`,
+    details: t('Ultimo giorno per inviare la disdetta. Promemoria creato con AnteFirma.'),
+  }).toString();
+  const box = document.createElement('div');
+  box.id = 'cal-offer';
+  box.className = 'cal-offer';
+  box.innerHTML = `<p>${esc(t('Mettila anche in calendario: ti avvisa anche quando AnteFirma è chiusa.'))}</p>
+    <div class="row"><a class="secondary btn-like" href="${esc(google)}" target="_blank" rel="noopener">Google Calendar</a>
+    <button class="secondary" id="cal-ics">${esc(t('Apple, Outlook e altri (.ics)'))}</button></div>`;
+  $('#track').after(box);
+  $('#cal-ics').addEventListener('click', async () => {
+    try {
+      const { content, filename } = await send('BUILD_ICS', { id: c.id });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([content], { type: 'text/calendar' }));
+      a.download = filename; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    } catch (err) { status(err.message, 'error'); }
+  });
+}
+
+/** Le analisi rimaste, in testata: si vede prima di finirle, non dopo. */
+function paintQuota(q) {
+  const m = q?.month;
+  if (!m || m.limit == null || m.remaining == null) return;
+  let el = $('#quota');
+  if (!el) {
+    el = document.createElement('button');
+    el.id = 'quota';
+    el.className = 'quota';
+    el.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#piano') }));
+    $('#open-options').before(el);
+  }
+  el.textContent = t('{n} di {m} analisi rimaste questo mese', { n: m.remaining, m: m.limit });
+  el.classList.toggle('low', m.remaining <= 1);
+}
+
+function engineNote(settings) {
+  $('#engine-note').textContent =
+    t('Analisi: server di AnteFirma · giurisdizione {x}', { x: settings.jurisdiction }) +
+    (settings.remoteConsentAt ? '' : ' · ' + t('alla prima analisi ti chiederò il consenso'));
+}
+
+/** Un esempio pronto: stesso calcolo, nessun testo inviato, nessuna analisi consumata. */
+async function runSample(key) {
+  const sample = SAMPLES[key];
+  if (!sample || state.busy) return;
+  selectTab('analyze');
+  if (!isWeb) selectSource('paste');
+  const s = sample.langs[getLang()] || sample.langs.it;
+  $('#paste-text').value = s.text;
+  $('#paste-price').value = sample.pricing?.amount ? String(sample.pricing.amount).replace('.', ',') : '';
+  $('#paste-period').value = sample.pricing?.period || '';
+  document.querySelectorAll('[data-sample]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.sample === key)));
+  state.busy = true;
+  status(t('Analizzo l’esempio…'));
+  try {
+    showResult(await send('ANALYZE_SAMPLE', { key }));
+    status(null);
+  } catch (err) {
+    status(err.message, 'error');
+  } finally {
+    state.busy = false;
   }
 }
 
@@ -95,6 +179,7 @@ function askConsent() {
             commitments.closeModal();
             try {
               await send('GRANT_CONSENT');
+              send('GET_SETTINGS').then(engineNote).catch(() => {});
               resolve(true);
             } catch {
               resolve(false);
@@ -211,6 +296,11 @@ $('#run-paste').addEventListener('click', () => {
   );
 });
 
+// Dalla casella del testo, Ctrl+Invio (⌘+Invio sul Mac) analizza.
+$('#paste-text').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('#run-paste').click(); }
+});
+
 // ── 3. PDF ──────────────────────────────────────────────────────────────────
 
 const dropzone = $('#dropzone');
@@ -244,7 +334,7 @@ document.addEventListener('drop', (e) => {
   e.preventDefault();
   const file = e.dataTransfer?.files?.[0];
   if (file && file.type === 'application/pdf') {
-    selectSource('pdf');
+    if (!isWeb) selectSource('pdf');
     handlePdf(file);
   }
 });
@@ -348,7 +438,9 @@ async function loadHistory() {
   const list = await send('GET_HISTORY');
   const el = $('#history-list');
   if (!list.length) {
-    el.innerHTML = `<div class="empty">${esc(t('Nessun impegno registrato.'))}<br>${esc(t('Lo storico si riempie quando il firewall interviene su un pulsante di accettazione, acquisto o firma.'))}<p class="muted small"><a href="https://antefirma.app/demo/" target="_blank" rel="noopener">${esc(t('Provalo su una pagina dimostrativa'))}</a></p></div>`;
+    el.innerHTML = isWeb
+      ? `<div class="empty">${esc(t('Le analisi che fai compaiono qui, con le scadenze da ricordare.'))}<p class="muted small"><button class="link" data-try-sample="gym">${esc(t('Prova con un esempio'))}</button></p></div>`
+      : `<div class="empty">${esc(t('Nessun impegno registrato.'))}<br>${esc(t('Lo storico si riempie quando il firewall interviene su un pulsante di accettazione, acquisto o firma.'))}<p class="muted small"><a href="https://antefirma.app/demo/" target="_blank" rel="noopener">${esc(t('Provalo su una pagina dimostrativa'))}</a></p></div>`;
     return;
   }
 
@@ -363,7 +455,7 @@ async function loadHistory() {
       return `<div class="h-item" data-level="${esc(h.level || '')}" style="--level-color:${LEVEL_COLORS[h.level] || '#888'}">
         <div class="h-top">
           <span>${esc(h.host || '—')}</span>
-          <span>${when.toLocaleDateString(locale())} · ${esc(String(h.score))}/100</span>
+          <span>${when.toLocaleDateString(locale())}</span>
         </div>
         <div class="h-title">${esc(h.headline || '')}</div>
         ${h.worstCase ? `<div class="h-cost">${esc(t('Impegno stimato: {x}.', { x: formatMoney(h.worstCase, h.currency || 'EUR') }))}</div>` : ''}
@@ -417,6 +509,39 @@ async function handlePanelRequest(req) {
   }
 }
 
+// ── esempi, PDF nella versione web ──────────────────────────────────────────
+
+function setupExtras() {
+  // Gli esempi sotto la casella: chi apre per la prima volta quasi mai ha un contratto sotto mano.
+  const lang = getLang();
+  const ex = document.createElement('div');
+  ex.className = 'examples';
+  ex.innerHTML = `<span>${esc(t('Prova con un esempio:'))}</span>` + Object.entries(SAMPLES)
+    .map(([k, v]) => `<button class="chip" data-sample="${k}" aria-pressed="false">${esc(v.label[{ en: 1, es: 2 }[lang] ?? 0])}</button>`).join('');
+  $('#paste-text').after(ex);
+  ex.querySelectorAll('[data-sample]').forEach((b) => b.addEventListener('click', () => runSample(b.dataset.sample)));
+  // Il tasto vicino al pulsante: si scopre senza leggere istruzioni.
+  $('#run-paste').title = /Mac/.test(navigator.platform) ? '⌘ + Invio' : 'Ctrl + Invio';
+
+  if (isWeb) {
+    // Incollare è l'azione principale: la casella è già aperta, il PDF si trascina o si sceglie da qui.
+    selectSource('paste');
+    const pdf = document.createElement('p');
+    pdf.className = 'pdf-hint muted small';
+    pdf.innerHTML = `${esc(t('Hai un PDF? Trascinalo qui oppure'))} <button class="link" id="pick-pdf-2">${esc(t('sceglilo dal computer'))}</button>`;
+    $('#run-paste').after(pdf);
+    $('#pick-pdf-2').addEventListener('click', () => $('#pdf-file').click());
+    // «Apri con AnteFirma» dal sistema (web/boot.js): il PDF arriva qui.
+    window.__afOpenPdf = (file) => handlePdf(file);
+    window.__afSample = runSample;
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest?.('[data-try-sample]');
+  if (b) runSample(b.dataset.trySample);
+});
+
 // ── avvio ───────────────────────────────────────────────────────────────────
 
 (async function init() {
@@ -424,11 +549,11 @@ async function handlePanelRequest(req) {
     const settings = await send('GET_SETTINGS');
     setLang(resolveLang(settings.uiLang, chrome.i18n.getUILanguage()));
     translateDom(document.body);
-    $('#engine-note').textContent =
-      t('Analisi: server di AnteFirma · giurisdizione {x}', { x: settings.jurisdiction }) +
-      (settings.remoteConsentAt ? '' : ' · ' + t('alla prima analisi ti chiederò il consenso'));
+    engineNote(settings);
   } catch { /* il pannello resta usabile comunque */ }
-  commitments.init(send);
+  commitments.init(send, { isWeb });
+  setupExtras();
+  send('GET_LICENSE').then((l) => paintQuota(l?.quota)).catch(() => {});
 
   // Aperto da una notifica di scadenza: si va dritti all'impegno giusto.
   const params = new URLSearchParams(location.search);

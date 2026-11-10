@@ -61,6 +61,8 @@ writeFileSync(join(OUT, 'manifest.webmanifest'), JSON.stringify({
   name: 'AnteFirma', short_name: 'AnteFirma',
   description: 'Prima di accettare, sai a che cosa ti impegni: analizza contratti e condizioni, ricorda le scadenze, scrive la lettera di disdetta.',
   id: '/', start_url: '/', scope: '/', display: 'standalone',
+  // «Apri con AnteFirma» per i PDF, con l'app installata (Chrome ed Edge sul computer).
+  file_handlers: [{ action: '/', accept: { 'application/pdf': ['.pdf'] }, launch_type: 'single-client' }],
   background_color: '#f5f6f8', theme_color: '#15203a', lang: 'it',
   icons: [
     { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },

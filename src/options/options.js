@@ -254,6 +254,44 @@ $('#clear-history').addEventListener('click', async () => {
   flash(t('Storico cancellato.'));
 });
 
+// La copia dei dati: un file JSON, senza identità dell'installazione né licenza.
+$('#export-data').addEventListener('click', async () => {
+  try {
+    const data = await send('EXPORT_DATA');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' }));
+    a.download = `antefirma-dati-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    flash(t('Dati scaricati.'));
+  } catch (err) { flash(err.message); }
+});
+$('#import-data').addEventListener('click', () => $('#import-file').click());
+$('#import-file').addEventListener('change', async (e) => {
+  const file = e.target.files?.[0];
+  e.target.value = '';
+  if (!file) return;
+  try {
+    const r = await send('IMPORT_DATA', JSON.parse(await file.text()));
+    flash(t('Caricati {a} impegni e {b} voci di storico. Quelli già presenti restano.', { a: r.commitments, b: r.history }));
+    load();
+  } catch (err) { flash(err instanceof SyntaxError ? t('Il file non è una copia di AnteFirma.') : err.message); }
+});
+
+/** La versione web: niente firewall, quindi altri titoli e un'altra spiegazione dell'analisi. */
+function adaptForWeb() {
+  if (document.documentElement.dataset.web !== '1') return;
+  const prot = $('#enabled')?.closest('section')?.querySelector('h2');
+  if (prot) prot.textContent = t('Lingua e paese');
+  const lead = $('#consent-box')?.closest('section')?.querySelector('p.lead');
+  if (lead) lead.textContent = t('Quando premi «Analizza», AnteFirma manda il testo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic). Il server risponde con le clausole che ti impegnano, ciascuna con la frase esatta del testo, e scarta ogni avviso la cui frase non c’è.');
+  // I promemoria della versione web sono notifiche del browser: servono il permesso e la finestra aperta.
+  const rem = $('#reminders');
+  rem?.addEventListener('change', () => { if (rem.checked && 'Notification' in self && Notification.permission === 'default') Notification.requestPermission(); });
+  const em = rem?.closest('label')?.querySelector('em');
+  if (em) em.textContent = t('Notifiche a 30, 7 e 1 giorno, quando AnteFirma è aperta. Per non perderle, metti la scadenza anche in calendario.');
+}
+
 if (new URLSearchParams(location.search).has('welcome')) {
   $('#welcome').hidden = false;
 }
@@ -268,6 +306,7 @@ let initialLang = 'auto';
   } catch { /* resta l'italiano */ }
   translateDom(document.body);
   document.title = t('AnteFirma — Impostazioni');
+  adaptForWeb();
   load();
   showServerStatus();
   showPlan();

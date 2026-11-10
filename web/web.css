@@ -12,3 +12,37 @@ html[data-web] .wrap { max-width: 720px; }
 .web-install { margin-inline-start: auto; margin-inline-end: 8px; font: 700 13px/1 system-ui, sans-serif; background: #ffe04a; color: #15203a; border: 0; border-radius: 999px; padding: 8px 12px; cursor: pointer; }
 .web-back { display: inline-block; margin: 16px 0 0; font-weight: 700; color: inherit; }
 .web-note { font-size: 12px; color: #6b7280; padding: 8px 14px 0; margin: 0; }
+
+/* ── nella versione web incollare è l'azione principale: niente tessere di scelta ── */
+html[data-web] .sources { display: none !important; }
+html[data-web] .web-install { margin-inline-start: 8px; }
+.web-placeholder { border: 1.5px dashed var(--line, #e8eaef); border-radius: 12px; padding: 22px 18px; color: var(--muted, #6b7280); font-size: 13px; line-height: 1.55; }
+.web-placeholder strong { display: block; color: var(--fg, #16191f); font-size: 14px; margin-bottom: 4px; }
+
+/* ── su uno schermo largo: a sinistra il testo, a destra il risultato ── */
+@media (min-width: 1000px) {
+  html[data-web] body { max-width: 1180px; }
+  html[data-web] #tab-analyze:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 0 26px; align-items: start; }
+  html[data-web] #tab-analyze > * { grid-column: 1; }
+  html[data-web] #tab-analyze > #status, html[data-web] #tab-analyze > #result { grid-column: 2; grid-row: 1 / span 12; }
+  html[data-web] #tab-analyze > #status:not([hidden]) + #result { grid-row: 2 / span 11; }
+  html[data-web] #result { position: sticky; top: 12px; max-height: calc(100vh - 140px); overflow: auto; }
+  html[data-web] #tab-commitments, html[data-web] #tab-history { max-width: 760px; margin: 0 auto; }
+}
+
+/* ── impostazioni: una barra in alto al posto del doppio titolo, «Salva» con il suo fondo ── */
+html[data-web] .wrap > header { display: none; }
+html[data-web] .web-back { display: flex; align-items: center; gap: 10px; font-size: 17px; text-decoration: none; margin: 4px 0 18px; }
+html[data-web] .web-back::before { content: ""; width: 26px; height: 29px; background: url(/icons/favicon.svg) center / contain no-repeat; order: 1; }
+html[data-web] .web-back { flex-direction: row; }
+html[data-web] .save-bar { background: var(--bg, #fff); border-top: 1px solid var(--line, #e8eaef); box-shadow: 0 -8px 20px -12px rgba(21, 32, 58, .25); padding-block: 12px; }
+
+/* ── benvenuto alla prima apertura ── */
+.web-welcome { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgba(8, 12, 24, .5); }
+.web-welcome .card { width: min(480px, 100%); background: var(--bg, #fff); color: var(--fg, #16191f); border-radius: 16px; padding: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, .3); font: 14px/1.55 system-ui, sans-serif; }
+.web-welcome h2 { margin: 0 0 12px; font-size: 20px; }
+.web-welcome ol { margin: 0 0 14px; padding-left: 20px; display: grid; gap: 6px; }
+.web-welcome .note { font-size: 12.5px; color: var(--muted, #6b7280); margin: 0 0 16px; }
+.web-welcome .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.web-welcome button { font: 600 14px system-ui, sans-serif; border-radius: 9px; padding: 10px 14px; cursor: pointer; border: 1px solid var(--line, #e8eaef); background: var(--bg, #fff); color: var(--fg, #16191f); }
+.web-welcome button.go { background: #15203a; color: #fff; border-color: #15203a; }

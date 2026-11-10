@@ -592,7 +592,16 @@
     showVerdict(verdict, { blocking = true } = {}) {
       const level = verdict.level || {};
       const cost = verdict.cost || {};
-      const findings = verdict.findings || [];
+      // Due categorie nate dalla stessa frase si mostrano una volta sola, con i due nomi.
+      const findings = [];
+      for (const f of verdict.findings || []) {
+        const key = (f.quote || '').trim().toLowerCase();
+        const prev = key && findings.find((x) => (x.quote || '').trim().toLowerCase() === key);
+        if (prev) prev.title = `${prev.title || prev.label} · ${f.title || f.label}`;
+        else findings.push({ ...f });
+      }
+      // La penale in mensilità ha una cifra calcolata, non un importo scritto.
+      const penaltyAmount = cost.penalty?.amount ?? (cost.lines || []).find((l) => l.kind === 'penalty')?.amount ?? null;
       const timeline = verdict.timeline || [];
       const consumer = verdict.consumer || {};
       const ink = paletteFor(level.id);
@@ -615,7 +624,7 @@
         },
         {
           label: t('Se esci prima'),
-          value: cost.penalty?.amount != null ? money(cost.penalty.amount, cost.currency) : cost.penalty ? t('penale non quantificata') : findings.some((f) => f.category === 'no_refund') ? t('nessun rimborso') : t('nessuna penale trovata'),
+          value: penaltyAmount != null ? money(penaltyAmount, cost.currency) : cost.penalty ? t('penale non quantificata') : findings.some((f) => f.category === 'no_refund') ? t('nessun rimborso') : t('nessuna penale trovata'),
           sub: cost.penalty ? t('penale di recesso') : '',
         },
       ];

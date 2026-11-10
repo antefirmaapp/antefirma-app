@@ -64,6 +64,23 @@ export function mergePricing(pricing = {}, server = {}) {
   return out;
 }
 
+/** La penale come cifra: scritta nel contratto, o calcolata dalle mensilità. */
+const penaltyOf = (cost) => cost.penalty?.amount ?? (cost.lines || []).find((l) => l.kind === 'penalty')?.amount ?? null;
+
+const NUMBER_WORDS = {
+  un: 1, una: 1, uno: 1, one: 1, due: 2, two: 2, dos: 2, tre: 3, three: 3, tres: 3, quattro: 4, four: 4, cuatro: 4,
+  cinque: 5, five: 5, cinco: 5, sei: 6, six: 6, seis: 6, dodici: 12, twelve: 12, doce: 12,
+};
+/** Le mensilità di penale scritte nella frase citata («tre mensilità», «2 monthly payments», «tres cuotas mensuales»). */
+export function penaltyFromFindings(findings = []) {
+  const f = findings.find((x) => x.category === 'early_termination_penalty' && x.quote);
+  if (!f) return null;
+  const m = String(f.quote).toLowerCase().match(/\b(\d{1,2}|un|una|uno|one|due|two|dos|tre|three|tres|quattro|four|cuatro|cinque|five|cinco|sei|six|seis|dodici|twelve|doce)\s+(mensilit[àa]|canoni mensili|rate mensili|monthly (?:payments|fees|instalments|installments)|months'? (?:fees|payments)|cuotas mensuales|mensualidades)(?![a-z])/);
+  if (!m) return null;
+  const months = /^\d+$/.test(m[1]) ? Number(m[1]) : NUMBER_WORDS[m[1]];
+  return months ? { months, amount: null, quote: f.quote } : null;
+}
+
 function fmtNum(n) {
   return Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10).replace('.', ',');
 }
@@ -81,7 +98,9 @@ export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
 
   const minTerm = terms.minTerm || null;
   const notice = terms.notice || null;
-  const penalty = terms.penalty || null;
+  // «Una penale pari a tre mensilità» non è una cifra: il server non la mette fra
+  // le condizioni economiche, ma nel totale deve entrare (prezzo al mese × mesi).
+  const penalty = terms.penalty || penaltyFromFindings(findings);
   const extras = terms.extras || [];
 
   const hasAutoRenewal = findings.some((f) => f.category === 'auto_renewal');
@@ -256,8 +275,8 @@ export function buildTimeline({ ctx = {}, cost = {}, findings = [], actionType =
       when: t('Se esci prima'),
       at: null,
       items: [
-        cost.penalty.amount != null
-          ? t('paghi una penale di {x}', { x: formatMoney(cost.penalty.amount, cost.currency) })
+        penaltyOf(cost) != null
+          ? t('paghi una penale di {x}', { x: formatMoney(penaltyOf(cost), cost.currency) })
           : t('è prevista una penale di recesso, di importo non chiaramente quantificato'),
       ],
       kind: 'penalty',

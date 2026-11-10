@@ -88,8 +88,10 @@ function matchesQuery(c, query) {
 
 // ── avvio ───────────────────────────────────────────────────────────────────
 
-export function init(sender) {
+let isWeb = false;
+export function init(sender, opts = {}) {
   send = sender;
+  isWeb = Boolean(opts.isWeb);
   $('#modal-close').addEventListener('click', closeModal);
   $('#modal').addEventListener('click', (e) => {
     if (e.target === $('#modal')) closeModal();
@@ -153,13 +155,17 @@ function render(list) {
   if (!list.length) {
     // Lo stato vuoto mostra come apparirà un impegno, con la strada per provarlo.
     $('#commitments-list').innerHTML = `<div class="empty">
-      <p>${esc(t('Quando prosegui su un contratto o un abbonamento, la scadenza di disdetta finisce qui, con la lettera già pronta e la prova di cosa avevi accettato.'))}</p>
+      <p>${esc(isWeb
+        ? t('Quando registri un impegno dopo un’analisi, la scadenza di disdetta finisce qui, con la lettera già pronta.')
+        : t('Quando prosegui su un contratto o un abbonamento, la scadenza di disdetta finisce qui, con la lettera già pronta e la prova di cosa avevi accettato.'))}</p>
       <div class="c-item example" aria-hidden="true">
         <div class="c-top"><span class="c-name">StreamPro</span><span class="c-amount">599,76 €</span></div>
         <span class="c-state" data-urgency="later">${esc(t('Disdetta entro il {d}', { d: '9/9/2028' }))}</span>
         <div class="c-nothing">${esc(t('Se non disdici, parte un nuovo periodo da {x}.', { x: '479,76 €' }))}</div>
       </div>
-      <p class="muted small">${esc(t('Esempio'))} · <a href="https://antefirma.app/demo/" target="_blank" rel="noopener">${esc(t('Provalo su una pagina dimostrativa'))}</a></p>
+      <p class="muted small">${esc(t('Esempio'))} · ${isWeb
+        ? `<button class="link" data-try-sample="streaming">${esc(t('Prova con un esempio'))}</button>`
+        : `<a href="https://antefirma.app/demo/" target="_blank" rel="noopener">${esc(t('Provalo su una pagina dimostrativa'))}</a>`}</p>
     </div>`;
     return;
   }

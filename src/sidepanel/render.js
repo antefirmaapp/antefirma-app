@@ -38,12 +38,7 @@ export function renderVerdict(v) {
       <div class="head">
         <span class="badge">${esc(level.icon || '')} ${esc(level.label || '')}</span>
         <h2>${esc(v.headline || level.headline || '')}</h2>
-        <div class="meta">
-          ${esc(t('rischio della decisione {n}/100', { n: v.score }))} ·
-          ${esc(v.engine?.cached ? t('AI · analisi già fatta per questo testo') : 'AI')}
-          ${v.host ? ` · ${esc(v.host)}` : ''}
-          ${v.cached ? ' · ' + esc(t('da cache')) : ''}
-        </div>
+        ${v.host || v.engine?.cached || v.cached ? `<div class="meta">${[v.host ? esc(v.host) : '', v.engine?.cached || v.cached ? esc(t('da cache')) : ''].filter(Boolean).join(' · ')}</div>` : ''}
       </div>
       <div class="content">
         ${v.engine?.notice ? `<div class="status" style="margin-bottom:10px">${esc(v.engine.notice[getLang()] || v.engine.notice.it)}</div>` : ''}
@@ -81,7 +76,31 @@ function renderCost(cost) {
   </div>`;
 }
 
-function renderFindings(findings) {
+/**
+ * Due categorie possono nascere dalla stessa frase («la quota di 49 € non è
+ * rimborsabile» è insieme «nessun rimborso» e «costo aggiuntivo»): si mostra
+ * una volta sola, con i due nomi.
+ */
+export function mergeByQuote(findings) {
+  const out = [];
+  const byQuote = new Map();
+  for (const f of findings) {
+    const key = (f.quote || '').trim().toLowerCase();
+    const prev = key && byQuote.get(key);
+    if (prev) {
+      prev.title = `${prev.title || prev.label} · ${f.title || f.label}`;
+      prev.severity = Math.max(prev.severity || 0, f.severity || 0);
+      continue;
+    }
+    const copy = { ...f };
+    out.push(copy);
+    if (key) byQuote.set(key, copy);
+  }
+  return out;
+}
+
+function renderFindings(list) {
+  const findings = mergeByQuote(list);
   if (!findings.length) return '';
   return `<h3 class="section">${esc(t('Cosa stai accettando'))}</h3>
     ${findings
@@ -92,7 +111,6 @@ function renderFindings(findings) {
         return `<div class="finding" style="--sev-color:${sevColor(f.severity)}">
           <div class="top">
             <span class="name">${esc(f.title || f.label)}</span>
-            <span class="sev">${esc(String(f.severity))}/100</span>
           </div>
           <div class="plain">${esc(f.plain || f.why || '')}</div>
           ${f.quote ? `<div class="quote">“${esc(f.quote)}”</div>` : ''}

@@ -372,3 +372,24 @@ test('l’impronta della stringa vuota non deve poter passare per una verifica r
   assert.equal(a.hash, b.hash);
   assert.ok(a.empty && b.empty, 'senza il flag, la verifica direbbe «✓ corrisponde»');
 });
+
+test('la penale in mensilità entra nel totale, in tre lingue', async () => {
+  const { computeCost } = await import('../src/core/consequence.js');
+  const base = { ctx: { pricing: { amount: 39, period: 'month', currency: 'EUR' } }, terms: { minTerm: { months: 12, raw: '12 mesi' }, extras: [{ amount: 49, label: 'Quota di iscrizione' }] } };
+  for (const quote of ['In caso di recesso anticipato è dovuta una penale pari a tre mensilità', 'Early termination incurs a fee equal to three monthly payments', 'La baja anticipada conlleva una penalización equivalente a tres cuotas mensuales']) {
+    const c = computeCost({ ...base, findings: [{ category: 'early_termination_penalty', quote }] });
+    assert.equal(c.worstCase, 468 + 117 + 49, quote);
+  }
+  // Una penale già in cifra dal server non si tocca.
+  const c2 = computeCost({ ...base, terms: { ...base.terms, penalty: { amount: 120 } }, findings: [{ category: 'early_termination_penalty', quote: 'tre mensilità' }] });
+  assert.equal(c2.worstCase, 468 + 120 + 49);
+});
+
+test('la cronologia usa la penale calcolata dalle mensilità', async () => {
+  const { computeCost, buildTimeline } = await import('../src/core/consequence.js');
+  const ctx = { pricing: { amount: 39, period: 'month', currency: 'EUR' } };
+  const findings = [{ category: 'early_termination_penalty', quote: 'una penale pari a tre mensilità' }];
+  const cost = computeCost({ ctx, findings, terms: { minTerm: { months: 12, raw: '12 mesi' } } });
+  const step = buildTimeline({ ctx, cost, findings }).find((s) => s.when === 'Se esci prima');
+  assert.match(step.items[0], /117/);
+});
