@@ -1,20 +1,20 @@
 /*
- * AnteFirma web: le API dell'estensione, imitate con quelle del browser.
+ * AnteFirma web: the extension's APIs, imitated with the browser's.
  *
- * La versione web usa lo stesso codice del pannello, delle impostazioni e del
- * «service worker» dell'estensione. Qui sotto c'è soltanto ciò che serve a
- * farlo girare in una pagina normale:
- *  - chrome.storage → IndexedDB (local) e memoria (session);
- *  - chrome.runtime.sendMessage → chiamata diretta allo sfondo, che gira nella stessa pagina;
- *  - chrome.alarms → timer, finché la finestra è aperta;
- *  - chrome.notifications → notifiche del browser, se la persona le permette.
- * Quello che una pagina web non può fare (leggere le altre schede, fermare un
- * click su un altro sito) non c'è: il pannello nasconde quelle funzioni.
+ * The web version uses the same code as the extension's panel, settings and
+ * "service worker". Below is only what is needed to run it in a normal
+ * page:
+ *  - chrome.storage → IndexedDB (local) and memory (session);
+ *  - chrome.runtime.sendMessage → a direct call to the background, running in the same page;
+ *  - chrome.alarms → timers, while the window is open;
+ *  - chrome.notifications → browser notifications, if the person allows them.
+ * What a web page cannot do (read other tabs, stop a click on another site)
+ * is missing: the panel hides those features.
  *
- * Script classico, caricato prima di tutti i moduli.
+ * A classic script, loaded before every module.
  */
 (() => {
-  const BASE = new URL('../', document.currentScript.src).href; // la radice della versione web (/app/)
+  const BASE = new URL('../', document.currentScript.src).href; // the web version's root
   document.documentElement.dataset.web = '1';
 
   // ── archivio ──────────────────────────────────────────────────────────
@@ -59,7 +59,7 @@
   };
   const changed = [];
   const clone = (v) => (v === undefined ? undefined : JSON.parse(JSON.stringify(v)));
-  // Le altre finestre della versione web sentono i cambi (es. pannello e impostazioni aperti insieme).
+  // The web version's other windows hear changes (e.g. panel and settings open together).
   const bc = 'BroadcastChannel' in self ? new BroadcastChannel('antefirma-storage') : null;
   const emit = (changes, areaName, remote = false) => {
     if (!Object.keys(changes).length) return;
@@ -99,7 +99,7 @@
     };
   }
 
-  // ── messaggi fra pannello e sfondo, nella stessa pagina ────────────────
+  // ── messages between panel and background, in the same page ────────────
   const onMessage = [];
   let markReady; const ready = new Promise((r) => { markReady = r; });
   function sendMessage(msg, cb) {
@@ -115,7 +115,7 @@
     return p;
   }
 
-  // ── timer al posto degli allarmi ──────────────────────────────────────
+  // ── timers instead of alarms ──────────────────────────────────────────
   const timers = new Map(), onAlarm = [];
   const fire = (name) => { for (const l of onAlarm) { try { l({ name }); } catch (e) { console.error(e); } } };
   const alarms = {
@@ -132,7 +132,7 @@
 
   // ── il resto ──────────────────────────────────────────────────────────
   const noopEvent = { addListener() {}, removeListener() {} };
-  // Il pannello vive alla radice e le impostazioni su /settings/: i percorsi dell'estensione portano lì, con query e #.
+  // The panel lives at the root and settings at /settings/: extension paths lead there, with query and #.
   const appUrl = (p) => new URL(p.replace(/^\//, '').replace(/^src\/sidepanel\/sidepanel(\.html)?/, '').replace(/^src\/options\/options(\.html)?/, 'settings/'), BASE).href;
   const onInstalled = [], onStartup = [];
   self.chrome = {
@@ -148,7 +148,7 @@
       onStartup: { addListener: (f) => onStartup.push(f) },
       __ready: async () => {
         markReady();
-        // Prima apertura: come l'installazione dell'estensione. Poi: come un avvio del browser.
+        // First opening: like installing the extension. Afterwards: like a browser start.
         const first = !(await local.get('__installed'));
         if (first) await local.put('__installed', new Date().toISOString());
         for (const l of first ? onInstalled : onStartup) { try { await l({ reason: 'install' }); } catch (e) { console.error(e); } }
@@ -158,7 +158,7 @@
     i18n: { getUILanguage: () => navigator.language || 'it', getMessage: () => '' },
     tabs: {
       async create({ url }) {
-        if (/welcome\.html/.test(url)) return {}; // la pagina di benvenuto è per l'estensione
+        if (/welcome\.html/.test(url)) return {}; // the welcome page is for the extension
         if (url.startsWith(BASE)) location.assign(url); else window.open(url, '_blank', 'noopener');
         return {};
       },

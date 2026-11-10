@@ -1,6 +1,6 @@
 /**
- * Rendering del verdetto nel pannello laterale.
- * Stessa gerarchia dell'overlay: prima il costo, poi la scadenza, poi il dettaglio.
+ * Rendering the verdict in the side panel.
+ * Same hierarchy as the overlay: first the cost, then the deadline, then the detail.
  */
 
 import { formatMoney } from '../core/text.js';
@@ -77,9 +77,9 @@ function renderCost(cost) {
 }
 
 /**
- * Due categorie possono nascere dalla stessa frase («la quota di 49 € non è
- * rimborsabile» è insieme «nessun rimborso» e «costo aggiuntivo»): si mostra
- * una volta sola, con i due nomi.
+ * Two categories can come from the same sentence ("the €49 fee is not
+ * refundable" is both "no refund" and "extra cost"): it is shown once, with
+ * both names.
  */
 export function mergeByQuote(findings) {
   const out = [];

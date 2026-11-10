@@ -1,4 +1,4 @@
-/** La pagina di benvenuto: consenso e prova, prima del primo click vero. */
+/** The welcome page: consent and a demo, before the first real click. */
 import { t, setLang, resolveLang } from '../i18n/index.js';
 import { translateDom } from '../i18n/dom.js';
 
@@ -23,5 +23,5 @@ async function send(type, payload) {
   try {
     const lic = await send('GET_LICENSE');
     if (lic?.quota?.month) $('#left').textContent = lic.quota.month.remaining;
-  } catch { /* il numero resta quello predefinito */ }
+  } catch { /* the default number stays */ }
 })();

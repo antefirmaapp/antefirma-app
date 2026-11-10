@@ -1,9 +1,9 @@
 /**
- * `[hidden] { display: none }` è una regola dello user-agent: qualunque
- * `display` dichiarato qui la batte, a prescindere dalla specificità. Senza
- * questa riga `.modal` e `.input-block` — che sono `display: flex` e vengono
- * pilotate con l'attributo `hidden` — restavano visibili sempre: il modale
- * stava aperto sopra il pannello dall'apertura, intercettando ogni click.
+ * `[hidden] { display: none }` is a user-agent rule: any `display` declared
+ * here beats it, regardless of specificity. Without this line `.modal` and
+ * `.input-block` — which are `display: flex` and driven by the `hidden`
+ * attribute — stayed visible all the time: the modal was open over the panel
+ * from the start, catching every click.
  */
 [hidden] {
   display: none !important;
@@ -50,7 +50,7 @@ body {
 .brand { display: flex; align-items: center; gap: 9px; }
 .brand strong { display: block; font-size: 13.5px; }
 .brand span { display: block; font-size: 11px; color: var(--muted); }
-/* Stretto (il pannello di Chrome ha già il nome sopra): via il motto, restano analisi rimaste, ? e ⚙. */
+/* Narrow (Chrome's panel already shows the name above): drop the tagline; analyses left, ? and ⚙ remain. */
 @media (max-width: 520px) { .brand span { display: none; } }
 
 .icon-btn {
@@ -91,8 +91,8 @@ textarea, input[type="text"], input[type="url"], select {
 }
 textarea:focus, input:focus, select:focus { outline: 2px solid #2563eb; outline-offset: -1px; }
 
-/* Prezzo e periodicità affiancati in una colonna da 350 px si comprimono fino
-   all'illeggibile: sotto i 150 px per campo vanno uno sotto l'altro. */
+/* Price and period side by side in a 350 px column get squeezed until
+   unreadable: below 150 px per field they stack. */
 .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .field { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 150px; }
 .field span { font-size: 11px; color: var(--muted); font-weight: 600; }
@@ -225,9 +225,9 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 
 .c-item { border: 1px solid var(--line); border-radius: 11px; padding: 11px 12px; margin-bottom: 9px; }
 .c-item .c-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-/* Un flex item non scende sotto la larghezza del suo contenuto se non gli si
-   dice `min-width: 0`: senza, un fornitore dal nome lungo spingeva l'importo
-   fuori dalla card invece di troncarsi. */
+/* A flex item doesn't shrink below its content width unless told
+   `min-width: 0`: without it, a provider with a long name pushed the amount
+   out of the card instead of truncating. */
 .c-item .c-name {
   font-weight: 650; font-size: 13.5px;
   min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -271,8 +271,8 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 }
 .modal-card {
   background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
-  /* Il pannello si apre anche come scheda intera (dalla notifica): senza un
-     tetto, la lettera di disdetta si stirava su 1600 px di riga. */
+  /* The panel also opens as a full tab (from the notification): without a cap,
+     the cancellation letter stretched over 1600 px lines. */
   width: 100%; max-width: 560px; max-height: 88vh;
   display: flex; flex-direction: column; overflow: hidden;
 }
@@ -295,7 +295,7 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 }
 .c-hint::before { content: '📅'; position: absolute; left: 0; }
 
-/* ── ricerca e filtri degli impegni ──────────────────────────────────────── */
+/* ── commitment search and filters ──────────────────────────────────────── */
 .c-tools { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
 .c-tools input[type="search"] { font-size: 13px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -307,7 +307,7 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 .chip:hover { border-color: var(--muted); color: var(--fg); }
 .chip.active { background: var(--accent); color: var(--bg); border-color: transparent; }
 
-/* Le fasce di urgenza: l'ordine è il messaggio, l'etichetta lo rende leggibile. */
+/* Urgency bands: the order is the message, the label makes it readable. */
 .c-group {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em;
@@ -339,9 +339,9 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 .c-actions .c-menu button:hover { background: var(--soft); border-color: transparent; }
 
 /*
- * «Elimina» non è la sesta voce di un elenco di sei: è l'unica che distrugge
- * la prova. Colore, separatore e posizione in fondo servono a farla sembrare
- * quello che è, e il secondo passo a impedire che parta per sbaglio.
+ * "Delete" is not the sixth item of a list of six: it is the only one that
+ * destroys the proof. Colour, separator and position at the bottom make it look
+ * like what it is, and the second step stops it starting by mistake.
  */
 .c-actions .c-menu button.danger {
   color: #a4262c; margin-top: 3px; padding-top: 9px;
@@ -353,8 +353,8 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 .c-confirm-text { margin: 0 0 4px; font-size: 12px; line-height: 1.45; color: var(--fg); }
 .c-menu .link { align-self: flex-start; padding: 2px 0; }
 
-/* La finestra di ripensamento: l'impegno è già sparito dalla vista, ma dallo
-   storage esce solo allo scadere del conto alla rovescia. */
+/* The window to change your mind: the commitment has already gone from view,
+   but it only leaves storage when the countdown ends. */
 .undo-bar {
   position: sticky; bottom: 8px; z-index: 30;
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -364,13 +364,13 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 }
 .undo-bar .link { color: var(--bg); font-weight: 700; font-size: 12.5px; white-space: nowrap; }
 
-/* Esito della copia sul pulsante che l'ha chiesta. */
+/* Copy outcome on the button that asked for it. */
 button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
 
 /*
- * Arrivare qui da una notifica e non capire quale card sia la propria rende
- * inutile il salto: la scheda si illumina per qualche secondo e poi torna
- * normale, senza restare accesa per sempre.
+ * Arriving here from a notification without knowing which card is yours makes
+ * the jump useless: the card lights up for a few seconds and then goes back to
+ * normal, without staying lit forever.
  */
 .c-item.focus {
   border-color: var(--fg);
@@ -385,7 +385,7 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
   .c-item.focus { animation: none; }
 }
 
-/* Il pattern delle schede si vede anche con la tastiera. */
+/* The tab pattern is visible with the keyboard too. */
 .tab:focus-visible, .chip:focus-visible, .c-actions button:focus-visible, .icon-btn:focus-visible {
   outline: 2px solid #2563eb; outline-offset: 2px;
 }
@@ -393,19 +393,19 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
 /* ── contrasto in tema scuro ─────────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   /*
-   * I colori di fascia arrivano come stile inline (`--level-color`) da
-   * constants.js e sono tarati sul bianco: su fondo scuro CRITICAL #7d0a0a fa
-   * 1,6:1 — un importo di 26 px che non si legge. Uno stile inline batte
-   * qualunque selettore, quindi qui l'unico strumento è `!important`. Il
-   * riferimento resta constants.js, che non viene toccato: queste sono solo
-   * le stesse fasce ritarate sul fondo #14171d (≥ 7:1).
+   * Band colours arrive as an inline style (`--level-color`) from constants.js
+   * and are tuned for white: on a dark background CRITICAL #7d0a0a is 1.6:1 —
+   * a 26 px amount nobody can read. An inline style beats any selector, so
+   * `!important` is the only tool here. The reference stays constants.js, which
+   * is untouched: these are just the same bands re-tuned for the #14171d
+   * background (≥ 7:1).
    */
   [data-level='safe'] { --level-color: #5fd39b !important; }
   [data-level='review'] { --level-color: #e0b750 !important; }
   [data-level='commitment'] { --level-color: #f2a35a !important; }
   [data-level='high_risk'] { --level-color: #ff8b7a !important; }
   [data-level='critical'] { --level-color: #ff7b7b !important; }
-  /* Il badge ha per sfondo la fascia: al chiaro sopra ci va il testo scuro. */
+  /* The badge has the band as background: in light mode dark text goes on top. */
   .verdict .badge { color: #10131a; }
 
   .proof-ok { color: #86d9ab; }
@@ -423,18 +423,18 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
 
 /* ── larghezze ───────────────────────────────────────────────────────────── */
 
-/* Il pannello laterale si può stringere fin quasi a 250 px: due colonne di
-   sorgenti a quel punto non ci stanno più. */
+/* The side panel can be narrowed to almost 250 px: two columns of sources no
+   longer fit at that point. */
 @media (max-width: 330px) {
   .sources { grid-template-columns: 1fr; }
   .c-actions { gap: 5px; }
 }
 
 /*
- * Il salto dalla notifica apre `sidepanel.html` come **scheda intera**
- * (`chrome.tabs.create`, non `sidePanel.open`): senza questa regola un layout
- * pensato per 350 px si stira su tutta la finestra, con righe di testo da
- * 1600 px e una card di impegno larga quanto lo schermo.
+ * The jump from the notification opens `sidepanel.html` as a **full tab**
+ * (`chrome.tabs.create`, not `sidePanel.open`): without this rule a layout
+ * designed for 350 px stretches across the whole window, with 1600 px text
+ * lines and a commitment card as wide as the screen.
  */
 @media (min-width: 700px) {
   .top, .tabs, .foot { padding-inline: max(14px, calc((100% - 820px) / 2)); }
@@ -447,10 +447,10 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
   .summary, .finding .plain { font-size: 13px; }
 }
 
-/* Stato vuoto: un impegno d'esempio, attenuato. */
+/* Empty state: an example commitment, dimmed. */
 .empty .example { opacity: .6; text-align: left; margin: 10px 0 6px; pointer-events: none; }
 
-/* ── esempi, analisi rimaste, calendario dopo il salvataggio ──────────────── */
+/* ── examples, analyses left, calendar after saving ─────────────────────── */
 .examples { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 10px; font-size: 12px; color: var(--muted); }
 .examples .chip[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: transparent; }
 .quota { margin-inline-start: auto; font: inherit; font-size: 11.5px; font-weight: 600; color: var(--muted); background: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; cursor: pointer; white-space: nowrap; }
@@ -465,12 +465,12 @@ a.btn-like { display: inline-flex; align-items: center; font-size: 13.5px; font-
 .letter-opts { display: flex; gap: 8px; flex-wrap: wrap; }
 .letter-opts select { flex: 1 1 160px; }
 
-/* Un impegno senza nome (analisi incollata, pagina di pagamento): un clic e si rinomina. */
+/* An unnamed commitment (pasted analysis, payment page): one click to rename it. */
 .c-unnamed { background: none; border: 0; padding: 0; font: inherit; font-weight: 700; color: var(--muted); cursor: pointer; text-align: left; border-bottom: 1px dashed currentColor; }
 .c-unnamed:hover { color: var(--fg); }
 
-/* Nel pannello di Chrome il nome e il logo stanno già sopra, nella barra del browser:
-   qui restano le analisi rimaste, l'aiuto e le impostazioni. La versione web tiene il marchio. */
+/* In Chrome's panel the name and logo are already above, in the browser bar:
+   what stays here is analyses left, help and settings. The web version keeps the brand. */
 html:not([data-web]) .top .brand { display: none; }
 html:not([data-web]) .top { justify-content: flex-end; gap: 6px; }
 html:not([data-web]) .top .quota { margin-inline-start: 0; margin-inline-end: auto; }

@@ -20,10 +20,10 @@
   </header>
 
   <!--
-    Il pattern ARIA delle schede è tutto o niente: `role="tab"` senza
-    `aria-selected` fa annunciare tre schede senza mai dire quale è aperta.
-    `aria-controls` e il `tabindex` a rotazione (uno solo a 0) completano il
-    contratto che sidepanel.js mantiene a ogni cambio scheda.
+    The ARIA tab pattern is all or nothing: `role="tab"` without
+    `aria-selected` announces three tabs without ever saying which is open.
+    `aria-controls` and the roving `tabindex` (only one at 0) complete the
+    contract sidepanel.js maintains on every tab change.
   -->
   <nav class="tabs" role="tablist" aria-label="Sezioni del pannello">
     <button class="tab active" id="tab-btn-analyze" data-tab="analyze" role="tab"
@@ -99,9 +99,9 @@
       </div>
 
       <!--
-        `#status` è l'unico canale per «Analisi in corso», «Non ho trovato
-        testo sufficiente», «Il file non è un PDF»: senza `role="status"`
-        cambia il testo e nessuno screen reader se ne accorge.
+        `#status` is the only channel for "Analysing", "Not enough text found",
+        "The file is not a PDF": without `role="status"` the text changes and
+        no screen reader notices.
       -->
       <div id="status" class="status" role="status" aria-live="polite" hidden></div>
       <div id="result" class="result"></div>
@@ -110,8 +110,8 @@
     <section id="tab-commitments" class="panel" role="tabpanel" aria-labelledby="tab-btn-commitments" hidden>
       <div id="portfolio" class="portfolio"></div>
 
-      <!-- Ricerca e filtri compaiono solo quando la lista è abbastanza lunga
-           da doverla setacciare: sotto gli otto impegni sono rumore. -->
+      <!-- Search and filters appear only when the list is long enough to need
+           sifting: under eight commitments they are noise. -->
       <div id="c-tools" class="c-tools" hidden>
         <input id="c-search" type="search" autocomplete="off"
                placeholder="Cerca fornitore, sito o clausola…" aria-label="Cerca fra gli impegni">

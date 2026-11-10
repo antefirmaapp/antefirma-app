@@ -1,4 +1,4 @@
-/** Accesso alle lingue per i moduli (service worker, pagine, test). Vedi i18n.js. */
+/** Language access for modules (service worker, pages, tests). See i18n.js. */
 import './i18n.js';
 import './dict.js';
 

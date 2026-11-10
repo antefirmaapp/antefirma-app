@@ -1,7 +1,7 @@
 /*
- * AnteFirma web: avvio. Carica lo «sfondo» dell'estensione nella pagina,
- * poi registra il service worker che rende l'app installabile e usabile
- * anche senza rete (l'analisi, naturalmente, la rete la chiede).
+ * AnteFirma web: start-up. Loads the extension's "background" into the page,
+ * then registers the service worker that makes the app installable and usable
+ * offline too (the analysis itself, of course, needs the network).
  */
 import '../src/background/service-worker.js';
 
@@ -11,7 +11,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register(new URL('../sw.js', import.meta.url), { scope: new URL('../', import.meta.url).pathname }).catch(() => {});
 }
 
-// «Installa sul computer»: Chrome ed Edge lo propongono, qui il pulsante è a portata di mano.
+// "Install on this computer": Chrome and Edge offer it; here the button is within reach.
 let deferred = null;
 const L = {
   it: ['Installa', 'Installa AnteFirma sul computer'], en: ['Install', 'Install AnteFirma on your computer'], es: ['Instalar', 'Instalar AnteFirma en el ordenador'],
@@ -27,7 +27,7 @@ addEventListener('beforeinstallprompt', (e) => {
 });
 addEventListener('appinstalled', () => document.getElementById('web-install')?.remove());
 
-// ── «Apri con AnteFirma»: un PDF aperto dal sistema arriva al pannello ──────
+// ── "Open with AnteFirma": a PDF opened from the system reaches the panel ──
 if ('launchQueue' in window) {
   launchQueue.setConsumer(async (params) => {
     const handle = params.files?.[0];
@@ -38,7 +38,7 @@ if ('launchQueue' in window) {
   });
 }
 
-// ── il pannello vuoto, a destra del testo, dice che cosa comparirà ─────────
+// ── the empty panel, right of the text, says what will appear ─────────────
 const W = {
   it: { ph: ['Il risultato compare qui', 'Quanto paghi davvero, entro quando disdire, le clausole che ti impegnano con la frase esatta del contratto.'],
     hi: 'Benvenuto in AnteFirma', steps: ['Incolla le condizioni o trascina il PDF del contratto.', 'In pochi secondi vedi quanto paghi davvero, entro quando disdire, come si esce.', 'Registra l’impegno: la scadenza va nel calendario, la lettera di disdetta è già scritta.'],
@@ -58,11 +58,11 @@ const result = document.getElementById('result');
 if (result && W) {
   const ph = () => { if (!result.innerHTML.trim()) result.innerHTML = `<div class="web-placeholder"><strong>${L2.ph[0]}</strong>${L2.ph[1]}</div>`; };
   ph();
-  // Quando un'analisi svuota il risultato, il segnaposto non deve tornare a coprirla.
+  // When an analysis clears the result, the placeholder must not cover it again.
   new MutationObserver(() => { if (!result.innerHTML.trim() && !document.getElementById('status')?.hidden) return; ph(); }).observe(result, { childList: true });
 }
 
-// ── benvenuto alla prima apertura ──────────────────────────────────────────
+// ── welcome on first opening ────────────────────────────────────────────────
 let seen = false;
 try { seen = !!localStorage.getItem('af-web-welcome'); } catch { /* archivio non disponibile */ }
 if (W && !seen && document.getElementById('tab-analyze')) {

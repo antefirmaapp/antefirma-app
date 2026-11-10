@@ -1,11 +1,11 @@
-/* AnteFirma web: lo stesso pannello dell'estensione, in una finestra.
-   Niente overflow nascosto sul body: si propagherebbe alla finestra e la pagina non scorrerebbe più. */
+/* AnteFirma web: the extension's panel, in a window.
+   No hidden overflow on body: it would spread to the window and the page would no longer scroll. */
 html[data-web] body { max-width: 560px; margin: 0 auto; min-height: 100vh; box-shadow: 0 0 0 1px rgba(21, 32, 58, .08); }
 @media (min-width: 700px) { html[data-web] { background: #eef1f5; } html[data-web] body { margin-block: 24px; min-height: calc(100vh - 48px); border-radius: 14px; } }
 @media (prefers-color-scheme: dark) and (min-width: 700px) { html[data-web] { background: #0b1120; } }
-/* Una pagina web non può leggere le altre schede né scaricare un indirizzo qualsiasi. */
+/* A web page can't read other tabs or download an arbitrary address. */
 html[data-web] .source[data-source="page"], html[data-web] .source[data-source="url"] { display: none !important; }
-/* Impostazioni che valgono solo per l'estensione nel browser. */
+/* Settings that only apply to the browser extension. */
 html[data-web] label.switch:has(#enabled), html[data-web] label.field:has(#blockFrom), html[data-web] label.field:has(#minBlockAmount), html[data-web] section.card:has(#allowlist),
 html[data-web] label.switch:has(#watchChanges), html[data-web] label.switch:has(#watchUsesRemote) { display: none !important; }
 html[data-web] .wrap { max-width: 720px; }
@@ -13,13 +13,13 @@ html[data-web] .wrap { max-width: 720px; }
 .web-back { display: inline-block; margin: 16px 0 0; font-weight: 700; color: inherit; }
 .web-note { font-size: 12px; color: #6b7280; padding: 8px 14px 0; margin: 0; }
 
-/* ── nella versione web incollare è l'azione principale: niente tessere di scelta ── */
+/* ── in the web version pasting is the main action: no choice tiles ── */
 html[data-web] .sources { display: none !important; }
 html[data-web] .web-install { margin-inline-start: 8px; }
 .web-placeholder { border: 1.5px dashed var(--line, #e8eaef); border-radius: 12px; padding: 22px 18px; color: var(--muted, #6b7280); font-size: 13px; line-height: 1.55; }
 .web-placeholder strong { display: block; color: var(--fg, #16191f); font-size: 14px; margin-bottom: 4px; }
 
-/* ── su uno schermo largo: a sinistra il testo, a destra il risultato ── */
+/* ── on a wide screen: text on the left, result on the right ── */
 @media (min-width: 1000px) {
   html[data-web] body { max-width: 1180px; }
   html[data-web] #tab-analyze:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 0 26px; align-items: start; }
@@ -30,14 +30,14 @@ html[data-web] .web-install { margin-inline-start: 8px; }
   html[data-web] #tab-commitments, html[data-web] #tab-history { max-width: 760px; margin: 0 auto; }
 }
 
-/* ── impostazioni: una barra in alto al posto del doppio titolo, «Salva» con il suo fondo ── */
+/* ── settings: a bar at the top instead of the double heading, "Save" with its own background ── */
 html[data-web] .wrap > header { display: none; }
 html[data-web] .web-back { display: flex; align-items: center; gap: 10px; font-size: 17px; text-decoration: none; margin: 4px 0 18px; }
 html[data-web] .web-back::before { content: ""; width: 26px; height: 29px; background: url(/icons/favicon.svg) center / contain no-repeat; order: 1; }
 html[data-web] .web-back { flex-direction: row; }
 html[data-web] .save-bar { background: var(--bg, #fff); border-top: 1px solid var(--line, #e8eaef); box-shadow: 0 -8px 20px -12px rgba(21, 32, 58, .25); padding-block: 12px; }
 
-/* ── benvenuto alla prima apertura ── */
+/* ── welcome on first opening ── */
 .web-welcome { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 16px; background: rgba(8, 12, 24, .5); }
 .web-welcome .card { width: min(480px, 100%); background: var(--bg, #fff); color: var(--fg, #16191f); border-radius: 16px; padding: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, .3); font: 14px/1.55 system-ui, sans-serif; }
 .web-welcome h2 { margin: 0 0 12px; font-size: 20px; }

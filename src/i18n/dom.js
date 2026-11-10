@@ -1,7 +1,7 @@
 /**
- * Traduce una pagina HTML scritta in italiano: testi e attributi visibili
- * (`placeholder`, `title`, `aria-label`, `alt`). La chiave è il testo italiano
- * con gli spazi normalizzati, come in t().
+ * Translates an HTML page written in Italian: texts and visible attributes
+ * (`placeholder`, `title`, `aria-label`, `alt`). The key is the Italian text
+ * with normalised spaces, as in t().
  */
 import { t, getLang } from './index.js';
 

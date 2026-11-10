@@ -1,18 +1,18 @@
 /**
- * Il kit di uscita, lato interfaccia.
+ * The exit kit, interface side.
  *
- * Ogni impegno registrato porta con sé quattro azioni, che sono le quattro
- * cose che servono davvero quando arriva il momento:
- *   · la scadenza nel calendario, perché l'estensione non può ricordartelo
- *     se Chrome è chiuso;
- *   · la lettera già scritta, perché il costo vero della disdetta è scriverla;
- *   · la prova di cosa avevi accettato;
- *   · il confronto con le condizioni di oggi.
+ * Every recorded commitment carries four actions, the four things really needed
+ * when the time comes:
+ *   · the deadline in the calendar, because the extension can't remind you
+ *     while Chrome is closed;
+ *   · the letter already written, because the real cost of cancelling is writing it;
+ *   · proof of what you had accepted;
+ *   · the comparison with today's terms.
  *
- * Due di queste quattro sono in prima fila; le altre stanno nel menu «⋯»,
- * insieme all'unica azione che distrugge qualcosa. Sei pulsanti identici
- * larghi 11,5 px in una colonna da 350 px non sono una scelta: sono un invito
- * a premere quello sbagliato.
+ * Two of the four are up front; the others are in the "⋯" menu, together with
+ * the only action that destroys something. Six identical 11.5 px buttons in a
+ * 350 px column are not a choice: they are an invitation to press the wrong
+ * one.
  */
 
 import { esc } from './render.js';
@@ -27,22 +27,22 @@ const $ = (sel) => document.querySelector(sel);
 let send = async () => { throw new Error('bridge non inizializzato'); };
 let cache = [];
 
-/** Ricerca e filtri sopravvivono al re-render: sono lo sguardo dell'utente. */
+/** Search and filters survive re-rendering: they are the user's point of view. */
 const view = { query: '', filter: 'all' };
 
-/** L'eliminazione in attesa di conferma silenziosa: vedi `startDelete`. */
+/** The deletion waiting for silent confirmation: see `startDelete`. */
 let pending = null;
 
-/** Oltre questa soglia setacciare a occhio non funziona più. */
+/** Beyond this threshold sifting by eye no longer works. */
 const SEARCH_THRESHOLD = 8;
 
 // ── ordinamento e raggruppamento ────────────────────────────────────────────
 
 /**
- * Lo storage impila con `unshift`: l'ordine naturale della lista è quello di
- * registrazione, dal più recente. È l'ordine sbagliato — l'unica cosa che
- * conta qui è quanto manca alla scadenza. Con venti impegni, quello da
- * disdire fra tre giorni finiva in fondo.
+ * Storage stacks with `unshift`: the list's natural order is recording order,
+ * newest first. That is the wrong order — the only thing that matters here is
+ * how long until the deadline. With twenty commitments, the one to cancel in
+ * three days ended up at the bottom.
  */
 const GROUPS = [
   { id: 'week', label: 'Entro 7 giorni' },
@@ -83,7 +83,7 @@ function matchesFilter(c, filter) {
 function matchesQuery(c, query) {
   if (!query) return true;
   const haystack = [c.provider, c.host, c.headline].filter(Boolean).join(' ').toLowerCase();
-  // Ogni parola deve comparire: chi scrive due termini sta restringendo.
+  // Every word must appear: whoever types two terms is narrowing down.
   return query.split(/\s+/).filter(Boolean).every((word) => haystack.includes(word));
 }
 
@@ -110,9 +110,8 @@ export function init(sender, opts = {}) {
     render(cache);
   });
 
-  // Un menu aperto che resta aperto mentre si clicca altrove è un menu che
-  // finisce sopra la card sbagliata: in cattura, così vale anche per i click
-  // che vengono fermati più in basso.
+  // A menu that stays open while clicking elsewhere ends up on top of the wrong
+  // card: capture phase, so it also covers clicks stopped further down.
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.c-menu-wrap')) closeMenus();
   }, true);
@@ -140,13 +139,13 @@ function render(list) {
   const summary = portfolioSummary(list);
   $('#portfolio').innerHTML = list.length ? renderPortfolio(summary) : '';
 
-  // La riga in attesa di eliminazione sparisce subito dalla vista, ma dallo
-  // storage non è ancora uscita: è quello che rende annullabile il gesto.
+  // The row waiting for deletion disappears from view at once, but hasn't left
+  // storage yet: that is what makes the gesture undoable.
   const alive = list.filter((c) => c.id !== pending?.id);
 
   $('#c-tools').hidden = alive.length <= SEARCH_THRESHOLD;
   if ($('#c-tools').hidden) {
-    // Nascondere i filtri lasciandoli attivi renderebbe invisibile metà lista.
+    // Hiding the filters while leaving them active would make half the list invisible.
     view.query = '';
     view.filter = 'all';
     $('#c-search').value = '';
@@ -154,7 +153,7 @@ function render(list) {
   paintChips(alive);
 
   if (!list.length) {
-    // Lo stato vuoto mostra come apparirà un impegno, con la strada per provarlo.
+    // The empty state shows what a commitment will look like, with the way to try it.
     $('#commitments-list').innerHTML = `<div class="empty">
       <p>${esc(isWeb
         ? t('Quando registri un impegno dopo un’analisi, la scadenza di disdetta finisce qui, con la lettera già pronta.')
@@ -189,9 +188,9 @@ function render(list) {
   const html = GROUPS.map((g) => {
     const items = buckets.get(g.id);
     if (!items.length) return '';
-    // Dentro il gruppo si va dal più imminente al più lontano; fra le finestre
-    // già chiuse invece conta l'opposto, la più fresca è quella su cui si può
-    // ancora tentare qualcosa.
+    // Within a group, from the most imminent to the furthest; among windows
+    // already closed the opposite counts, the freshest is the one where
+    // something can still be tried.
     items.sort((a, b) =>
       g.id === 'passed'
         ? (b.state.daysLeft ?? -Infinity) - (a.state.daysLeft ?? -Infinity)
@@ -258,8 +257,8 @@ function renderItem(c, state = commitmentState(c)) {
 }
 
 /**
- * La riga sotto il nome: ciò che non si legge già a destra (il totale).
- * Quando finisce o si rinnova, con il preavviso; altrimenti quanto costa uscire.
+ * The line under the name: what isn't already readable on the right (the total).
+ * When it ends or renews, with the notice period; otherwise what leaving costs.
  */
 function subline(c) {
   const notice = c.noticeMonths ? ' · ' + t('preavviso {n} giorni', { n: Math.round(c.noticeMonths * 30) }) : '';
@@ -271,7 +270,7 @@ function subline(c) {
   return '';
 }
 
-/** Il nome dell'impegno, deciso da chi lo usa: quello ricavato dal sito può essere sbagliato (Paddle, Stripe…). */
+/** The commitment's name, decided by the user: the one taken from the site can be wrong (Paddle, Stripe…). */
 function renameCommitment(id) {
   const c = cache.find((x) => x.id === id);
   if (!c) return;
@@ -306,10 +305,10 @@ function renderMenu(c) {
 }
 
 /**
- * Il secondo passo dell'eliminazione. Non è una formalità: qui sparisce lo
- * snapshot integrale, l'impronta SHA-256 che lo rende opponibile e il piano
- * delle scadenze. Va detto per intero, e va offerta la via d'uscita — portarsi
- * via l'archivio prima di bruciarlo.
+ * The second step of deletion. Not a formality: the full snapshot, the
+ * SHA-256 fingerprint that makes it usable as evidence and the deadline plan
+ * all disappear here. It must be said in full, and a way out offered —
+ * taking the archive away before burning it.
  */
 function renderConfirm(c) {
   const id = esc(c.id);
@@ -330,8 +329,8 @@ function closeMenus() {
   for (const menu of document.querySelectorAll('.c-menu')) {
     if (menu.hidden) continue;
     menu.hidden = true;
-    // Il secondo passo non sopravvive alla chiusura: riaprire il menu deve
-    // ripartire dal menu, non dalla conferma di eliminazione già armata.
+    // The second step doesn't survive closing: reopening the menu must start
+    // from the menu, not from the already armed delete confirmation.
     const c = cache.find((x) => x.id === menu.dataset.menu);
     if (c) menu.innerHTML = renderMenu(c);
     menu.closest('.c-menu-wrap')?.querySelector('.c-more')?.setAttribute('aria-expanded', 'false');
@@ -351,7 +350,7 @@ function toggleMenu(id) {
 
 // ── azioni ──────────────────────────────────────────────────────────────────
 
-/** Azioni che non parlano con il service worker: nessuna attesa da mostrare. */
+/** Actions that don't talk to the service worker: no waiting to show. */
 const INSTANT = new Set(['menu', 'menu-close', 'delete-ask', 'delete-confirm', 'reset-view']);
 
 async function onAction(event) {
@@ -403,28 +402,27 @@ async function onAction(event) {
   } catch (err) {
     openModal(t('Non è stato possibile completare l’operazione'), `<div class="status error">${esc(err.message)}</div>`, []);
   } finally {
-    // Dopo un `load()` il pulsante è staccato dal documento: innocuo.
+    // After a `load()` the button is detached from the document: harmless.
     btn.disabled = false;
     btn.textContent = original;
   }
 }
 
-// ── eliminazione con finestra di ripensamento ───────────────────────────────
+// ── deletion with a window to change your mind ──────────────────────────────
 
 const UNDO_MS = 8000;
 
 /**
- * `DELETE_COMMITMENT` è irreversibile e non esiste il messaggio inverso: la
- * sola forma onesta di «annulla» è **non eliminare ancora**. La card sparisce
- * subito, ma la cancellazione parte solo allo scadere della finestra. Se il
- * pannello viene chiuso prima, l'impegno resta: l'errore cade dalla parte
- * giusta.
+ * `DELETE_COMMITMENT` is irreversible and has no inverse message: the only
+ * honest form of "undo" is **not deleting yet**. The card disappears at once,
+ * but deletion only starts when the window expires. If the panel is closed
+ * before, the commitment stays: the mistake falls on the right side.
  */
 function startDelete(id) {
   const c = cache.find((x) => x.id === id);
   if (!c) return;
   closeMenus();
-  if (pending) finalizeDelete();          // una eliminazione in sospeso per volta
+  if (pending) finalizeDelete();          // one pending deletion at a time
 
   pending = { id, commitment: c, endsAt: Date.now() + UNDO_MS, timer: null, tick: null };
   pending.timer = setTimeout(finalizeDelete, UNDO_MS);
@@ -436,9 +434,9 @@ function startDelete(id) {
 function showUndoBar(c) {
   const bar = $('#undo-bar');
   const name = c.provider || c.host || 'Impegno';
-  // La barra si scrive una volta sola: riscrivere l'HTML a ogni secondo
-  // toglierebbe il fuoco dal pulsante «Annulla» proprio a chi lo sta cercando
-  // con la tastiera.
+  // The bar is written once only: rewriting the HTML every second would take
+  // focus away from the "Undo" button exactly from whoever is looking for it
+  // with the keyboard.
   bar.innerHTML = `<span>${esc(t('Eliminato «{x}» con la sua prova.', { x: name }))}</span>
     <button class="link" id="undo-delete">${esc(t('Annulla'))} (<span id="undo-count">${Math.ceil(UNDO_MS / 1000)}</span>)</button>`;
   bar.hidden = false;
@@ -515,7 +513,7 @@ export async function showLetter(id, kind = null, lang = null) {
   $('#letter-lang').addEventListener('change', (e) => showLetter(id, $('#letter-kind').value, e.target.value));
 }
 
-/** Una riga di spiegazione che compare solo le prime volte (tre aperture), poi non disturba più. */
+/** A line of explanation shown only the first times (three openings), then it stops bothering. */
 function firstTime(key) {
   try {
     const k = `af-hint-${key}`, n = Number(localStorage.getItem(k) || 0);
@@ -527,7 +525,7 @@ function firstTime(key) {
 async function downloadIcs(id) {
   const { content, filename } = await send('BUILD_ICS', { id });
   download(filename, content, 'text/calendar');
-  // Una volta in calendario la scadenza non dipende più da noi: si smette di insistere.
+  // Once in the calendar the deadline no longer depends on us: stop insisting.
   await send('UPDATE_COMMITMENT', { id, patch: { inCalendar: true } });
   await load();
 }
@@ -577,9 +575,9 @@ async function showProof(id) {
 }
 
 /**
- * Attestazione e testo integrale in un file solo: se stai per cancellare la
- * prova, scaricarla in due pezzi da due menu diversi è una richiesta che nessuno
- * soddisfa.
+ * Attestation and full text in a single file: if you are about to delete the
+ * proof, downloading it in two pieces from two different menus is a request
+ * nobody fulfils.
  */
 async function exportArchive(id) {
   const proof = await send('GET_PROOF', { id });
@@ -617,7 +615,7 @@ export function openModal(title, bodyHtml, actions = []) {
     const btn = document.createElement('button');
     btn.className = 'secondary';
     btn.textContent = a.label;
-    // L'azione riceve il proprio pulsante: è lì che deve comparire l'esito.
+    // The action receives its own button: that is where the outcome must appear.
     btn.addEventListener('click', () => a.act(btn));
     $('#modal-foot').append(btn);
   }
@@ -644,10 +642,9 @@ function download(filename, content, mime) {
 }
 
 /**
- * Copiare negli appunti è un'operazione che può fallire in silenzio (permesso
- * negato, documento non a fuoco) e riuscire altrettanto in silenzio. In
- * entrambi i casi l'utente premeva «Copia» e non succedeva niente di visibile:
- * qui l'esito lo dice il pulsante stesso.
+ * Copying to the clipboard can fail silently (permission denied, document not
+ * focused) and succeed just as silently. In both cases the user pressed "Copy"
+ * and nothing visible happened: here the button itself says the outcome.
  */
 async function copy(text, btn) {
   try {

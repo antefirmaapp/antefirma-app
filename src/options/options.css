@@ -1,4 +1,4 @@
-/* La regola [hidden] dello user-agent perde contro display:flex delle classi: la si ribadisce. */
+/* The user-agent [hidden] rule loses against the classes' display:flex: restate it. */
 [hidden] { display: none !important; }
 
 :root {
@@ -103,7 +103,7 @@ button:disabled { opacity: .55; cursor: progress; }
 .foot-note { font-size: 11.5px; color: var(--muted); line-height: 1.6; margin-top: 14px; }
 code { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; background: rgba(127,127,127,.14); padding: 1px 4px; border-radius: 4px; }
 
-/* L'indice delle sezioni, solo dove c'è spazio accanto alla colonna. */
+/* The section index, only where there is room next to the column. */
 .toc { display: none; }
 @media (min-width: 1120px) {
   .toc { display: flex; flex-direction: column; gap: 2px; position: fixed; top: 96px; left: calc(50% - 360px - 196px); width: 172px; }

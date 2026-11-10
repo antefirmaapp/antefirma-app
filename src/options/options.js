@@ -69,8 +69,8 @@ async function load() {
 }
 
 /**
- * Il testo delle pagine esce dal browser solo dopo un sì esplicito: qui, o
- * nell'avviso alla prima analisi. La data resta registrata.
+ * Page text leaves the browser only after an explicit yes: here, or in the
+ * warning at the first analysis. The date stays recorded.
  */
 function showConsent(at) {
   const box = $('#consent-box');
@@ -85,7 +85,7 @@ function showConsent(at) {
   $('#revoke-consent').hidden = !at;
 }
 
-/** Il server risponde? Una prova che non costa analisi. */
+/** Does the server answer? A check that costs no analysis. */
 async function showServerStatus() {
   const el = $('#server-status');
   try {
@@ -123,7 +123,7 @@ async function save() {
         .filter(Boolean),
       profile: readProfile(),
     });
-    // Cambiata la lingua: la pagina si ridisegna nella nuova.
+    // Language changed: the page is redrawn in the new one.
     if ($('#uiLang').value !== initialLang) { location.reload(); return; }
     flash(t('Salvato ✓'));
   } catch (err) {
@@ -208,7 +208,7 @@ $('#plan-remove').addEventListener('click', async () => {
   } catch (err) { planStatus(err.message, false); }
 });
 
-/** Il messaggio di AnteFirma agli utenti, se ce n'è uno in vigore. */
+/** AnteFirma's message to users, if one is in force. */
 function showNotice(n) {
   let el = document.getElementById('af-notice');
   if (!el) {
@@ -229,13 +229,13 @@ async function showInstallId() {
   } catch { $('#install-id').textContent = '—'; }
 }
 
-// Di ritorno dalla pagina di pagamento, il piano si aggiorna da solo.
+// Back from the payment page, the plan refreshes by itself.
 document.addEventListener('visibilitychange', () => { if (!document.hidden) showPlan(); });
 
 $('#save').addEventListener('click', save);
 
-// Si salva da sé: le caselle e i menu subito, i campi di testo quando li lasci. «Salva» resta per chi lo cerca.
-// La lingua no: cambiarla ridisegna la pagina, e lo fa «Salva», quando hai finito.
+// Saves by itself: checkboxes and menus at once, text fields when you leave them. "Save" stays for those who look for it.
+// Not the language: changing it redraws the page, so "Save" does it, when you are done.
 const AUTO = '#enabled, #blockFrom, #jurisdiction, #minBlockAmount, #trackCommitments, #reminders, #watchChanges, #watchUsesRemote, #id-name, #id-email, #id-address, #id-customer, #allowlist, #profile-grid input';
 let autoTimer = null;
 document.addEventListener('change', (e) => {
@@ -269,7 +269,7 @@ $('#clear-history').addEventListener('click', async () => {
   flash(t('Storico cancellato.'));
 });
 
-// La copia dei dati: un file JSON, senza identità dell'installazione né licenza.
+// The data backup: a JSON file, without the installation identity or the licence.
 $('#export-data').addEventListener('click', async () => {
   try {
     const data = await send('EXPORT_DATA');
@@ -293,14 +293,14 @@ $('#import-file').addEventListener('change', async (e) => {
   } catch (err) { flash(err instanceof SyntaxError ? t('Il file non è una copia di AnteFirma.') : err.message); }
 });
 
-/** La versione web: niente firewall, quindi altri titoli e un'altra spiegazione dell'analisi. */
+/** The web version: no firewall, so other headings and another explanation of the analysis. */
 function adaptForWeb() {
   if (document.documentElement.dataset.web !== '1') return;
   const prot = $('#enabled')?.closest('section')?.querySelector('h2');
   if (prot) prot.textContent = t('Lingua e paese');
   const lead = $('#consent-box')?.closest('section')?.querySelector('p.lead');
   if (lead) lead.textContent = t('Quando premi «Analizza», AnteFirma manda il testo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic). Il server risponde con le clausole che ti impegnano, ciascuna con la frase esatta del testo, e scarta ogni avviso la cui frase non c’è.');
-  // I promemoria della versione web sono notifiche del browser: servono il permesso e la finestra aperta.
+  // Web version reminders are browser notifications: they need permission and an open window.
   const rem = $('#reminders');
   rem?.addEventListener('change', () => { if (rem.checked && 'Notification' in self && Notification.permission === 'default') Notification.requestPermission(); });
   const em = rem?.closest('label')?.querySelector('em');
@@ -312,8 +312,8 @@ if (new URLSearchParams(location.search).has('welcome')) {
 }
 
 /**
- * L'indice delle sezioni: fisso a sinistra sugli schermi larghi, con la
- * sezione in vista evidenziata. Sugli schermi stretti non c'è (CSS).
+ * The section index: fixed on the left on wide screens, with the section in
+ * view highlighted. On narrow screens it isn't there (CSS).
  */
 function addToc() {
   const nav = document.createElement('nav');
@@ -331,7 +331,7 @@ function addToc() {
     links.push([sec, a]);
   }
   document.body.append(nav);
-  // Evidenziata: l'ultima sezione il cui titolo ha superato un terzo della finestra.
+  // Highlighted: the last section whose heading has passed a third of the window.
   const mark = () => {
     let cur = links[0]?.[0];
     for (const [sec] of links) if (sec.getBoundingClientRect().top <= innerHeight / 3) cur = sec;
@@ -341,7 +341,7 @@ function addToc() {
   mark();
 }
 
-/** Un «?» accanto al titolo di ogni sezione: apre la guida su quell'argomento. */
+/** A "?" next to each section heading: opens the guide on that topic. */
 function addHelpLinks() {
   for (const h of document.querySelectorAll('h2[data-help]')) {
     const a = document.createElement('a');
@@ -352,7 +352,7 @@ function addHelpLinks() {
   }
 }
 
-// La lingua prima di tutto: la pagina è scritta in italiano e si traduce qui.
+// Language first: the page is written in Italian and translated here.
 let initialLang = 'auto';
 (async () => {
   try {

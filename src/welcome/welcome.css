@@ -1,4 +1,4 @@
-/* La regola [hidden] dello user-agent perde contro display:flex delle classi: la si ribadisce. */
+/* The user-agent [hidden] rule loses against the classes' display:flex: restate it. */
 [hidden] { display: none !important; }
 
 :root { --bg: #f5f6f8; --card: #fff; --fg: #15203a; --muted: #5b6475; --line: #e3e6eb; --mark: #ffe04a; color-scheme: light dark; }

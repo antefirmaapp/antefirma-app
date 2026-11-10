@@ -1,6 +1,6 @@
 /**
- * Pannello laterale: le quattro vie d'ingresso all'analisi
- * (pagina, testo incollato, PDF, URL) e lo storico degli impegni.
+ * Side panel: the four ways into the analysis (page, pasted text, PDF, URL)
+ * and the history of commitments.
  */
 
 import { renderVerdict, esc } from './render.js';
@@ -14,7 +14,7 @@ import { helpUrl } from '../core/help.js';
 
 const $ = (sel) => document.querySelector(sel);
 const state = { source: null, busy: false };
-/** La versione web (web.antefirma.app): stesso pannello, senza le funzioni che una pagina non può avere. */
+/** The web version (web.antefirma.app): same panel, without what a web page cannot do. */
 const isWeb = document.documentElement.dataset.web === '1';
 
 // ── infrastruttura ──────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ let lastVerdict = null;
 
 function showResult(verdict) {
   lastVerdict = verdict;
-  // Un esempio non è un contratto tuo: si guarda, non si registra.
+  // An example is not your contract: you look at it, you don't record it.
   const trackable = !verdict.example && (verdict.cost?.horizonMonths || verdict.cost?.hasAutoRenewal || verdict.cost?.worstCase != null);
   if (verdict.engine?.quota) paintQuota(verdict.engine.quota);
   $('#result').innerHTML =
@@ -56,16 +56,16 @@ function showResult(verdict) {
 }
 
 /**
- * Anche un'analisi manuale può diventare una scadenza da presidiare: è il caso
- * del contratto che ti arriva via email e che firmi altrove.
+ * A manual analysis can also become a deadline to watch: the case of a
+ * contract that reaches you by email and that you sign elsewhere.
  */
 async function trackCurrent() {
   const btn = $('#track');
   btn.disabled = true;
   try {
-    // Il testo lo ritrova il service worker dal verdetto in sessione: quello
-    // della textarea è il testo di *una* delle quattro sorgenti, non di quella
-    // che ha prodotto questo verdetto.
+    // The service worker finds the text from the verdict in the session: the
+    // textarea's text is that of *one* of the four sources, not necessarily the
+    // one that produced this verdict.
     const saved = await send('SAVE_COMMITMENT_FROM_VERDICT', {
       historyId: lastVerdict?.historyId,
       verdict: lastVerdict,
@@ -86,8 +86,8 @@ async function trackCurrent() {
 }
 
 /**
- * Subito dopo il salvataggio, la scadenza in calendario: è l'unico promemoria
- * che arriva anche a browser chiuso. Google Calendar o un file .ics.
+ * Right after saving, the deadline in the calendar: the only reminder that
+ * arrives with the browser closed too. Google Calendar or an .ics file.
  */
 function offerCalendar(c) {
   if (!c?.deadlineAt || $('#cal-offer')) return;
@@ -117,7 +117,7 @@ function offerCalendar(c) {
   });
 }
 
-/** Le analisi rimaste, in testata: si vede prima di finirle, non dopo. */
+/** Analyses left, in the header: visible before running out, not after. */
 function paintQuota(q) {
   const m = q?.month;
   if (!m || m.limit == null || m.remaining == null) return;
@@ -134,18 +134,18 @@ function paintQuota(q) {
   el.classList.toggle('low', m.remaining <= 1);
 }
 
-/** In fondo: le tutele scelte, in parole e cliccabili, e se manca ancora il consenso. */
+/** At the bottom: the chosen protections, in words and clickable, and whether consent is still missing. */
 function engineNote(settings) {
   const code = settings.jurisdiction || 'IT';
   let country = code;
-  try { country = new Intl.DisplayNames([getLang()], { type: 'region' }).of(code === 'UK' ? 'GB' : code) || code; } catch { /* resta il codice */ }
+  try { country = new Intl.DisplayNames([getLang()], { type: 'region' }).of(code === 'UK' ? 'GB' : code) || code; } catch { /* keep the code */ }
   const el = $('#engine-note');
   el.innerHTML = `<button class="link" id="note-country" title="${esc(t('Cambia nelle impostazioni'))}">${esc(t('Tutele: {x}', { x: country }))}</button>` +
     (settings.remoteConsentAt ? '' : ' · ' + esc(t('alla prima analisi ti chiederò il consenso')));
   $('#note-country').addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#tutele') }));
 }
 
-/** Un esempio pronto: stesso calcolo, nessun testo inviato, nessuna analisi consumata. */
+/** A ready-made example: same computation, no text sent, no analysis used. */
 async function runSample(key) {
   const sample = SAMPLES[key];
   if (!sample || state.busy) return;
@@ -169,8 +169,8 @@ async function runSample(key) {
 }
 
 /**
- * Il consenso alla prima analisi, chiesto dal pannello. Il testo parte verso il
- * server di AnteFirma solo dopo un sì.
+ * Consent at the first analysis, asked from the panel. The text goes to the
+ * AnteFirma server only after a yes.
  */
 function askConsent() {
   return new Promise((resolve) => {
@@ -195,7 +195,7 @@ function askConsent() {
         },
       ]
     );
-    // «Chiudi», aggiunto dalla finestra stessa, vale come un no.
+    // "Close", added by the dialog itself, counts as a no.
     document.querySelector('#modal-foot button:last-child')?.addEventListener('click', () => resolve(false), { once: true });
   });
 }
@@ -225,7 +225,7 @@ async function analyze(payload, label) {
   }
 }
 
-/** Analisi del mese finite: non è un errore. Quando ripartono e che cosa si può fare intanto. */
+/** This month's analyses are used up: not an error. When they come back and what can be done meanwhile. */
 function quotaOut() {
   const now = new Date();
   const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -280,7 +280,7 @@ async function analyzeCurrentPage() {
       func: () => {
         const text = document.body?.innerText || '';
         const CF = globalThis.__CF;
-        // Se il content script è presente, riusa il suo estrattore di prezzi.
+        // If the content script is present, reuse its price extractor.
         const pricing = CF?.context ? CF.context.extractPricing(document.body) : {};
         return { text: text.slice(0, 120000), pricing, title: document.title, url: location.href };
       },
@@ -319,7 +319,7 @@ $('#run-paste').addEventListener('click', () => {
   );
 });
 
-// Dalla casella del testo, Ctrl+Invio (⌘+Invio sul Mac) analizza.
+// From the text box, Ctrl+Enter (⌘+Enter on Mac) analyses.
 $('#paste-text').addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $('#run-paste').click(); }
 });
@@ -351,7 +351,7 @@ dropzone.addEventListener('drop', (e) => {
   if (file) handlePdf(file);
 });
 
-// Trascinare il PDF ovunque nel pannello funziona comunque.
+// Dropping the PDF anywhere in the panel works too.
 document.addEventListener('dragover', (e) => e.preventDefault());
 document.addEventListener('drop', (e) => {
   e.preventDefault();
@@ -412,12 +412,12 @@ $('#run-url').addEventListener('click', async () => {
 const TABS = [...document.querySelectorAll('.tab')];
 
 /**
- * La classe `.active` è per gli occhi; `aria-selected` è l'unica cosa che uno
- * screen reader legge. Il `tabindex` a rotazione serve al resto del pattern:
- * dentro la barra ci si muove con le frecce, non con Tab, che deve saltare
- * direttamente al contenuto della scheda aperta.
+ * The `.active` class is for the eyes; `aria-selected` is the only thing a
+ * screen reader reads. The roving `tabindex` serves the rest of the pattern:
+ * inside the bar you move with the arrows, not with Tab, which must jump
+ * straight to the open tab's content.
  */
-/** Il «?» porta alla guida della scheda aperta. */
+/** The "?" opens the guide of the open tab. */
 const HELP_OF_TAB = { analyze: 'analizzare', commitments: 'impegni', history: 'problemi' };
 function selectTab(name, { focus = false } = {}) {
   const help = document.getElementById('open-help');
@@ -477,8 +477,8 @@ async function loadHistory() {
       const when = new Date(h.at);
       const deadline = h.deadline ? new Date(h.deadline) : null;
       const daysLeft = deadline ? Math.round((deadline - now) / 86400000) : null;
-      // `data-level` non è decorazione: in tema scuro sidepanel.css se ne serve
-      // per sostituire il colore chiaro con una variante leggibile sul fondo.
+      // `data-level` is not decoration: in the dark theme sidepanel.css uses it
+      // to replace the light colour with a variant readable on the background.
       return `<div class="h-item" data-level="${esc(h.level || '')}" style="--level-color:${LEVEL_COLORS[h.level] || '#888'}">
         <div class="h-top">
           <span>${esc(h.host || '—')}</span>
@@ -495,8 +495,8 @@ async function loadHistory() {
 }
 
 /**
- * Lo stesso avviso sullo stesso sito, lo stesso giorno e con la stessa decisione
- * (chi riprova un acquisto, chi ricarica la pagina) diventa una scheda sola: «5 volte».
+ * The same warning on the same site, on the same day and with the same decision
+ * (someone retrying a purchase, reloading the page) becomes one card: "5 times".
  */
 function groupHistory(list) {
   const out = [];
@@ -510,7 +510,7 @@ function groupHistory(list) {
   return out;
 }
 
-/** Che cosa è successo davvero, non solo se l'utente ha proseguito. */
+/** What really happened, not only whether the user went ahead. */
 function decisionLabel(h) {
   if (h.decision === 'cancel') return t('Ti sei fermato');
   if (h.decision !== 'proceed') return t('Nessuna decisione registrata');
@@ -526,7 +526,7 @@ $('#clear-history').addEventListener('click', async () => {
 
 $('#open-options').addEventListener('click', () => chrome.runtime.openOptionsPage());
 
-// ── richieste in arrivo dal menu contestuale ────────────────────────────────
+// ── requests arriving from the context menu ─────────────────────────────────
 
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg?.type === 'PANEL_REQUEST') handlePanelRequest(msg.payload);
@@ -555,7 +555,7 @@ async function handlePanelRequest(req) {
 // ── esempi, PDF nella versione web ──────────────────────────────────────────
 
 function setupExtras() {
-  // Gli esempi sotto la casella: chi apre per la prima volta quasi mai ha un contratto sotto mano.
+  // The examples under the box: first-time users almost never have a contract at hand.
   const lang = getLang();
   const ex = document.createElement('div');
   ex.className = 'examples';
@@ -563,18 +563,18 @@ function setupExtras() {
     .map(([k, v]) => `<button class="chip" data-sample="${k}" aria-pressed="false">${esc(v.label[{ en: 1, es: 2 }[lang] ?? 0])}</button>`).join('');
   $('#paste-text').after(ex);
   ex.querySelectorAll('[data-sample]').forEach((b) => b.addEventListener('click', () => runSample(b.dataset.sample)));
-  // Il tasto vicino al pulsante: si scopre senza leggere istruzioni.
+  // The shortcut next to the button: discoverable without reading instructions.
   $('#run-paste').title = /Mac/.test(navigator.platform) ? '⌘ + Invio' : 'Ctrl + Invio';
 
   if (isWeb) {
-    // Incollare è l'azione principale: la casella è già aperta, il PDF si trascina o si sceglie da qui.
+    // Pasting is the main action: the box is already open, the PDF is dropped or chosen from here.
     selectSource('paste');
     const pdf = document.createElement('p');
     pdf.className = 'pdf-hint muted small';
     pdf.innerHTML = `${esc(t('Hai un PDF? Trascinalo qui oppure'))} <button class="link" id="pick-pdf-2">${esc(t('sceglilo dal computer'))}</button>`;
     $('#run-paste').after(pdf);
     $('#pick-pdf-2').addEventListener('click', () => $('#pdf-file').click());
-    // «Apri con AnteFirma» dal sistema (web/boot.js): il PDF arriva qui.
+    // "Open with AnteFirma" from the system (web/boot.js): the PDF arrives here.
     window.__afOpenPdf = (file) => handlePdf(file);
     window.__afSample = runSample;
   }
@@ -593,17 +593,17 @@ document.addEventListener('click', (e) => {
     setLang(resolveLang(settings.uiLang, chrome.i18n.getUILanguage()));
     translateDom(document.body);
     engineNote(settings);
-  } catch { /* il pannello resta usabile comunque */ }
+  } catch { /* the panel stays usable anyway */ }
   commitments.init(send, { isWeb });
   setupExtras();
   send('GET_LICENSE').then((l) => paintQuota(l?.quota)).catch(() => {});
 
-  // Aperto da una notifica di scadenza: si va dritti all'impegno giusto.
+  // Opened from a deadline notification: go straight to the right commitment.
   const params = new URLSearchParams(location.search);
   if (params.get('tab') === 'commitments') {
     selectTab('commitments');
     await commitments.load({ focusId: params.get('id') });
-    // Dal promemoria «Scrivi la lettera»: si apre già la lettera.
+    // From the "Write the letter" reminder: the letter opens right away.
     if (params.get('letter') === '1' && params.get('id')) commitments.showLetter(params.get('id')).catch(() => {});
   }
 

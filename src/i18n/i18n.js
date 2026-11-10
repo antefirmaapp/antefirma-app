@@ -1,16 +1,16 @@
 /**
- * Le lingue dell'estensione: italiano (la lingua del codice), inglese, spagnolo.
+ * The extension's languages: Italian, English, Spanish.
  *
- * Le chiavi sono **le frasi italiane stesse**: `t('Torna indietro')` restituisce
- * la traduzione nella lingua scelta, o la frase italiana se la traduzione
- * manca. Così il codice resta leggibile e una traduzione dimenticata si vede
- * (resta in italiano) invece di rompere qualcosa.
+ * Keys are **the Italian sentences themselves**: `t('Torna indietro')` returns
+ * the translation in the chosen language, or the Italian sentence if the
+ * translation is missing. A forgotten translation shows up (it stays in
+ * Italian) instead of breaking something.
  *
- * Segnaposti: `t('Disdici entro {n} giorni', { n: 5 })`.
+ * Placeholders: `t('Disdici entro {n} giorni', { n: 5 })`.
  *
- * Il file è uno script classico: lo caricano i content script (che non sono
- * moduli) e lo importano per effetto collaterale il service worker, le pagine
- * dell'estensione e i test. Si registra su `globalThis.AF_I18N`.
+ * The file is a classic script: content scripts (which are not modules) load it,
+ * and the service worker, extension pages and tests import it for its side
+ * effect. It registers itself on `globalThis.AF_I18N`.
  */
 (() => {
   const g = globalThis;
@@ -23,13 +23,13 @@
 
   g.AF_I18N = {
     LANGS,
-    /** Il dizionario: { 'frase italiana': ['english', 'español'] }. Lo riempie dict.js. */
+    /** The dictionary: { 'Italian sentence': ['English', 'Spanish'] }. Filled by dict.js. */
     dict: {},
     add(entries) { Object.assign(this.dict, entries); },
     get lang() { return lang; },
     get locale() { return LOCALES[lang]; },
     setLang(l) { lang = LANGS.includes(l) ? l : 'it'; return lang; },
-    /** «auto» segue la lingua del browser; fuori da it/es si usa l'inglese. */
+    /** "auto" follows the browser language; outside it/es English is used. */
     resolve(pref, uiLanguage = '') {
       if (LANGS.includes(pref)) return pref;
       const b = String(uiLanguage || '').slice(0, 2).toLowerCase();
