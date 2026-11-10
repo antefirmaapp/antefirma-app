@@ -157,6 +157,45 @@ Lo ZIP si carica nel bucket R2 `antefirma-backup` (giurisdizione UE) sotto
 `dev/` e si scarica dal pannello, **Strumenti → Estensione per sviluppatori**.
 Il manifest del repository resta senza chiave: lo store assegna il suo ID.
 
+## AnteFirma web (da installare sul computer)
+
+```bash
+node tools/web-build.mjs        # → ../antefirma-site/assets/app (il sito la pubblica su /app/)
+```
+
+Lo stesso codice di pannello, impostazioni e «sfondo», con `web/shim.js` che
+imita le API di Chrome in una pagina normale (IndexedDB, timer, notifiche del
+browser). È un'app installabile (PWA): manifest, icone, service worker.
+Fa: testo incollato e PDF, impegni, scadenze, lettere, piano e chiave.
+Non può: fermare i click sugli altri siti o leggere le altre schede (per quello
+serve l'estensione). Il server deve ammettere l'origine del sito (`APP_ORIGINS`).
+Dopo ogni modifica all'estensione: rifare la build e pubblicare il sito.
+
+## Safari (Mac)
+
+```bash
+node tools/safari-build.mjs     # → dist/safari: manifest senza pannello laterale e notifiche
+```
+
+Poi, **su un Mac con Xcode** (non si può fare da Linux):
+
+```bash
+xcrun safari-web-extension-converter dist/safari --project-location safari-xcode \
+  --app-name AnteFirma --bundle-identifier app.antefirma.safari --macos-only --copy-resources
+```
+
+1. Apri il progetto in Xcode, scegli il tuo Team in *Signing & Capabilities*, premi Run.
+2. In Safari: *Impostazioni → Avanzate → Mostra funzioni per sviluppatori*, poi
+   *Sviluppo → Consenti estensioni non firmate*; attiva AnteFirma in *Impostazioni → Estensioni*.
+3. Per pubblicarla serve l'Apple Developer Program (99 USD l'anno) e l'invio da
+   App Store Connect, come per un'app.
+
+In Safari il pannello si apre dal pulsante nella barra (finestrella) e dal menu
+contestuale (scheda); le notifiche non ci sono, i promemoria restano nel pannello
+e nel calendario (.ics). Il server accetta le origini `safari-web-extension://`
+con `ALLOW_SAFARI=1`. Da provare su un Mac prima della pubblicazione: il service
+worker come modulo richiede Safari 16.4 o successivo.
+
 ## Test
 
 ```bash

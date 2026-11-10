@@ -112,7 +112,9 @@ function setupContextMenus() {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!tab?.id) return;
   try {
-    await chrome.sidePanel.open({ tabId: tab.id });
+    // Safari non ha il pannello laterale: lo stesso pannello si apre in una scheda.
+    if (chrome.sidePanel?.open) await chrome.sidePanel.open({ tabId: tab.id });
+    else await chrome.tabs.create({ url: chrome.runtime.getURL('src/sidepanel/sidepanel.html') });
   } catch { /* il pannello può essere già aperto */ }
 
   const payload =
@@ -632,7 +634,7 @@ async function openCommitment(notificationId, { letter = false } = {}) {
     `src/sidepanel/sidepanel.html?tab=commitments${commitmentId ? `&id=${commitmentId}` : ''}${letter ? '&letter=1' : ''}`
   );
   chrome.tabs.create({ url });
-  chrome.notifications.clear(notificationId);
+  chrome.notifications?.clear(notificationId);
 }
 
 chrome.notifications?.onClicked.addListener((id) => openCommitment(id));
@@ -640,7 +642,7 @@ chrome.notifications?.onButtonClicked.addListener(async (id, index) => {
   const { commitmentId, kind } = await notifTarget(id);
   if (kind === 'reminder' && index === 1 && commitmentId) {
     await updateAndReschedule(commitmentId, { status: COMMITMENT_STATUS.CANCELLED });
-    chrome.notifications.clear(id);
+    chrome.notifications?.clear(id);
     return;
   }
   openCommitment(id, { letter: kind === 'reminder' && index === 0 });
