@@ -165,7 +165,7 @@ try {
   check('settings switch to Spanish', (await opt.textContent('#piano h2')).replace(/\s*\?$/, '') === 'Plan' && /ayuda\/planes-y-clave/.test(await opt.getAttribute('#piano .help-q', 'href')) && (await opt.textContent('#save')) === 'Guardar');
   check('the plan reads in Spanish', (await opt.textContent('#plan-summary')).includes('Plan gratuito'));
 
-  // L'avviso in inglese.
+  // The warning in English.
   await opt.selectOption('#uiLang', 'en');
   await opt.click('#save');
   await opt.waitForTimeout(1500);

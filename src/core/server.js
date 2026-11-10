@@ -71,7 +71,7 @@ function messageFor(code) {
   return t(MESSAGES[code] || 'analysisFailed3');
 }
 
-// ── token dell'installazione ────────────────────────────────────────────────
+// ── installation token ──────────────────────────────────────────────────────
 
 async function readAuth(storage) {
   const got = await storage.get(AUTH_KEY);

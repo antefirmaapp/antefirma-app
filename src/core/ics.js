@@ -107,7 +107,7 @@ function renewalDescription(c) {
   return bits.join('\n');
 }
 
-// ── formattazione RFC 5545 ──────────────────────────────────────────────────
+// ── RFC 5545 formatting ─────────────────────────────────────────────────────
 
 function utc(d) {
   return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}${p(d.getUTCSeconds())}Z`;

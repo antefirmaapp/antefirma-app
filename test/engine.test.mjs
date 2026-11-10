@@ -162,7 +162,7 @@ test('low confidence lowers severity, but doesn\'t zero it', () => {
   assert.ok(unsure.severity > 0);
 });
 
-// ── conseguenze ─────────────────────────────────────────────────────────────
+// ── consequences ────────────────────────────────────────────────────────────
 
 test('the server\'s figures become term, notice and exit fee', () => {
   const t = termsFromServer(RESPONSE().terms);
@@ -237,7 +237,7 @@ test('the timeline puts the cancellation deadline before the renewal', () => {
   assert.match(deadline.when, /luglio 2027/);
 });
 
-// ── profilo personale ───────────────────────────────────────────────────────
+// ── personal profile ────────────────────────────────────────────────────────
 
 test('the profile changes the severity of the same clause', () => {
   const findings = fromServer(RESPONSE().findings);
@@ -257,7 +257,7 @@ test('the multiplier is capped, with diminishing returns', () => {
   assert.ok(all.multiplier > 1.45);
 });
 
-// ── punteggio ───────────────────────────────────────────────────────────────
+// ── score ───────────────────────────────────────────────────────────────────
 
 test('aggregateSeverity lets the most serious risk dominate', () => {
   const one = aggregateSeverity([{ severity: 80 }]);
@@ -321,7 +321,7 @@ test('a single weak clue doesn\'t trigger the red alert', () => {
   assert.notEqual(level.id, 'critical');
 });
 
-// ── motore consumer UE/IT ───────────────────────────────────────────────────
+// ── EU/IT consumer engine ───────────────────────────────────────────────────
 
 test('the Italian engine flags arbitration, court and unilateral changes', () => {
   const findings = fromServer(RESPONSE().findings);
@@ -351,7 +351,7 @@ test('pre-ticked consent is flagged as invalid', () => {
   assert.ok(consumer.flags.some((f) => f.id === 'eu.consent_bundled'));
 });
 
-// ── pipeline completa ───────────────────────────────────────────────────────
+// ── full pipeline ───────────────────────────────────────────────────────────
 
 test('end-to-end analysis: numbers, level and deadline', async () => {
   const settings = { ...SETTINGS, jurisdiction: 'IT', profile: { money: true, privacy: true, identity: true } };

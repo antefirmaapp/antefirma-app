@@ -7,7 +7,7 @@
 
 import { locale as currentLocale } from '../i18n/index.js';
 
-/** Rimuove spazi ridondanti e caratteri invisibili. */
+/** Removes redundant spaces and invisible characters. */
 export function normalize(text = '') {
   return String(text)
     .replace(/\u00a0/g, ' ')

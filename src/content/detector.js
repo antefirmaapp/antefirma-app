@@ -240,7 +240,7 @@
    * tell "I pressed Continue anyway" from "it went through below the threshold",
    * but in both cases the user went ahead and the commitment must be recorded.
    *
-   * @returns {Promise<'proceed'|'cancel'>} la decisione effettiva.
+   * @returns {Promise<'proceed'|'cancel'>} the actual decision.
    */
   async function finalize(decision, verdict, via = 'blocked') {
     let how = via;
@@ -685,7 +685,7 @@
     const bar = lifeBar();
     if (bar) {
       // Freeze the width reached, otherwise the bar would go backwards.
-      const w = bar.getBoundingClientRect().width;   // larghezza *trasformata*
+      const w = bar.getBoundingClientRect().width;   // *transformed* width
       const full = bar.offsetWidth || w || 1;        // layout width
       bar.style.transition = 'none';
       bar.style.transform = `scaleX(${Math.max(0, Math.min(1, w / full))})`;

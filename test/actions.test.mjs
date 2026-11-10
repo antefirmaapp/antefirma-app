@@ -116,7 +116,7 @@ test('empty or missing text produces nothing', () => {
   assert.equal(classifyText(undefined), null);
 });
 
-// ── richiamo: etichette viste in produzione ─────────────────────────────────
+// ── recall: labels seen in production ───────────────────────────────────────
 
 test('recognises the payment wording found in real checkouts', () => {
   const cases = {
@@ -179,7 +179,7 @@ test('generic and harmless buttons stay out', () => {
   }
 });
 
-// ── opt-out posizionale ────────────────────────────────────────────────────
+// ── positional opt-out ─────────────────────────────────────────────────────
 
 /**
  * Treating the opt-out as an absolute veto ate real commitments: "cancel
@@ -241,7 +241,7 @@ test('in the nine historical refusal cases the match falls in the first third', 
 test('a weak action doesn\'t stand against an opt-out, wherever it is', () => {
   // signup weighs 1: "Registrati" plus a refusal stays a refusal.
   assert.equal(classifyText('Registrati oppure annulla'), null);
-  // sign pesa 5: la firma regge.
+  // sign weighs 5: the signature stands.
   assert.equal(classifyText('Sottoscrivi il documento oppure annulla'), 'sign');
 });
 
@@ -252,7 +252,7 @@ test('classifyDetail tells "found nothing" from "it\'s a refusal"', () => {
   assert.equal(classifyDetail('Abbonati ora').type, 'subscribe');
 });
 
-// ── spagnolo ───────────────────────────────────────────────────────────────
+// ── Spanish ────────────────────────────────────────────────────────────────
 
 test('recognises commitment buttons in Spanish', () => {
   const cases = {

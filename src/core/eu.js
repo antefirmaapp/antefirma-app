@@ -165,7 +165,7 @@ const CHECKS = [
 ];
 
 /**
- * Esegue i controlli consumer.
+ * Runs the consumer checks.
  *
  * @param {object} p
  * @param {string} p.text

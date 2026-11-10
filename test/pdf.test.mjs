@@ -65,7 +65,7 @@ test('well-extracted text declares itself reliable and attaches no notes', async
   assert.equal(r.note, null);
 });
 
-// ── i quattro difetti ───────────────────────────────────────────────────────
+// ── the four defects ────────────────────────────────────────────────────────
 
 /**
  * The dominant layout of Word, LibreOffice and InDesign: spaces are not

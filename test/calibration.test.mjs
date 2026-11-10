@@ -96,7 +96,7 @@ test('economic pressure tells orders of magnitude apart', () => {
   assert.ok(moneyPressure(1000) < moneyPressure(10000));
 });
 
-// ── 2. ordinamento ──────────────────────────────────────────────────────────
+// ── 2. ordering ─────────────────────────────────────────────────────────────
 
 test('a worse contract comes out worse', () => {
   for (const [worse, better] of ORDERING) {
@@ -116,7 +116,7 @@ test('the main chain is ordered from start to end', () => {
   assert.deepEqual(values, ranked, `ordine rotto: ${chain.map((id, i) => `${id}=${values[i]}`).join(' ')}`);
 });
 
-// ── 3. comportamento sperimentato dall'utente ───────────────────────────────
+// ── 3. what the user experiences ────────────────────────────────────────────
 
 test('harmless cases don\'t interrupt the user', () => {
   for (const id of ['newsletter', 'saas_fair', 'cookie_banner']) {
