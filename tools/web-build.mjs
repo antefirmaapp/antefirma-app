@@ -69,9 +69,10 @@ writeFileSync(join(OUT, 'manifest.webmanifest'), JSON.stringify({
   ],
 }, null, 2) + '\n');
 
-// Regole di sicurezza della pagina: solo i propri file, e il server di AnteFirma per le analisi.
+// Regole di sicurezza della pagina: solo i propri file, il server di AnteFirma per le analisi
+// e le statistiche di visita di Cloudflare (senza cookie), che Cloudflare aggiunge da sé.
 writeFileSync(join(OUT, '_headers'), `/*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.antefirma.app; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.antefirma.app https://cloudflareinsights.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: no-referrer
   Permissions-Policy: camera=(), microphone=(), geolocation=()
