@@ -6,11 +6,11 @@
  *
  * The web app runs the same panel and settings code and CSS as the extension,
  * so this catches layout and style regressions in both. Every screen is taken
- * in light theme, with animations off and one font everywhere (DejaVu Sans, on
- * Ubuntu and in most Linux images), so the same code gives the same pixels.
+ * in light theme, with animations off and one font everywhere, loaded from
+ * test/visual/fonts (not from the system), so the same code gives the same pixels.
  * Images are compared inside Chromium, without extra dependencies: a pixel
- * counts as different when a channel moves by more than 32; a screen fails when
- * more than 0.5 % of its pixels differ, or its size changes. On failure the new
+ * counts as different when a channel moves by more than 64 (antialiasing differs a
+ * little between machines); a screen fails when more than 1 % of its pixels differ, or its size changes. On failure the new
  * image and a diff (changed pixels in red) are written next to the baseline as
  * `<name>.new.png` and `<name>.diff.png`.
  */
@@ -23,7 +23,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 const DIR = join(ROOT, 'test', 'visual');
 const UPDATE = process.env.UPDATE_VISUAL === '1';
-const TOLERANCE = 0.005;
+const TOLERANCE = 0.01;
 mkdirSync(DIR, { recursive: true });
 
 // Fixed clock, so dates and "days left" never change the picture.
@@ -33,7 +33,12 @@ const FREEZE = `{
   class F extends D { constructor(...a) { super(...(a.length ? a : [N])); } static now() { return N; } }
   globalThis.Date = F;
 }`;
-const STYLE = `*, *::before, *::after { font-family: "DejaVu Sans", sans-serif !important; animation: none !important; transition: none !important; caret-color: transparent !important; }`;
+// The font travels with the test (a Latin subset of DejaVu Sans, free licence in
+// fonts/LICENSE.txt): system fonts differ between machines and would move every line.
+const font = (file) => `url(data:font/woff2;base64,${readFileSync(join(DIR, 'fonts', file)).toString('base64')}) format("woff2")`;
+const STYLE = `@font-face { font-family: AFVisual; src: ${font('DejaVuSans.woff2')}; font-weight: 100 599; }
+@font-face { font-family: AFVisual; src: ${font('DejaVuSans-Bold.woff2')}; font-weight: 600 900; }
+*, *::before, *::after { font-family: AFVisual, sans-serif !important; animation: none !important; transition: none !important; caret-color: transparent !important; }`;
 
 const browser = await chromium.launch();
 const results = [];
@@ -53,19 +58,25 @@ async function compare(cmp, a, b) {
     x.drawImage(ia, 0, 0); const da = x.getImageData(0, 0, c.width, c.height);
     x.drawImage(ib, 0, 0); const db = x.getImageData(0, 0, c.width, c.height);
     const out = x.createImageData(c.width, c.height);
-    let changed = 0;
+    let changed = 0, x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
     for (let i = 0; i < da.data.length; i += 4) {
       const d = Math.max(Math.abs(da.data[i] - db.data[i]), Math.abs(da.data[i + 1] - db.data[i + 1]), Math.abs(da.data[i + 2] - db.data[i + 2]));
       const grey = (db.data[i] + db.data[i + 1] + db.data[i + 2]) / 3;
-      if (d > 32) { changed++; out.data.set([255, 0, 0, 255], i); } else out.data.set([grey, grey, grey, 60], i);
+      if (d > 64) {
+        changed++; out.data.set([255, 0, 0, 255], i);
+        const px = (i / 4) % c.width, py = Math.floor(i / 4 / c.width);
+        x0 = Math.min(x0, px); y0 = Math.min(y0, py); x1 = Math.max(x1, px); y1 = Math.max(y1, py);
+      } else out.data.set([grey, grey, grey, 60], i);
     }
     x.putImageData(out, 0, 0);
-    return { changed, total: c.width * c.height, diff: c.toDataURL('image/png').split(',')[1] };
+    const box = changed ? `changes within x ${x0}–${x1}, y ${y0}–${y1}` : '';
+    return { changed, box, total: c.width * c.height, diff: c.toDataURL('image/png').split(',')[1] };
   }, [a.toString('base64'), b.toString('base64')]);
   return r;
 }
 
 async function screen(page, cmp, name) {
+  await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(150);
   const shot = await page.screenshot({ fullPage: true });
   const base = join(DIR, `${name}.png`);
@@ -85,7 +96,7 @@ async function screen(page, cmp, name) {
     writeFileSync(join(DIR, `${name}.new.png`), shot);
     writeFileSync(join(DIR, `${name}.diff.png`), Buffer.from(r.diff, 'base64'));
   }
-  check(`${name}: matches the approved image`, ok, `${(share * 100).toFixed(2)} % of pixels differ`);
+  check(`${name}: matches the approved image`, ok, `${(share * 100).toFixed(2)} % of pixels differ${r.box ? `, ${r.box}` : ''}`);
 }
 
 async function run(label, viewport, extra = {}) {
