@@ -89,13 +89,13 @@
   ];
 
   const ACTION_LABELS = {
-    accept_terms: 'Accettazione di termini e condizioni',
-    subscribe: 'Attivazione di un abbonamento',
-    purchase: 'Acquisto',
-    sign: 'Firma di un documento',
-    signup: 'Creazione di un account',
-    consent: 'Consenso al trattamento dei dati',
-    oauth: 'Autorizzazione di accesso',
+    accept_terms: 'acceptingTermsConditions',
+    subscribe: 'startingSubscription',
+    purchase: 'purchase',
+    sign: 'signingDocument',
+    signup: 'creatingAccount',
+    consent: 'consentDataProcessing',
+    oauth: 'accessAuthorisation',
   };
 
   /**

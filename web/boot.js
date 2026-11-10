@@ -4,6 +4,7 @@
  * offline too (the analysis itself, of course, needs the network).
  */
 import '../src/background/service-worker.js';
+import { tIn, resolveLang } from '../src/i18n/index.js';
 
 await chrome.runtime.__ready();
 
@@ -39,20 +40,14 @@ if ('launchQueue' in window) {
 }
 
 // ── the empty panel, right of the text, says what will appear ─────────────
+// The web app follows the browser language until the panel loads the user's choice.
+const LANG = resolveLang('auto', navigator.language || 'it');
+const tw = (key) => tIn(LANG, key);
 const W = {
-  it: { ph: ['Il risultato compare qui', 'Quanto paghi davvero, entro quando disdire, le clausole che ti impegnano con la frase esatta del contratto.'],
-    hi: 'Benvenuto in AnteFirma', steps: ['Incolla le condizioni o trascina il PDF del contratto.', 'In pochi secondi vedi quanto paghi davvero, entro quando disdire, come si esce.', 'Registra l’impegno: la scadenza va nel calendario, la lettera di disdetta è già scritta.'],
-    note: 'Niente account: i tuoi dati restano su questo computer. L’estensione per Chrome ed Edge (gennaio 2027) fa anche di più: ferma il click sui siti prima che ti impegni.',
-    sample: 'Prova con un esempio', paste: 'Incolla il mio contratto' },
-  en: { ph: ['The result appears here', 'What you really pay, when to cancel by, the clauses that bind you with the exact sentence from the contract.'],
-    hi: 'Welcome to AnteFirma', steps: ['Paste the terms or drop the contract PDF.', 'In a few seconds you see what you really pay, when to cancel by, how to get out.', 'Record the commitment: the deadline goes into your calendar, the cancellation letter is already written.'],
-    note: 'No account: your data stays on this computer. The extension for Chrome and Edge (January 2027) does even more: it stops the click on websites before you commit.',
-    sample: 'Try an example', paste: 'Paste my contract' },
-  es: { ph: ['El resultado aparece aquí', 'Cuánto pagas de verdad, hasta cuándo darte de baja, las cláusulas que te atan con la frase exacta del contrato.'],
-    hi: 'Bienvenido a AnteFirma', steps: ['Pega las condiciones o arrastra el PDF del contrato.', 'En unos segundos ves cuánto pagas de verdad, hasta cuándo darte de baja, cómo salir.', 'Guarda el compromiso: la fecha va al calendario, la carta de baja ya está escrita.'],
-    note: 'Sin cuenta: tus datos se quedan en este ordenador. La extensión para Chrome y Edge (enero de 2027) hace aún más: detiene el clic en las webs antes de que te comprometas.',
-    sample: 'Prueba con un ejemplo', paste: 'Pegar mi contrato' },
-}[(navigator.language || 'it').slice(0, 2)] || null;
+  ph: [tw('webPlaceholderTitle'), tw('webPlaceholderText')],
+  hi: tw('webWelcomeTitle'), steps: [tw('webWelcomeStep1'), tw('webWelcomeStep2'), tw('webWelcomeStep3')],
+  note: tw('webWelcomeNote'), sample: tw('webWelcomeSample'), paste: tw('webWelcomePaste'),
+};
 const L2 = W || { ph: ['', ''] };
 const result = document.getElementById('result');
 if (result && W) {
@@ -64,7 +59,7 @@ if (result && W) {
 
 // ── welcome on first opening ────────────────────────────────────────────────
 let seen = false;
-try { seen = !!localStorage.getItem('af-web-welcome'); } catch { /* archivio non disponibile */ }
+try { seen = !!localStorage.getItem('af-web-welcome'); } catch { /* storage unavailable */ }
 if (W && !seen && document.getElementById('tab-analyze')) {
   const box = document.createElement('div');
   box.className = 'web-welcome';
@@ -74,7 +69,7 @@ if (W && !seen && document.getElementById('tab-analyze')) {
   box.innerHTML = `<div class="card"><h2 id="ww-t">${W.hi}</h2><ol>${W.steps.map((x) => `<li>${x}</li>`).join('')}</ol><p class="note">${W.note}</p>
     <div class="acts"><button class="go" data-w="sample">${W.sample}</button><button data-w="paste">${W.paste}</button></div></div>`;
   const close = (what) => {
-    try { localStorage.setItem('af-web-welcome', '1'); } catch { /* idem */ }
+    try { localStorage.setItem('af-web-welcome', '1'); } catch { /* same */ }
     box.remove();
     if (what === 'sample') { const go = () => (window.__afSample ? window.__afSample('gym') : setTimeout(go, 100)); go(); }
     else document.getElementById('paste-text')?.focus();

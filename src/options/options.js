@@ -10,18 +10,18 @@ import { helpUrl } from '../core/help.js';
 const $ = (s) => document.querySelector(s);
 
 const AREA_HINTS = {
-  money: 'Abbonamenti, rinnovi, penali, costi nascosti.',
-  privacy: 'Condivisione dati, profilazione, conservazione.',
-  ip: 'Licenze sui tuoi contenuti, cessioni di diritti, uso per addestrare AI.',
-  freelance: 'Lavori che vendi: foto, testi, codice, progetti.',
-  business: 'Dati e documenti dell’azienda, responsabilità, riservatezza.',
-  minors: 'Account e dati di figli o familiari minorenni.',
-  identity: 'Chiusura arbitraria dell’account, rinuncia a diritti, foro estero.',
+  money: 'subscriptionsRenewalsFeesHiddenCosts',
+  privacy: 'dataSharingProfilingRetention',
+  ip: 'licencesContentTransfersRightsUseTrain',
+  freelance: 'workSellPhotosWritingCodeProjects',
+  business: 'companyDataDocumentsLiabilityConfidentiality',
+  minors: 'accountsDataChildrenUnderageRelatives',
+  identity: 'arbitraryAccountClosureWaivedRightsForeign',
 };
 
 async function send(type, payload) {
   const res = await chrome.runtime.sendMessage({ type, payload });
-  if (!res) throw new Error(t('Nessuna risposta dal motore.'));
+  if (!res) throw new Error(t('noReplyFromEngine'));
   if (!res.ok) throw new Error(res.error);
   return res.result;
 }
@@ -76,10 +76,10 @@ function showConsent(at) {
   const box = $('#consent-box');
   if (at) {
     box.className = 'key-status ok';
-    box.textContent = t('Hai acconsentito all’analisi il {d}.', { d: new Date(at).toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' }) });
+    box.textContent = t('consentedAnalysisD', { d: new Date(at).toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' }) });
   } else {
     box.className = 'key-status';
-    box.textContent = t('Non hai ancora acconsentito: te lo chiederò alla prima analisi.');
+    box.textContent = t('havenTConsentedYetILl');
   }
   $('#grant-consent').hidden = Boolean(at);
   $('#revoke-consent').hidden = !at;
@@ -90,10 +90,10 @@ async function showServerStatus() {
   const el = $('#server-status');
   try {
     const st = await send('SERVER_STATUS');
-    el.textContent = st.ok ? t('raggiungibile') : t('non raggiungibile in questo momento');
+    el.textContent = st.ok ? t('reachable') : t('notReachableRightNow');
     el.style.color = st.ok ? '#14603c' : '#a12a1a';
   } catch (err) {
-    el.textContent = t('non verificabile: {x}', { x: err.message });
+    el.textContent = t('canTCheckX', { x: err.message });
   }
 }
 
@@ -125,9 +125,9 @@ async function save() {
     });
     // Language changed: the page is redrawn in the new one.
     if ($('#uiLang').value !== initialLang) { location.reload(); return; }
-    flash(t('Salvato ✓'));
+    flash(t('saved'));
   } catch (err) {
-    flash(t('Errore: {x}', { x: err.message }));
+    flash(t('errorX', { x: err.message }));
   } finally {
     btn.disabled = false;
   }
@@ -145,7 +145,7 @@ function flash(message) {
 
 // ── piano ───────────────────────────────────────────────────────────────────
 
-const PLAN_NAMES = { free: 'Gratuito', pro: 'Pro', max: 'Max', team: 'Team' };
+const PLAN_NAMES = { free: 'free', pro: 'Pro', max: 'Max', team: 'Team' };
 const planName = (p) => (PLAN_NAMES[p] ? t(PLAN_NAMES[p]) : p);
 const day = (iso) => (iso ? new Date(iso).toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' }) : '');
 
@@ -158,16 +158,16 @@ function planStatus(text, ok) {
 
 async function showPlan() {
   let lic;
-  try { lic = await send('GET_LICENSE'); } catch (err) { $('#plan-summary').textContent = t('Piano non verificabile: {x}', { x: err.message }); return; }
+  try { lic = await send('GET_LICENSE'); } catch (err) { $('#plan-summary').textContent = t('canTCheckPlanX', { x: err.message }); return; }
   if (lic.notice) showNotice(lic.notice);
   if (lic.error) { $('#plan-summary').textContent = lic.message; $('#plan-buy').hidden = lic.error === 'billing_off'; return; }
   const m = lic.quota?.month;
-  const left = m ? ' ' + t('Restano {a} analisi su {b} questo mese.', { a: m.remaining, b: m.limit }) : '';
+  const left = m ? ' ' + t('bAnalysesLeftMonth', { a: m.remaining, b: m.limit }) : '';
   if (lic.plan === 'free') {
-    $('#plan-summary').textContent = t('Piano gratuito.') + left;
+    $('#plan-summary').textContent = t('freePlan') + left;
   } else {
-    const when = lic.cancelAt ? ' ' + t('Disdetto: resta attivo fino al {d}.', { d: day(lic.cancelAt) }) : lic.periodEnd ? ' ' + t('Rinnovo il {d}.', { d: day(lic.periodEnd) }) : '';
-    const where = lic.activations ? ' ' + t('Attivo su {a} browser su {b}.', { a: lic.activations.used, b: lic.activations.limit }) : '';
+    const when = lic.cancelAt ? ' ' + t('cancelledStaysActiveUntilD', { d: day(lic.cancelAt) }) : lic.periodEnd ? ' ' + t('renewsD', { d: day(lic.periodEnd) }) : '';
+    const where = lic.activations ? ' ' + t('activeBBrowsers', { a: lic.activations.used, b: lic.activations.limit }) : '';
     $('#plan-summary').textContent = `${planName(lic.plan)}.${left}${where}${when}`;
   }
   const paid = lic.plan !== 'free';
@@ -181,29 +181,29 @@ document.querySelectorAll('#plan-buy [data-plan]').forEach((b) => b.addEventList
   try {
     const r = await send('START_CHECKOUT', { plan: b.dataset.plan });
     if (r.error) planStatus(r.message, false);
-    else planStatus(t('Pagina di pagamento aperta. Quando hai finito, torna qui: il piano compare da solo.'), true);
+    else planStatus(t('paymentPageOpenedWhenReDone'), true);
   } catch (err) { planStatus(err.message, false); }
   b.disabled = false;
 }));
 
 $('#plan-activate').addEventListener('click', async () => {
   const key = $('#plan-key').value.trim();
-  if (!key) { planStatus(t('Scrivi la chiave.'), false); return; }
+  if (!key) { planStatus(t('typeKey'), false); return; }
   try {
     const r = await send('ACTIVATE_LICENSE', { key });
     if (r.error) { planStatus(r.message, false); return; }
     $('#plan-key').value = '';
-    planStatus(t('Chiave attivata: {x} su questo browser.', { x: planName(r.plan) }), true);
+    planStatus(t('keyActivatedXBrowser', { x: planName(r.plan) }), true);
     showPlan();
   } catch (err) { planStatus(err.message, false); }
 });
 
 $('#plan-remove').addEventListener('click', async () => {
-  if (!confirm(t('Togliere il piano da questo browser? La chiave resta valida e puoi usarla su un altro browser.'))) return;
+  if (!confirm(t('removePlanFromBrowserKeyStays'))) return;
   try {
     const r = await send('DEACTIVATE_LICENSE');
     if (r.error) { planStatus(r.message, false); return; }
-    planStatus(t('Piano tolto da questo browser.'), true);
+    planStatus(t('planRemovedFromBrowser'), true);
     showPlan();
   } catch (err) { planStatus(err.message, false); }
 });
@@ -225,7 +225,7 @@ async function showInstallId() {
   try {
     const { installId } = await send('GET_INSTALL_ID');
     $('#install-id').textContent = installId;
-    $('#copy-install-id').addEventListener('click', () => navigator.clipboard?.writeText(installId).then(() => flash(t('Codice copiato.'))));
+    $('#copy-install-id').addEventListener('click', () => navigator.clipboard?.writeText(installId).then(() => flash(t('codeCopied'))));
   } catch { $('#install-id').textContent = '—'; }
 }
 
@@ -243,9 +243,9 @@ document.addEventListener('change', (e) => {
   clearTimeout(autoTimer);
   autoTimer = setTimeout(save, 250);
 });
-$('#uiLang').addEventListener('change', () => { $('#save-status').textContent = t('Premi Salva per cambiare lingua'); });
+$('#uiLang').addEventListener('change', () => { $('#save-status').textContent = t('pressSaveChangeLanguage'); });
 document.addEventListener('input', (e) => {
-  if (e.target.matches?.(AUTO) && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'checkbox') $('#save-status').textContent = t('Modifiche non salvate');
+  if (e.target.matches?.(AUTO) && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'checkbox') $('#save-status').textContent = t('unsavedChanges');
 });
 
 $('#grant-consent').addEventListener('click', async () => {
@@ -256,17 +256,17 @@ $('#grant-consent').addEventListener('click', async () => {
 $('#revoke-consent').addEventListener('click', async () => {
   await send('REVOKE_CONSENT');
   showConsent(null);
-  flash(t('Consenso ritirato: nessun testo partirà più verso il server.'));
+  flash(t('consentWithdrawnNoTextWillSent'));
 });
 
 $('#clear-cache').addEventListener('click', async () => {
   await send('CLEAR_CACHE');
-  flash(t('Cache svuotata.'));
+  flash(t('cacheCleared'));
 });
 
 $('#clear-history').addEventListener('click', async () => {
   await send('CLEAR_HISTORY');
-  flash(t('Storico cancellato.'));
+  flash(t('historyDeleted'));
 });
 
 // The data backup: a JSON file, without the installation identity or the licence.
@@ -278,7 +278,7 @@ $('#export-data').addEventListener('click', async () => {
     a.download = `antefirma-dati-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-    flash(t('Dati scaricati.'));
+    flash(t('dataDownloaded'));
   } catch (err) { flash(err.message); }
 });
 $('#import-data').addEventListener('click', () => $('#import-file').click());
@@ -288,23 +288,23 @@ $('#import-file').addEventListener('change', async (e) => {
   if (!file) return;
   try {
     const r = await send('IMPORT_DATA', JSON.parse(await file.text()));
-    flash(t('Caricati {a} impegni e {b} voci di storico. Quelli già presenti restano.', { a: r.commitments, b: r.history }));
+    flash(t('loadedCommitmentsBHistoryEntriesExisting', { a: r.commitments, b: r.history }));
     load();
-  } catch (err) { flash(err instanceof SyntaxError ? t('Il file non è una copia di AnteFirma.') : err.message); }
+  } catch (err) { flash(err instanceof SyntaxError ? t('fileNotAntefirmaBackup') : err.message); }
 });
 
 /** The web version: no firewall, so other headings and another explanation of the analysis. */
 function adaptForWeb() {
   if (document.documentElement.dataset.web !== '1') return;
   const prot = $('#enabled')?.closest('section')?.querySelector('h2');
-  if (prot) prot.textContent = t('Lingua e paese');
+  if (prot) prot.textContent = t('languageCountry');
   const lead = $('#consent-box')?.closest('section')?.querySelector('p.lead');
-  if (lead) lead.textContent = t('Quando premi «Analizza», AnteFirma manda il testo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic). Il server risponde con le clausole che ti impegnano, ciascuna con la frase esatta del testo, e scarta ogni avviso la cui frase non c’è.');
+  if (lead) lead.textContent = t('whenPressAnalyseAntefirmaSendsText');
   // Web version reminders are browser notifications: they need permission and an open window.
   const rem = $('#reminders');
   rem?.addEventListener('change', () => { if (rem.checked && 'Notification' in self && Notification.permission === 'default') Notification.requestPermission(); });
   const em = rem?.closest('label')?.querySelector('em');
-  if (em) em.textContent = t('Notifiche a 30, 7 e 1 giorno, quando AnteFirma è aperta. Per non perderle, metti la scadenza anche in calendario.');
+  if (em) em.textContent = t('notifications3071DayBefore2');
 }
 
 if (new URLSearchParams(location.search).has('welcome')) {
@@ -318,7 +318,7 @@ if (new URLSearchParams(location.search).has('welcome')) {
 function addToc() {
   const nav = document.createElement('nav');
   nav.className = 'toc';
-  nav.setAttribute('aria-label', t('Sezioni'));
+  nav.setAttribute('aria-label', t('sections'));
   const links = [];
   for (const sec of document.querySelectorAll('section.card')) {
     const h = sec.querySelector('h2');
@@ -347,7 +347,7 @@ function addHelpLinks() {
     const a = document.createElement('a');
     a.className = 'help-q'; a.textContent = '?'; a.target = '_blank'; a.rel = 'noopener';
     a.href = helpUrl(h.dataset.help, getLang());
-    a.title = a.ariaLabel = t('Aiuto: {s}', { s: h.textContent.trim() });
+    a.title = a.ariaLabel = t('helpS', { s: h.textContent.trim() });
     h.append(' ', a);
   }
 }
@@ -361,7 +361,7 @@ let initialLang = 'auto';
     setLang(resolveLang(initialLang, chrome.i18n.getUILanguage()));
   } catch { /* resta l'italiano */ }
   translateDom(document.body);
-  document.title = t('AnteFirma — Impostazioni');
+  document.title = t('antefirmaSettings');
   adaptForWeb();
   addHelpLinks();
   addToc();

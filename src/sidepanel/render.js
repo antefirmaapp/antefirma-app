@@ -38,11 +38,11 @@ export function renderVerdict(v) {
       <div class="head">
         <span class="badge">${esc(level.icon || '')} ${esc(level.label || '')}</span>
         <h2>${esc(v.headline || level.headline || '')}</h2>
-        ${v.host || v.engine?.cached || v.cached ? `<div class="meta">${[v.host ? esc(v.host) : '', v.engine?.cached || v.cached ? esc(t('da cache')) : ''].filter(Boolean).join(' · ')}</div>` : ''}
+        ${v.host || v.engine?.cached || v.cached ? `<div class="meta">${[v.host ? esc(v.host) : '', v.engine?.cached || v.cached ? esc(t('fromCache')) : ''].filter(Boolean).join(' · ')}</div>` : ''}
       </div>
       <div class="content">
         ${v.engine?.notice ? `<div class="status" style="margin-bottom:10px">${esc(v.engine.notice[getLang()] || v.engine.notice.it)}</div>` : ''}
-        ${v.engine?.truncated ? `<div class="status error" style="margin-bottom:10px">${esc(t('La pagina era molto lunga: è stata analizzata solo in parte.'))}</div>` : ''}
+        ${v.engine?.truncated ? `<div class="status error" style="margin-bottom:10px">${esc(t('pageWasVeryLongOnlyPart'))}</div>` : ''}
         ${renderCost(cost)}
         ${v.mustRemember ? `<div class="remember">📌 ${esc(v.mustRemember)}</div>` : ''}
         ${v.summary ? `<p class="summary">${esc(v.summary)}</p>` : ''}
@@ -52,7 +52,7 @@ export function renderVerdict(v) {
         ${renderLaw(consumer)}
         ${renderDebug(v)}
       </div>
-      <div class="disclaimer">${esc(consumer.disclaimer || t('Analisi automatica a scopo informativo. Non è un parere legale.'))}</div>
+      <div class="disclaimer">${esc(consumer.disclaimer || t('automaticAnalysisInformationOnlyNotLegal'))}</div>
     </div>
   `;
 }
@@ -62,7 +62,7 @@ function renderCost(cost) {
     if (!cost.displayed) return '';
     return `<div class="cost-box">
       <div class="amount">${esc(cost.displayed)}</div>
-      <div class="cap">${esc(t('prezzo rilevato · nessun impegno pluriennale identificato nel testo'))}</div>
+      <div class="cap">${esc(t('priceFoundNoMultiYearCommitment'))}</div>
     </div>`;
   }
   const formula = (cost.lines || [])
@@ -70,7 +70,7 @@ function renderCost(cost) {
     .join('  +  ');
   return `<div class="cost-box">
     <div class="amount">${esc(cost.worstCaseLabel)}</div>
-    <div class="cap">${esc(t('impegno economico potenziale stimato'))}${cost.displayed ? ` · ${esc(t('prezzo mostrato: {x}', { x: cost.displayed }))}` : ''}</div>
+    <div class="cap">${esc(t('estimatedPotentialFinancialCommitment'))}${cost.displayed ? ` · ${esc(t('priceShownX', { x: cost.displayed }))}` : ''}</div>
     ${formula ? `<div class="formula">${esc(formula)}${cost.horizonReason ? ` · ${esc(cost.horizonReason)}` : ''}</div>` : ''}
     ${cost.explanation ? `<div class="formula">${esc(cost.explanation)}</div>` : ''}
   </div>`;
@@ -102,12 +102,12 @@ export function mergeByQuote(findings) {
 function renderFindings(list) {
   const findings = mergeByQuote(list);
   if (!findings.length) return '';
-  return `<h3 class="section">${esc(t('Cosa stai accettando'))}</h3>
+  return `<h3 class="section">${esc(t('whatReAccepting'))}</h3>
     ${findings
       .map((f) => {
         const tags = [];
-        if (f.personalized && f.personalReasons?.length) tags.push(t('rilevante per: {x}', { x: f.personalReasons.join(', ') }));
-        if (f.quotes?.length) tags.push(t('citata in {n} punti', { n: f.quotes.length + 1 }));
+        if (f.personalized && f.personalReasons?.length) tags.push(t('relevantX', { x: f.personalReasons.join(', ') }));
+        if (f.quotes?.length) tags.push(t('quotedNPlaces', { n: f.quotes.length + 1 }));
         return `<div class="finding" style="--sev-color:${sevColor(f.severity)}">
           <div class="top">
             <span class="name">${esc(f.title || f.label)}</span>
@@ -122,7 +122,7 @@ function renderFindings(list) {
 
 function renderTimeline(timeline) {
   if (timeline.length < 2) return '';
-  return `<h3 class="section">${esc(t('Che cosa succede se accetti'))}</h3>
+  return `<h3 class="section">${esc(t('whatHappensIfAccept'))}</h3>
     <div class="timeline">
       ${timeline
         .map(
@@ -137,7 +137,7 @@ function renderTimeline(timeline) {
 
 function renderConsequences(list) {
   if (!list.length) return '';
-  return `<h3 class="section">${esc(t('In pratica'))}</h3>
+  return `<h3 class="section">${esc(t('practice'))}</h3>
     <ul style="margin:0 0 12px;padding-left:18px;font-size:12.5px;line-height:1.55">
       ${list.map((c) => `<li>${esc(c)}</li>`).join('')}
     </ul>`;
@@ -147,8 +147,8 @@ function renderLaw(consumer) {
   if (!consumer.flags?.length) return '';
   return `<details>
     <summary>${esc(consumer.jurisdiction === 'IT'
-      ? tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele italiane', '{n} condizioni da verificare rispetto alle tutele italiane')
-      : tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele UE', '{n} condizioni da verificare rispetto alle tutele UE'))}</summary>
+      ? tn(consumer.flags.length, 'nTermCheckAgainstItalianConsumer', 'nTermsCheckAgainstItalianConsumer')
+      : tn(consumer.flags.length, 'nTermCheckAgainstEuConsumer', 'nTermsCheckAgainstEuConsumer'))}</summary>
     ${consumer.flags
       .map(
         (f) => `<div class="law">
@@ -164,13 +164,13 @@ function renderLaw(consumer) {
 function renderDebug(v) {
   const e = v.engine || {};
   return `<details>
-    <summary>${esc(t('Dettagli tecnici dell’analisi'))}</summary>
+    <summary>${esc(t('technicalDetailsAnalysis'))}</summary>
     <div class="small muted" style="line-height:1.7;padding:4px 0">
-      ${esc(t('Caratteri analizzati: {n}', { n: e.textLength ?? '—' }))}<br>
-      ${esc(t('Citazioni scartate perché assenti dal testo: {n}', { n: e.dropped ?? 0 }))}<br>
-      ${esc(t('Componenti: base {a} · pressione economica {b} · tutele consumer {c}', { a: v.components?.base ?? '—', b: v.components?.money ?? '—', c: v.components?.euBoost ?? '—' }))}<br>
-      ${esc(t('Modello: {x}', { x: e.model || '—' }))}<br>
-      ${esc(t('Durata: {n} ms', { n: e.durationMs ?? '—' }))}
+      ${esc(t('charactersAnalysedN', { n: e.textLength ?? '—' }))}<br>
+      ${esc(t('quotesDroppedBecauseMissingFromText', { n: e.dropped ?? 0 }))}<br>
+      ${esc(t('componentsBaseFinancialPressureBConsumer', { a: v.components?.base ?? '—', b: v.components?.money ?? '—', c: v.components?.euBoost ?? '—' }))}<br>
+      ${esc(t('modelX', { x: e.model || '—' }))}<br>
+      ${esc(t('durationNMs', { n: e.durationMs ?? '—' }))}
     </div>
   </details>`;
 }

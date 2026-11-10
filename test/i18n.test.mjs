@@ -1,16 +1,22 @@
 /**
- * Languages: every sentence passed to t()/tn() in the code and every text of
- * the HTML pages has its English and Spanish translation, with the same
- * placeholders. A forgotten sentence would stay in Italian for whoever uses the
- * extension in another language.
+ * Languages. Code refers to texts by id (`t('goBack')`); the texts live in
+ * src/i18n/locales/{it,en,es}.json. These tests make sure that:
+ * - every id used in the code exists, in all three languages;
+ * - the three files have exactly the same ids and the same placeholders;
+ * - messages.js is up to date with the JSON files;
+ * - every text of the HTML pages (written in Italian) has an id;
+ * - no id is left unused.
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { t, setLang, resolveLang } from '../src/i18n/index.js';
+import { t, tn, tIn, setLang, resolveLang } from '../src/i18n/index.js';
+import { buildMessages } from '../tools/i18n-build.mjs';
 
-const dict = globalThis.AF_I18N.dict;
+const LANGS = ['it', 'en', 'es'];
+const L = Object.fromEntries(LANGS.map((l) => [l, JSON.parse(readFileSync(`src/i18n/locales/${l}.json`, 'utf8'))]));
+const ids = Object.keys(L.it);
 
 function files(dir, ext) {
   return readdirSync(dir).flatMap((f) => {
@@ -18,51 +24,67 @@ function files(dir, ext) {
     return statSync(p).isDirectory() ? files(p, ext) : p.endsWith(ext) ? [p] : [];
   });
 }
+const SOURCES = [...files('src', '.js'), ...files('web', '.js')].filter((f) => !f.includes('src/i18n/'));
+const code = Object.fromEntries(SOURCES.map((f) => [f, readFileSync(f, 'utf8')]));
 
-/** The literal sentences inside t('…') and tn(n, '…', '…'). */
-function keysIn(src) {
+/** The ids inside t('…'), tn(n, '…', '…') and tIn(lang, '…'). */
+function idsIn(src) {
   const out = [];
-  const str = String.raw`'((?:[^'\\]|\\.)*)'`;
-  for (const m of src.matchAll(new RegExp(String.raw`\bt\(\s*` + str, 'g'))) out.push(m[1]);
-  for (const m of src.matchAll(new RegExp(String.raw`\btn\([^,]+,\s*` + str + String.raw`\s*,\s*` + str, 'g'))) out.push(m[1], m[2]);
-  return out.map((s) => s.replace(/\\'/g, "'"));
+  for (const m of src.matchAll(/\bt\(\s*'([A-Za-z0-9]+)'/g)) out.push(m[1]);
+  for (const m of src.matchAll(/\btn\([^,]+,\s*'([A-Za-z0-9]+)'\s*,\s*'([A-Za-z0-9]+)'/g)) out.push(m[1], m[2]);
+  for (const m of src.matchAll(/\b(?:tIn|tw)\([^)]*?'([A-Za-z0-9]+)'/g)) out.push(m[1]);
+  return out;
 }
-
 const vars = (s) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort().join(',');
 
-test('every sentence in the code has an English and a Spanish translation', () => {
+test('every id used in the code exists in the locale files', () => {
   const missing = [];
-  for (const f of files('src', '.js')) {
-    if (f.includes('i18n')) continue;
-    for (const k of keysIn(readFileSync(f, 'utf8'))) if (!dict[k]) missing.push(`${f}: ${k}`);
-  }
+  for (const [f, src] of Object.entries(code)) for (const id of idsIn(src)) if (!(id in L.it)) missing.push(`${f}: ${id}`);
   assert.deepEqual(missing, []);
 });
 
-test('translations have the same placeholders as the Italian', () => {
+test('it, en and es have the same ids, non-empty texts and the same placeholders', () => {
+  for (const l of ['en', 'es']) assert.deepEqual(Object.keys(L[l]).sort(), [...ids].sort(), `${l}.json ids differ from it.json`);
   const bad = [];
-  for (const [k, [en, es]] of Object.entries(dict)) {
-    if (!en || !es) bad.push(`vuota: ${k}`);
-    else if (vars(en) !== vars(k) || vars(es) !== vars(k)) bad.push(k);
+  for (const id of ids) {
+    for (const l of LANGS) if (!String(L[l][id] || '').trim()) bad.push(`${l}: ${id} empty`);
+    if (vars(L.en[id]) !== vars(L.it[id]) || vars(L.es[id]) !== vars(L.it[id])) bad.push(`placeholders: ${id}`);
   }
   assert.deepEqual(bad, []);
 });
 
-test('t(): language, placeholders, fallback to Italian', () => {
+test('ids are English camelCase', () => {
+  assert.deepEqual(ids.filter((id) => !/^[a-z][A-Za-z0-9]*$/.test(id)), []);
+});
+
+test('messages.js is generated from the current locale files', () => {
+  assert.equal(readFileSync('src/i18n/messages.js', 'utf8'), buildMessages(), 'run node tools/i18n-build.mjs');
+});
+
+test('every id is used somewhere (code, vocabularies or HTML pages)', () => {
+  const all = Object.values(code).join('\n');
+  const html = ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html'].map((f) => readFileSync(f, 'utf8').replace(/&#10;/g, ' ').replace(/\s+/g, ' ')).join('\n');
+  const unused = ids.filter((id) => { const v = L.it[id].replace(/\s+/g, ' '); return !all.includes(`'${id}'`) && !html.includes(v.replace(/&/g, '&amp;')) && !html.includes(v); });
+  assert.deepEqual(unused, []);
+});
+
+test('t(), tn(), tIn(): language, placeholders, fallbacks', () => {
   setLang('en');
-  assert.equal(t('Disdici entro {n} giorni', { n: 5 }), 'Cancel within 5 days');
-  assert.equal(t('frase che non esiste'), 'frase che non esiste');
+  assert.equal(t('cancelWithinNDays', { n: 5 }), 'Cancel within 5 days');
+  assert.equal(t('noSuchId'), 'noSuchId');
+  assert.equal(tn(1, 'nDay', 'nDays2'), '1 day');
   setLang('es');
-  assert.equal(t('Torna indietro'), 'Volver atrás');
+  assert.equal(t('goBack'), 'Volver atrás');
+  assert.equal(tIn('it', 'goBack'), 'Torna indietro');
   setLang('xx');
-  assert.equal(t('Torna indietro'), 'Torna indietro');
+  assert.equal(t('goBack'), 'Torna indietro');
   assert.equal(resolveLang('auto', 'es-ES'), 'es');
   assert.equal(resolveLang('auto', 'de-DE'), 'en');
   assert.equal(resolveLang('it', 'en-US'), 'it');
   setLang('it');
 });
 
-test('labels and texts of the vocabularies have translations', async () => {
+test('labels and texts of the vocabularies are ids with translations', async () => {
   const { RISK_CATEGORIES, LEVELS, ACTION_LABELS, PROTECTION_LABELS } = await import('../src/core/constants.js');
   const { LETTER_LABELS } = await import('../src/core/letter.js');
   const { runConsumerChecks } = await import('../src/core/eu.js');
@@ -75,12 +97,13 @@ test('labels and texts of the vocabularies have translations', async () => {
   const text = 'arbitrato foro competente rinuncia azioni collettive modifica unilaterale responsabilità nessun rimborso rinnovo tacito vendita dati terze parti addestrare';
   const findings = Object.keys(RISK_CATEGORIES).map((category) => ({ category, severity: 50 }));
   const r = runConsumerChecks({ text, findings, ctx: { form: { bundledConsent: true, precheckedConsents: 1 } }, cost: { notice: { months: 3 }, hasAutoRenewal: true }, actionType: 'purchase', jurisdiction: 'IT' });
-  all.push(r.disclaimer, ...r.flags.flatMap((f) => [f.title, f.note]));
-  const missing = all.filter((s) => s && !dict[s]);
-  assert.deepEqual(missing, []);
+  assert.deepEqual(all.filter((s) => s && !(s in L.it)), []);
+  // The consumer checks come back already translated (current language: Italian).
+  const texts = new Set(Object.values(L.it));
+  assert.deepEqual([r.disclaimer, ...r.flags.flatMap((f) => [f.title, f.note])].filter((s) => s && !texts.has(s)), []);
 });
 
-test('the HTML pages\' texts have translations', () => {
+test('the HTML pages\' texts all have an id', () => {
   const missing = [];
   const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|https?:\/\/\S+)$/;
   for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html']) {
@@ -89,7 +112,7 @@ test('the HTML pages\' texts have translations', () => {
       ...[...html.matchAll(/>([^<>]+)</g)].map((m) => m[1]),
       ...[...html.matchAll(/\s(?:placeholder|title|aria-label|alt)="([^"]+)"/g)].map((m) => m[1]),
     ].map((s) => s.replace(/\s+/g, ' ').trim()).filter((s) => /[A-Za-zÀ-ú]{2,}/.test(s) && !skip.test(s));
-    for (const s of texts) if (!dict[s.replace(/&amp;/g, '&')]) missing.push(`${f}: ${s}`);
+    for (const s of texts) if (!globalThis.AF_I18N.idOf(s.replace(/&amp;/g, '&'))) missing.push(`${f}: ${s}`);
   }
   assert.deepEqual(missing, []);
 });

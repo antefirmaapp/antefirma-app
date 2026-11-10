@@ -503,28 +503,28 @@
         <div class="card" style="--level-color:#6b7280">
           <div class="bar"></div>
           <header>
-            <div class="eyebrow"><span>${esc(actionLabel || t('Azione in sospeso'))}</span></div>
-            <h1 id="v-title" role="status">${esc(t('Sto leggendo le condizioni…'))}</h1>
+            <div class="eyebrow"><span>${esc(actionLabel || t('actionHold'))}</span></div>
+            <h1 id="v-title" role="status">${esc(t('readingTerms'))}</h1>
             ${preview.host ? `<p class="action">${esc(preview.host)}</p>` : ''}
           </header>
           <div class="body">
             <div class="tiles">
-              ${tile(t('Quanto paghi davvero'), null)}
-              ${tile(t('Fino a quando'), null)}
-              ${tile(t('Se esci prima'), null)}
+              ${tile(t('whatReallyPay'), null)}
+              ${tile(t('untilWhen'), null)}
+              ${tile(t('ifLeaveEarly'), null)}
             </div>
-            ${preview.price ? `<p class="summary">${esc(t('Prezzo mostrato in pagina: {x}', { x: preview.price }))}</p>` : ''}
+            ${preview.price ? `<p class="summary">${esc(t('priceShownPageX', { x: preview.price }))}</p>` : ''}
             <div class="skel line"></div><div class="skel line short"></div>
-            <p class="armhint">${esc(t('Il click è in pausa per qualche secondo: puoi anche continuare senza aspettare.'))}</p>
+            <p class="armhint">${esc(t('clickPausedFewSecondsCanAlso'))}</p>
           </div>
           <footer>
-            <button class="link" data-act="cancel">${esc(t('Annulla'))}</button>
+            <button class="link" data-act="cancel">${esc(t('cancel'))}</button>
             <span class="spacer"></span>
-            <button class="proceed" data-act="proceed">${esc(t('Continua senza aspettare'))}</button>
+            <button class="proceed" data-act="proceed">${esc(t('continueWithoutWaiting'))}</button>
           </footer>
         </div>
       `,
-        { label: t('Verifica dell’impegno in corso') }
+        { label: t('checkingCommitment') }
       );
       this.bind();
     }
@@ -547,18 +547,18 @@
           <div class="card" style="--level-color:#15203A">
             <div class="bar"></div>
             <header>
-              <div class="eyebrow"><svg class="mark" viewBox="0 0 64 72" aria-hidden="true"><path d="M32 4 L55.5 10 C57.5 10.6 58.5 12.2 58.5 14.2 V34 C58.5 48.5 48.5 59.5 34.2 66.6 C33.3 67.1 30.7 67.1 29.8 66.6 C15.5 59.5 5.5 48.5 5.5 34 V14.2 C5.5 12.2 6.5 10.6 8.5 10 Z" fill="#FFE04A"/><path d="M32 6.6 L52.9 11.9 C54.9 12.4 55.9 13.8 55.9 15.5 V32.4 C55.9 46.4 46.6 56.4 33.9 62.7 C33.3 63.2 30.7 63.2 30.1 62.7 C17.4 56.4 8.1 46.4 8.1 32.4 V15.5 C8.1 13.8 9.1 12.4 11.1 11.9 Z" fill="#15203A"/><path d="M32 15.5V37.5M22.47 21L41.53 32M22.47 32L41.53 21" stroke="#FFE04A" stroke-width="6.4" stroke-linecap="round"/><path d="M19 49.5 C22 44 26 43.5 29 47 S34.5 52 38 47.5 S43 42.5 45 43" fill="none" stroke="#FFE04A" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="badge">AnteFirma</span><span>${esc(t('prima analisi'))}</span></div>
-              <h1 id="v-title">${esc(t('Posso leggere questa pagina per te?'))}</h1>
+              <div class="eyebrow"><svg class="mark" viewBox="0 0 64 72" aria-hidden="true"><path d="M32 4 L55.5 10 C57.5 10.6 58.5 12.2 58.5 14.2 V34 C58.5 48.5 48.5 59.5 34.2 66.6 C33.3 67.1 30.7 67.1 29.8 66.6 C15.5 59.5 5.5 48.5 5.5 34 V14.2 C5.5 12.2 6.5 10.6 8.5 10 Z" fill="#FFE04A"/><path d="M32 6.6 L52.9 11.9 C54.9 12.4 55.9 13.8 55.9 15.5 V32.4 C55.9 46.4 46.6 56.4 33.9 62.7 C33.3 63.2 30.7 63.2 30.1 62.7 C17.4 56.4 8.1 46.4 8.1 32.4 V15.5 C8.1 13.8 9.1 12.4 11.1 11.9 Z" fill="#15203A"/><path d="M32 15.5V37.5M22.47 21L41.53 32M22.47 32L41.53 21" stroke="#FFE04A" stroke-width="6.4" stroke-linecap="round"/><path d="M19 49.5 C22 44 26 43.5 29 47 S34.5 52 38 47.5 S43 42.5 45 43" fill="none" stroke="#FFE04A" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="badge">AnteFirma</span><span>${esc(t('firstAnalysis'))}</span></div>
+              <h1 id="v-title">${esc(t('canIReadPage'))}</h1>
             </header>
             <div class="body">
-              <p class="summary">${esc(t('Per dirti a che cosa ti stai impegnando, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic) e ti risponde con le clausole che ti impegnano, ciascuna con la frase esatta da cui nasce.'))}</p>
-              <p class="summary">${esc(t('Il server non conserva il testo né l’indirizzo. Nessun account, nessun dato che ti identifichi. Puoi ritirare il consenso quando vuoi dalle impostazioni.'))}</p>
+              <p class="summary">${esc(t('tellWhatReCommittingAntefirmaSends'))}</p>
+              <p class="summary">${esc(t('serverKeepsNeitherTextNorAddress'))}</p>
             </div>
             <footer>
-              <button class="cancel" data-act="cancel">${esc(t('Torna indietro'))}</button>
+              <button class="cancel" data-act="cancel">${esc(t('goBack'))}</button>
               <span class="spacer"></span>
-              <button class="link" data-consent="skip">${esc(t('Prosegui senza analisi'))}</button>
-              <button class="proceed" data-consent="accept">${esc(t('Sì, analizza'))}</button>
+              <button class="link" data-consent="skip">${esc(t('continueWithoutAnalysis'))}</button>
+              <button class="proceed" data-consent="accept">${esc(t('yesAnalyse'))}</button>
             </footer>
           </div>
         `,
@@ -610,26 +610,26 @@
       const months = cost.horizonMonths ? Math.round(cost.horizonMonths) : null;
       const tiles = [
         {
-          label: t('Quanto paghi davvero'),
-          value: cost.worstCaseLabel || cost.displayed || t('nessun costo trovato'),
-          sub: cost.worstCaseLabel && months ? tn(months, 'in {n} mese', 'in {n} mesi') : (cost.displayed && !cost.worstCaseLabel ? t('prezzo in pagina') : ''),
+          label: t('whatReallyPay'),
+          value: cost.worstCaseLabel || cost.displayed || t('noCostFound'),
+          sub: cost.worstCaseLabel && months ? tn(months, 'overNMonth', 'overNMonths') : (cost.displayed && !cost.worstCaseLabel ? t('pricePage') : ''),
           strong: !!cost.worstCaseLabel,
         },
         {
-          label: t('Fino a quando'),
-          value: deadline ? deadline.when : cost.hasAutoRenewal ? t('si rinnova da solo') : months ? tn(months, '{n} mese', '{n} mesi') : t('nessun vincolo trovato'),
-          sub: deadline ? t('ultimo giorno per disdire') : cost.hasAutoRenewal ? t('segna la scadenza') : '',
+          label: t('untilWhen'),
+          value: deadline ? deadline.when : cost.hasAutoRenewal ? t('renewsItself') : months ? tn(months, 'nMonth', 'nMonths') : t('noLockFound'),
+          sub: deadline ? t('lastDayCancel') : cost.hasAutoRenewal ? t('noteEndDate') : '',
         },
         {
-          label: t('Se esci prima'),
-          value: penaltyAmount != null ? money(penaltyAmount, cost.currency) : cost.penalty ? t('penale non quantificata') : findings.some((f) => f.category === 'no_refund') ? t('nessun rimborso') : t('nessuna penale trovata'),
-          sub: cost.penalty ? t('penale di recesso') : '',
+          label: t('ifLeaveEarly'),
+          value: penaltyAmount != null ? money(penaltyAmount, cost.currency) : cost.penalty ? t('feeNotStated') : findings.some((f) => f.category === 'no_refund') ? t('noRefund') : t('noFeeFound'),
+          sub: cost.penalty ? t('earlyTerminationFee2') : '',
         },
       ];
       const tilesBlock = `<div class="tiles">${tiles.map((x) => `<div class="tile${x.strong ? ' strong' : ''}"><div class="tlabel">${esc(x.label)}</div><div class="tvalue">${esc(x.value)}</div>${x.sub ? `<div class="tsub">${esc(x.sub)}</div>` : ''}</div>`).join('')}</div>
-        ${cost.displayed && cost.worstCaseLabel && cost.understated ? `<p class="displayed-note">${esc(t('In pagina vedi {x}.', { x: cost.displayed }))}</p>` : ''}`;
+        ${cost.displayed && cost.worstCaseLabel && cost.understated ? `<p class="displayed-note">${esc(t('pageSeeX', { x: cost.displayed }))}</p>` : ''}`;
       const chips = findings.length
-        ? `<ul class="chips" aria-label="${esc(t('Cosa stai accettando'))}">${findings.slice(0, 4).map((f) => `<li>${esc(f.title || f.label)}</li>`).join('')}${findings.length > 4 ? `<li class="more">+${findings.length - 4}</li>` : ''}</ul>`
+        ? `<ul class="chips" aria-label="${esc(t('whatReAccepting'))}">${findings.slice(0, 4).map((f) => `<li>${esc(f.title || f.label)}</li>`).join('')}${findings.length > 4 ? `<li class="more">+${findings.length - 4}</li>` : ''}</ul>`
         : '';
 
       const formula = cost.lines?.length
@@ -638,26 +638,26 @@
                .map(
                  (l) => `<li>
                    <span class="voce">${esc(l.label)}</span>
-                   <span class="cifra">${l.amount != null ? esc(money(l.amount, cost.currency)) : esc(t('importo non quantificato'))}</span>
+                   <span class="cifra">${l.amount != null ? esc(money(l.amount, cost.currency)) : esc(t('amountNotStated'))}</span>
                  </li>`
                )
                .join('')}
-             ${cost.worstCaseLabel ? `<li class="tot"><span class="voce">${esc(t('totale'))}</span><span class="cifra">${esc(cost.worstCaseLabel)}</span></li>` : ''}
+             ${cost.worstCaseLabel ? `<li class="tot"><span class="voce">${esc(t('total'))}</span><span class="cifra">${esc(cost.worstCaseLabel)}</span></li>` : ''}
            </ul>
            ${cost.horizonReason ? `<p class="horizon">${esc(cost.horizonReason)}</p>` : ''}`
         : '';
-      const costBlock = formula ? `<section><h2>${esc(t('Come si arriva alla cifra'))}</h2><div class="cost">${formula}</div></section>` : '';
+      const costBlock = formula ? `<section><h2>${esc(t('howWeGetFigure'))}</h2><div class="cost">${formula}</div></section>` : '';
 
       const head = findings.slice(0, FINDINGS_HEAD);
       const rest = findings.slice(FINDINGS_HEAD);
       const findingsBlock = findings.length
         ? `<section>
-             <h2>${esc(t('Cosa stai accettando'))}</h2>
+             <h2>${esc(t('whatReAccepting'))}</h2>
              <ul>${head.map(renderFinding).join('')}</ul>
              ${
                rest.length
                  ? `<details class="more">
-                      <summary>${esc(tn(rest.length, 'Altra {n} condizione', 'Altre {n} condizioni'))}</summary>
+                      <summary>${esc(tn(rest.length, 'nMoreTerm', 'nMoreTerms'))}</summary>
                       <ul style="margin-top:8px">${rest.map(renderFinding).join('')}</ul>
                     </details>`
                  : ''
@@ -672,7 +672,7 @@
         timeline.length > 1 || (timeline.length === 1 && KEY_STEPS.has(timeline[0]?.kind));
       const timelineBlock = showTimeline
         ? `<section>
-             <h2>${esc(t('Che cosa succede se clicchi'))}</h2>
+             <h2>${esc(t('whatHappensIfClick'))}</h2>
              <div class="timeline">
                ${timeline
                  .map(
@@ -689,8 +689,8 @@
       const lawBlock = consumer.flags?.length
         ? `<details>
              <summary>${esc(consumer.jurisdiction === 'IT'
-               ? tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele italiane per i consumatori', '{n} condizioni da verificare rispetto alle tutele italiane per i consumatori')
-               : tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele UE per i consumatori', '{n} condizioni da verificare rispetto alle tutele UE per i consumatori'))}</summary>
+               ? tn(consumer.flags.length, 'nTermCheckAgainstItalianConsumer2', 'nTermsCheckAgainstItalianConsumer2')
+               : tn(consumer.flags.length, 'nTermCheckAgainstEuConsumer2', 'nTermsCheckAgainstEuConsumer2'))}</summary>
              <div style="margin-top:10px">
                ${consumer.flags
                  .map(
@@ -715,14 +715,14 @@
       const left = q?.month?.remaining;
       const bigFind = cost.understated && (cost.worstCase || 0) >= 100;
       const upsellBlock = free && !verdict.cached && (left === 0 || left === 1 || bigFind)
-        ? `<div class="upsell soft"><p>${esc(left === 0 ? t('Era la tua ultima analisi gratuita del mese.') : left === 1 ? t('Ti resta un’analisi gratuita questo mese.') : t('AnteFirma ti ha appena mostrato {x} di impegno che in pagina non si vedeva.', { x: cost.worstCaseLabel }))}</p>
-             <button class="upgrade" type="button" data-upgrade>${esc(t('Passa a Pro · 50 analisi al mese'))}</button><p class="upsell-note" aria-live="polite"></p></div>`
+        ? `<div class="upsell soft"><p>${esc(left === 0 ? t('wasLastFreeAnalysisMonth') : left === 1 ? t('haveOneFreeAnalysisLeftMonth') : t('antefirmaJustShowedXCommitmentPage', { x: cost.worstCaseLabel }))}</p>
+             <button class="upgrade" type="button" data-upgrade>${esc(t('upgradePro50AnalysesMonth'))}</button><p class="upsell-note" aria-live="polite"></p></div>`
         : '';
       this.model = verdict.engine?.model || null;
       const n = verdict.engine?.notice;
       const noticeBlock = n ? `<div class="notice ${n.level === 'warn' ? 'warn' : ''}" role="note">${esc(n[I.lang] || n.it)}</div>` : '';
       const errorBlock = verdict.engine?.truncated
-        ? `<div class="error">${esc(t('La pagina era molto lunga: è stata analizzata solo in parte.'))}</div>`
+        ? `<div class="error">${esc(t('pageWasVeryLongOnlyPart'))}</div>`
         : '';
 
       this.render(
@@ -745,7 +745,7 @@
             ${chips}
             ${upsellBlock}
             <details class="why">
-              <summary>${esc(t('Perché? Clausole, frasi esatte e calcolo'))}</summary>
+              <summary>${esc(t('whyClausesExactSentencesCalculation'))}</summary>
               ${verdict.summary ? `<p class="summary">${esc(verdict.summary)}</p>` : ''}
               ${findingsBlock}
               ${costBlock}
@@ -755,26 +755,26 @@
           </div>
           <footer>
             ${trackable
-              ? `<button class="cancel alt" data-act="cancel">${esc(t('Torna indietro'))}</button>
-                 <button class="proceed main" data-act="track"${arm}>${esc(t('Continua e ricordami la disdetta'))}</button>`
-              : `<button class="cancel" data-act="cancel">${esc(blocking ? t('Torna indietro') : t('Annulla'))}</button>
-                 <button class="proceed" data-act="proceed"${arm}>${esc(t('Continua comunque'))}</button>`}
+              ? `<button class="cancel alt" data-act="cancel">${esc(t('goBack'))}</button>
+                 <button class="proceed main" data-act="track"${arm}>${esc(t('continueRemindMeCancel'))}</button>`
+              : `<button class="cancel" data-act="cancel">${esc(blocking ? t('goBack') : t('cancel'))}</button>
+                 <button class="proceed" data-act="proceed"${arm}>${esc(t('continueAnyway'))}</button>`}
             <span class="spacer"></span>
-            ${trackable ? `<button class="link" data-act="proceed">${esc(t('Continua senza promemoria'))}</button>` : ''}
+            ${trackable ? `<button class="link" data-act="proceed">${esc(t('continueWithoutReminder'))}</button>` : ''}
             <button class="link${(verdict.proceedCount || 0) >= 3 ? ' hint' : ''}" data-act="allowlist">${esc((verdict.proceedCount || 0) >= 3
-              ? t('Hai proseguito {n} volte qui: non avvisarmi più su {x}', { n: verdict.proceedCount, x: verdict.host || t('questo sito') })
-              : t('Non avvisarmi su {x}', { x: verdict.host || t('questo sito') }))}</button>
+              ? t('wentAheadNTimesHereStop', { n: verdict.proceedCount, x: verdict.host || t('site') })
+              : t('donTWarnMeX', { x: verdict.host || t('site') }))}</button>
           </footer>
           ${
             blocking
               ? `<p class="armhint">
-                   <span id="v-arm-why">${esc(t('Il pulsante per continuare si attiva fra un istante: il click che hai appena fatto è ancora in corso.'))}</span>
+                   <span id="v-arm-why">${esc(t('buttonContinueTurnsMomentClickJust'))}</span>
                    <span class="v-arm-live" role="status"></span>
                  </p>`
               : ''
           }
-          <div class="provenance">${esc((verdict.engine?.cached ? t('Analisi già fatta per questo testo') : t('Analisi automatica di AnteFirma')) + quotaNote(verdict))}</div>
-          <div class="disclaimer">${esc(consumer.disclaimer || t('Analisi automatica a scopo informativo. Non è un parere legale.'))} <a class="help" href="https://antefirma.app${{ en: '/en/help/the-warning/', es: '/es/ayuda/el-aviso/' }[I.lang] || '/aiuto/l-avviso/'}" target="_blank" rel="noopener">${esc(t('Come leggere l’avviso'))}</a></div>
+          <div class="provenance">${esc((verdict.engine?.cached ? t('analysisAlreadyDoneText') : t('automaticAnalysisAntefirma')) + quotaNote(verdict))}</div>
+          <div class="disclaimer">${esc(consumer.disclaimer || t('automaticAnalysisInformationOnlyNotLegal'))} <a class="help" href="https://antefirma.app${{ en: '/en/help/the-warning/', es: '/es/ayuda/el-aviso/' }[I.lang] || '/aiuto/l-avviso/'}" target="_blank" rel="noopener">${esc(t('howReadWarning'))}</a></div>
         </div>
       `,
         { role: 'alertdialog', labelledby: 'v-title' }
@@ -790,24 +790,24 @@
       // that the service is useful to them. The button opens the payment already
       // linked to this browser (or settings, for those who already have a plan).
       const upsell = code === 'quota_month'
-        ? `<div class="upsell"><button class="upgrade" type="button" data-upgrade>${esc(t('Passa a Pro · 50 analisi al mese'))}</button><p class="upsell-note" aria-live="polite"></p></div>`
+        ? `<div class="upsell"><button class="upgrade" type="button" data-upgrade>${esc(t('upgradePro50AnalysesMonth'))}</button><p class="upsell-note" aria-live="polite"></p></div>`
         : '';
       this.render(
         `
         <div class="card" style="--level-color:#b8860b;--level-ink:${ink.light};--level-ink-dark:${ink.dark};--badge-ink:${ink.badge}">
           <div class="bar"></div>
           <header>
-            <div class="eyebrow"><span class="badge">⚠️ ${esc(t('ANALISI NON RIUSCITA'))}</span></div>
-            <h1 id="v-title">${esc(t('Non sono riuscito a verificare questo impegno'))}</h1>
+            <div class="eyebrow"><span class="badge">⚠️ ${esc(t('analysisFailed'))}</span></div>
+            <h1 id="v-title">${esc(t('iCouldnTCheckCommitment'))}</h1>
           </header>
           <div class="body">
             <div class="error">${esc(message)}</div>
             ${upsell}
-            <p class="summary">${esc(t('Puoi procedere comunque, ma lo stai facendo senza verifica. Se il documento è lungo, aprilo nel pannello laterale e incollalo lì.'))}</p>
+            <p class="summary">${esc(t('canGoAheadAnywayButWithout'))}</p>
           </div>
           <footer>
-            <button class="cancel" data-act="cancel">${esc(t('Torna indietro'))}</button>
-            <button class="proceed" data-act="proceed">${esc(t('Continua comunque'))}</button>
+            <button class="cancel" data-act="cancel">${esc(t('goBack'))}</button>
+            <button class="proceed" data-act="proceed">${esc(t('continueAnyway'))}</button>
           </footer>
         </div>
       `,
@@ -862,7 +862,7 @@
       // leaves no gap under the buttons (`.armhint:empty`).
       // A single announcement, at unlock. A tick per second would fill the audio
       // space with numbers right while there is a contract to listen to.
-      if (live) live.textContent = announce ? t('Ora puoi continuare.') : '';
+      if (live) live.textContent = announce ? t('canContinueNow') : '';
     }
 
     bind() {
@@ -883,7 +883,7 @@
           e.stopPropagation();
           if (!e.isTrusted || b.disabled) return;
           b.disabled = true;
-          try { await CF.bridge.send('FEEDBACK', { category: b.dataset.feedback, model: this.model }); b.textContent = t('Grazie, segnalato'); } catch { b.disabled = false; }
+          try { await CF.bridge.send('FEEDBACK', { category: b.dataset.feedback, model: this.model }); b.textContent = t('thanksReported'); } catch { b.disabled = false; }
         });
       }
       const up = this.root.querySelector('[data-upgrade]');
@@ -895,10 +895,10 @@
         try {
           const r = await CF.bridge.send('UPGRADE');
           if (note) note.textContent = r?.error ? r.message : r?.where === 'options'
-            ? t('Ho aperto le impostazioni del piano in una nuova scheda.')
-            : t('Ho aperto la pagina di pagamento in una nuova scheda. Dopo il pagamento il piano si attiva da solo.');
+            ? t('iOpenedPlanSettingsNewTab')
+            : t('iOpenedPaymentPageNewTab');
         } catch (err) {
-          if (note) note.textContent = err?.message || t('Non riesco ad aprire la pagina di pagamento.');
+          if (note) note.textContent = err?.message || t('iCanTOpenPaymentPage');
         }
       });
       // While loading there is no `.cancel`, only a `.link`: searching by class
@@ -945,26 +945,26 @@
     const n = m.remaining;
     const paid = verdict.engine?.quota?.plan && verdict.engine.quota.plan !== 'free';
     return ' · ' + (paid
-      ? tn(n, 'ti resta {n} analisi questo mese', 'ti restano {n} analisi questo mese')
-      : tn(n, 'ti resta {n} analisi gratuita questo mese', 'ti restano {n} analisi gratuite questo mese'));
+      ? tn(n, 'nAnalysisLeftMonth', 'nAnalysesLeftMonth')
+      : tn(n, 'nFreeAnalysisLeftMonth', 'nFreeAnalysesLeftMonth'));
   }
 
 
   function renderFinding(f) {
     const ink = sevPalette(f.severity);
     const tags = [];
-    if (f.personalized && f.personalReasons?.length) tags.push(t('rilevante per: {x}', { x: f.personalReasons.join(', ') }));
-    if (f.quotes?.length) tags.push(t('citata in {n} punti della pagina', { n: f.quotes.length + 1 }));
+    if (f.personalized && f.personalReasons?.length) tags.push(t('relevantX', { x: f.personalReasons.join(', ') }));
+    if (f.quotes?.length) tags.push(t('quotedNPlacesPage', { n: f.quotes.length + 1 }));
 
     return `<li class="finding" style="--sev-color:${ink.light};--sev-color-dark:${ink.dark}">
       <div class="top">
         <span class="name">${esc(f.title || f.label)}</span>
-        <span class="sev">${esc(f.severity >= 65 ? t('pesa molto') : f.severity >= 40 ? t('da sapere') : t('minore'))}</span>
+        <span class="sev">${esc(f.severity >= 65 ? t('weighsLot') : f.severity >= 40 ? t('worthKnowing') : t('minor'))}</span>
       </div>
       <div class="plain">${esc(f.plain || f.why || '')}</div>
       ${f.quote ? `<div class="quote">“${esc(f.quote)}”</div>` : ''}
       ${tags.length ? `<span class="tag">${esc(tags.join(' · '))}</span>` : ''}
-      ${f.category ? `<button type="button" class="wrong" data-feedback="${esc(f.category)}">${esc(t('Avviso sbagliato?'))}</button>` : ''}
+      ${f.category ? `<button type="button" class="wrong" data-feedback="${esc(f.category)}">${esc(t('wrongWarning'))}</button>` : ''}
     </li>`;
   }
 

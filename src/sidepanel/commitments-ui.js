@@ -45,11 +45,11 @@ const SEARCH_THRESHOLD = 8;
  * three days ended up at the bottom.
  */
 const GROUPS = [
-  { id: 'week', label: 'Entro 7 giorni' },
-  { id: 'month', label: 'Entro 30 giorni' },
-  { id: 'later', label: 'Più avanti' },
-  { id: 'passed', label: 'Finestra scaduta' },
-  { id: 'closed', label: 'Disdetti' },
+  { id: 'week', label: 'within7Days' },
+  { id: 'month', label: 'within30Days' },
+  { id: 'later', label: 'later' },
+  { id: 'passed', label: 'windowExpired' },
+  { id: 'closed', label: 'cancelled' },
 ];
 
 function groupOf(c, state) {
@@ -62,10 +62,10 @@ function groupOf(c, state) {
 }
 
 const CHIP_LABELS = {
-  all: 'Tutti',
-  urgent: 'Entro 30 giorni',
-  active: 'Attivi',
-  cancelled: 'Disdetti',
+  all: 'all',
+  urgent: 'within30Days',
+  active: 'active',
+  cancelled: 'cancelled',
 };
 
 function matchesFilter(c, filter) {
@@ -156,16 +156,16 @@ function render(list) {
     // The empty state shows what a commitment will look like, with the way to try it.
     $('#commitments-list').innerHTML = `<div class="empty">
       <p>${esc(isWeb
-        ? t('Quando registri un impegno dopo un’analisi, la scadenza di disdetta finisce qui, con la lettera già pronta.')
-        : t('Quando prosegui su un contratto o un abbonamento, la scadenza di disdetta finisce qui, con la lettera già pronta e la prova di cosa avevi accettato.'))}</p>
+        ? t('whenRecordCommitmentAfterAnalysisCancellation')
+        : t('whenGoAheadContractSubscriptionIts'))}</p>
       <div class="c-item example" aria-hidden="true">
         <div class="c-top"><span class="c-name">StreamPro</span><span class="c-amount">599,76 €</span></div>
-        <span class="c-state" data-urgency="later">${esc(t('Disdetta entro il {d}', { d: '9/9/2028' }))}</span>
-        <div class="c-nothing">${esc(t('Se non disdici, parte un nuovo periodo da {x}.', { x: '479,76 €' }))}</div>
+        <span class="c-state" data-urgency="later">${esc(t('cancelD', { d: '9/9/2028' }))}</span>
+        <div class="c-nothing">${esc(t('ifDonTCancelNewPeriod', { x: '479,76 €' }))}</div>
       </div>
-      <p class="muted small">${esc(t('Esempio'))} · ${isWeb
-        ? `<button class="link" data-try-sample="streaming">${esc(t('Prova con un esempio'))}</button>`
-        : `<a href="https://antefirma.app/demo/" target="_blank" rel="noopener">${esc(t('Provalo su una pagina dimostrativa'))}</a>`}</p>
+      <p class="muted small">${esc(t('example'))} · ${isWeb
+        ? `<button class="link" data-try-sample="streaming">${esc(t('tryExample'))}</button>`
+        : `<a href="https://antefirma.app/demo/" target="_blank" rel="noopener">${esc(t('tryDemoPage'))}</a>`}</p>
     </div>`;
     return;
   }
@@ -176,8 +176,8 @@ function render(list) {
 
   if (!shown.length) {
     $('#commitments-list').innerHTML = `<div class="empty">
-      ${esc(t('Nessun impegno corrisponde a questa ricerca.'))}<br>
-      <button class="link" data-act="reset-view">${esc(t('Mostra tutti gli impegni'))}</button>
+      ${esc(t('noCommitmentMatchesSearch'))}<br>
+      <button class="link" data-act="reset-view">${esc(t('showAllCommitments'))}</button>
     </div>`;
     return;
   }
@@ -217,8 +217,8 @@ function renderPortfolio(s) {
   const totals = s.totals.map((t) => formatMoney(t.amount, t.currency)).join(' · ') || '—';
   return `
     <div class="big">${esc(totals)}</div>
-    <div class="cap">${esc(tn(s.count, 'esposizione complessiva su {n} impegno attivo', 'esposizione complessiva su {n} impegni attivi'))}</div>
-    ${s.next ? `<div class="next">${esc(t('Prossima scadenza:'))} <strong>${esc(s.next.c.provider || s.next.c.host || t('Senza nome'))}</strong> — ${esc(s.next.state.label.toLowerCase())}</div>` : ''}
+    <div class="cap">${esc(tn(s.count, 'totalExposureAcrossNActiveCommitment', 'totalExposureAcrossNActiveCommitments'))}</div>
+    ${s.next ? `<div class="next">${esc(t('nextDeadline'))} <strong>${esc(s.next.c.provider || s.next.c.host || t('unnamed'))}</strong> — ${esc(s.next.state.label.toLowerCase())}</div>` : ''}
   `;
 }
 
@@ -232,23 +232,23 @@ function renderItem(c, state = commitmentState(c)) {
       <div class="c-top">
         ${c.provider || c.host
           ? `<span class="c-name">${esc(c.provider || c.host)}</span>`
-          : `<button class="c-name c-unnamed" data-act="rename" data-id="${id}" title="${esc(t('Rinomina'))}">${esc(t('Senza nome'))} ✎</button>`}
+          : `<button class="c-name c-unnamed" data-act="rename" data-id="${id}" title="${esc(t('rename'))}">${esc(t('unnamed'))} ✎</button>`}
         <span class="c-amount">${c.worstCase != null ? esc(formatMoney(c.worstCase, c.currency)) : ''}</span>
       </div>
       ${subline(c) ? `<div class="c-head">${esc(subline(c))}</div>` : ''}
       <span class="c-state" data-urgency="${esc(state.urgency)}">${esc(state.label)}</span>
       ${doing && state.urgency !== 'done' ? `<div class="c-nothing">${esc(doing.label)}</div>` : ''}
       ${lastChange && lastChange.changed ? `<div class="c-change">⚠️ ${esc(lastChange.summary)}</div>` : ''}
-      ${lastChange && !lastChange.changed ? `<div class="c-nothing">✓ ${esc(t('Verificato il {d}: condizioni invariate.', { d: new Date(lastChange.checkedAt).toLocaleDateString(locale()) }))}</div>` : ''}
+      ${lastChange && !lastChange.changed ? `<div class="c-nothing">✓ ${esc(t('checkedDTermsUnchanged', { d: new Date(lastChange.checkedAt).toLocaleDateString(locale()) }))}</div>` : ''}
       ${state.urgency !== 'done' && c.deadlineAt && !c.inCalendar
-        ? `<div class="c-hint">${esc(t('I promemoria funzionano solo con il browser aperto: metti la scadenza anche in calendario.'))}</div>`
+        ? `<div class="c-hint">${esc(t('remindersOnlyWorkBrowserOpenAdd'))}</div>`
         : ''}
       <div class="c-actions">
-        <button class="strong" data-act="ics" data-id="${id}">${esc(t('Calendario'))}</button>
-        <button data-act="letter" data-id="${id}">${esc(t('Lettera'))}</button>
+        <button class="strong" data-act="ics" data-id="${id}">${esc(t('calendar'))}</button>
+        <button data-act="letter" data-id="${id}">${esc(t('letter'))}</button>
         <div class="c-menu-wrap">
           <button class="c-more" data-act="menu" data-id="${id}"
-                  aria-haspopup="true" aria-expanded="false" aria-label="${esc(t('Altre azioni'))}">⋯</button>
+                  aria-haspopup="true" aria-expanded="false" aria-label="${esc(t('moreActions'))}">⋯</button>
           <div class="c-menu" data-menu="${id}" hidden>${renderMenu(c)}</div>
         </div>
       </div>
@@ -261,12 +261,12 @@ function renderItem(c, state = commitmentState(c)) {
  * When it ends or renews, with the notice period; otherwise what leaving costs.
  */
 function subline(c) {
-  const notice = c.noticeMonths ? ' · ' + t('preavviso {n} giorni', { n: Math.round(c.noticeMonths * 30) }) : '';
+  const notice = c.noticeMonths ? ' · ' + t('nDaysNotice', { n: Math.round(c.noticeMonths * 30) }) : '';
   if (c.renewalAt) {
     const d = formatDate(new Date(c.renewalAt));
-    return (c.autoRenewal ? t('Si rinnova da solo il {d}', { d }) : t('Il periodo finisce il {d}', { d })) + notice;
+    return (c.autoRenewal ? t('renewsItselfD', { d }) : t('periodEndsD', { d })) + notice;
   }
-  if (c.penalty) return t('Uscire prima costa {x}', { x: formatMoney(c.penalty, c.currency) });
+  if (c.penalty) return t('leavingEarlyCostsX', { x: formatMoney(c.penalty, c.currency) });
   return '';
 }
 
@@ -275,10 +275,10 @@ function renameCommitment(id) {
   const c = cache.find((x) => x.id === id);
   if (!c) return;
   closeMenus();
-  openModal(t('Rinomina'), `<label class="field"><span>${esc(t('Nome del fornitore o del servizio'))}</span>
-    <input id="rename-input" maxlength="80" value="${esc(c.provider || '')}" placeholder="${esc(c.host || t('es. Palestra Orizzonte'))}"></label>
-    <p class="muted small">${esc(t('Compare nel pannello, nei promemoria e nella lettera di disdetta.'))}</p>`, [
-    { label: t('Salva'), act: async () => {
+  openModal(t('rename'), `<label class="field"><span>${esc(t('providerServiceName'))}</span>
+    <input id="rename-input" maxlength="80" value="${esc(c.provider || '')}" placeholder="${esc(c.host || t('eGHorizonGym'))}"></label>
+    <p class="muted small">${esc(t('appearsPanelRemindersCancellationLetter'))}</p>`, [
+    { label: t('save'), act: async () => {
       const name = $('#rename-input').value.trim().slice(0, 80);
       await send('UPDATE_COMMITMENT', { id, patch: { provider: name || null } });
       closeModal();
@@ -293,14 +293,14 @@ function renameCommitment(id) {
 function renderMenu(c) {
   const id = esc(c.id);
   return `
-    <button data-act="rename" data-id="${id}">${esc(t('Rinomina'))}</button>
-    <button data-act="check" data-id="${id}">${esc(t('Verifica modifiche'))}</button>
-    <button data-act="proof" data-id="${id}">${esc(t('Prova di cosa hai accettato'))}</button>
-    <button data-act="export" data-id="${id}">${esc(t('Esporta l’archivio'))}</button>
+    <button data-act="rename" data-id="${id}">${esc(t('rename'))}</button>
+    <button data-act="check" data-id="${id}">${esc(t('checkChanges'))}</button>
+    <button data-act="proof" data-id="${id}">${esc(t('proofWhatAccepted'))}</button>
+    <button data-act="export" data-id="${id}">${esc(t('exportArchive'))}</button>
     ${c.status === 'active'
-      ? `<button data-act="cancelled" data-id="${id}">${esc(t('Segna come disdetto'))}</button>`
-      : `<button data-act="reactivate" data-id="${id}">${esc(t('Riattiva'))}</button>`}
-    <button class="danger" data-act="delete-ask" data-id="${id}">${esc(t('Elimina definitivamente…'))}</button>
+      ? `<button data-act="cancelled" data-id="${id}">${esc(t('markCancelled'))}</button>`
+      : `<button data-act="reactivate" data-id="${id}">${esc(t('reactivate'))}</button>`}
+    <button class="danger" data-act="delete-ask" data-id="${id}">${esc(t('deletePermanently'))}</button>
   `;
 }
 
@@ -314,12 +314,12 @@ function renderConfirm(c) {
   const id = esc(c.id);
   return `
     <p class="c-confirm-text">
-      ${esc(t('Elimini {x}?', { x: c.provider || c.host || t('questo impegno') }))}
-      ${esc(t('Sparisce anche la prova: il testo conservato, l’impronta SHA-256 che lo certifica e le scadenze. Non si recupera.'))}
+      ${esc(t('deleteX', { x: c.provider || c.host || t('commitment3') }))}
+      ${esc(t('proofGoesTooStoredTextSha'))}
     </p>
-    <button data-act="export" data-id="${id}">${esc(t('Esporta prima di eliminare'))}</button>
-    <button class="danger" data-act="delete-confirm" data-id="${id}">${esc(t('Sì, elimina'))}</button>
-    <button class="link" data-act="menu-close" data-id="${id}">${esc(t('Annulla'))}</button>
+    <button data-act="export" data-id="${id}">${esc(t('exportBeforeDeleting'))}</button>
+    <button class="danger" data-act="delete-confirm" data-id="${id}">${esc(t('yesDelete'))}</button>
+    <button class="link" data-act="menu-close" data-id="${id}">${esc(t('cancel'))}</button>
   `;
 }
 
@@ -400,7 +400,7 @@ async function onAction(event) {
       await load();
     }
   } catch (err) {
-    openModal(t('Non è stato possibile completare l’operazione'), `<div class="status error">${esc(err.message)}</div>`, []);
+    openModal(t('operationCouldnTCompleted'), `<div class="status error">${esc(err.message)}</div>`, []);
   } finally {
     // After a `load()` the button is detached from the document: harmless.
     btn.disabled = false;
@@ -433,12 +433,12 @@ function startDelete(id) {
 
 function showUndoBar(c) {
   const bar = $('#undo-bar');
-  const name = c.provider || c.host || 'Impegno';
+  const name = c.provider || c.host || t('commitment');
   // The bar is written once only: rewriting the HTML every second would take
   // focus away from the "Undo" button exactly from whoever is looking for it
   // with the keyboard.
-  bar.innerHTML = `<span>${esc(t('Eliminato «{x}» con la sua prova.', { x: name }))}</span>
-    <button class="link" id="undo-delete">${esc(t('Annulla'))} (<span id="undo-count">${Math.ceil(UNDO_MS / 1000)}</span>)</button>`;
+  bar.innerHTML = `<span>${esc(t('deletedXItsProof', { x: name }))}</span>
+    <button class="link" id="undo-delete">${esc(t('cancel'))} (<span id="undo-count">${Math.ceil(UNDO_MS / 1000)}</span>)</button>`;
   bar.hidden = false;
   $('#undo-delete').addEventListener('click', undoDelete);
 }
@@ -477,7 +477,7 @@ async function finalizeDelete() {
     await send('DELETE_COMMITMENT', { id });
     await load();
   } catch (err) {
-    openModal(t('Non è stato possibile eliminare l’impegno'), `<div class="status error">${esc(err.message)}</div>`, []);
+    openModal(t('commitmentCouldnTDeleted'), `<div class="status error">${esc(err.message)}</div>`, []);
     await load();
   }
 }
@@ -494,18 +494,18 @@ export async function showLetter(id, kind = null, lang = null) {
     .join('');
 
   openModal(
-    t('Lettera pronta da inviare'),
+    t('letterReadySend'),
     `
-      <div class="letter-opts"><select id="letter-kind" aria-label="${esc(t('Tipo di lettera'))}">${options}</select>
-      <select id="letter-lang" aria-label="${esc(t('Lingua della lettera'))}" title="${esc(t('La lingua del fornitore a cui la mandi'))}">${langs}</select></div>
-      ${firstTime('letter-lang') ? `<p class="hint-first muted small">${esc(t('Tipo e lingua si cambiano qui: la lingua è quella del fornitore, non la tua.'))}</p>` : ''}
+      <div class="letter-opts"><select id="letter-kind" aria-label="${esc(t('typeLetter'))}">${options}</select>
+      <select id="letter-lang" aria-label="${esc(t('letterLanguage'))}" title="${esc(t('languageProviderSend'))}">${langs}</select></div>
+      ${firstTime('letter-lang') ? `<p class="hint-first muted small">${esc(t('changeTypeLanguageHereLanguageProvider'))}</p>` : ''}
       <ul class="checklist">${letter.checklist.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>
       <pre id="letter-text">${esc(letter.text)}</pre>
-      <p class="muted small"><a href="${helpUrl('lettera', getLang())}" target="_blank" rel="noopener">${esc(t('Come spedirla e quale tipo scegliere'))}</a></p>
+      <p class="muted small"><a href="${helpUrl('lettera', getLang())}" target="_blank" rel="noopener">${esc(t('howSendWhichTypeChoose'))}</a></p>
     `,
     [
-      { label: t('Copia'), act: (btn) => copy(letter.text, btn) },
-      { label: t('Scarica .txt'), act: () => download(letter.filename, letter.text, 'text/plain') },
+      { label: t('copy'), act: (btn) => copy(letter.text, btn) },
+      { label: t('downloadTxt'), act: () => download(letter.filename, letter.text, 'text/plain') },
     ]
   );
 
@@ -537,16 +537,16 @@ async function showChanges(id) {
   const body = diff.changed
     ? `
       <p class="summary">${esc(diff.summary)}</p>
-      ${diff.added.length ? `<p class="muted small"><strong>${esc(t('Condizioni comparse:'))}</strong> ${esc(diff.added.join(', '))}</p>` : ''}
-      ${diff.removed.length ? `<p class="muted small"><strong>${esc(t('Condizioni sparite:'))}</strong> ${esc(diff.removed.join(', '))}</p>` : ''}
+      ${diff.added.length ? `<p class="muted small"><strong>${esc(t('termsAdded'))}</strong> ${esc(diff.added.join(', '))}</p>` : ''}
+      ${diff.removed.length ? `<p class="muted small"><strong>${esc(t('termsRemoved'))}</strong> ${esc(diff.removed.join(', '))}</p>` : ''}
       ${diff.severity === 'major'
-        ? `<p class="muted small">${esc(t('Una modifica unilaterale sfavorevole può aprire la strada al recesso senza penali: nella lettera trovi la variante apposita.'))}</p>`
+        ? `<p class="muted small">${esc(t('unfavourableUnilateralChangeCanLetWithdraw'))}</p>`
         : ''}
     `
     : `<p class="summary">${esc(diff.summary)}</p>`;
 
-  openModal(t('Confronto con le condizioni che avevi accettato'), body,
-    diff.severity === 'major' ? [{ label: t('Lettera di recesso'), act: () => showLetter(id, LETTER_KINDS.CHANGE) }] : []);
+  openModal(t('comparisonTermsAccepted'), body,
+    diff.severity === 'major' ? [{ label: t('withdrawalLetter'), act: () => showLetter(id, LETTER_KINDS.CHANGE) }] : []);
 }
 
 async function showProof(id) {
@@ -554,20 +554,20 @@ async function showProof(id) {
   const when = proof.snapshot?.at ? new Date(proof.snapshot.at).toLocaleString(locale()) : '—';
 
   openModal(
-    t('Prova di cosa hai accettato'),
+    t('proofWhatAccepted'),
     `
       ${proof.valid
-        ? `<div class="proof-ok">✓ ${esc(t('Il testo conservato corrisponde all’impronta registrata.'))}</div>`
-        : `<div class="proof-bad">⚠️ ${esc(t('Il testo conservato non corrisponde all’impronta: non usarlo come prova.'))}</div>`}
-      <p class="muted small">${esc(t('Accettato il {d}', { d: when }))} · ${esc(t('{n} caratteri', { n: proof.snapshot?.chars ?? 0 }))}</p>
+        ? `<div class="proof-ok">✓ ${esc(t('storedTextMatchesRecordedFingerprint'))}</div>`
+        : `<div class="proof-bad">⚠️ ${esc(t('storedTextDoesnTMatchFingerprint'))}</div>`}
+      <p class="muted small">${esc(t('acceptedD', { d: when }))} · ${esc(t('nCharacters', { n: proof.snapshot?.chars ?? 0 }))}</p>
       <pre>${esc(proof.attestation)}</pre>
-      <p class="muted small">${esc(t('Estratto:'))}</p>
+      <p class="muted small">${esc(t('excerpt'))}</p>
       <pre>${esc((proof.snapshot?.excerpt || '').slice(0, 700))}…</pre>
     `,
     [
-      { label: t('Scarica attestazione'), act: () => download(proof.filename, proof.attestation, 'text/plain') },
+      { label: t('downloadStatement'), act: () => download(proof.filename, proof.attestation, 'text/plain') },
       {
-        label: t('Scarica il testo integrale'),
+        label: t('downloadFullText'),
         act: () => download(proof.filename.replace('prova-', 'testo-'), proof.text || '', 'text/plain'),
       },
     ]
@@ -584,21 +584,21 @@ async function exportArchive(id) {
   const c = cache.find((x) => x.id === id) || {};
   const state = commitmentState(c);
   const header = [
-    `${t('Impegno:')} ${c.provider || c.host || '—'}`,
-    c.headline ? `${t('Sintesi:')} ${c.headline}` : null,
-    c.worstCase != null ? `${t('Impegno economico stimato:')} ${formatMoney(c.worstCase, c.currency || 'EUR')}` : null,
-    c.deadlineAt ? `${t('Disdetta entro:')} ${formatDate(new Date(c.deadlineAt))}` : null,
-    c.renewalAt ? `${t('Scadenza del periodo:')} ${formatDate(new Date(c.renewalAt))}` : null,
-    `${t('Stato:')} ${state.label}`,
+    `${t('commitment2')} ${c.provider || c.host || '—'}`,
+    c.headline ? `${t('summary')} ${c.headline}` : null,
+    c.worstCase != null ? `${t('estimatedFinancialCommitment')} ${formatMoney(c.worstCase, c.currency || 'EUR')}` : null,
+    c.deadlineAt ? `${t('cancel2')} ${formatDate(new Date(c.deadlineAt))}` : null,
+    c.renewalAt ? `${t('endPeriod')} ${formatDate(new Date(c.renewalAt))}` : null,
+    `${t('status')} ${state.label}`,
   ].filter(Boolean).join('\n');
 
   const body = [
     header,
     '',
-    `── ${t('attestazione')} ──────────────────────────────`,
+    `── ${t('statement')} ──────────────────────────────`,
     proof.attestation || '',
     '',
-    `── ${t('testo integrale conservato')} ──────────────────────────────`,
+    `── ${t('fullStoredText')} ──────────────────────────────`,
     proof.text || proof.snapshot?.excerpt || '',
   ].join('\n');
 
@@ -621,7 +621,7 @@ export function openModal(title, bodyHtml, actions = []) {
   }
   const close = document.createElement('button');
   close.className = 'link';
-  close.textContent = t('Chiudi');
+  close.textContent = t('close');
   close.addEventListener('click', closeModal);
   $('#modal-foot').append(close);
   $('#modal').hidden = false;
@@ -649,9 +649,9 @@ function download(filename, content, mime) {
 async function copy(text, btn) {
   try {
     await navigator.clipboard.writeText(text);
-    flash(btn, t('Copiato ✓'), 2000);
+    flash(btn, t('copied'), 2000);
   } catch {
-    flash(btn, t('Copia non riuscita: usa Scarica .txt'), 4000, 'failed');
+    flash(btn, t('copyFailedUseDownloadTxt'), 4000, 'failed');
   }
 }
 

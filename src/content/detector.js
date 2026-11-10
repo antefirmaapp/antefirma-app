@@ -291,7 +291,7 @@
     let price = null;
     if (p?.amount != null) {
       try { price = new Intl.NumberFormat(globalThis.AF_I18N.locale, { style: 'currency', currency: p.currency || 'EUR' }).format(p.amount); } catch { price = String(p.amount); }
-      const per = { month: t('al mese'), year: t('all\'anno'), week: t('a settimana'), quarter: t('al trimestre') }[p.period];
+      const per = { month: t('perMonth'), year: t('perYear'), week: t('perWeek'), quarter: t('perQuarter') }[p.period];
       if (per) price += ` ${per}`;
     }
     return { price, host: location.hostname.replace(/^www\./, '') };
@@ -334,7 +334,7 @@
         }
       }
     } catch (err) {
-      overlay.showError(err?.message || t('Errore durante l’analisi.'));
+      overlay.showError(err?.message || t('errorDuringAnalysis'));
       decision = await waiting;
     } finally {
       state.busy = false;
@@ -439,7 +439,7 @@
         decision = await waiting;
       }
     } catch (err) {
-      overlay.showError(err?.message || t('Errore durante l’analisi.'));
+      overlay.showError(err?.message || t('errorDuringAnalysis'));
       decision = await waiting;
     } finally {
       state.busy = false;
@@ -612,13 +612,13 @@
     box.innerHTML = `
       <span class="ico" aria-hidden="true">${esc(level.icon || '•')}</span>
       <div class="txt">
-        <p class="headline">${esc(verdict.headline || level.headline || t('Condizioni da verificare'))}</p>
+        <p class="headline">${esc(verdict.headline || level.headline || t('termsCheck'))}</p>
         ${verdict.mustRemember ? `<p class="note">📌 ${esc(verdict.mustRemember)}</p>` : ''}
         ${toast.queue.length ? `<p class="queued">${esc(queuedLabel(toast.queue.length))}</p>` : ''}
       </div>
-      <button class="x" type="button" aria-label="${esc(t('Chiudi questa notifica'))}">✕</button>
+      <button class="x" type="button" aria-label="${esc(t('closeNotification'))}">✕</button>
       <div class="actions">
-        <button class="why" type="button">${esc(t('Vedi perché →'))}</button>
+        <button class="why" type="button">${esc(t('seeWhy'))}</button>
       </div>
       ${sticky ? '' : '<div class="life" aria-hidden="true"></div>'}
     `;
@@ -651,7 +651,7 @@
   }
 
   function queuedLabel(n) {
-    return n === 1 ? t('un altro avviso in attesa') : t('altri {n} avvisi in attesa', { n });
+    return n === 1 ? t('oneMoreWarningWaiting') : t('nMoreWarningsWaiting', { n });
   }
 
   /** Updates the queue counter on the notification already on screen. */

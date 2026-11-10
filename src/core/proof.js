@@ -124,18 +124,18 @@ export function compareSnapshot(snapshot, { text = '', verdict = {}, newHash = n
 }
 
 function describe({ changed, costDelta, currency, oldCost, newCost, added, removed, hashChanged }) {
-  if (!changed) return t('Le condizioni sono identiche a quelle che avevi accettato.');
+  if (!changed) return t('termsIdenticalOnesAccepted');
 
   const bits = [];
   if (costDelta && oldCost != null && newCost != null) {
     const vars = { a: formatMoney(oldCost, currency), b: formatMoney(newCost, currency), d: (costDelta > 0 ? '+' : '') + formatMoney(costDelta, currency) };
     bits.push(costDelta > 0
-      ? t('Il tuo impegno potenziale è salito da {a} a {b} ({d}).', vars)
-      : t('Il tuo impegno potenziale è sceso da {a} a {b} ({d}).', vars));
+      ? t('potentialCommitmentWentUpFromB', vars)
+      : t('potentialCommitmentWentDownFromB', vars));
   }
-  if (added.length) bits.push(t('Condizioni nuove: {n}.', { n: added.length }));
-  if (removed.length) bits.push(t('Condizioni rimosse: {n}.', { n: removed.length }));
-  if (!bits.length && hashChanged) bits.push(t('Il testo è cambiato, ma le condizioni rilevanti sembrano equivalenti.'));
+  if (added.length) bits.push(t('newTermsN', { n: added.length }));
+  if (removed.length) bits.push(t('removedTermsN', { n: removed.length }));
+  if (!bits.length && hashChanged) bits.push(t('textChangedButRelevantTermsLook'));
   return bits.join(' ');
 }
 
@@ -147,16 +147,16 @@ function describe({ changed, costDelta, currency, oldCost, newCost, added, remov
 export function attestation(snapshot, { host } = {}) {
   const d = new Date(snapshot.at);
   return [
-    t('ATTESTAZIONE DI CONTENUTO (generata localmente da AnteFirma)'),
+    t('contentStatementGeneratedLocallyAntefirma'),
     '',
-    `${t('Fonte:')} ${snapshot.url || host || '—'}`,
-    `${t('Data e ora:')} ${d.toLocaleString(locale())} (${snapshot.at})`,
-    `${t('Lunghezza testo:')} ${t('{n} caratteri', { n: snapshot.chars })}`,
-    `${t('Impronta SHA-256:')} ${snapshot.hash}`,
+    `${t('source')} ${snapshot.url || host || '—'}`,
+    `${t('dateTime')} ${d.toLocaleString(locale())} (${snapshot.at})`,
+    `${t('textLength')} ${t('nCharacters', { n: snapshot.chars })}`,
+    `${t('sha256Fingerprint')} ${snapshot.hash}`,
     '',
-    t('Il testo integrale corrispondente a questa impronta è conservato in locale e può essere esportato per il confronto. Ricalcolando lo SHA-256 del testo esportato si ottiene l’impronta qui sopra.'),
+    t('fullTextMatchingFingerprintStoredLocally'),
     '',
-    t('Questa attestazione non è una certificazione con valore legale autonomo: documenta ciò che il browser ha ricevuto nel momento indicato.'),
+    t('statementNotCertificationIndependentLegalValue'),
   ].join('\n');
 }
 

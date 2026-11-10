@@ -246,7 +246,7 @@ src/core/{profile,eu,scoring}.js     profile, EU/IT protections, score
 src/core/{commitments,letter,ics,proof}.js  exit kit and proof
 src/core/help.js                     links to the help centre
 src/sidepanel/, src/options/         panel and settings
-src/i18n/                            languages: t(), dictionary, page translation
+src/i18n/                            languages: t(), locales/*.json, generated messages.js, page translation
 src/lib/pdf-text.js                  dependency-free PDF text extractor
 web/                                 the web app layer (shim, boot, styles, icons)
 tools/                               builds, screenshots, dev package, English check
@@ -254,12 +254,16 @@ tools/                               builds, screenshots, dev package, English c
 
 Conventions: everything in English except user-facing text; no secrets in code.
 
-**Languages.** User-facing sentences are written inside `t('…')` (or
-`tn(n, '…', '…')` for singular and plural); their translations live in
-`src/i18n/dict.js`. HTML pages are translated by `src/i18n/dom.js` when they
-open. The language is chosen in settings ("Automatic" follows the browser;
-outside it/es, English) and also applies to the server's answers.
-`test/i18n.test.mjs` fails if a sentence has no translation.
+**Languages.** Code refers to user-facing texts by English id: `t('goBack')`,
+`tn(n, 'nDay', 'nDays2')` for singular and plural. The texts live in
+`src/i18n/locales/{it,en,es}.json`; after editing them run
+`node tools/i18n-build.mjs`, which writes `src/i18n/messages.js` (content scripts
+can't import JSON). HTML pages are written in Italian and translated by
+`src/i18n/dom.js`, which finds each text's id in `it.json`. The language is chosen
+in settings ("Automatic" follows the browser; outside it/es, English) and also
+applies to the server's answers. `test/i18n.test.mjs` fails if an id is missing
+in any language, if placeholders differ, if `messages.js` is stale, or if an id
+is unused.
 
 ## Known limits
 

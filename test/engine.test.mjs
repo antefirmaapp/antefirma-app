@@ -7,6 +7,7 @@
  *   node --test test/
  */
 
+import { t } from '../src/i18n/index.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -127,11 +128,11 @@ test('hashText is stable and discriminating', () => {
 test('server risks take label and severity from the constants', () => {
   const findings = fromServer(RESPONSE().findings);
   const ip = findings.find((f) => f.category === 'ip_license');
-  assert.equal(ip.label, RISK_CATEGORIES.ip_license.label);
+  assert.equal(ip.label, t(RISK_CATEGORIES.ip_license.label));
   assert.ok(ip.severity <= RISK_CATEGORIES.ip_license.base);
   assert.ok(ip.severity >= Math.round(RISK_CATEGORIES.ip_license.base * 0.8));
   assert.equal(ip.source, 'ai');
-  for (let i = 1; i < findings.length; i++) assert.ok(findings[i - 1].severity >= findings[i].severity, 'non ordinati');
+  for (let i = 1; i < findings.length; i++) assert.ok(findings[i - 1].severity >= findings[i].severity, 'not sorted');
 });
 
 test('an unknown category or one without a quote is ignored', () => {

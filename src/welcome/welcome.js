@@ -14,7 +14,7 @@ async function send(type, payload) {
   try { settings = await send('GET_SETTINGS'); } catch { /* resta l'italiano */ }
   setLang(resolveLang(settings.uiLang, chrome.i18n.getUILanguage()));
   translateDom(document.body);
-  document.title = t('Benvenuto in AnteFirma');
+  document.title = t('welcomeAntefirma');
   const done = () => { $('#grant').hidden = true; $('#granted').hidden = false; };
   if (settings.remoteConsentAt) done();
   $('#grant').addEventListener('click', async () => {

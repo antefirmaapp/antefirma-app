@@ -23,10 +23,10 @@
         res = await chrome.runtime.sendMessage({ type, payload });
       } catch (err) {
         // Typical when the extension is reloaded while the page is open.
-        throw new Error(globalThis.AF_I18N.t('Estensione non raggiungibile: ricarica la pagina.'));
+        throw new Error(globalThis.AF_I18N.t('extensionUnreachableReloadPage'));
       }
-      if (!res) throw new Error(globalThis.AF_I18N.t('Nessuna risposta dal motore di analisi.'));
-      if (!res.ok) throw new Error(res.error || globalThis.AF_I18N.t('Errore sconosciuto.'));
+      if (!res) throw new Error(globalThis.AF_I18N.t('noReplyFromAnalysisEngine'));
+      if (!res.ok) throw new Error(res.error || globalThis.AF_I18N.t('unknownError'));
       return res.result;
     },
 

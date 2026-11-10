@@ -169,20 +169,20 @@ export function fromServer(serverFindings = []) {
 
 function headlineFor({ level, cost, actionType }) {
   if (cost.understated && cost.worstCaseLabel) {
-    return t('Vedi {a}, ma stai impegnando fino a {b}', { a: cost.displayed, b: cost.worstCaseLabel });
+    return t('seeButCommittingUpB', { a: cost.displayed, b: cost.worstCaseLabel });
   }
   if (cost.worstCaseLabel) {
-    return t('Stai per assumere un impegno economico stimato in {x}', { x: cost.worstCaseLabel });
+    return t('aboutTakeFinancialCommitmentEstimatedX', { x: cost.worstCaseLabel });
   }
   const byAction = {
-    accept_terms: 'Stai accettando un contratto con condizioni da verificare',
-    subscribe: 'Stai attivando un abbonamento',
-    purchase: 'Stai confermando un acquisto',
-    sign: 'Stai firmando un documento vincolante',
-    signup: 'Stai creando un account accettandone le condizioni',
-    consent: 'Stai autorizzando un trattamento dei tuoi dati',
-    oauth: 'Stai dando a un servizio accesso a un altro tuo account',
-    manual: 'Analisi del documento',
+    accept_terms: 'acceptingContractTermsWorthChecking',
+    subscribe: 'startingSubscription2',
+    purchase: 'confirmingPurchase',
+    sign: 'signingBindingDocument',
+    signup: 'creatingAccountAcceptingItsTerms',
+    consent: 'authorisingUseData',
+    oauth: 'givingServiceAccessAnotherAccounts',
+    manual: 'documentAnalysis',
   };
   return byAction[actionType] ? t(byAction[actionType]) : t(level.headline);
 }
@@ -191,15 +191,15 @@ function summaryFor({ findings, cost, consumer }) {
   const bits = [];
   if (findings.length) {
     const top = findings.slice(0, 3).map((f) => f.label.toLowerCase());
-    bits.push(tn(findings.length, 'Il testo contiene una condizione rilevante: {list}.', 'Il testo contiene {n} condizioni rilevanti: {list}.', { list: top.join(', ') }));
+    bits.push(tn(findings.length, 'textContainsOneRelevantTermList', 'textContainsNRelevantTermsList', { list: top.join(', ') }));
   } else {
-    bits.push(t('Nel testo disponibile non sono state trovate clausole che ti impegnano.'));
+    bits.push(t('noBindingClausesWereFoundAvailable'));
   }
   if (cost.worstCaseLabel) {
-    bits.push(t('L’impegno economico potenziale stimato è {x}.', { x: cost.worstCaseLabel + (cost.horizonReason ? ` (${cost.horizonReason})` : '') }));
+    bits.push(t('estimatedPotentialFinancialCommitmentX', { x: cost.worstCaseLabel + (cost.horizonReason ? ` (${cost.horizonReason})` : '') }));
   }
   if (consumer.flags?.length) {
-    bits.push(tn(consumer.flags.length, '{n} condizione merita una verifica rispetto alle tutele previste per i consumatori.', '{n} condizioni meritano una verifica rispetto alle tutele previste per i consumatori.'));
+    bits.push(tn(consumer.flags.length, 'nTermWorthCheckingAgainstConsumer', 'nTermsWorthCheckingAgainstConsumer'));
   }
   return bits.join(' ');
 }
@@ -208,7 +208,7 @@ function mustRememberFor(cost, timeline) {
   const deadline = timeline.find((s) => s.kind === 'deadline');
   if (deadline) return `${deadline.when}: ${deadline.items[0]}`;
   if (cost.hasAutoRenewal && cost.horizonMonths) {
-    return t('Il contratto si rinnova da solo tra {n} mesi: segna la scadenza in calendario.', { n: Math.round(cost.horizonMonths) });
+    return t('contractRenewsItselfNMonthsPut', { n: Math.round(cost.horizonMonths) });
   }
   return null;
 }

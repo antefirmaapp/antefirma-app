@@ -22,7 +22,7 @@
     </div>
 
     <section class="card">
-      <h2 data-help="avviso">Protezione</h2>
+      <h2 data-help="warning">Protezione</h2>
       <label class="switch">
         <input type="checkbox" id="enabled">
         <span><strong>Firewall attivo</strong><em>Intercetta i pulsanti di accettazione, acquisto, firma e consenso.</em></span>
@@ -70,13 +70,13 @@
     </section>
 
     <section class="card">
-      <h2 data-help="primi-passi">Cosa vuoi proteggere</h2>
+      <h2 data-help="gettingStarted">Cosa vuoi proteggere</h2>
       <p class="lead">La stessa clausola non pesa uguale per tutti. Una licenza mondiale sui contenuti è un dettaglio per chi carica foto delle vacanze e un problema serio per chi vive del proprio lavoro creativo.</p>
       <div class="grid" id="profile-grid"></div>
     </section>
 
     <section class="card">
-      <h2 data-help="lettera">Kit di uscita</h2>
+      <h2 data-help="letter">Kit di uscita</h2>
       <p class="lead">Sapere che devi disdire entro il 15 giugno non basta: il costo vero è scrivere la lettera. Questi dati restano su questo dispositivo e servono solo a precompilarla.</p>
 
       <label class="switch">
@@ -119,7 +119,7 @@
     </section>
 
     <section class="card" id="piano">
-      <h2 data-help="piani">Piano</h2>
+      <h2 data-help="plans">Piano</h2>
       <p class="lead" id="plan-summary">Verifico il piano…</p>
       <div class="row" id="plan-buy" hidden>
         <button class="primary" type="button" data-plan="pro">Passa a Pro</button>
@@ -140,7 +140,7 @@
     </section>
 
     <section class="card">
-      <h2 data-help="dati">Analisi</h2>
+      <h2 data-help="data">Analisi</h2>
       <p class="lead">Quando premi un pulsante che ti impegna, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic). Il server risponde con le clausole che ti impegnano, ciascuna con la frase esatta della pagina, e scarta ogni avviso la cui frase non c'è.</p>
       <p class="lead small">Non escono: la cronologia di navigazione, i dati per le lettere di disdetta, gli impegni registrati, le prove. Il server non conserva il testo né l'indirizzo e non ti chiede un account: riconosce soltanto un numero casuale di questa installazione, per contare le analisi. Con un piano a pagamento conosce anche la licenza legata a questo browser, mai il tuo nome o la tua email.</p>
       <div id="consent-box" class="key-status"></div>
@@ -151,13 +151,13 @@
       <p class="lead small">Stato del server: <span id="server-status">verifico…</span></p>
     </section>
     <section class="card">
-      <h2 data-help="problemi">Siti esclusi</h2>
+      <h2 data-help="troubleshooting">Siti esclusi</h2>
       <p class="lead">Un dominio per riga. Su questi siti il firewall non interviene.</p>
       <textarea id="allowlist" rows="4" placeholder="esempio.it&#10;intranet.azienda.com"></textarea>
     </section>
 
     <section class="card">
-      <h2 data-help="dati">Dati locali</h2>
+      <h2 data-help="data">Dati locali</h2>
       <div class="row">
         <button class="secondary" id="clear-cache" type="button">Svuota la cache delle analisi</button>
         <button class="secondary danger" id="clear-history" type="button">Cancella lo storico</button>

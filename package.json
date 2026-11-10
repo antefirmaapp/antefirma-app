@@ -12,7 +12,8 @@
     "test:e2e": "node test/smoke.mjs",
     "lint": "eslint .",
     "check": "npm run lint && npm test",
-    "check:english": "node tools/no-italian.mjs"
+    "check:english": "node tools/no-italian.mjs",
+    "i18n": "node tools/i18n-build.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",

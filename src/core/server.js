@@ -46,29 +46,29 @@ export class ServerError extends Error {
 }
 
 const MESSAGES = {
-  quota: 'Hai usato tutte le analisi di oggi. Domani il conteggio riparte.',
-  quota_month: 'Hai usato le analisi di questo mese. Il conteggio riparte il primo del mese; per averne di più, Impostazioni → Piano.',
-  quota_day: 'Hai usato le analisi di oggi del tuo piano. Domani il conteggio riparte.',
-  key_format: 'La chiave ha la forma AF-XXXX-XXXX-XXXX-XXXX.',
-  key_unknown: 'Chiave sconosciuta. Controlla di averla copiata tutta.',
-  key_admin: 'Questa è la chiave di amministrazione del Team: qui serve la chiave di un posto.',
-  key_inactive: 'La licenza di questa chiave non è attiva.',
-  activations: 'La chiave è già attiva sul numero massimo di browser: toglila da uno.',
-  billing_off: 'I piani a pagamento non sono ancora attivi.',
-  paused: 'Le analisi gratuite sono sospese per oggi. Riprovano domani; con un piano a pagamento continuano.',
-  timeout: 'L’analisi ha impiegato troppo tempo.',
-  network: 'Il server di AnteFirma non è raggiungibile. Controlla la connessione.',
-  busy: 'Il servizio è molto richiesto in questo momento. Riprova fra poco.',
-  capacity: 'Il servizio ha raggiunto il limite di oggi. Riprova domani.',
-  disabled: 'Il servizio è sospeso per manutenzione.',
-  revoked: 'Questa installazione è stata disattivata. Reinstalla l’estensione o scrivici.',
-  origin: 'Il server non riconosce questa versione dell’estensione.',
-  size: 'La pagina è troppo lunga per essere analizzata.',
-  upstream: 'L’analisi non è riuscita. Riprova fra poco.',
+  quota: 'veUsedAllTodaySAnalyses',
+  quota_month: 'veUsedMonthSAnalysesCount',
+  quota_day: 'veUsedPlanSAnalysesToday',
+  key_format: 'keyLooksLikeAfXxxxXxxx',
+  key_unknown: 'unknownKeyCheckCopiedAll',
+  key_admin: 'teamAdministratorKeyHereNeedSeat',
+  key_inactive: 'keySLicenceNotActive',
+  activations: 'keyAlreadyActiveMaximumNumberBrowsers',
+  billing_off: 'paidPlansNotActiveYet',
+  paused: 'freeAnalysesPausedTodayTheyResume',
+  timeout: 'analysisTookTooLong',
+  network: 'antefirmaServerCanTReachedCheck',
+  busy: 'serviceVeryBusyRightNowTry',
+  capacity: 'serviceHasReachedTodaySLimit',
+  disabled: 'serviceDownMaintenance',
+  revoked: 'installationHasBeenDisabledReinstallExtension',
+  origin: 'serverDoesnTRecogniseVersionExtension',
+  size: 'pageTooLongAnalyse',
+  upstream: 'analysisFailedTryAgainShortly',
 };
 
 function messageFor(code) {
-  return t(MESSAGES[code] || 'L’analisi non è riuscita.');
+  return t(MESSAGES[code] || 'analysisFailed3');
 }
 
 // ── token dell'installazione ────────────────────────────────────────────────

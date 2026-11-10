@@ -255,7 +255,7 @@
     let trial = null;
     if (trialMatch) {
       const value = Number(trialMatch[1] || trialMatch[3] || trialMatch[4] || trialMatch[6] || 1);
-      const unit = (trialMatch[2] || trialMatch[5] || 'mesi').toLowerCase();
+      const unit = (trialMatch[2] || trialMatch[5] || 'mesi').toLowerCase(); // default unit: months
       const months = /giorn|day/.test(unit) ? value / 30 : /settimana|week/.test(unit) ? value / 4.345 : value;
       trial = { raw: trialMatch[0].replace(/\s+/g, ' ').trim(), months };
     }

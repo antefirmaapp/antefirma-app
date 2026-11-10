@@ -94,17 +94,17 @@ function setupContextMenus() {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: 'cf-analyze-selection',
-      title: t('Analizza il testo selezionato con AnteFirma'),
+      title: t('analyseSelectedTextAntefirma'),
       contexts: ['selection'],
     });
     chrome.contextMenus.create({
       id: 'cf-analyze-page',
-      title: t('Analizza questa pagina (contratto, termini, checkout)'),
+      title: t('analysePageContractTermsCheckout'),
       contexts: ['page'],
     });
     chrome.contextMenus.create({
       id: 'cf-analyze-link',
-      title: t('Analizza il documento collegato'),
+      title: t('analyseLinkedDocument'),
       contexts: ['link'],
     });
   });
@@ -299,7 +299,7 @@ async function grantConsent() {
 /** Turns a server error into an answer for the interface. */
 function failure(err) {
   if (err instanceof ServerError) return { error: { code: err.code, message: err.message, retryAfter: err.retryAfter } };
-  return { error: { code: 'internal', message: t('L’analisi non è riuscita.') } };
+  return { error: { code: 'internal', message: t('analysisFailed3') } };
 }
 
 // ── analisi di un'azione intercettata ───────────────────────────────────────
@@ -392,7 +392,7 @@ async function analyzeAction(payload = {}, sender) {
 async function analyzeText(payload = {}) {
   const settings = await getSettings();
   const text = normalize(payload.text || '');
-  if (text.length < 40) throw new Error(t('Testo troppo breve per un’analisi sensata.'));
+  if (text.length < 40) throw new Error(t('textTooShortMeaningfulAnalysis'));
 
   const ctx = {
     url: payload.url || null,
@@ -433,7 +433,7 @@ async function analyzeText(payload = {}) {
  */
 async function analyzeSample(key) {
   const sample = SAMPLES[key];
-  if (!sample) throw new Error(t('Esempio non trovato.'));
+  if (!sample) throw new Error(t('exampleNotFound'));
   const settings = await getSettings();
   const lang = sample.langs[settings.uiLang] ? settings.uiLang : 'it';
   const s = sample.langs[lang];
@@ -458,7 +458,7 @@ async function exportData() {
 
 /** Merges a backup: adds what is missing, deletes nothing that is there. */
 async function importData(file) {
-  if (!file || file.app !== 'antefirma' || typeof file.data !== 'object') throw new Error(t('Il file non è una copia di AnteFirma.'));
+  if (!file || file.app !== 'antefirma' || typeof file.data !== 'object') throw new Error(t('fileNotAntefirmaBackup'));
   const cur = await chrome.storage.local.get(EXPORT_KEYS);
   const byId = (a = [], b = []) => {
     const seen = new Set(a.map((x) => x.id ?? x.at));
@@ -511,8 +511,8 @@ async function recordDecision({ id, decision, via = null, track = false } = {}) 
     const when = new Date(commitment.deadlineAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
     await notify({
       id: `tracked-${commitment.id}`,
-      title: t('Promemoria impostato: {x}', { x: commitment.provider || commitment.host || '' }),
-      message: t('Ti avviso prima del {d}, l’ultimo giorno per disdire. Trovi l’impegno nel pannello di AnteFirma.', { d: when }),
+      title: t('reminderSetX', { x: commitment.provider || commitment.host || '' }),
+      message: t('iLlRemindBeforeDLast', { d: when }),
       commitmentId: commitment.id, sticky: false,
     });
   }
@@ -544,7 +544,7 @@ async function commitmentFromVerdict({ historyId = null, verdict = null, text = 
 
   const snapshot = await createSnapshot({ text, verdict });
   if (snapshot.empty) {
-    throw new Error(t('Testo del contratto non disponibile: senza, la prova non attesterebbe nulla.'));
+    throw new Error(t('contractTextNotAvailableWithoutProof'));
   }
   const commitment = buildCommitment({ verdict, snapshot, decision });
 
@@ -617,10 +617,10 @@ async function sweep(now = Date.now()) {
       const renewalAmount = c.recurringTotal ?? c.worstCase;
       await notify({
         id: `missed-${c.id}`,
-        title: t('{x}: finestra di disdetta chiusa', { x: c.provider || c.host }),
+        title: t('xCancellationWindowClosed', { x: c.provider || c.host }),
         message: renewalAmount != null
-          ? t('Il termine per disdire è passato e il contratto si rinnova: {x}. Apri per vedere cosa puoi ancora fare.', { x: formatMoney(renewalAmount, c.currency) })
-          : t('Il termine per disdire è passato. Apri per vedere cosa puoi ancora fare.'),
+          ? t('cancellationDeadlineHasPassedContractRenews', { x: formatMoney(renewalAmount, c.currency) })
+          : t('cancellationDeadlineHasPassedOpenSee'),
         commitmentId: c.id,
       });
       await updateCommitment(c.id, { missedNotified: true });
@@ -635,10 +635,10 @@ async function sweep(now = Date.now()) {
     const renewalAmount = c.recurringTotal ?? c.worstCase;
     await notify({
       id: `reminder-${c.id}-${due.days}`,
-      title: t('Disdetta {x}: mancano {n} giorni', { x: c.provider || c.host, n: due.days }),
+      title: t('cancelXNDaysLeft', { x: c.provider || c.host, n: due.days }),
       message: renewalAmount != null
-        ? `${t('Se non disdici entro il termine, parte un nuovo periodo da {x}.', { x: formatMoney(renewalAmount, c.currency) })} ${state.label}.`
-        : `${state.label}. ${t('Apri per generare la lettera di disdetta.')}`,
+        ? `${t('ifDonTCancelTimeNew', { x: formatMoney(renewalAmount, c.currency) })} ${state.label}.`
+        : `${state.label}. ${t('openGenerateCancellationLetter')}`,
       commitmentId: c.id,
       kind: 'reminder',
     });
@@ -672,8 +672,8 @@ async function notify({ id, title, message, commitmentId, kind = 'open', sticky 
       requireInteraction: sticky,
       // I promemoria di disdetta portano direttamente all'azione.
       buttons: kind === 'reminder'
-        ? [{ title: t('Scrivi la lettera') }, { title: t('Ho già disdetto') }]
-        : [{ title: t('Apri il kit di uscita') }],
+        ? [{ title: t('writeLetter') }, { title: t('iVeAlreadyCancelled') }]
+        : [{ title: t('openExitKit') }],
     });
     await chrome.storage.session.set({ [`notif:${id}`]: { commitmentId, kind } });
   } catch (err) {
@@ -718,10 +718,10 @@ chrome.notifications?.onButtonClicked.addListener(async (id, index) => {
  */
 async function checkChanges(id, { trigger = 'manual' } = {}) {
   const commitment = await getCommitment(id);
-  if (!commitment) throw new Error(t('Impegno non trovato.'));
+  if (!commitment) throw new Error(t('commitmentNotFound'));
 
   const source = commitment.termsUrl || commitment.url;
-  if (!source) throw new Error(t('Per questo impegno non è stato registrato un indirizzo da ricontrollare.'));
+  if (!source) throw new Error(t('noAddressReCheckWasSaved'));
 
   const settings = await getSettings();
 
@@ -730,10 +730,10 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
   // transferred: stop here, without reading, analysing or spending.
   const doc = await fetchDocument(source, commitment.http || {});
   if (doc.notModified) {
-    return recordCheck(id, unchangedDiff(t('Il documento non è cambiato dall’ultimo controllo.')), commitment);
+    return recordCheck(id, unchangedDiff(t('documentHasnTChangedSinceLast')), commitment);
   }
   if (!doc.text || doc.text.length < 200) {
-    throw new Error(t('Il documento non è più leggibile automaticamente da questo indirizzo.'));
+    throw new Error(t('documentCanNoLongerReadAutomatically'));
   }
   if (doc.http) await updateCommitment(id, { http: doc.http });
 
@@ -741,7 +741,7 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
   const clean = normalize(doc.text);
   const newHash = await sha256(clean);
   if (commitment.snapshot?.hash && newHash === commitment.snapshot.hash) {
-    return recordCheck(id, unchangedDiff(t('Le condizioni sono identiche a quelle che avevi accettato.')), commitment);
+    return recordCheck(id, unchangedDiff(t('termsIdenticalOnesAccepted')), commitment);
   }
 
   // ── Gate 3: the server. ──────────────────────────────────────────────────
@@ -768,7 +768,7 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
   const serverAllowed = Boolean(settings.remoteConsentAt) && (trigger === 'manual' || settings.watchUsesRemote !== false);
   if (!serverAllowed) {
     return recordCheck(id, {
-      ...unchangedDiff(t('Il testo delle condizioni è cambiato. Premi «Verifica modifiche» per sapere se cambia il tuo impegno.')),
+      ...unchangedDiff(t('textTermsHasChangedPressCheck')),
       changed: true,
       hashChanged: true,
       severity: 'minor',
@@ -799,7 +799,7 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
 
   await notify({
     id: `change-${id}-${Date.now()}`,
-    title: t('Condizioni cambiate: {x}', { x: commitment.provider || commitment.host }),
+    title: t('termsChangedX', { x: commitment.provider || commitment.host }),
     message: diff.summary,
     commitmentId: id,
   });
@@ -855,7 +855,7 @@ async function watchAllCommitments() {
 
 async function letterFor({ id, kind, lang } = {}) {
   const commitment = await getCommitment(id);
-  if (!commitment) throw new Error(t('Impegno non trovato.'));
+  if (!commitment) throw new Error(t('commitmentNotFound'));
   const settings = await getSettings();
   // The letter's language is the provider's: normally, that of the country chosen in settings.
   return buildLetter(commitment, settings.identity || {}, kind || suggestKind(commitment), Date.now(), lang || letterLangFor(settings.jurisdiction));
@@ -863,15 +863,15 @@ async function letterFor({ id, kind, lang } = {}) {
 
 async function icsFor(id) {
   const commitment = await getCommitment(id);
-  if (!commitment) throw new Error(t('Impegno non trovato.'));
+  if (!commitment) throw new Error(t('commitmentNotFound'));
   const content = buildIcs(commitment);
-  if (!content) throw new Error(t('Questo impegno non ha una scadenza da mettere in calendario.'));
+  if (!content) throw new Error(t('commitmentHasNoDeadlinePutCalendar'));
   return { content, filename: `scadenza-${(commitment.provider || 'impegno').toLowerCase()}.ics` };
 }
 
 async function proofFor(id) {
   const commitment = await getCommitment(id);
-  if (!commitment) throw new Error(t('Impegno non trovato.'));
+  if (!commitment) throw new Error(t('commitmentNotFound'));
   const text = await getSnapshotText(id);
   const snapshot = commitment.snapshot || {};
 
@@ -915,7 +915,7 @@ async function fetchDocument(url, validators = {}, { signal } = {}) {
   if (res.status === 304) {
     return { url, notModified: true, text: '', http: validators };
   }
-  if (!res.ok) throw new Error(t('Il documento non è raggiungibile (HTTP {n}).', { n: res.status }));
+  if (!res.ok) throw new Error(t('documentCanTReachedHttpN', { n: res.status }));
 
   const http = {
     etag: res.headers.get('etag') || null,
@@ -924,7 +924,7 @@ async function fetchDocument(url, validators = {}, { signal } = {}) {
 
   const type = res.headers.get('content-type') || '';
   if (type.includes('application/pdf')) {
-    return { url: res.url, isPdf: true, text: '', note: t('PDF: aprilo nel pannello laterale per l’analisi.') };
+    return { url: res.url, isPdf: true, text: '', note: t('pdfOpenSidePanelAnalyse') };
   }
 
   const buf = await res.arrayBuffer();
@@ -959,7 +959,7 @@ async function checkCheckout() {
     await done();
     await showQuotaBadge(null);
     const name = { pro: 'Pro', max: 'Max', team: 'Team' }[lic.plan] || lic.plan;
-    await notify({ id: `plan-${Date.now()}`, title: t('{x} attivo su questo browser ✓', { x: name }), message: t('Grazie! Puoi chiudere la pagina del pagamento e tornare dove stavi: AnteFirma continua da solo.'), commitmentId: null, sticky: false });
+    await notify({ id: `plan-${Date.now()}`, title: t('xActiveBrowser', { x: name }), message: t('thanksCanClosePaymentPageGo'), commitmentId: null, sticky: false });
   }
 }
 

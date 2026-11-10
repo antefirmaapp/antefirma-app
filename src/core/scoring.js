@@ -153,7 +153,7 @@ function buildDrivers({ findings, cost, consumer, money, euBoost, understatedBoo
       weight: f.severity,
       label: f.label,
       detail: f.personalized && f.personalReasons?.length
-        ? `${f.why} ${t('Pesa di più per il tuo profilo: {x}.', { x: f.personalReasons.join(', ') })}`
+        ? `${f.why} ${t('mattersMoreProfileX', { x: f.personalReasons.join(', ') })}`
         : f.why,
     });
   }
@@ -161,15 +161,15 @@ function buildDrivers({ findings, cost, consumer, money, euBoost, understatedBoo
     drivers.push({
       kind: 'money',
       weight: understatedBoost,
-      label: t('Il prezzo mostrato non è il costo dell’impegno'),
-      detail: t('Vedi {a}, ma l’impegno potenziale stimato è {b}.', { a: cost.displayed, b: cost.worstCaseLabel }),
+      label: t('priceShownNotCostCommitment'),
+      detail: t('seeButEstimatedPotentialCommitmentB', { a: cost.displayed, b: cost.worstCaseLabel }),
     });
   } else if (money >= 12) {
     drivers.push({
       kind: 'money',
       weight: money,
-      label: t('Esposizione economica rilevante'),
-      detail: t('Impegno potenziale stimato: {x}.', { x: cost.worstCaseLabel }),
+      label: t('significantFinancialExposure'),
+      detail: t('estimatedPotentialCommitmentX', { x: cost.worstCaseLabel }),
     });
   }
   if (euBoost >= 8 && consumer.flags?.length) {
@@ -177,8 +177,8 @@ function buildDrivers({ findings, cost, consumer, money, euBoost, understatedBoo
       kind: 'law',
       weight: euBoost,
       label: consumer.jurisdiction === 'IT'
-        ? tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele italiane', '{n} condizioni da verificare rispetto alle tutele italiane')
-        : tn(consumer.flags.length, '{n} condizione da verificare rispetto alle tutele UE', '{n} condizioni da verificare rispetto alle tutele UE'),
+        ? tn(consumer.flags.length, 'nTermCheckAgainstItalianConsumer', 'nTermsCheckAgainstItalianConsumer')
+        : tn(consumer.flags.length, 'nTermCheckAgainstEuConsumer', 'nTermsCheckAgainstEuConsumer'),
       detail: consumer.flags.map((f) => f.title).join(' · '),
     });
   }

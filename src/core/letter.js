@@ -44,9 +44,9 @@ const FILE_SLUGS = {
 };
 
 export const LETTER_LABELS = {
-  withdrawal: 'Recesso entro 14 giorni (ripensamento)',
-  cancellation: 'Disdetta per evitare il rinnovo automatico',
-  change_withdrawal: 'Recesso per modifica unilaterale delle condizioni',
+  withdrawal: 'withdrawalWithin14DaysChangeMind',
+  cancellation: 'cancellationAvoidAutomaticRenewal',
+  change_withdrawal: 'withdrawalDueUnilateralChangeTerms',
 };
 
 /**
@@ -296,14 +296,14 @@ const TEXT = {
 /** The advice next to the letter: in the user's language, with the sending method of the letter's country. */
 function checklistFor(kind, c, lang) {
   const list = [
-    t('Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).'),
-    lang === 'es' ? t('Invia con un mezzo che lasci prova della data: burofax o raccomandata con ricevuta di ritorno.')
-      : lang === 'en' ? t('Invia con un mezzo che lasci prova della data: raccomandata con ricevuta o email con conferma di lettura.')
-        : t('Invia con un mezzo che lasci prova della data: PEC o raccomandata A/R.'),
-    t('Conserva la ricevuta di invio insieme allo snapshot delle condizioni.'),
+    t('fillFieldsSquareBracketsProviderAddress'),
+    lang === 'es' ? t('sendWayProvesDateBurofaxRegistered')
+      : lang === 'en' ? t('sendWayProvesDateRecordedDelivery')
+        : t('sendWayProvesDateCertifiedEmail'),
+    t('keepProofSendingTogetherSnapshotTerms'),
   ];
-  if (kind === LETTER_KINDS.WITHDRAWAL) list.unshift(t('Verifica di essere entro i 14 giorni dalla conclusione del contratto.'));
-  if (kind === LETTER_KINDS.CANCELLATION && c?.deadlineAt) list.unshift(t('Invia entro il {d}: è il termine di preavviso.', { d: fd(new Date(c.deadlineAt), locale()) }));
+  if (kind === LETTER_KINDS.WITHDRAWAL) list.unshift(t('checkWithin14DaysConcludingContract'));
+  if (kind === LETTER_KINDS.CANCELLATION && c?.deadlineAt) list.unshift(t('sendDSNoticeDeadline', { d: fd(new Date(c.deadlineAt), locale()) }));
   return list;
 }
 

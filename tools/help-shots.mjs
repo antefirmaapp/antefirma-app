@@ -10,9 +10,9 @@
  * simply doesn't appear. Like tools/media.mjs: extension loaded in Chromium,
  * invented gym, fake server (demo-fixture.mjs), no network.
  *
- * Screenshots: consenso, attesa, avviso, perche, pannello-esempi,
- * pannello-risultato, calendario, impegni, lettera, opzioni-piano, opzioni-dati.
- * Videos (15–20 s, .mp4 via ffmpeg): video-impegno, video-lettera, video-chiave.
+ * Screenshots: consent, waiting, warning, why, panel-examples, panel-result,
+ * calendar, commitments, letter, settings-plan, settings-data.
+ * Videos (15–20 s, .mp4 via ffmpeg): video-commitment, video-letter, video-key.
  * Also writes sizes.json (width and height of each image).
  */
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readdirSync } from 'node:fs';
@@ -80,16 +80,16 @@ async function screens(l, dir) {
   await pg.click('button.cta');
   await pg.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('[data-consent="accept"]'), null, { timeout: 15000 });
   await pg.waitForTimeout(500);
-  await shot(pg, dir, 'consenso');
+  await shot(pg, dir, 'consent');
   await alert.locator('[data-consent="accept"]').click();
   await pg.waitForTimeout(1200);
-  await shot(pg, dir, 'attesa');
+  await shot(pg, dir, 'waiting');
   await pg.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.tiles .tvalue'), null, { timeout: 15000 });
   await pg.waitForTimeout(2200);
-  await shot(pg, dir, 'avviso');
+  await shot(pg, dir, 'warning');
   await alert.locator('details.why > summary').click();
   await pg.waitForTimeout(700);
-  await shot(pg, dir, 'perche');
+  await shot(pg, dir, 'why');
   await pg.waitForTimeout(1500);
   await alert.locator('[data-act="track"]').click();
   await pg.waitForTimeout(800);
@@ -102,26 +102,26 @@ async function screens(l, dir) {
   await panel.waitForTimeout(800);
   await panel.click('.source[data-source="paste"]');
   await panel.waitForTimeout(400);
-  await shot(panel, dir, 'pannello-esempi');
+  await shot(panel, dir, 'panel-examples');
   // An example is viewed, not recorded: the result needs a (fake) analysis of the gym text.
   await panel.fill('#paste-text', PAGE[l].terms);
   await panel.fill('#paste-price', '39'); await panel.selectOption('#paste-period', 'month');
   await panel.click('#run-paste');
   await panel.waitForSelector('#track', { timeout: 15000 });
   await panel.waitForTimeout(600);
-  await shot(panel, dir, 'pannello-risultato');
+  await shot(panel, dir, 'panel-result');
   await panel.click('#track');
   await panel.waitForSelector('#cal-ics', { timeout: 10000 });
   await panel.locator('#cal-ics').scrollIntoViewIfNeeded();
   await panel.waitForTimeout(500);
-  await shot(panel, dir, 'calendario');
+  await shot(panel, dir, 'calendar');
   await panel.click('#tab-btn-commitments');
   await panel.waitForTimeout(800);
-  await shot(panel, dir, 'impegni');
+  await shot(panel, dir, 'commitments');
   await panel.locator('[data-act="letter"]').first().click();
   await panel.waitForSelector('#letter-lang', { timeout: 10000 });
   await panel.waitForTimeout(600);
-  await shot(panel, dir, 'lettera');
+  await shot(panel, dir, 'letter');
   await panel.close();
 
   // Settings: one section at a time.
@@ -129,7 +129,7 @@ async function screens(l, dir) {
   await opt.setViewportSize({ width: 820, height: 900 });
   await opt.goto(`chrome-extension://${extId}/src/options/options.html`);
   await opt.waitForTimeout(1000);
-  for (const [name, sel] of [['opzioni-piano', '#piano'], ['opzioni-dati', '#export-data']]) {
+  for (const [name, sel] of [['settings-plan', '#piano'], ['settings-data', '#export-data']]) {
     const sec = opt.locator(sel).locator('xpath=ancestor-or-self::section[1]');
     await sec.scrollIntoViewIfNeeded();
     await opt.waitForTimeout(300);
@@ -174,7 +174,7 @@ const panelUrl = (id) => `chrome-extension://${id}/src/sidepanel/sidepanel.html`
 
 async function videos(l, dir) {
   // Recording a commitment and adding it to the calendar.
-  await clip(l, dir, 'video-impegno', PANEL, async (p, id) => {
+  await clip(l, dir, 'video-commitment', PANEL, async (p, id) => {
     await p.goto(panelUrl(id)); await p.evaluate(CURSOR); await p.waitForTimeout(900);
     await press(p, '.source[data-source="paste"]', 900);
     await press(p, '#paste-text', 200);
@@ -187,7 +187,7 @@ async function videos(l, dir) {
     await press(p, '#tab-btn-commitments', 2500);
   });
   // Preparing the letter, and changing its language.
-  await clip(l, dir, 'video-lettera', PANEL, async (p, id) => {
+  await clip(l, dir, 'video-letter', PANEL, async (p, id) => {
     await p.goto(panelUrl(id)); await p.evaluate(CURSOR);
     await p.click('.source[data-source="paste"]'); await p.fill('#paste-text', PAGE[l].terms);
     await p.fill('#paste-price', '39'); await p.selectOption('#paste-period', 'month'); await p.click('#run-paste');
@@ -203,7 +203,7 @@ async function videos(l, dir) {
     await p.mouse.wheel(0, 500); await p.waitForTimeout(2000);
   });
   // Entering the plan key (fake: the test server accepts it).
-  await clip(l, dir, 'video-chiave', PANEL, async (p, id) => {
+  await clip(l, dir, 'video-key', PANEL, async (p, id) => {
     await p.goto(`chrome-extension://${id}/src/options/options.html`); await p.evaluate(CURSOR); await p.waitForTimeout(600);
     await p.locator('#piano').scrollIntoViewIfNeeded(); await p.waitForTimeout(1200);
     await press(p, '#plan-key', 300);
