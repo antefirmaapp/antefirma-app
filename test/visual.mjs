@@ -40,7 +40,8 @@ const STYLE = `@font-face { font-family: AFVisual; src: ${font('DejaVuSans.woff2
 @font-face { font-family: AFVisual; src: ${font('DejaVuSans-Bold.woff2')}; font-weight: 600 900; }
 *, *::before, *::after { font-family: AFVisual, sans-serif !important; animation: none !important; transition: none !important; caret-color: transparent !important; }`;
 
-const browser = await chromium.launch();
+// No font hinting: with it, text widths follow each machine's fontconfig and lines wrap differently.
+const browser = await chromium.launch({ args: ['--font-render-hinting=none', '--disable-lcd-text', '--force-color-profile=srgb'] });
 const results = [];
 const check = (name, ok, detail = '') => {
   results.push(ok);
@@ -75,8 +76,27 @@ async function compare(cmp, a, b) {
   return r;
 }
 
+/**
+ * Emoji come from each system's colour font, with its own size and line height:
+ * each one is replaced by a plain square of the same em size before the picture.
+ */
+const NO_EMOJI = () => {
+  const re = /(\p{Extended_Pictographic}|\p{Regional_Indicator})(\uFE0F|\u200D\p{Extended_Pictographic})*/gu;
+  const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  const has = new RegExp(re.source, 'u'); // without /g: test() would move lastIndex
+  for (let t = tw.nextNode(); t; t = tw.nextNode()) if (has.test(t.textContent)) nodes.push(t);
+  for (const t of nodes) {
+    const span = document.createElement('span');
+    span.innerHTML = t.textContent.replace(/[&<>]/g, (c) => `&#${c.charCodeAt(0)};`)
+      .replace(re, '<i style="display:inline-block;width:1em;height:.8em;background:#999;vertical-align:-.1em;font-style:normal"></i>');
+    t.replaceWith(span);
+  }
+};
+
 async function screen(page, cmp, name) {
   await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(NO_EMOJI);
   await page.waitForTimeout(150);
   const shot = await page.screenshot({ fullPage: true });
   const base = join(DIR, `${name}.png`);
