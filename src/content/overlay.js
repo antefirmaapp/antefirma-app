@@ -1,17 +1,17 @@
 /**
- * L'avviso che si frappone fra l'utente e il click.
+ * The warning that stands between the user and the click.
  *
- * Principio di progetto: l'utente ha il dito sul pulsante e dieci secondi di
- * pazienza. Quindi prima il numero (quanto mi costa), poi la scadenza da
- * ricordare, e solo dopo, se vuole, il dettaglio delle clausole. Il punteggio
- * e il motore che l'ha prodotto stanno in fondo: sono la provenienza del
- * verdetto, non il verdetto.
+ * Design principle: the user has a finger on the button and ten seconds of
+ * patience. So first the number (what it costs me), then the deadline to
+ * remember, and only then, if they want, the clause details. The score and the
+ * engine that produced it sit at the bottom: they are where the verdict comes
+ * from, not the verdict.
  *
- * Vive in uno shadow root, dentro un <dialog> aperto con showModal(): il top
- * layer non è raggiungibile dallo z-index del sito, il focus resta dentro
- * l'avviso e il resto della pagina diventa inerte senza che dobbiamo
- * reimplementarlo. Sopra a tutto, un guardiano che rimette l'avviso al suo
- * posto se il sito prova a rimuoverlo o a nasconderlo con il proprio CSS.
+ * It lives in a shadow root, inside a <dialog> opened with showModal(): the top
+ * layer is out of reach of the site's z-index, focus stays inside the warning
+ * and the rest of the page becomes inert without us reimplementing it. On top
+ * of everything, a guard puts the warning back in place if the site tries to
+ * remove it or hide it with its own CSS.
  */
 (() => {
   const CF = (globalThis.__CF ||= {});
@@ -22,20 +22,20 @@
   const tn = (n, one, many, v) => I.tn(n, one, many, v);
 
   /**
-   * Ogni livello ha due inchiostri, uno per tema.
+   * Every level has two inks, one per theme.
    *
-   * I colori di `LEVELS` in core/constants.js sono tarati per il fondo chiaro:
-   * su fondo scuro `#7d0a0a` (CRITICAL) contro `#1c2027` fa 1,49:1, cioè il
-   * numero più importante dell'avviso — la cifra da 30 px — diventa
-   * illeggibile proprio nel caso più grave. Quel file è il vocabolario del
-   * motore e resta com'è: la variante scura è una questione di resa, e vive
-   * qui insieme al resto degli stili.
+   * The `LEVELS` colours in core/constants.js are tuned for the light
+   * background: on dark, `#7d0a0a` (CRITICAL) against `#1c2027` is 1.49:1, so
+   * the most important number of the warning — the 30 px figure — becomes
+   * unreadable in exactly the most serious case. That file is the engine's
+   * vocabulary and stays as it is: the dark variant is a rendering matter, and
+   * lives here with the rest of the styles.
    *
-   * `badge` è l'inchiostro del pill colorato: su ambra e arancione il bianco
-   * non arriva a 4,5:1 a 11 px (3,25:1 e 4,16:1), quindi lì si scrive scuro.
+   * `badge` is the ink of the coloured pill: on amber and orange, white doesn't
+   * reach 4.5:1 at 11 px (3.25:1 and 4.16:1), so dark ink is used there.
    *
-   * Contrasti misurati con la formula WCAG 2.1 (fondi: chiaro #f7f8fa dentro
-   * il blocco costo, scuro #1c2027):
+   * Contrasts measured with the WCAG 2.1 formula (backgrounds: light #f7f8fa
+   * inside the cost block, dark #1c2027):
    *   safe        #176e47 5,89:1   ·  #57d08f 8,42:1  ·  badge #fff  5,00:1
    *   review      #8a6508 5,01:1   ·  #e3b341 8,40:1  ·  badge scuro 6,08:1
    *   commitment  #a44f00 5,35:1   ·  #f59b4a 7,52:1  ·  badge scuro 4,76:1
@@ -54,7 +54,7 @@
 
   const paletteFor = (levelId) => LEVEL_PALETTE[levelId] || FALLBACK_PALETTE;
 
-  /** Fasce di severità di una singola clausola: stessa scala dei livelli. */
+  /** Severity bands of a single clause: the same scale as the levels. */
   const SEV_BANDS = [
     [80, 'critical'],
     [65, 'high_risk'],
@@ -68,7 +68,7 @@
     return FALLBACK_PALETTE;
   }
 
-  /** Colore (tema chiaro) della fascia di severità. */
+  /** Colour (light theme) of the severity band. */
   function sevColor(sev) {
     return sevPalette(sev).light;
   }
@@ -77,8 +77,8 @@
     :host { all: initial; }
     * { box-sizing: border-box; }
 
-    /* Il <dialog> occupa tutto il viewport e fa da area di scarto: un click
-       fuori dalla card colpisce lui, ed è il gesto di "torna indietro". */
+    /* The <dialog> fills the viewport and acts as a discard area: a click
+       outside the card hits it, and that is the "go back" gesture. */
     dialog.backdrop {
       position: fixed; inset: 0; margin: 0; border: 0; padding: 24px;
       width: 100%; max-width: 100%; height: 100%; max-height: 100%;
@@ -96,7 +96,7 @@
       box-shadow: 0 24px 70px rgba(0,0,0,.45);
       display: flex; flex-direction: column; overflow: hidden;
       animation: rise .2s cubic-bezier(.2,.7,.3,1);
-      /* Inchiostri di livello: il tema scuro li ribalta più in basso. */
+      /* Level inks: the dark theme flips them further down. */
       --ink-safe: #176e47; --ink-review: #8a6508; --ink-commitment: #a44f00;
       --ink-high: #b3312a; --ink-critical: #7d0a0a;
     }
@@ -126,8 +126,8 @@
     .cost .displayed { font-size: 13px; color: #6b7280; }
     .cost .displayed b { color: #15203a; }
 
-    /* La formula come elenco verticale: chi deve giudicare da sé ha bisogno di
-       leggere gli addendi uno per uno, non una riga di somme. */
+    /* The formula as a vertical list: whoever must judge for themselves needs
+       to read the addends one by one, not a line of sums. */
     .formula { margin-top: 12px; font-size: 12.5px; color: #414852; width: 100%; }
     .formula li { display: flex; justify-content: space-between; gap: 14px; padding: 3px 0; }
     .formula .voce { color: #4a5058; }
@@ -140,8 +140,8 @@
       background: #fff7cc; border: 1px solid #ffe04a; border-radius: 10px;
       padding: 11px 13px; margin-bottom: 14px; font-size: 13.5px; line-height: 1.45;
     }
-    /* Dentro il blocco costo la scadenza è la seconda riga, non un box a parte:
-       «648,76 €» e «entro il 15 giugno 2028» sono un colpo d'occhio solo. */
+    /* Inside the cost block the deadline is the second line, not a separate
+       box: "€648.76" and "by 15 June 2028" are a single glance. */
     .cost .remember { margin: 12px 0 0; }
     .remember .ico { font-size: 15px; line-height: 1.3; }
     .summary { font-size: 14px; line-height: 1.55; margin: 0 0 14px; color: #2b3038; }
@@ -185,8 +185,8 @@
     .law .refs { font-size: 11px; color: #6b7280; margin-top: 5px; }
     details { border-top: 1px solid #eceef2; padding-top: 10px; }
     summary { cursor: pointer; font-size: 12.5px; color: #4a5568; font-weight: 600; }
-    /* Il troncamento muto delle clausole in eccesso è un'omissione: qui il
-       resto è chiuso, ma dichiarato e raggiungibile. */
+    /* Silently cutting extra clauses would be an omission: here the rest is
+       collapsed, but declared and reachable. */
     .more { border-top: none; padding-top: 2px; }
     .more > summary { color: #4a5568; }
     footer {
@@ -209,19 +209,18 @@
     .armhint { margin: 0; padding: 0 22px 10px; font-size: 11.5px; color: #6b7280; line-height: 1.45; }
     .armhint:empty { padding: 0; }
     /**
-     * Testo per chi ascolta, non per chi guarda: l'annuncio dello sblocco
-     * restava a schermo come una riga di interfaccia («Ora puoi premere
-     * "Continua comunque"»), che a chi vede il pulsante attivo non dice nulla.
-     * Ritaglio invece di display:none, altrimenti gli screen reader non lo
-     * leggerebbero affatto.
+     * Text for listeners, not for viewers: the unlock announcement used to stay
+     * on screen as an interface line ("You can now press 'Continue anyway'"),
+     * which says nothing to someone who sees the button active. Clipped rather
+     * than display:none, otherwise screen readers would not read it at all.
      */
     .v-arm-live {
       position: absolute; width: 1px; height: 1px; margin: -1px;
       padding: 0; border: 0; overflow: hidden; white-space: nowrap;
       clip: rect(0 0 0 0); clip-path: inset(50%);
     }
-    /* Provenienza: da dove viene il verdetto e quanto pesa il punteggio.
-       Serve a chi vuole controllare, non a chi deve decidere in tre secondi. */
+    /* Provenance: where the verdict comes from and how much the score weighs.
+       For whoever wants to check, not for whoever must decide in three seconds. */
     .provenance { font-size: 11px; color: #6b7280; padding: 0 22px 4px; line-height: 1.5; }
     .disclaimer { font-size: 11px; color: #6b7280; padding: 0 22px 12px; line-height: 1.45; }
     .disclaimer a.help { color: inherit; text-decoration: underline; white-space: nowrap; }
@@ -288,16 +287,16 @@
       .summary, .finding .plain, .step .items, .law .note, .loading p, .formula { color: #c3c8d1; }
       h1, .finding .name, .step .when, .law .title, .cost .displayed b { color: #f2f4f8; }
       summary, .more > summary { color: #c3c8d1; }
-      /* Il grigio dei testi secondari è tarato sul fondo chiaro: su #15203a
-         scende a 3,64:1, sotto la soglia per corpi da 11-12 px. */
+      /* The grey of secondary text is tuned for the light background: on
+         #15203a it drops to 3.64:1, below the threshold for 11-12 px text. */
       .eyebrow, .action, h2, .cost .caption, .cost .displayed, .formula .voce, .horizon,
       .finding .sev, .finding .tag, .law .refs, .loading small, .link,
       .armhint, .provenance, .disclaimer { color: #a8b0bd; }
       .finding .quote { color: #b4bbc7; }
       .finding .tag { background: #232830; }
       .formula .tot { border-top-color: #2a2f38; }
-      /* Sul fondo scuro il pill e la barra prendono l'inchiostro chiaro: il
-         colore di livello pieno (1,61:1 per CRITICAL) sparirebbe nella card. */
+      /* On the dark background the pill and the bar take the light ink: the
+         full level colour (1.61:1 for CRITICAL) would vanish into the card. */
       .bar { background: var(--level-ink-dark, var(--level-color, #888)); }
       .badge { background: var(--level-ink-dark, var(--level-color, #888)); color: #15203a; }
       .cost .amount { color: var(--level-ink-dark, #f2f4f8); }
@@ -316,8 +315,8 @@
       .error { background: #2a1616; border-color: #5a2626; color: #f5b5b5; }
     }
 
-    /* Chi ha chiesto meno movimento lo ha chiesto al sistema operativo: un
-       avviso che pulsa mentre si legge un contratto è esattamente il caso. */
+    /* Whoever asked for less motion asked the operating system: a warning that
+       pulses while you read a contract is exactly that case. */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: .01ms !important;
@@ -325,21 +324,21 @@
         transition-duration: .01ms !important;
         scroll-behavior: auto !important;
       }
-      /* Lo stato "in corso" resta leggibile senza rotazione: un anello pieno
-         invece di uno che gira. */
+      /* The "in progress" state stays readable without rotation: a full ring
+         instead of a spinning one. */
       .spinner { animation: none; border-style: dotted; border-color: #8a919d; }
     }
   `;
 
   const HOST_TAG = 'antefirma-alert';
 
-  /** Quanto resta bloccato "Continua comunque" dal primo disegno della card. */
+  /** How long "Continue anyway" stays locked from the card's first paint. */
   const ARM_MS = 3000;
 
-  /** Passi di timeline che da soli valgono comunque la sezione. */
+  /** Timeline steps that are worth the section on their own. */
   const KEY_STEPS = new Set(['deadline', 'renewal', 'penalty']);
 
-  /** Quante clausole stanno in chiaro prima del blocco richiudibile. */
+  /** How many clauses are shown before the collapsible block. */
   const FINDINGS_HEAD = 6;
 
   function money(amount, currency = 'EUR') {
@@ -356,7 +355,7 @@
       this.host = null;
       this.root = null;
       this.dialog = null;
-      /** Istante del primo armamento: il conto alla rovescia parte una volta sola. */
+      /** When it was first armed: the countdown starts only once. */
       this.armedAt = null;
       this.armTimer = null;
       this.onKeyDown = this.onKeyDown.bind(this);
@@ -377,12 +376,11 @@
     }
 
     /**
-     * Gli stili dell'host vanno scritti inline e in !important.
+     * Host styles must be written inline and !important.
      *
-     * Il foglio di stile del sito ha la stessa dignità del nostro: gli
-     * basterebbe un `antefirma-alert { display: none }` per far sparire
-     * l'avviso lasciando il click sospeso — cioè per rompere la pagina e
-     * insieme la protezione.
+     * The site's stylesheet ranks as high as ours: an `antefirma-alert
+     * { display: none }` would be enough to make the warning disappear while the
+     * click stays held — breaking the page and the protection at once.
      */
     enforceHostStyle() {
       const rules = {
@@ -396,23 +394,22 @@
     }
 
     /**
-     * Un shadow root chiuso darebbe solo l'illusione della protezione: la
-     * pagina non ne leggerebbe il contenuto, ma potrebbe comunque rimuovere
-     * l'elemento host dal DOM. Meglio uno shadow aperto — ispezionabile, e
-     * quindi verificabile dai test — con un guardiano che rimette l'avviso al
-     * suo posto se qualcuno lo toglie di mezzo.
+     * A closed shadow root would only give the illusion of protection: the page
+     * couldn't read its content, but it could still remove the host element from
+     * the DOM. Better an open shadow — inspectable, and so testable — with a
+     * guard that puts the warning back if someone moves it out of the way.
      */
     startWatchdog() {
       this.watchdog = new MutationObserver(() => {
-        if (!this.resolve) return; // decisione già presa: nulla da difendere
+        if (!this.resolve) return; // decision already taken: nothing to defend
         if (!this.host) return;
         if (!this.host.isConnected) {
           (document.documentElement || document.body).append(this.host);
         }
         this.enforceHostStyle();
-        // Staccare l'host dal documento fa cadere il dialogo dal top layer:
-        // rimetterlo nel DOM non basta, va riaperto o l'avviso resta lì
-        // svuotato di ogni difesa (niente focus trap, niente inerzia).
+        // Detaching the host from the document drops the dialog from the top
+        // layer: putting it back in the DOM isn't enough, it must be reopened or
+        // the warning stays there stripped of every defence (no focus trap, no inertness).
         this.ensureModal();
       });
       this.watchdog.observe(document.documentElement, {
@@ -424,13 +421,13 @@
     }
 
     /**
-     * Apre (o riapre) il dialogo come modale.
+     * Opens (or reopens) the dialog as a modal.
      *
-     * showModal() è ciò che ci dà gratis quello che `aria-modal` da solo non dà
-     * dentro uno shadow root: il focus non esce dall'avviso, il resto della
-     * pagina è inerte — compreso il pulsante che stiamo bloccando — ed Esc
-     * arriva a noi. Se il browser non lo supporta si ripiega su un dialogo
-     * aperto e basta: meno protetto, ma visibile.
+     * showModal() gives us for free what `aria-modal` alone doesn't inside a
+     * shadow root: focus doesn't leave the warning, the rest of the page is inert
+     * — including the button we are holding — and Esc comes to us. If the
+     * browser doesn't support it we fall back to a plain open dialog: less
+     * protected, but visible.
      */
     ensureModal() {
       const dlg = this.dialog;
@@ -463,8 +460,8 @@
       if (existing) existing.remove();
       const dlg = document.createElement('dialog');
       dlg.className = 'backdrop';
-      // Con un role esplicito l'`aria-modal` implicito del dialogo modale non
-      // vale più: va riscritto a mano.
+      // With an explicit role the dialog's implicit `aria-modal` no longer
+      // applies: it must be set by hand.
       dlg.setAttribute('role', aria.role || 'dialog');
       dlg.setAttribute('aria-modal', 'true');
       if (aria.labelledby) dlg.setAttribute('aria-labelledby', aria.labelledby);
@@ -473,13 +470,13 @@
       dlg.addEventListener('click', (e) => {
         if (e.target === dlg) this.finish('cancel');
       });
-      // Esc e ogni altra "close request" del browser passano di qui e valgono
-      // «Torna indietro», come è sempre stato.
+      // Esc and every other browser "close request" go through here and mean
+      // "Go back", as they always did.
       //
-      // Non stiamo invece a sentire `close`: quell'evento è accodato, non
-      // sincrono, e arriva anche quando siamo noi a chiudere il dialogo per
-      // ridisegnare la card. Ascoltarlo significava annullare l'azione
-      // dell'utente al primo aggiornamento del verdetto.
+      // We don't listen to `close` instead: that event is queued, not
+      // synchronous, and it also arrives when we close the dialog ourselves to
+      // redraw the card. Listening to it meant undoing the user's action at the
+      // first verdict update.
       dlg.addEventListener('cancel', (e) => {
         e.preventDefault();
         this.finish('cancel');
@@ -491,10 +488,10 @@
     }
 
     /**
-     * L'attesa. Il server impiega qualche secondo: intanto si mostra subito
-     * ciò che l'estensione sa già (azione, sito, prezzo letto nella pagina) e i
-     * riquadri che si riempiranno, e «Continua senza aspettare» è disponibile
-     * da subito: l'attesa è una scelta, non una trappola.
+     * The wait. The server takes a few seconds: meanwhile we show at once what
+     * the extension already knows (action, site, price read on the page) and the
+     * boxes that will fill up, and "Continue without waiting" is available from
+     * the start: waiting is a choice, not a trap.
      *
      * @param {string} actionLabel
      * @param {{ price?: string|null, host?: string|null }} [preview]
@@ -533,15 +530,15 @@
     }
 
     /**
-     * Il consenso alla prima analisi. Il testo della pagina parte verso il
-     * server di AnteFirma solo dopo questo sì, e il sì vale per le analisi
-     * successive finché non lo si ritira dalle impostazioni.
+     * Consent at the first analysis. The page text goes to the AnteFirma server
+     * only after this yes, and the yes covers later analyses until it is
+     * withdrawn in settings.
      *
-     * I due pulsanti accettano solo click veri (`isTrusted`): l'avviso sta in
-     * uno shadow root aperto, e uno script della pagina potrebbe altrimenti
-     * premere «Analizza» al posto della persona.
+     * Both buttons accept only real clicks (`isTrusted`): the warning lives in an
+     * open shadow root, and a page script could otherwise press "Analyse" on the
+     * person's behalf.
      *
-     * @returns {Promise<'accept'|'skip'>} `cancel` passa da `wait()`, come sempre.
+     * @returns {Promise<'accept'|'skip'>} `cancel` goes through `wait()`, as always.
      */
     askConsent() {
       return new Promise((resolve) => {
@@ -585,7 +582,7 @@
       });
     }
 
-    /** L'avviso è ancora in attesa di una decisione dell'utente? */
+    /** Is the warning still waiting for a user decision? */
     isOpen() {
       return Boolean(this.resolve && this.host?.isConnected);
     }
@@ -593,7 +590,7 @@
     showVerdict(verdict, { blocking = true } = {}) {
       const level = verdict.level || {};
       const cost = verdict.cost || {};
-      // Due categorie nate dalla stessa frase si mostrano una volta sola, con i due nomi.
+      // Two categories born from the same sentence are shown once, with both names.
       const findings = [];
       for (const f of verdict.findings || []) {
         const key = (f.quote || '').trim().toLowerCase();
@@ -601,14 +598,14 @@
         if (prev) prev.title = `${prev.title || prev.label} · ${f.title || f.label}`;
         else findings.push({ ...f });
       }
-      // La penale in mensilità ha una cifra calcolata, non un importo scritto.
+      // An exit fee in monthly payments has a computed figure, not a written amount.
       const penaltyAmount = cost.penalty?.amount ?? (cost.lines || []).find((l) => l.kind === 'penalty')?.amount ?? null;
       const timeline = verdict.timeline || [];
       const consumer = verdict.consumer || {};
       const ink = paletteFor(level.id);
 
-      // Le tre risposte che la persona cerca: quanto pago davvero, fino a
-      // quando sono legato, come ne esco. Il resto sta dietro «Perché?».
+      // The three answers the person is looking for: what I really pay, how long
+      // I am bound, how I get out. The rest is behind "Why?".
       const deadline = timeline.find((x) => x.kind === 'deadline');
       const months = cost.horizonMonths ? Math.round(cost.horizonMonths) : null;
       const tiles = [
@@ -668,9 +665,9 @@
            </section>`
         : '';
 
-      // Un solo passo di timeline di solito è rumore, ma se quel passo è una
-      // scadenza, un rinnovo o una penale è proprio la data da ricordare:
-      // scartarla la farebbe uscire dalla card.
+      // A single timeline step is usually noise, but if that step is a deadline,
+      // a renewal or an exit fee it is exactly the date to remember: dropping it
+      // would push it out of the card.
       const showTimeline =
         timeline.length > 1 || (timeline.length === 1 && KEY_STEPS.has(timeline[0]?.kind));
       const timelineBlock = showTimeline
@@ -708,11 +705,11 @@
            </details>`
         : '';
 
-      // Un impegno con una scadenza o un costo ricorrente: il pulsante principale
-      // diventa «Continua e ricordami la disdetta» (prosegue e registra l'impegno).
+      // A commitment with a deadline or a recurring cost: the main button
+      // becomes "Continue and remind me to cancel" (goes ahead and records it).
       const trackable = blocking && !!(deadline || cost.hasRecurring || cost.hasAutoRenewal);
       const arm = blocking ? ' data-arm="1" aria-disabled="true" aria-describedby="v-arm-why"' : '';
-      // Il piano a pagamento si propone quando il valore si vede, non solo al limite.
+      // The paid plan is offered when its value is visible, not only at the limit.
       const q = verdict.engine?.quota;
       const free = !q?.plan || q.plan === 'free';
       const left = q?.month?.remaining;
@@ -789,9 +786,9 @@
 
     showError(message, code = '') {
       const ink = paletteFor('review');
-      // Analisi del mese finite: il momento in cui la persona ha appena visto
-      // che il servizio le serve. Il pulsante apre il pagamento già legato a
-      // questo browser (o le impostazioni, per chi ha già un piano).
+      // This month's analyses are used up: the moment the person has just seen
+      // that the service is useful to them. The button opens the payment already
+      // linked to this browser (or settings, for those who already have a plan).
       const upsell = code === 'quota_month'
         ? `<div class="upsell"><button class="upgrade" type="button" data-upgrade>${esc(t('Passa a Pro · 50 analisi al mese'))}</button><p class="upsell-note" aria-live="polite"></p></div>`
         : '';
@@ -820,22 +817,22 @@
     }
 
     /**
-     * "Continua comunque" si sblocca dopo un attimo: non per attrito fine a sé
-     * stesso, ma perché il click che stiamo intercettando era già partito e la
-     * mano è ancora in movimento.
+     * "Continue anyway" unlocks after a moment: not friction for its own sake,
+     * but because the click we are intercepting had already started and the hand
+     * is still moving.
      *
-     * Due cose che prima non erano vere:
+     * Two things that weren't true before:
      *
-     * 1. Il pulsante non è `disabled`. Un `<button disabled>` esce dall'ordine
-     *    di tabulazione: chi naviga da tastiera non lo incontra proprio, e
-     *    dopo tre secondi se lo ritrova comparso senza che nulla glielo abbia
-     *    detto. Con `aria-disabled` il pulsante resta raggiungibile e
-     *    annunciato come non disponibile, e il click lo fermiamo noi in bind().
+     * 1. The button is not `disabled`. A `<button disabled>` leaves the tab
+     *    order: keyboard users don't meet it at all, and after three seconds
+     *    find it appeared without anything telling them. With `aria-disabled` the
+     *    button stays reachable and announced as unavailable, and we stop the
+     *    click ourselves in bind().
      *
-     * 2. L'armamento è idempotente. Il raffinamento ridisegna la card, e con
-     *    essa faceva ripartire il conto da tre — un bersaglio che si sposta
-     *    sotto il dito di chi lo stava già puntando. L'istante di partenza è
-     *    memorizzato una volta sola.
+     * 2. Arming is idempotent. Refining the verdict redraws the card, and with
+     *    it the countdown restarted from three — a target moving under the
+     *    finger of someone already aiming at it. The start time is stored only
+     *    once.
      */
     armProceed() {
       clearTimeout(this.armTimer);
@@ -845,15 +842,15 @@
       this.armedAt ??= Date.now();
       const left = ARM_MS - (Date.now() - this.armedAt);
       if (left <= 0) {
-        // Già scaduto quando la card è stata ridisegnata: niente da annunciare,
-        // il pulsante era libero anche un attimo fa.
+        // Already expired when the card was redrawn: nothing to announce, the
+        // button was free a moment ago too.
         this.releaseProceed(false);
         return;
       }
       this.armTimer = setTimeout(() => this.releaseProceed(true), left);
     }
 
-    /** @param {boolean} announce dare voce allo sblocco (una volta sola). */
+    /** @param {boolean} announce voice the unlock (only once). */
     releaseProceed(announce) {
       const btn = this.root?.querySelector('.proceed[data-arm]');
       if (!btn) return;
@@ -861,10 +858,10 @@
       btn.removeAttribute('aria-describedby');
       this.root.querySelector('#v-arm-why')?.remove();
       const live = this.root.querySelector('.v-arm-live');
-      // Tolto il perché, resta solo la live region: senza padding la riga non
-      // lascia un vuoto sotto ai pulsanti (`.armhint:empty`).
-      // Un annuncio solo, allo sblocco. Un tick al secondo riempirebbe di
-      // numeri lo spazio sonoro proprio mentre c'è un contratto da ascoltare.
+      // Without the reason only the live region stays: with no padding the line
+      // leaves no gap under the buttons (`.armhint:empty`).
+      // A single announcement, at unlock. A tick per second would fill the audio
+      // space with numbers right while there is a contract to listen to.
       if (live) live.textContent = announce ? t('Ora puoi continuare.') : '';
     }
 
@@ -873,13 +870,13 @@
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          // `aria-disabled` non impedisce il click come farebbe `disabled`:
-          // il rifiuto tocca a noi.
+          // `aria-disabled` doesn't stop the click like `disabled` would: refusing
+          // it is our job.
           if (btn.getAttribute('aria-disabled') === 'true') return;
           this.finish(btn.dataset.act);
         });
       }
-      // «Avviso sbagliato?»: al server va solo la categoria, mai il testo.
+      // "Wrong warning?": only the category goes to the server, never the text.
       for (const b of this.root.querySelectorAll('[data-feedback]')) {
         b.addEventListener('click', async (e) => {
           e.preventDefault();
@@ -904,8 +901,8 @@
           if (note) note.textContent = err?.message || t('Non riesco ad aprire la pagina di pagamento.');
         }
       });
-      // Durante il caricamento non c'è nessun `.cancel`, solo un `.link`: la
-      // ricerca per classe lasciava il focus dov'era, cioè sulla pagina sotto.
+      // While loading there is no `.cancel`, only a `.link`: searching by class
+      // left focus where it was, i.e. on the page underneath.
       const first = this.root.querySelector('[data-act]');
       first?.focus?.();
     }
@@ -938,9 +935,9 @@
   }
 
   /**
-   * Quante analisi gratuite restano nel mese. Solo per un verdetto appena
-   * arrivato dal server: uno dalla cache locale non ha consumato niente, e il
-   * suo numero sarebbe vecchio.
+   * How many free analyses are left this month. Only for a verdict that has
+   * just arrived from the server: one from the local cache used nothing, and
+   * its number would be stale.
    */
   function quotaNote(verdict = {}) {
     const m = verdict.engine?.quota?.month;

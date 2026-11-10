@@ -1,11 +1,11 @@
 /**
- * Context Engine (lato pagina).
+ * Context Engine (page side).
  *
- * Guarda la *decisione*, non solo il documento: che pulsante è, quanto costa,
- * per quanto tempo, quali consensi sono già spuntati, dove sono i termini.
+ * It looks at the *decision*, not just the document: which button it is, what it
+ * costs, for how long, which consents are already ticked, where the terms are.
  *
- * Tutto ciò che raccoglie resta nella pagina finché l'utente non compie
- * l'azione: nulla viene inviato in background prima del click.
+ * Everything it collects stays in the page until the user performs the action:
+ * nothing is sent in the background before the click.
  */
 (() => {
   const CF = (globalThis.__CF ||= {});
@@ -14,9 +14,9 @@
 
   const CURRENCY = { '€': 'EUR', $: 'USD', '£': 'GBP', '¥': 'JPY' };
   /**
-   * Le forme a parole («29,90 euro al mese») valgono quanto il simbolo: senza,
-   * il prezzo di una pagina che non usa «€» non veniva visto affatto. Solo
-   * postfisse, come in core/text.js: in italiano l'unità segue l'importo.
+   * Word forms ("29,90 euro al mese") count as much as the symbol: without them,
+   * the price of a page that doesn't use "€" was not seen at all. Postfix only,
+   * as in core/text.js: in Italian the unit follows the amount.
    */
   const CURRENCY_WORD = { euro: 'EUR', euros: 'EUR', dollari: 'USD', sterline: 'GBP', franchi: 'CHF' };
   const AMOUNT_RE =
@@ -81,7 +81,7 @@
     return out;
   }
 
-  /** Risale dal pulsante al contenitore che con più probabilità contiene il prezzo. */
+  /** Walks up from the button to the container most likely to hold the price. */
   function decisionScope(target) {
     let node = target;
     let best = target;
@@ -101,33 +101,33 @@
   }
 
   /**
-   * Importi che non sono "il prezzo": penali, cauzioni, spese accessorie.
-   * Confonderli con il prezzo è l'errore più visibile che questo pannello
-   * possa fare, perché è il primo numero che l'utente legge.
+   * Amounts that are not "the price": exit fees, deposits, extra charges.
+   * Mistaking them for the price is the most visible error this panel can make,
+   * because it is the first number the user reads.
    */
   const NOT_A_PRICE = /(?:penale|penalit[àa]|multa|indennit[àa]|cauzione|deposito|spes\w+\s+di|attivazione|istruttoria|risarcimento|rimborso|penalty|fee\b|deposit)/i;
 
   /**
-   * Marcatori del prezzo **a regime**: quello che si paga quando la promozione
-   * finisce. Sono la conferma testuale che due prezzi ricorrenti diversi non
-   * sono due piani alternativi ma due tempi dello stesso impegno.
+   * Markers of the **regular** price: the one paid when the promotion ends. They
+   * are the textual confirmation that two different recurring prices are not two
+   * alternative plans but two phases of the same commitment.
    */
   const REGIME_RE =
     /\b(poi|successivamente|in\s+seguito|dal\s+secondo|dal\s+\d+°?\s*(?:mese|anno)|a\s+partire\s+dal|al\s+termine|alla\s+scadenza|then|thereafter|afterwards?|after\s+the\s+first|after\s+the\s+trial|renews\s+at)\b/i;
 
-  /** Marcatori del prezzo **promozionale**: il lato corto dell'offerta. */
+  /** Markers of the **promotional** price: the short side of the offer. */
   const PROMO_RE =
     /\b(prim[oiae]\s*\d*\s*(?:mese|mesi|anno|anni|settiman\w+|giorni)|per\s+i\s+primi|offert\w+|promo\w*|scont\w+|introduttiv\w+|di\s+lancio|solo\s+per\s+ora|first\s+\d*\s*(?:month|months|year|years)|for\s+the\s+first|intro(?:ductory)?|limited\s+time)\b/i;
 
   /**
-   * Prezzo barrato = prezzo di listino, cioè quello che *non* si sta per
-   * accettare. Tenerlo dentro produce l'errore opposto a quello della promo
-   * («39,99 € barrato, ora 19,99 €» stimato a 39,99): sovrastimare qui non è
-   * prudenza, è un avviso che l'utente scopre falso guardando la pagina.
+   * A struck-through price = the list price, i.e. the one *not* being accepted.
+   * Keeping it produces the opposite error to the promo one ("€39.99 struck
+   * through, now €19.99" estimated at 39.99): overestimating here is not
+   * prudence, it is a warning the user finds false by looking at the page.
    *
-   * Il CSS calcolato non si eredita: un <span> dentro un <del> risulta
-   * `textDecorationLine: none` pur essendo barrato a schermo. Per questo si
-   * risale di tre livelli guardando anche tag e classi.
+   * Computed CSS isn't inherited: a <span> inside a <del> reports
+   * `textDecorationLine: none` while being struck through on screen. That is why
+   * we walk up three levels looking at tags and classes too.
    */
   const STRIKE_TAGS = new Set(['S', 'DEL', 'STRIKE']);
   const STRIKE_CLASS_RE = /strike|barrat|line-?through|original|list-?price|old-?price|prezzo-?pieno|full-?price|\bwas\b/i;
@@ -142,7 +142,7 @@
       let deco = '';
       try {
         deco = getComputedStyle(node).textDecorationLine || '';
-      } catch { /* nodo non più nel documento */ }
+      } catch { /* node no longer in the document */ }
       if (deco.includes('line-through')) return true;
       node = node.parentElement;
     }
@@ -150,8 +150,8 @@
   }
 
   /**
-   * Chiavi degli importi barrati. Si indicizza anche il solo importo perché
-   * su un frammento corto («39,99 €») la periodicità sta fuori dall'elemento.
+   * Keys of struck-through amounts. The bare amount is indexed too because on a
+   * short fragment ("€39.99") the period is outside the element.
    */
   function struckKeys(root) {
     const keys = new Set();
@@ -182,7 +182,7 @@
     const inScope = pricesIn(scopeText).map((p) => ({ ...p, near: true }));
     const inPage = pricesIn(pageText).map((p) => ({ ...p, near: false }));
 
-    // Dedup per importo+periodo, dando la precedenza a quelli vicini al pulsante.
+    // Dedupe by amount+period, preferring those close to the button.
     const byKey = new Map();
     for (const p of [...inScope, ...inPage]) {
       const key = `${p.amount}|${p.period || ''}`;
@@ -194,23 +194,23 @@
       struck: struck.has(`${c.amount}|${c.period || ''}`) || struck.has(String(c.amount)),
     }));
 
-    // Se la pagina barra *tutti* i prezzi si è sbagliato qualcosa: meglio un
-    // prezzo imperfetto che nessun prezzo.
+    // If the page strikes through *every* price something went wrong: an
+    // imperfect price is better than none.
     const live = candidates.filter((c) => !c.struck);
     const pool = live.length ? live : candidates;
 
     /**
-     * 1) Il prezzo è quello ricorrente: è lui a generare l'impegno.
+     * 1) The price is the recurring one: it is what creates the commitment.
      *
-     * Fra più prezzi ricorrenti **non** vince il primo del documento: l'ordine
-     * nel DOM non ha alcun significato semantico, e nella struttura d'offerta
-     * più diffusa che esista — «primi 3 mesi a 9,99 €/mese, poi 19,99 €/mese» —
-     * il primo è quello promozionale. Prenderlo dimezzava l'impegno stimato e
-     * rendeva la headline «stai impegnando fino a Y» più rassicurante del vero:
-     * l'esatto contrario di ciò che questo prodotto promette.
+     * Among several recurring prices the first in the document does **not** win:
+     * DOM order has no semantic meaning, and in the most common offer structure
+     * there is — "first 3 months at €9.99/month, then €19.99/month" — the first
+     * is the promotional one. Taking it halved the estimated commitment and made
+     * the headline "you are committing up to Y" more reassuring than the truth:
+     * the exact opposite of what this product promises.
      *
-     * Quindi: si sceglie la periodicità più vicina al pulsante, e dentro quella
-     * l'importo **più alto**. In caso di ambiguità si sbaglia per eccesso.
+     * So: the period closest to the button is chosen, and within it the
+     * **highest** amount. When ambiguous, err on the high side.
      */
     const recurring = pool.filter((c) => c.period);
     const near = recurring.filter((c) => c.near);
@@ -220,10 +220,10 @@
     let primary = samePeriod.length ? samePeriod.reduce((a, b) => (b.amount > a.amount ? b : a)) : null;
 
     /**
-     * Il prezzo promozionale non si butta: serve a chi calcolerà la formula
-     * «9,99 € × 3 + 19,99 € × 21» invece di moltiplicare un prezzo solo.
-     * Si registra solo con una prova testuale di promozione, altrimenti due
-     * piani alternativi («Base 9,99 – Premium 19,99») diventerebbero un'offerta.
+     * The promotional price is not thrown away: it serves whoever computes the
+     * formula "€9.99 × 3 + €19.99 × 21" instead of multiplying a single price.
+     * It is recorded only with textual proof of a promotion, otherwise two
+     * alternative plans ("Basic 9.99 – Premium 19.99") would become one offer.
      */
     let introductory = null;
     if (primary && samePeriod.length > 1) {
@@ -240,9 +240,9 @@
       }
     }
 
-    // 2) Nessuna ricorrenza: si prende l'importo più alto fra quelli che non
-    //    sono chiaramente penali o spese accessorie. Meglio nessun prezzo che
-    //    il prezzo sbagliato.
+    // 2) No recurrence: take the highest amount among those that are not
+    //    clearly exit fees or extra charges. Better no price than the wrong
+    //    price.
     if (!primary) {
       const plausible = pool.filter((c) => {
         const source = c.near ? scopeText : pageText;
@@ -273,7 +273,7 @@
     };
   }
 
-  /** Ispeziona il modulo: consensi precompilati, tipo di form, caratteri minuscoli. */
+  /** Inspects the form: pre-ticked consents, form type, tiny print. */
   function extractForm(target) {
     const form = target.closest?.('form') || null;
     const root = form || document.body;
@@ -294,7 +294,7 @@
       }
     }
 
-    // Consenso "a pacchetto": una sola casella copre contratto + marketing/dati.
+    // "Bundled" consent: a single box covers contract + marketing/data.
     const bundledConsent =
       consentBoxes === 1 &&
       checkboxes.some((cb) => {
@@ -344,7 +344,7 @@
     return parts.join(' ').replace(/\s+/g, ' ').trim().slice(0, 400);
   }
 
-  /** Prezzo o rinnovo scritti in un carattere molto più piccolo del resto: classico dark pattern. */
+  /** Price or renewal written in a much smaller font than the rest: a classic dark pattern. */
   function hasSmallPrintPrice(root) {
     const nodes = deepQueryAll('small, .fine-print, .disclaimer, .legal, span, p', root, 300);
     const baseSize = Number.parseFloat(getComputedStyle(document.body).fontSize) || 16;
@@ -358,7 +358,7 @@
     return false;
   }
 
-  /** Trova i termini: testo già nella pagina oppure link da scaricare. */
+  /** Finds the terms: text already on the page or a link to download. */
   function extractTerms(target) {
     const scope = target.closest?.('form') || document.body;
     const links = deepQueryAll('a[href]', scope, 200)
@@ -393,7 +393,7 @@
     };
   }
 
-  /** Testo rilevante da mandare all'analisi. */
+  /** Relevant text to send for analysis. */
   function collectText(target, terms) {
     const parts = [];
     if (terms.inlineText) parts.push(terms.inlineText);
@@ -415,7 +415,7 @@
         ctx: {
           url: location.href,
           title: document.title,
-          // Il nome del venditore, se la pagina lo dichiara: serve quando a incassare è Paddle, Stripe…
+          // The seller's name, if the page declares it: needed when Paddle, Stripe… collect the payment.
           merchant: (document.querySelector('meta[property="og:site_name"],meta[name="application-name"]')?.content || '').trim().slice(0, 60) || null,
           buttonText: labelOf(target),
           actionType,
@@ -429,8 +429,8 @@
     },
     pricesIn,
     extractPricing,
-    // Il detector ne ha bisogno per decidere in modo *sincrono* se un pulsante
-    // generico («Continua») sta in un checkout: il testo da solo non basta.
+    // The detector needs it to decide *synchronously* whether a generic button
+    // ("Continue") is in a checkout: the text alone is not enough.
     extractForm,
   };
 })();

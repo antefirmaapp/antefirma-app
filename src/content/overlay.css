@@ -1,5 +1,5 @@
-/* Solo l'host: tutto il resto vive dentro lo shadow root, così nessun CSS del
-   sito può alterare l'avviso (o nasconderlo). */
+/* Only the host: everything else lives inside the shadow root, so no site CSS
+   can alter the warning (or hide it). */
 antefirma-alert {
   all: initial;
   position: fixed;

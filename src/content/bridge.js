@@ -1,8 +1,8 @@
 /**
- * Namespace condiviso fra i content script e ponte verso il service worker.
+ * A namespace shared by the content scripts, and a bridge to the service worker.
  *
- * I content script girano in un "isolated world": il sito non vede queste
- * variabili e non può manomettere l'analisi.
+ * Content scripts run in an "isolated world": the site doesn't see these
+ * variables and cannot tamper with the analysis.
  */
 (() => {
   const CF = (globalThis.__CF ||= {});
@@ -16,13 +16,13 @@
   };
 
   CF.bridge = {
-    /** Invia un messaggio al service worker e restituisce il risultato. */
+    /** Sends a message to the service worker and returns the result. */
     async send(type, payload) {
       let res;
       try {
         res = await chrome.runtime.sendMessage({ type, payload });
       } catch (err) {
-        // Tipico quando l'estensione viene ricaricata mentre la pagina è aperta.
+        // Typical when the extension is reloaded while the page is open.
         throw new Error(globalThis.AF_I18N.t('Estensione non raggiungibile: ricarica la pagina.'));
       }
       if (!res) throw new Error(globalThis.AF_I18N.t('Nessuna risposta dal motore di analisi.'));
@@ -31,20 +31,20 @@
     },
 
     /**
-     * Solo il sottoinsieme che serve a decidere se intercettare. La chiave API
-     * e i dati anagrafici non entrano mai nella pagina.
+     * Only the subset needed to decide whether to intercept. The API key and
+     * personal details never enter the page.
      */
     async settings(force = false) {
       if (!force && CF.state.settings) return CF.state.settings;
       CF.state.settings = await this.send('GET_CONTENT_SETTINGS');
-      // La lingua dell'avviso: la sceglie l'estensione (impostazioni o lingua del browser).
+      // The warning's language: chosen by the extension (settings or browser language).
       globalThis.AF_I18N?.setLang(CF.state.settings?.uiLang);
       return CF.state.settings;
     },
   };
 
   CF.util = {
-    /** Testo visibile di un elemento, robusto rispetto a icone e span annidati. */
+    /** An element's visible text, robust against icons and nested spans. */
     labelOf(el) {
       if (!el) return '';
       const aria = el.getAttribute?.('aria-label');
@@ -54,7 +54,7 @@
       return (text || value || aria || title || '').replace(/\s+/g, ' ').trim().slice(0, 200);
     },
 
-    /** Percorso di elementi dal target alla radice, attraversando gli shadow root. */
+    /** Path of elements from the target to the root, crossing shadow roots. */
     composedPath(event) {
       if (typeof event.composedPath === 'function') return event.composedPath();
       const path = [];
@@ -66,7 +66,7 @@
       return path;
     },
 
-    /** Cerca in profondità anche dentro gli shadow root aperti. */
+    /** Deep search, inside open shadow roots too. */
     deepQueryAll(selector, root = document, limit = 400) {
       const out = [];
       const walk = (node) => {
@@ -74,7 +74,7 @@
         let found = [];
         try {
           found = node.querySelectorAll(selector);
-        } catch { /* selettore non valido in questo contesto */ }
+        } catch { /* selector not valid in this context */ }
         for (const el of found) {
           out.push(el);
           if (out.length >= limit) return;

@@ -1,44 +1,43 @@
 /**
- * Riconoscimento dell'azione: quali pulsanti rappresentano un impegno.
+ * Action recognition: which buttons represent a commitment.
  *
- * Vive in un file a parte, senza DOM e senza API di Chrome, per due motivi:
- * è la tabella che si aggiorna più spesso quando si incontra un sito nuovo,
- * ed è l'unica parte del detector verificabile in Node senza un browser.
+ * It lives in its own file, with no DOM and no Chrome APIs, for two reasons:
+ * it is the table updated most often when a new site turns up, and it is the
+ * only part of the detector testable in Node without a browser.
  *
- * Caricato come classic script dai content script e importato dai test:
- * in entrambi i casi si limita a registrarsi su globalThis.__CF.
+ * Loaded as a classic script by the content scripts and imported by the tests:
+ * in both cases it just registers itself on globalThis.__CF.
  */
 (() => {
   const CF = (globalThis.__CF ||= {});
   if (CF.actions) return;
 
   /**
-   * `weight` risolve le sovrapposizioni: "Accetta e firma" contiene sia
-   * "accetta" sia "firma", ma è la firma a determinare la posta in gioco.
+   * `weight` resolves overlaps: "Accetta e firma" contains both "accetta" and
+   * "firma", but the signature sets the stakes.
    *
-   * Il peso serve anche al veto di opt-out (vedi sotto): sotto 3 l'azione è
-   * troppo debole per reggere il confronto con un "annulla" nella stessa
-   * etichetta, sopra no.
+   * The weight also serves the opt-out veto (see below): below 3 the action is
+   * too weak to stand against a "cancel" in the same label, above it isn't.
    *
-   * Lo spagnolo sta in un ramo separato dell'alternanza, dopo il `\b(…)\b` di
-   * italiano e inglese, per due ragioni. La prima è di igiene: le tabelle già
-   * collaudate restano identiche carattere per carattere, quindi una regola
-   * spagnola sbagliata può solo aggiungere match, mai spostarne uno vecchio.
-   * La seconda è che il ramo spagnolo non può usare `\b`: in JavaScript `\b` è
-   * definito su [A-Za-z0-9_], e fra uno spazio e la «í» di «Suscríbete» non
-   * c'è nessuna transizione da agganciare — il confine semplicemente non
-   * esiste e la regola non scatta mai. È lo stesso difetto già trovato in
-   * `\bnon\s+è\b` e in `\bpenalit[àa]\b`. I lookaround `(?<![\wÀ-ÿ])` e
-   * `(?![\wÀ-ÿ])` fanno lo stesso lavoro contando come lettera anche le
-   * vocali accentate, e per questo delimitano ogni alternativa spagnola.
+   * Spanish sits in a separate branch of the alternation, after the `\b(…)\b`
+   * of Italian and English, for two reasons. The first is hygiene: the tables
+   * already tested stay identical character for character, so a wrong Spanish
+   * rule can only add matches, never move an old one. The second is that the
+   * Spanish branch cannot use `\b`: in JavaScript `\b` is defined on
+   * [A-Za-z0-9_], and between a space and the "í" of "Suscríbete" there is no
+   * transition to hook onto — the boundary simply doesn't exist and the rule
+   * never fires. It is the same defect already found in `\bnon\s+è\b` and in
+   * `\bpenalit[àa]\b`. The lookarounds `(?<![\wÀ-ÿ])` and `(?![\wÀ-ÿ])` do the
+   * same job while counting accented vowels as letters, and that is why they
+   * delimit every Spanish alternative.
    */
   const ACTION_PATTERNS = [
     {
       type: 'sign',
       weight: 5,
-      // «firmar» da solo basta: copre «Firmar el contrato» e «Aceptar y
-      // firmar». Il lookbehind è ciò che tiene fuori «Confirmar pedido», che
-      // contiene «firmar» ma è un acquisto, non una firma.
+      // "firmar" alone is enough: it covers "Firmar el contrato" and "Aceptar y
+      // firmar". The lookbehind is what keeps out "Confirmar pedido", which
+      // contains "firmar" but is a purchase, not a signature.
       re: /\b(firma\s+(?:il\s+|questo\s+)?(?:contratto|documento|ordine)?|firmo|sottoscriv\w+|accetta\s+e\s+firma|sign\s+(?:now|document|contract|and\s+accept)|e-?sign)\b|(?<![\wÀ-ÿ])(firmar(?:lo|la)?|firmo\s+(?:el\s+)?(?:contrato|documento))(?![\wÀ-ÿ])/i,
     },
     {
@@ -50,14 +49,13 @@
       type: 'purchase',
       weight: 4,
       /**
-       * In spagnolo il pulsante di pagamento si scrive all'infinito, quindi
-       * «Pagar» da solo è un impegno vero — a differenza dell'italiano, dove
-       * «paga» nudo è troppo ambiguo e infatti qui sopra chiede sempre un
-       * complemento. Ma proprio perché è un infinito, la stessa parola regge
-       * anche le frasi che il pagamento lo raccontano invece di eseguirlo:
-       * «Formas de pagar» è un elenco, «Continuar sin pagar» è la via
-       * gratuita. Quei due contesti sono esclusi per nome; «Terminar de
-       * pagar», che invece paga davvero, resta dentro.
+       * In Spanish the payment button is written in the infinitive, so "Pagar"
+       * alone is a real commitment — unlike Italian, where a bare "paga" is too
+       * ambiguous and indeed always requires a complement above. But precisely
+       * because it is an infinitive, the same word also carries sentences that
+       * describe payment instead of performing it: "Formas de pagar" is a list,
+       * "Continuar sin pagar" is the free path. Those two contexts are excluded
+       * by name; "Terminar de pagar", which really pays, stays in.
        */
       re: /\b(acquista|compra|paga\s+(?:ora|adesso|subito|con\b|tutto)|effettua\s+(?:il\s+)?pagamento|procedi\s+(?:al\s+|con\s+il\s+)?(?:pagamento|checkout|ordine)|(?:continua|prosegui|vai)\s+(?:e\s+paga|e\s+pagamento|al\s+pagamento|al\s+checkout|alla\s+cassa)|conferma\s+(?:e\s+paga|e\s+procedi|ordine|acquisto|pagamento)|concludi\s+(?:l['’])?(?:ordine|acquisto)|ordina\s+(?:ora|adesso|e\s+paga)|completa\s+(?:l['’])?(?:ordine|acquisto)|buy\s+now|place\s+(?:your\s+)?order|complete\s+(?:purchase|order)|pay\s+now|confirm\s+and\s+pay|continue\s+to\s+(?:payment|checkout)|proceed\s+to\s+checkout|checkout(?![-_\w]))\b|(?<![\wÀ-ÿ])(comprar(?:lo|la)?|(?<!sin\s)(?<!(?:formas|m[ée]todos|opciones)\s+de\s)pagar(?:lo|la)?|ir\s+al\s+(?:pago|checkout)|pasar\s+por\s+caja|proceder\s+al\s+pago|(?:finalizar|completar|confirmar|realizar|tramitar|hacer)\s+(?:la\s+|el\s+|mi\s+|tu\s+)?(?:compra|pedido|pago|reserva))(?![\wÀ-ÿ])/i,
     },
@@ -70,11 +68,11 @@
       type: 'consent',
       weight: 3,
       /**
-       * «Entendido» è ancorato all'intera etichetta, non cercato dentro il
-       * testo come gli altri: da solo su un pulsante è il gemello di «Ho
-       * capito» e vale un consenso, ma è anche una parola comunissima nella
-       * prosa dei banner («Hemos entendido tus preferencias»), dove chiuderebbe
-       * un avviso su una frase che non impegna a niente.
+       * "Entendido" is anchored to the whole label, not searched inside the text
+       * like the others: alone on a button it is the twin of "Ho capito" and
+       * counts as consent, but it is also a very common word in banner prose
+       * ("Hemos entendido tus preferencias"), where it would close a notice on a
+       * sentence that commits to nothing.
        */
       re: /\b(accetta\s+tutt\w+|consenti\s+tutt\w+|acconsento\s+a\s+tutt\w+|consenti(?![-_\w])|ho\s+capito|accept\s+all(?:\s+cookies)?|allow\s+all|got\s+it|gestisci\s+(?:i\s+)?consensi|salva\s+(?:le\s+)?preferenze\s+(?:sui\s+)?cookie)\b|(?<![\wÀ-ÿ])(aceptar\s+tod[oa]s?(?:\s+las\s+cookies)?|aceptar\s+(?:las\s+)?cookies|permitir\s+tod[oa]s?|consentir|doy\s+mi\s+consentimiento)(?![\wÀ-ÿ])|^[\s¡"'«(]*entendido[\s!.…»)]*$/i,
     },
@@ -101,35 +99,35 @@
   };
 
   /**
-   * Espressioni che indicano il contrario di un impegno: rifiuto, rinuncia,
-   * uscita. Non possono essere un veto assoluto: "Subscribe — cancel anytime"
-   * è microcopy standard nei checkout, e "Firma il contratto e chiudi" è una
-   * firma con l'istruzione su cosa fare dopo. Vedi `optOutWins`.
+   * Expressions meaning the opposite of a commitment: refusal, waiver, exit.
+   * They cannot be an absolute veto: "Subscribe — cancel anytime" is standard
+   * checkout microcopy, and "Firma il contratto e chiudi" is a signature with
+   * an instruction about what to do next. See `optOutWins`.
    *
-   * Sullo spagnolo due cautele, entrambe imparate da come si scrive davvero:
+   * Two cautions about Spanish, both learnt from how it is really written:
    *
-   * - «volver a comprar» non è un ritorno, è un riacquisto: la stessa parola
-   *   che di solito riporta indietro qui apre un ordine. L'esclusione è
-   *   esplicita perché il caso è esattamente rovesciato rispetto a «Volver» e
-   *   a «Volver a la tienda», che restano opt-out.
-   * - «cerrar» resta fuori apposta: «cerrar la compra» vuol dire concludere
-   *   l'acquisto, non chiudere la finestra, e il rischio di zittire un
-   *   checkout vero supera quello di un banner non riconosciuto.
+   * - "volver a comprar" is not a return, it is a re-purchase: the same word
+   *   that usually goes back here opens an order. The exclusion is explicit
+   *   because the case is exactly the reverse of "Volver" and "Volver a la
+   *   tienda", which stay opt-outs.
+   * - "cerrar" is left out on purpose: "cerrar la compra" means completing the
+   *   purchase, not closing the window, and the risk of silencing a real
+   *   checkout outweighs that of an unrecognised banner.
    */
   const OPT_OUT = /\b(rifiut\w+|nega|non\s+(?:accett|consent|autorizz)\w+|solo\s+(?:i\s+)?(?:cookie\s+)?(?:necessari|essenziali)|continua\s+senza\s+accettare|reject(?:\s+all)?|decline|deny|manage\s+(?:preferences|options)|annulla|cancel|indietro|torna|chiudi|close|esci|log\s*out|disdici|unsubscribe)\b|(?<![\wÀ-ÿ])(rechaz(?:ar|o)(?:\s+tod[oa]s)?|denegar|s[óo]lo\s+(?:las\s+|los\s+)?(?:cookies\s+)?(?:necesari[oa]s|esenciales|t[ée]cnicas)|continuar\s+sin\s+aceptar|no\s+(?:acepto|aceptar|autorizar|permitir)|cancelar?|volver(?!\s+a\s+(?:comprar|pagar|contratar|suscribirse|reservar))|atr[áa]s|gestionar\s+(?:las\s+|mis\s+)?(?:preferencias|opciones|cookies)|configurar\s+(?:las\s+)?(?:cookies|preferencias)|dar(?:se|me|te)?\s+de\s+baja|date\s+de\s+baja)(?![\wÀ-ÿ])/i;
 
-  /** Sotto questo peso un'azione non regge il confronto con un opt-out. */
+  /** Below this weight an action cannot stand against an opt-out. */
   const STRONG_WEIGHT = 3;
 
   /**
-   * Il rifiuto vince se sta **all'inizio** dell'etichetta, o se ciò che ha
-   * intercettato è un'azione debole.
+   * The refusal wins if it is **at the start** of the label, or if what it
+   * caught is a weak action.
    *
-   * La posizione è il segnale: chi scrive un pulsante mette per primo il
-   * verbo che comanda ("Annulla e torna al carrello"); ciò che segue è
-   * contorno. Al contrario, in "Subscribe — cancel anytime" il rifiuto è una
-   * rassicurazione sul dopo, e trattarlo come veto cancellava un abbonamento
-   * vero — cioè esattamente il caso che questo prodotto esiste per fermare.
+   * Position is the signal: whoever writes a button puts the commanding verb
+   * first ("Annulla e torna al carrello"); what follows is trimming. Conversely,
+   * in "Subscribe — cancel anytime" the refusal is a reassurance about later,
+   * and treating it as a veto cancelled a real subscription — exactly the case
+   * this product exists to stop.
    */
   function optOutWins(text, best) {
     const m = OPT_OUT.exec(text);
@@ -150,11 +148,11 @@
   }
 
   /**
-   * Come `classifyText`, ma dice anche *perché* non ha classificato.
+   * Like `classifyText`, but it also says *why* it didn't classify.
    *
-   * Serve al detector: se è l'etichetta visibile a rifiutare l'azione
-   * ("Annulla"), gli attributi HTML non devono poterla smentire; se invece
-   * l'etichetta semplicemente non dice niente, gli attributi possono parlare.
+   * The detector needs it: if the visible label refuses the action ("Cancel"),
+   * HTML attributes must not be able to overrule it; if the label simply says
+   * nothing, attributes may speak.
    *
    * @returns {{type: string|null, weight: number, vetoed: boolean}}
    */
@@ -165,7 +163,7 @@
     return { type: best ? best.type : null, weight: best ? best.weight : 0, vetoed: false };
   }
 
-  /** Classifica un testo. @returns {string|null} */
+  /** Classifies a text. @returns {string|null} */
   function classifyText(text) {
     return classifyDetail(text).type;
   }

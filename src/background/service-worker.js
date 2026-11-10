@@ -1,13 +1,13 @@
 /**
- * Service worker: il cervello dell'estensione.
+ * Service worker: the extension's brain.
  *
- * Il content script osserva e blocca; qui si decide. Tenere l'analisi fuori
- * dalla pagina significa che nessuno script del sito può leggerla, alterarla o
- * intercettare il token dell'installazione.
+ * The content script watches and blocks; decisions are made here. Keeping the
+ * analysis out of the page means no site script can read it, alter it or
+ * intercept the installation token.
  *
- * Da qui passano anche le tre cose che vivono più a lungo di una pagina:
- * il registro degli impegni, i promemoria delle scadenze e il controllo
- * periodico delle condizioni già accettate.
+ * The three things that live longer than a page also go through here: the
+ * commitment register, deadline reminders and the periodic check of terms
+ * already accepted.
  */
 
 import { analyze } from '../core/analyzer.js';
@@ -34,8 +34,8 @@ import {
 const MAX_TERMS_BYTES = 1_500_000;
 
 /**
- * Le impostazioni con la lingua già risolta («auto» → lingua del browser), che
- * diventa anche la lingua dei testi prodotti qui: verdetti, notifiche, menu.
+ * Settings with the language already resolved ("auto" → browser language), which
+ * is also the language of the texts produced here: verdicts, notifications, menus.
  */
 async function getSettings() {
   const s = await readSettings();
@@ -43,24 +43,24 @@ async function getSettings() {
 }
 
 /**
- * Tempo massimo di un'analisi, e del solo scaricamento dei termini.
+ * Maximum duration of an analysis, and of downloading the terms alone.
  *
- * Il click è sospeso e la pagina è coperta dall'avviso: se l'API del modello
- * non risponde, l'utente resta davanti a una clessidra senza fine, con due
- * sole uscite — tornare indietro o procedere alla cieca. `analyze()` accettava
- * già un AbortSignal e lo propagava fino a fetch, ma in tutto il progetto non
- * ne veniva creato nessuno: era sempre undefined.
+ * The click is held and the page is covered by the warning: if the model API
+ * doesn't answer, the user is left facing an endless hourglass, with only two
+ * ways out — go back or go ahead blindly. `analyze()` already accepted an
+ * AbortSignal and passed it down to fetch, but none was ever created in the
+ * whole project: it was always undefined.
  *
- * Allo scadere l'avviso dice che l'analisi non è riuscita e lascia scegliere:
- * non c'è un verdetto di ripiego da mostrare, e fingerne uno sarebbe peggio.
+ * When time runs out the warning says the analysis failed and lets the user
+ * choose: there is no fallback verdict to show, and faking one would be worse.
  */
 const ANALYSIS_BUDGET_MS = 15_000;
 const TERMS_FETCH_BUDGET_MS = 6_000;
 const WATCH_ALARM = 'antefirma-controllo-condizioni';
 /**
- * Un solo allarme ricorrente al posto di tre allarmi per impegno programmati a
- * due anni di distanza. Scatta due volte al giorno: se una passata salta —
- * browser chiuso, aggiornamento, sospensione — la successiva recupera.
+ * A single recurring alarm instead of three alarms per commitment scheduled two
+ * years ahead. It fires twice a day: if one pass is skipped — browser closed,
+ * update, sleep — the next one catches up.
  */
 const SWEEP_ALARM = 'antefirma-passata-quotidiana';
 
@@ -72,8 +72,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   await scheduleAlarms();
   await sweep();
   if (details.reason === 'update') await forgetOldEngine();
-  // Il token si chiede subito, così la prima analisi non aspetta anche questo.
-  // Se il server non risponde si riproverà alla prima analisi.
+  // The token is requested right away, so the first analysis doesn't wait for it too.
+  // If the server doesn't answer, it is retried at the first analysis.
   register().catch(() => {});
   if (details.reason === 'install') {
     chrome.tabs.create({ url: chrome.runtime.getURL('src/welcome/welcome.html') });
@@ -113,10 +113,10 @@ function setupContextMenus() {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!tab?.id) return;
   try {
-    // Safari non ha il pannello laterale: lo stesso pannello si apre in una scheda.
+    // Safari has no side panel: the same panel opens in a tab.
     if (chrome.sidePanel?.open) await chrome.sidePanel.open({ tabId: tab.id });
     else await chrome.tabs.create({ url: chrome.runtime.getURL('src/sidepanel/sidepanel.html') });
-  } catch { /* il pannello può essere già aperto */ }
+  } catch { /* the panel may already be open */ }
 
   const payload =
     info.menuItemId === 'cf-analyze-selection'
@@ -129,7 +129,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   chrome.runtime.sendMessage({ type: 'PANEL_REQUEST', payload }).catch(() => {});
 });
 
-/** Il sottoinsieme di impostazioni che serve davvero a un content script. */
+/** The subset of settings a content script really needs. */
 async function contentSettings() {
   const s = await getSettings();
   return {
@@ -141,8 +141,8 @@ async function contentSettings() {
 }
 
 /**
- * Aggiunge un dominio alla allowlist. Un messaggio dedicato invece di un
- * `SET_SETTINGS` generico: il content script deve poter fare questa cosa sola.
+ * Adds a domain to the allowlist. A dedicated message instead of a generic
+ * `SET_SETTINGS`: the content script must be able to do this one thing only.
  */
 async function allowlistAdd(host) {
   const clean = String(host || '').trim().toLowerCase().replace(/^www\./, '');
@@ -167,14 +167,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
 async function handle(msg, sender) {
   /**
-   * `GET_SETTINGS` restituiva l'oggetto **integrale** — chiave API, nome,
-   * indirizzo, email — e il detector lo chiedeva a ogni caricamento di ogni
-   * frame. Bastavano `enabled` e `allowlist`. Oltre a essere una violazione
-   * della regola di minimizzazione del Chrome Web Store, contraddiceva la
-   * frase che il prodotto scrive di sé: «nessuno script del sito può leggerla».
+   * `GET_SETTINGS` used to return the **whole** object — API key, name,
+   * address, email — and the detector asked for it on every load of every
+   * frame. `enabled` and `allowlist` were enough. Besides breaking the Chrome
+   * Web Store's minimisation rule, it contradicted what the product says about
+   * itself: "no site script can read it".
    *
-   * `SET_SETTINGS` accettava per giunta un patch arbitrario: un content script
-   * compromesso poteva sovrascrivere la chiave o spegnere il firewall.
+   * `SET_SETTINGS` also accepted an arbitrary patch: a compromised content
+   * script could overwrite the key or switch the firewall off.
    */
   if (!isAllowed(msg?.type, sender, chrome.runtime.id, chrome.runtime.getURL(''))) {
     throw new Error('Messaggio non consentito da una pagina web.');
@@ -205,7 +205,7 @@ async function handle(msg, sender) {
       return readSettings();
     case 'SET_SETTINGS': {
       const saved = await setSettings(msg.payload || {});
-      // Cambiata la lingua: i menu contestuali si riscrivono nella nuova.
+      // Language changed: context menus are rewritten in the new one.
       if (msg.payload && 'uiLang' in msg.payload) { await getSettings(); setupContextMenus(); }
       return saved;
     }
@@ -220,14 +220,14 @@ async function handle(msg, sender) {
     case 'SERVER_STATUS':
       return serverStatus();
 
-    // Dall'avviso, a analisi finite: il pagamento (o le impostazioni, se c'è già un piano).
-    // La pagina non riceve né il codice dell'acquisto né il token.
+    // From the warning, with analyses used up: the payment (or settings, if there is already a plan).
+    // The page receives neither the purchase code nor the token.
     case 'UPGRADE':
       return upgrade();
     case 'FEEDBACK':
       return withCode(sendFeedback(msg.payload?.category, msg.payload?.model));
 
-    // ── piano (solo dalle pagine dell'estensione) ─────────────────────────
+    // ── plan (extension pages only) ───────────────────────────────────────
     case 'GET_LICENSE':
       return withCode(getLicense());
     case 'START_CHECKOUT':
@@ -271,10 +271,10 @@ async function handle(msg, sender) {
 // ── consenso ────────────────────────────────────────────────────────────────
 
 /**
- * Le versioni fino alla 0.4 mandavano il testo direttamente ad Anthropic o a
- * OpenAI con una chiave della persona. Con il passaggio al server cambia chi
- * riceve il testo: il consenso dato allora non vale per questo, e la chiave
- * non serve più e non deve restare sul disco.
+ * Versions up to 0.4 sent the text straight to Anthropic or OpenAI with the
+ * person's own key. With the move to the server, who receives the text changed:
+ * consent given then doesn't cover this, and the key is no longer needed and
+ * must not stay on disk.
  */
 async function forgetOldEngine() {
   const { settings } = await chrome.storage.local.get('settings');
@@ -285,10 +285,10 @@ async function forgetOldEngine() {
 }
 
 /**
- * Il consenso all'invio del testo al server. Si chiede alla prima analisi,
- * dentro l'avviso o nel pannello: il Chrome Web Store vuole una spiegazione
- * nell'interfaccia e un atto esplicito prima che qualcosa esca dal browser.
- * La data serve anche a sapere chi ha accettato quale versione delle pratiche.
+ * Consent to send the text to the server. It is asked at the first analysis,
+ * inside the warning or in the panel: the Chrome Web Store wants an explanation
+ * in the interface and an explicit act before anything leaves the browser.
+ * The date also tells who accepted which version of the practices.
  */
 async function grantConsent() {
   const remoteConsentAt = new Date().toISOString();
@@ -296,7 +296,7 @@ async function grantConsent() {
   return { remoteConsentAt };
 }
 
-/** Per tradurre un errore del server in una risposta per l'interfaccia. */
+/** Turns a server error into an answer for the interface. */
 function failure(err) {
   if (err instanceof ServerError) return { error: { code: err.code, message: err.message, retryAfter: err.retryAfter } };
   return { error: { code: 'internal', message: t('L’analisi non è riuscita.') } };
@@ -352,7 +352,7 @@ async function analyzeAction(payload = {}, sender) {
 
   verdict = { ...verdict, cached, termsSource };
   let blocking = shouldBlock(verdict.level.id, settings.blockFrom);
-  // «Blocca solo sopra … €»: un impegno piccolo non interrompe, salvo i casi critici.
+  // "Only block above … €": a small commitment doesn't interrupt, except critical cases.
   const minAmount = Number(settings.minBlockAmount) || 0;
   if (blocking && minAmount > 0 && verdict.level.id !== 'critical' && verdict.cost?.worstCase != null && verdict.cost.worstCase < minAmount) blocking = false;
 
@@ -377,8 +377,8 @@ async function analyzeAction(payload = {}, sender) {
     settings.historyLimit
   );
 
-  // Il verdetto integrale resta a disposizione per il momento della decisione:
-  // se l'utente prosegue, è da qui che nasce l'impegno registrato.
+  // The full verdict stays available for the moment of decision: if the user
+  // goes ahead, the recorded commitment is born from here.
   await chrome.storage.session.set({ [`verdict:${id}`]: { verdict, text } });
 
   await updateBadge(sender?.tab?.id, verdict.level);
@@ -388,7 +388,7 @@ async function analyzeAction(payload = {}, sender) {
   return { skip: false, blocking, verdict: { ...verdict, historyId: id, proceedCount } };
 }
 
-/** Analisi lanciata dal side panel (incolla, PDF, pagina, URL). */
+/** Analysis started from the side panel (paste, PDF, page, URL). */
 async function analyzeText(payload = {}) {
   const settings = await getSettings();
   const text = normalize(payload.text || '');
@@ -412,14 +412,14 @@ async function analyzeText(payload = {}) {
     if (cached) return { ...cached, cached: true };
   }
 
-  // Dal pannello l'errore sale come eccezione: il pannello mostra il messaggio.
+  // From the panel the error bubbles up as an exception: the panel shows the message.
   const verdict = await analyze({
     text, ctx, actionType, settings,
     signal: AbortSignal.timeout(ANALYSIS_BUDGET_MS),
   });
   await setCached(key, verdict);
 
-  // Anche le analisi manuali possono diventare impegni da sorvegliare.
+  // Manual analyses can become commitments to watch, too.
   const id = `manual-${Date.now().toString(36)}`;
   await chrome.storage.session.set({ [`verdict:${id}`]: { verdict, text } });
   await showQuotaBadge(verdict.engine?.quota);
@@ -427,9 +427,9 @@ async function analyzeText(payload = {}) {
 }
 
 /**
- * Un esempio: lo stesso calcolo di un'analisi vera, con la risposta del server
- * già scritta. Nessun testo esce dal computer, nessuna analisi viene consumata,
- * e il risultato non si può registrare come impegno (non è un contratto tuo).
+ * An example: the same computation as a real analysis, with the server's answer
+ * already written. No text leaves the computer, no analysis is used, and the
+ * result cannot be recorded as a commitment (it is not your contract).
  */
 async function analyzeSample(key) {
   const sample = SAMPLES[key];
@@ -447,16 +447,16 @@ async function analyzeSample(key) {
   return { ...verdict, example: true, text: s.text };
 }
 
-/** Le chiavi che la copia di sicurezza porta con sé: mai l'identità dell'installazione né la licenza. */
+/** The keys a backup carries: never the installation identity or the licence. */
 const EXPORT_KEYS = ['settings', 'history', 'commitments', 'snapshots', 'proceedByHost'];
 
 async function exportData() {
   const data = await chrome.storage.local.get(EXPORT_KEYS);
-  if (data.settings) delete data.settings.remoteConsentAt; // il consenso si dà in ogni installazione
+  if (data.settings) delete data.settings.remoteConsentAt; // consent is given in each installation
   return { app: 'antefirma', version: 1, exportedAt: new Date().toISOString(), data };
 }
 
-/** Unisce una copia di sicurezza: aggiunge ciò che manca, non cancella niente di quello che c'è. */
+/** Merges a backup: adds what is missing, deletes nothing that is there. */
 async function importData(file) {
   if (!file || file.app !== 'antefirma' || typeof file.data !== 'object') throw new Error(t('Il file non è una copia di AnteFirma.'));
   const cur = await chrome.storage.local.get(EXPORT_KEYS);
@@ -470,7 +470,7 @@ async function importData(file) {
     history: byId(cur.history || [], Array.isArray(d.history) ? d.history : []),
     snapshots: { ...(d.snapshots || {}), ...(cur.snapshots || {}) },
     proceedByHost: { ...(d.proceedByHost || {}), ...(cur.proceedByHost || {}) },
-    // Preferenze e dati per le lettere arrivano dalla copia; il consenso resta quello di qui.
+    // Preferences and letter details come from the backup; consent stays this installation's.
     settings: { ...(cur.settings || {}), ...(d.settings || {}), remoteConsentAt: cur.settings?.remoteConsentAt || null },
   };
   await chrome.storage.local.set(next);
@@ -480,21 +480,21 @@ async function importData(file) {
   };
 }
 
-// ── decisione e registro degli impegni ──────────────────────────────────────
+// ── decision and commitment register ───────────────────────────────────────
 
 /**
- * `via` non cambia la decisione, ne registra la provenienza: «Continua
- * comunque» (blocked), sotto soglia (auto), sito escluso (allowlist). Serve a
- * uno storico veritiero — prima ogni intercettazione non bloccante restava
- * con `decision: null` — e sarà la base per misurare i falsi positivi.
+ * `via` doesn't change the decision, it records where it came from: "Continue
+ * anyway" (blocked), below threshold (auto), excluded site (allowlist). It keeps
+ * history truthful — before, every non-blocking interception stayed with
+ * `decision: null` — and will be the basis for measuring false positives.
  */
 async function recordDecision({ id, decision, via = null, track = false } = {}) {
   await updateHistoryEntry(id, { decision, via, decidedAt: new Date().toISOString() });
   if (decision !== 'proceed') return { recorded: true, commitment: null };
 
   const stored = (await chrome.storage.session.get(`verdict:${id}`))[`verdict:${id}`];
-  // Quante volte si è proseguito su questo sito dopo un blocco: alla terza
-  // l'avviso propone di non avvisare più.
+  // How many times the user went ahead on this site after a block: at the
+  // third, the warning offers to stop warning.
   if (via === 'blocked' && stored?.verdict?.host) {
     const { proceedByHost = {} } = await chrome.storage.local.get('proceedByHost');
     proceedByHost[stored.verdict.host] = (proceedByHost[stored.verdict.host] || 0) + 1;
@@ -506,7 +506,7 @@ async function recordDecision({ id, decision, via = null, track = false } = {}) 
   if (!stored) return { recorded: true, commitment: null };
 
   const commitment = await commitmentFromVerdict({ verdict: stored.verdict, text: stored.text, decision });
-  // Conferma: chi ha chiesto il promemoria deve sapere che c'è.
+  // Confirmation: whoever asked for the reminder must know it exists.
   if (track && commitment?.deadlineAt) {
     const when = new Date(commitment.deadlineAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
     await notify({
@@ -520,18 +520,18 @@ async function recordDecision({ id, decision, via = null, track = false } = {}) 
 }
 
 /**
- * Crea l'impegno: snapshot del testo accettato, scadenze calcolate, promemoria
- * programmati. È il momento in cui un avviso si trasforma in qualcosa che
- * l'utente ritroverà fra due anni.
+ * Creates the commitment: snapshot of the accepted text, computed deadlines,
+ * scheduled reminders. The moment a warning turns into something the user
+ * will find again two years later.
  */
 async function commitmentFromVerdict({ historyId = null, verdict = null, text = '', decision = 'proceed' } = {}) {
   /**
-   * Il testo dev'essere quello effettivamente analizzato. Il pannello passava
-   * sempre il contenuto della textarea di «Incolla testo»: per un'analisi da
-   * PDF, da pagina corrente o da URL quella textarea è vuota, e ne nasceva uno
-   * snapshot di zero caratteri — con l'hash della stringa vuota, che la
-   * verifica dichiarava valido. Il verdetto integrale è già in sessione
-   * insieme al suo testo: si legge da lì.
+   * The text must be the one actually analysed. The panel always passed the
+   * content of the "Paste text" textarea: for an analysis from a PDF, the
+   * current page or a URL that textarea is empty, and a zero-character snapshot
+   * was born — with the hash of the empty string, which verification declared
+   * valid. The full verdict is already in the session together with its text:
+   * it is read from there.
    */
   if (historyId) {
     const stored = (await chrome.storage.session.get(`verdict:${historyId}`))[`verdict:${historyId}`];
@@ -548,7 +548,7 @@ async function commitmentFromVerdict({ historyId = null, verdict = null, text = 
   }
   const commitment = buildCommitment({ verdict, snapshot, decision });
 
-  // Solo gli impegni che hanno una conseguenza nel tempo meritano il registro.
+  // Only commitments with a consequence over time deserve the register.
   const worthTracking =
     commitment.deadlineAt || commitment.renewalAt || commitment.worstCase != null || commitment.autoRenewal;
   if (!worthTracking) return null;
@@ -561,7 +561,7 @@ async function commitmentFromVerdict({ historyId = null, verdict = null, text = 
 async function updateAndReschedule(id, patch) {
   const updated = await updateCommitment(id, patch);
   if (!updated) return null;
-  // Riattivato dopo una disdetta annullata: il piano va ricalcolato da capo.
+  // Reactivated after an undone cancellation: the plan is computed again from scratch.
   if (updated.status === COMMITMENT_STATUS.ACTIVE && patch.status) return planAndSave(updated);
   return updated;
 }
@@ -573,10 +573,10 @@ async function removeCommitment(id) {
 // ── promemoria ──────────────────────────────────────────────────────────────
 
 /**
- * I promemoria sono un piano salvato insieme all'impegno, non allarmi
- * programmati a due anni di distanza: chi decide cosa è dovuto è la passata
- * quotidiana. È un meccanismo che si auto-ripara — un giorno saltato viene
- * recuperato il giorno dopo — mentre un allarme perso è perso e basta.
+ * Reminders are a plan saved with the commitment, not alarms scheduled two
+ * years ahead: the daily pass decides what is due. It is a self-healing
+ * mechanism — a skipped day is recovered the next day — while a lost alarm is
+ * simply lost.
  */
 async function planAndSave(commitment) {
   const settings = await getSettings();
@@ -596,10 +596,10 @@ async function scheduleAlarms() {
 }
 
 /**
- * La passata: guarda tutti gli impegni attivi e decide cosa dire.
- * Un solo promemoria per impegno, il più urgente: dopo una pausa lunga del
- * browser sarebbero dovuti tutti e tre, e tre notifiche di fila sullo stesso
- * contratto sono il modo più rapido per farsi disattivare.
+ * The pass: looks at every active commitment and decides what to say.
+ * One reminder per commitment, the most urgent: after a long browser pause all
+ * three would be due, and three notifications in a row about the same contract
+ * are the quickest way to get switched off.
  */
 async function sweep(now = Date.now()) {
   const settings = await getSettings();
@@ -611,8 +611,8 @@ async function sweep(now = Date.now()) {
   for (const c of list) {
     if (c.status !== COMMITMENT_STATUS.ACTIVE) continue;
 
-    // La finestra si è chiusa mentre nessuno guardava: dirlo è sgradevole,
-    // ma tacere significa farlo scoprire dall'estratto conto.
+    // The window closed while nobody was looking: saying so is unpleasant,
+    // but silence means the user finds out from the bank statement.
     if (missedWindow(c, now)) {
       const renewalAmount = c.recurringTotal ?? c.worstCase;
       await notify({
@@ -643,8 +643,8 @@ async function sweep(now = Date.now()) {
       kind: 'reminder',
     });
 
-    // Tutti i promemoria più lontani di questo si considerano consumati:
-    // avvisare a 30 giorni dopo aver già avvisato a 7 non ha senso.
+    // Every reminder further away than this counts as used: warning at 30
+    // days after already warning at 7 makes no sense.
     const reminders = (c.reminders || []).map((r) => (r.days >= due.days ? { ...r, fired: true } : r));
     await updateCommitment(c.id, { reminders, lastReminder: new Date(now).toISOString() });
     fired += 1;
@@ -677,8 +677,8 @@ async function notify({ id, title, message, commitmentId, kind = 'open', sticky 
     });
     await chrome.storage.session.set({ [`notif:${id}`]: { commitmentId, kind } });
   } catch (err) {
-    // Le notifiche possono essere negate dal sistema operativo: è un peccato,
-    // non un errore fatale. La scadenza resta nel pannello e nel calendario.
+    // Notifications can be denied by the operating system: a pity, not a fatal
+    // error. The deadline stays in the panel and in the calendar.
     console.warn('[AnteFirma] notifica non mostrata:', err?.message);
   }
 }
@@ -712,9 +712,9 @@ chrome.notifications?.onButtonClicked.addListener(async (id, index) => {
 // ── controllo delle modifiche ───────────────────────────────────────────────
 
 /**
- * Rilegge le condizioni già accettate e confronta.
- * Il messaggio utile non è "i termini sono cambiati" — che non dice niente —
- * ma "il tuo impegno è passato da 239,88 € a 479,76 €".
+ * Re-reads the terms already accepted and compares.
+ * The useful message is not "the terms changed" — which says nothing — but
+ * "your commitment went from €239.88 to €479.76".
  */
 async function checkChanges(id, { trigger = 'manual' } = {}) {
   const commitment = await getCommitment(id);
@@ -725,9 +725,9 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
 
   const settings = await getSettings();
 
-  // ── Cancello 1: la rete. Costo quasi nullo. ──────────────────────────────
-  // Se il server risponde 304 il documento è identico e non è stato trasferito
-  // nulla: si chiude qui, senza leggere, senza analizzare, senza spendere.
+  // ── Gate 1: the network. Almost free. ────────────────────────────────────
+  // If the server answers 304 the document is identical and nothing was
+  // transferred: stop here, without reading, analysing or spending.
   const doc = await fetchDocument(source, commitment.http || {});
   if (doc.notModified) {
     return recordCheck(id, unchangedDiff(t('Il documento non è cambiato dall’ultimo controllo.')), commitment);
@@ -737,28 +737,27 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
   }
   if (doc.http) await updateCommitment(id, { http: doc.http });
 
-  // ── Cancello 2: l'impronta. Costo nullo, tutto in locale. ────────────────
+  // ── Gate 2: the fingerprint. Free, all local. ────────────────────────────
   const clean = normalize(doc.text);
   const newHash = await sha256(clean);
   if (commitment.snapshot?.hash && newHash === commitment.snapshot.hash) {
     return recordCheck(id, unchangedDiff(t('Le condizioni sono identiche a quelle che avevi accettato.')), commitment);
   }
 
-  // ── Cancello 3: il server. ───────────────────────────────────────────────
-  // Un hash diverso non significa che il *tuo impegno* sia cambiato: basta un
-  // anno di copyright o un contatore. Quello che conta sono i fatti derivati —
-  // costo, durata, preavviso, penale, categorie — e per ricavarli serve
-  // l'analisi. Il documento è quello pubblico che avevi accettato; il server
-  // ricorda le analisi per impronta del testo, quindi le stesse condizioni
-  // lette da più persone si analizzano una volta sola.
+  // ── Gate 3: the server. ──────────────────────────────────────────────────
+  // A different hash doesn't mean *your commitment* changed: a copyright year
+  // or a counter is enough. What matters are the derived facts — cost, term,
+  // notice, penalty, categories — and getting them needs the analysis. The
+  // document is the public one you accepted; the server remembers analyses by
+  // text fingerprint, so the same terms read by many people are analysed once.
   //
-  // Un controllo che parte da solo interroga il server solo se l'opzione è
-  // attiva e il consenso c'è; altrimenti si limita a dire che il testo è
-  // cambiato, senza notificare.
+  // A check that starts by itself only asks the server if the option is on and
+  // consent was given; otherwise it only says the text changed, without
+  // notifying.
   const snapshot = { ...(commitment.snapshot || {}), verdict: snapshotVerdict(commitment) };
-  // Stesso contesto economico dell'analisi originale: confrontare un verdetto
-  // calcolato con il prezzo contro uno calcolato senza è un falso allarme
-  // garantito, e per giunta rassicurante — segnalerebbe un calo inesistente.
+  // The same economic context as the original analysis: comparing a verdict
+  // computed with the price against one computed without it is a guaranteed
+  // false alarm, and a reassuring one too — it would report a non-existent drop.
   const recheckCtx = {
     url: source,
     title: commitment.title,
@@ -787,7 +786,7 @@ async function checkChanges(id, { trigger = 'manual' } = {}) {
     });
   } catch (err) {
     if (trigger === 'manual') throw err;
-    // Un controllo automatico che non riesce si ripete alla passata successiva.
+    // An automatic check that fails is repeated at the next pass.
     return commitment;
   }
   const diff = { ...compareSnapshot(snapshot, { text: clean, verdict: better, newHash }), escalated: true };
@@ -822,7 +821,7 @@ async function recordCheck(id, diff, commitment) {
   return diff;
 }
 
-/** Ricostruisce la fotografia dei numeri conservata nell'impegno. */
+/** Rebuilds the snapshot of numbers kept in the commitment. */
 function snapshotVerdict(commitment) {
   return {
     score: commitment.score,
@@ -847,7 +846,7 @@ async function watchAllCommitments() {
     try {
       await checkChanges(c.id, { trigger: 'scheduled' });
     } catch {
-      /* un sito irraggiungibile non deve fermare gli altri */
+      /* an unreachable site must not stop the others */
     }
   }
 }
@@ -858,7 +857,7 @@ async function letterFor({ id, kind, lang } = {}) {
   const commitment = await getCommitment(id);
   if (!commitment) throw new Error(t('Impegno non trovato.'));
   const settings = await getSettings();
-  // La lingua della lettera è quella del fornitore: di regola, quella del paese scelto nelle impostazioni.
+  // The letter's language is the provider's: normally, that of the country chosen in settings.
   return buildLetter(commitment, settings.identity || {}, kind || suggestKind(commitment), Date.now(), lang || letterLangFor(settings.jurisdiction));
 }
 
@@ -876,15 +875,15 @@ async function proofFor(id) {
   const text = await getSnapshotText(id);
   const snapshot = commitment.snapshot || {};
 
-  // Verifica dell'integrità: si ricalcola l'impronta sul testo conservato.
+  // Integrity check: the fingerprint is recomputed on the stored text.
   const recomputed = text ? await sha256(text) : null;
 
   return {
     commitment,
     snapshot,
     text,
-    // Uno snapshot senza testo non può essere "valido": l'impronta della
-    // stringa vuota coincide con sé stessa e direbbe di sì a vuoto.
+    // A snapshot without text cannot be "valid": the fingerprint of the empty
+    // string matches itself and would say yes to nothing.
     valid: Boolean(recomputed && recomputed === snapshot.hash && !snapshot.empty),
     recomputed,
     attestation: attestation({ ...snapshot, url: commitment.url }, { host: commitment.host }),
@@ -897,9 +896,9 @@ async function proofFor(id) {
 /**
  * @param {string} url
  * @param {{etag?: string, lastModified?: string}} [validators]
- *        Se forniti, la richiesta diventa condizionale: un 304 significa
- *        "identico" senza trasferire un byte. È il controllo più economico che
- *        esista, e riduce anche il carico sul sito che stiamo interrogando.
+ *        When given, the request becomes conditional: a 304 means
+ *        "identical" without transferring a byte. It is the cheapest check
+ *        there is, and it also reduces the load on the site we are asking.
  */
 async function fetchDocument(url, validators = {}, { signal } = {}) {
   if (!url) throw new Error('URL mancante.');
@@ -938,13 +937,13 @@ async function fetchDocument(url, validators = {}, { signal } = {}) {
 
 // ── varie ───────────────────────────────────────────────────────────────────
 
-/** Il server risponde? Serve alle impostazioni, non costa analisi. */
-// ── dopo il pagamento ───────────────────────────────────────────────────────
+/** Does the server answer? Used by settings, costs no analysis. */
+// ── after payment ───────────────────────────────────────────────────────────
 
 /**
- * Dopo l'apertura del pagamento si controlla il piano ogni minuto per mezz'ora:
- * appena è attivo, una notifica lo conferma. Chi ha pagato non deve chiedersi
- * se deve fare qualcos'altro.
+ * After the payment opens, the plan is checked every minute for half an hour:
+ * as soon as it is active, a notification confirms it. Whoever paid must not
+ * wonder whether they have to do something else.
  */
 const CHECKOUT_ALARM = 'antefirma-attesa-pagamento';
 async function watchCheckout() {
@@ -965,15 +964,15 @@ async function checkCheckout() {
 }
 
 /**
- * Le analisi gratuite rimaste sull'icona, sempre in vista. Le schede con un
- * verdetto mostrano il loro livello: quello vale solo per quella scheda.
+ * The badge used to show the free analyses left. Tabs with a verdict show their
+ * level: that applies only to that tab.
  */
 async function showQuotaBadge(quota) {
   if (!chrome.action?.setBadgeText) return;
-  // Le analisi rimaste stanno nel pannello: un numero rosso sull'icona sembra un errore o una notifica.
-  // Qui si toglie soltanto quello che le versioni precedenti avevano scritto.
+  // Analyses left are shown in the panel: a red number on the icon looks like an error or a notification.
+  // Here we only clear what earlier versions wrote.
   void quota;
-  try { await chrome.action.setBadgeText({ text: '' }); } catch { /* nessuna icona da aggiornare */ }
+  try { await chrome.action.setBadgeText({ text: '' }); } catch { /* no icon to update */ }
 }
 
 async function upgrade() {
@@ -989,7 +988,7 @@ async function upgrade() {
   return { where: 'checkout' };
 }
 
-/** Gli errori del server arrivano alla pagina come { error, message }, non come eccezioni. */
+/** Server errors reach the page as { error, message }, not as exceptions. */
 async function withCode(promise) {
   try {
     return await promise;
@@ -1014,7 +1013,7 @@ async function updateBadge(tabId, level) {
   try {
     await chrome.action.setBadgeText({ tabId, text });
     await chrome.action.setBadgeBackgroundColor({ tabId, color: level.color });
-  } catch { /* la tab può essere già chiusa */ }
+  } catch { /* the tab may already be closed */ }
 }
 
 function cacheKey(text, actionType, settings) {
