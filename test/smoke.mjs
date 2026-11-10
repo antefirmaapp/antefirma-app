@@ -1,16 +1,16 @@
 /**
- * Prova end-to-end: carica davvero l'estensione in Chromium, apre la pagina
- * demo e segue il flusso con il server. Il server di AnteFirma è finto (le
- * richieste ad api.antefirma.app sono intercettate), così la prova non spende
- * analisi e non dipende dalla rete.
+ * End-to-end check: really loads the extension in Chromium, opens the demo page
+ * and follows the flow with the server. The AnteFirma server is fake (requests
+ * to api.antefirma.app are intercepted), so the check spends no analyses and
+ * doesn't depend on the network.
  *
  *     node test/smoke.mjs
  *
- * Serve a vedere ciò che i test unitari non vedono: manifest malformato,
- * service worker che non parte, content script che non si aggancia, errori
- * negli script che girano solo nel browser, testi rimasti in italiano.
+ * It catches what unit tests can't see: a malformed manifest, a service worker
+ * that doesn't start, a content script that doesn't attach, errors in scripts
+ * that only run in the browser, texts left untranslated.
  *
- * Richiede Playwright con Chromium (`require('playwright')`).
+ * Requires Playwright with Chromium (`require('playwright')`).
  */
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, mkdtempSync } from 'node:fs';
@@ -23,7 +23,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const results = [];
-/** Con SHOTS=cartella salva anche le schermate dei passaggi principali. */
+/** With SHOTS=folder it also saves screenshots of the main steps. */
 const alert = (pg) => pg.locator('antefirma-alert');
 const shot = (pg, name) => (process.env.SHOTS ? pg.screenshot({ path: join(process.env.SHOTS, `${name}.png`) }) : null);
 const check = (name, ok, detail = '') => {
@@ -31,7 +31,7 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? '  ok  ' : 'NOT OK'}  ${name}${detail ? ` — ${detail}` : ''}`);
 };
 
-// La pagina demo, servita in locale.
+// The demo page, served locally.
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.pdf': 'application/pdf' };
 const site = createServer((req, res) => {
   const f = join(ROOT, 'demo', req.url === '/' ? 'checkout.html' : req.url.split('?')[0]);
@@ -41,7 +41,7 @@ const site = createServer((req, res) => {
 await new Promise((r) => site.listen(0, '127.0.0.1', r));
 const BASE = `http://127.0.0.1:${site.address().port}/`;
 
-// Il server finto: risposte come quelle vere, con le frasi della pagina demo.
+// The fake server: answers like the real ones, with the demo page's sentences.
 const fake = { mode: 'ok', analyzeCalls: 0, lastLang: null, feedback: [], notice: null, delay: 0 };
 const VERDICT = {
   findings: [
@@ -85,12 +85,12 @@ await context.route('https://antefirma.app/**', (r) => r.fulfill({ contentType: 
 
 try {
   const sw = context.serviceWorkers()[0] || await context.waitForEvent('serviceworker', { timeout: 20000 });
-  check('il service worker si avvia', Boolean(sw));
+  check('the service worker starts', Boolean(sw));
   const extId = new URL(sw.url()).host;
 
-  // Si parte dall'italiano, qualunque sia la lingua del browser di prova.
+  // Start from Italian, whatever the test browser's language.
   const opt = await context.newPage();
-  opt.on('pageerror', (e) => errors.push(`impostazioni: ${e.message}`));
+  opt.on('pageerror', (e) => errors.push(`settings: ${e.message}`));
   await opt.goto(`chrome-extension://${extId}/src/options/options.html`);
   await opt.waitForTimeout(800);
   await opt.selectOption('#uiLang', 'it');
@@ -98,46 +98,46 @@ try {
   await opt.waitForTimeout(1200);
 
   const page = await context.newPage();
-  page.on('pageerror', (e) => errors.push(`pagina: ${e.message}`));
+  page.on('pageerror', (e) => errors.push(`page: ${e.message}`));
   page.on('dialog', (d) => d.dismiss());
   await page.goto(BASE);
   await page.waitForTimeout(1000);
 
-  // Il pulsante innocuo non si ferma.
+  // The harmless button doesn't stop.
   await page.click('text=Iscriviti alla newsletter');
   await page.waitForTimeout(400);
-  check('il pulsante innocuo non viene intercettato', (await alert(page).count()) === 0);
+  check('the harmless button is not intercepted', (await alert(page).count()) === 0);
 
-  // Il click che impegna: consenso, poi il verdetto.
+  // The binding click: consent, then the verdict.
   await page.click('button.cta');
   await page.waitForSelector('antefirma-alert', { state: 'attached', timeout: 10000 });
-  check('il click su «Conferma abbonamento» viene intercettato', true);
+  check('the click on "Conferma abbonamento" is intercepted', true);
   const shadow = (sel) => page.evaluate((s) => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector(s)?.textContent || '', sel);
   await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('[data-consent="accept"]'), null, { timeout: 8000 });
-  check('alla prima analisi chiede il consenso', (await shadow('h1')).includes('Posso leggere'));
-  // Il consenso accetta solo click veri: si clicca come la persona.
+  check('the first analysis asks for consent', (await shadow('h1')).includes('Posso leggere'));
+  // Consent only accepts real clicks: click like the person.
   await alert(page).locator('[data-consent="accept"]').click();
   await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.tile.strong .tvalue'), null, { timeout: 10000 });
   const cost = await shadow('.tile.strong .tvalue');
-  check('il costo potenziale è calcolato', /599,76|599.76/.test(cost.replace(/\s/g, '')), cost);
-  check('l’avviso dice quante analisi gratuite restano', (await shadow('.provenance')).includes('ti restano 4 analisi gratuite'));
+  check('the potential cost is computed', /599,76|599.76/.test(cost.replace(/\s/g, '')), cost);
+  check('the warning says how many free analyses are left', (await shadow('.provenance')).includes('ti restano 4 analisi gratuite'));
   const box = await page.evaluate(() => { const r = document.querySelector('antefirma-alert').getBoundingClientRect(); return { w: r.width, h: r.height }; });
-  check('l’avviso copre la pagina', box.w > 300 && box.h > 300);
-  check('le impostazioni mostrano il codice dell’installazione', /^[0-9a-f-]{36}$/.test(await opt.textContent('#install-id')));
-  await alert(page).locator('details.why > summary').click(); // «Perché?»: clausole e frasi esatte
+  check('the warning covers the page', box.w > 300 && box.h > 300);
+  check('settings show the installation code', /^[0-9a-f-]{36}$/.test(await opt.textContent('#install-id')));
+  await alert(page).locator('details.why > summary').click(); // "Why?": clauses and exact sentences
   await alert(page).locator('[data-feedback]').first().click();
   await page.waitForTimeout(500);
-  check('«Avviso sbagliato?» manda solo la categoria', fake.feedback.length === 1 && /^[a-z_]+$/.test(fake.feedback[0]) && (await shadow('[data-feedback]')).includes('Grazie'), fake.feedback.join(','));
-  check('le tre risposte: costo, scadenza, uscita', (await shadow('.tiles')).includes('2028') && (await shadow('.tiles')).includes('120'));
-  check('niente punteggi tecnici nell’avviso', !/\/100|Verdetto da/.test(await shadow('.card')));
-  await page.waitForTimeout(3200); // il pulsante si arma dopo un attimo
+  check('"Wrong warning?" sends only the category', fake.feedback.length === 1 && /^[a-z_]+$/.test(fake.feedback[0]) && (await shadow('[data-feedback]')).includes('Grazie'), fake.feedback.join(','));
+  check('the three answers: cost, deadline, way out', (await shadow('.tiles')).includes('2028') && (await shadow('.tiles')).includes('120'));
+  check('no technical scores in the warning', !/\/100|Verdetto da/.test(await shadow('.card')));
+  await page.waitForTimeout(3200); // the button arms after a moment
   await alert(page).locator('[data-act="track"]').click();
   await page.waitForTimeout(500);
-  check('«Continua e ricordami la disdetta» esegue l’azione sospesa', await page.evaluate(() => window.__demoSubmitted === true));
-  check('l’avviso si chiude dopo la decisione', (await alert(page).count()) === 0);
+  check('"Continue and remind me to cancel" performs the held action', await page.evaluate(() => window.__demoSubmitted === true));
+  check('the warning closes after the decision', (await alert(page).count()) === 0);
 
-  // Analisi del mese finite: il pulsante per passare a Pro apre il pagamento.
-  // La cache locale ricorderebbe il verdetto di prima: si svuota.
+  // This month's analyses are used up: the Pro button opens the payment.
+  // The local cache would remember the earlier verdict: clear it.
   fake.mode = 'quota';
   await opt.click('#clear-cache');
   await page.bringToFront();
@@ -145,25 +145,25 @@ try {
   await page.waitForTimeout(800);
   await page.click('button.cta');
   await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('[data-upgrade]'), null, { timeout: 10000 });
-  check('a analisi finite compare «Passa a Pro»', true);
+  check('with analyses used up "Upgrade to Pro" appears', true);
   await shot(page, 'passa-a-pro');
   const [tab] = await Promise.all([
     context.waitForEvent('page', { timeout: 8000 }),
     alert(page).locator('[data-upgrade]').click(),
   ]);
   await tab.waitForLoadState().catch(() => {});
-  check('«Passa a Pro» apre il pagamento legato a questo browser', /antefirma\.app\/pro\/#c=c{32}&p=pro/.test(tab.url()), tab.url());
+  check('"Upgrade to Pro" opens the payment linked to this browser', /antefirma\.app\/pro\/#c=c{32}&p=pro/.test(tab.url()), tab.url());
   await tab.close();
   await alert(page).locator('[data-act="cancel"]').click();
 
-  // Le impostazioni, in spagnolo.
+  // Settings, in Spanish.
   await opt.bringToFront();
   await opt.selectOption('#uiLang', 'es');
   await opt.click('#save');
   await opt.waitForTimeout(1500);
   await shot(opt, 'impostazioni-es');
-  check('le impostazioni passano allo spagnolo', (await opt.textContent('#piano h2')).replace(/\s*\?$/, '') === 'Plan' && /ayuda\/planes-y-clave/.test(await opt.getAttribute('#piano .help-q', 'href')) && (await opt.textContent('#save')) === 'Guardar');
-  check('il piano si legge in spagnolo', (await opt.textContent('#plan-summary')).includes('Plan gratuito'));
+  check('settings switch to Spanish', (await opt.textContent('#piano h2')).replace(/\s*\?$/, '') === 'Plan' && /ayuda\/planes-y-clave/.test(await opt.getAttribute('#piano .help-q', 'href')) && (await opt.textContent('#save')) === 'Guardar');
+  check('the plan reads in Spanish', (await opt.textContent('#plan-summary')).includes('Plan gratuito'));
 
   // L'avviso in inglese.
   await opt.selectOption('#uiLang', 'en');
@@ -178,41 +178,41 @@ try {
   await page.waitForTimeout(1000);
   await page.click('button.cta');
   await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.skel'), null, { timeout: 5000 });
-  check('durante l’attesa: prezzo in pagina e «Continue without waiting»', (await shadow('.body')).includes('€') && (await shadow('footer')).includes('Continue without waiting'));
+  check('while waiting: page price and "Continue without waiting"', (await shadow('.body')).includes('€') && (await shadow('footer')).includes('Continue without waiting'));
   await shot(page, 'attesa-en');
   await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.tiles .tvalue'), null, { timeout: 10000 });
   await page.waitForTimeout(600);
   await shot(page, 'avviso-en');
-  check('l’avviso è in inglese', (await shadow('.cancel')) === 'Go back' && (await shadow('.tlabel')).includes('What you really pay'));
-  check('al server si chiede l’analisi in inglese', fake.lastLang === 'en');
-  check('il messaggio agli utenti compare nella lingua giusta', (await shadow('.notice')) === 'Maintenance tonight');
-  check('la cronologia del verdetto è in inglese', (await shadow('.timeline')).includes('Now'));
+  check('the warning is in English', (await shadow('.cancel')) === 'Go back' && (await shadow('.tlabel')).includes('What you really pay'));
+  check('the server is asked for the analysis in English', fake.lastLang === 'en');
+  check('the message to users appears in the right language', (await shadow('.notice')) === 'Maintenance tonight');
+  check('the verdict timeline is in English', (await shadow('.timeline')).includes('Now'));
   await alert(page).locator('[data-act="cancel"]').click();
 
-  // Il pannello laterale, aperto come pagina.
+  // The side panel, opened as a page.
   const panel = await context.newPage();
-  panel.on('pageerror', (e) => errors.push(`pannello: ${e.message}`));
+  panel.on('pageerror', (e) => errors.push(`panel: ${e.message}`));
   await panel.goto(`chrome-extension://${extId}/src/sidepanel/sidepanel.html`);
   await panel.waitForTimeout(800);
-  check('il pannello laterale è in inglese', (await panel.textContent('#tab-btn-commitments')).trim() === 'Commitments');
+  check('the side panel is in English', (await panel.textContent('#tab-btn-commitments')).trim() === 'Commitments');
   await panel.click('#tab-btn-commitments');
   await panel.waitForTimeout(800);
-  check('l’impegno è registrato con la sua scadenza', (await panel.locator('.c-item:not(.example)').count()) === 1);
-  // La pagina di benvenuto
+  check('the commitment is recorded with its deadline', (await panel.locator('.c-item:not(.example)').count()) === 1);
+  // The welcome page
   const wel = await context.newPage();
-  wel.on('pageerror', (e) => errors.push(`benvenuto: ${e.message}`));
+  wel.on('pageerror', (e) => errors.push(`welcome: ${e.message}`));
   await wel.goto(`chrome-extension://${extId}/src/welcome/welcome.html`);
   await wel.waitForTimeout(800);
-  check('la pagina di benvenuto si apre tradotta e con il consenso già dato', (await wel.textContent('h1')) === 'Welcome to AnteFirma' && await wel.isVisible('#granted'));
+  check('the welcome page opens translated and with consent already given', (await wel.textContent('h1')) === 'Welcome to AnteFirma' && await wel.isVisible('#granted'));
   await shot(wel, 'benvenuto-en');
 } catch (err) {
-  check('la prova arriva in fondo', false, err.message);
+  check('the run reaches the end', false, err.message);
 } finally {
-  check('nessun errore JavaScript', errors.length === 0, errors.slice(0, 3).join(' | '));
+  check('no JavaScript errors', errors.length === 0, errors.slice(0, 3).join(' | '));
   await context.close();
   site.close();
 }
 
 const failed = results.filter((r) => !r).length;
-console.log(`\n${results.length - failed}/${results.length} controlli superati`);
+console.log(`\n${results.length - failed}/${results.length} checks passed`);
 process.exit(failed ? 1 : 0);

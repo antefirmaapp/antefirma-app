@@ -1,8 +1,8 @@
 /**
- * Test del motore dell'estensione: tutto ciò che succede **dopo** la risposta
- * del server — severità, costo, scadenze, profilo, tutele, punteggio — più le
- * guardie dei messaggi. Il server è sostituito da una risposta scritta a mano,
- * con citazioni copiate parola per parola dal contratto di prova.
+ * Tests of the extension's engine: everything that happens **after** the
+ * server's answer — severity, cost, deadlines, profile, protections, score —
+ * plus the message guards. The server is replaced by a hand-written answer, with
+ * quotes copied word for word from the test contract.
  *
  *   node --test test/
  */
@@ -20,7 +20,7 @@ import { ServerError } from '../src/core/server.js';
 import { levelForScore, DEFAULT_SETTINGS, RISK_CATEGORIES } from '../src/core/constants.js';
 import { isAllowed } from '../src/core/sender.js';
 
-// Contratto di prova: è l'esempio della riflessione di partenza.
+// Test contract: the example from the original reflection.
 const CONTRACT = `
 CONDIZIONI GENERALI DI ABBONAMENTO
 
@@ -58,7 +58,7 @@ const CTX_SUBSCRIPTION = {
 };
 
 
-/** La risposta che il server darebbe al contratto di prova. */
+/** The answer the server would give to the test contract. */
 const q = (category, quote, confidence = 0.95) => {
   assert.ok(CONTRACT.includes(quote), `citazione assente dal contratto: ${quote}`);
   return { category, quote, why: '', confidence };
@@ -102,7 +102,7 @@ const SETTINGS = { ...DEFAULT_SETTINGS, remoteConsentAt: '2026-08-01T00:00:00.00
 
 // ── text ────────────────────────────────────────────────────────────────────
 
-test('parseAmount interpreta i formati italiano e inglese', () => {
+test('parseAmount reads Italian and English formats', () => {
   assert.equal(parseAmount('19,99'), 19.99);
   assert.equal(parseAmount('1.234,56'), 1234.56);
   assert.equal(parseAmount('1,234.56'), 1234.56);
@@ -111,20 +111,20 @@ test('parseAmount interpreta i formati italiano e inglese', () => {
   assert.equal(parseAmount('abc'), null);
 });
 
-test('htmlToText rimuove script e tag e decodifica le entità', () => {
+test('htmlToText removes scripts and tags and decodes entities', () => {
   const text = htmlToText('<div><script>alert(1)</script><p>Prezzo &euro;19,99 &amp; oltre</p></div>');
   assert.ok(!text.includes('alert'));
   assert.ok(text.includes('€19,99 & oltre'));
 });
 
-test('hashText è stabile e discrimina', () => {
+test('hashText is stable and discriminating', () => {
   assert.equal(hashText('abc'), hashText('abc'));
   assert.notEqual(hashText('abc'), hashText('abd'));
 });
 
-// ── dal server ai finding ───────────────────────────────────────────────────
+// ── from the server to findings ─────────────────────────────────────────────
 
-test('i rischi del server prendono etichetta e severità dalle costanti', () => {
+test('server risks take label and severity from the constants', () => {
   const findings = fromServer(RESPONSE().findings);
   const ip = findings.find((f) => f.category === 'ip_license');
   assert.equal(ip.label, RISK_CATEGORIES.ip_license.label);
@@ -134,7 +134,7 @@ test('i rischi del server prendono etichetta e severità dalle costanti', () => 
   for (let i = 1; i < findings.length; i++) assert.ok(findings[i - 1].severity >= findings[i].severity, 'non ordinati');
 });
 
-test('una categoria sconosciuta o senza citazione viene ignorata', () => {
+test('an unknown category or one without a quote is ignored', () => {
   const findings = fromServer([
     { category: 'inventata', quote: 'qualcosa', why: '', confidence: 1 },
     { category: 'auto_renewal', quote: '   ', why: '', confidence: 1 },
@@ -144,7 +144,7 @@ test('una categoria sconosciuta o senza citazione viene ignorata', () => {
   assert.equal(findings[0].why, 'Paghi un altro anno.');
 });
 
-test('la stessa categoria citata due volte resta una, con la citazione più sicura', () => {
+test('the same category quoted twice stays one, with the most confident quote', () => {
   const findings = fromServer([
     { category: 'no_refund', quote: 'prima', why: '', confidence: 0.6 },
     { category: 'no_refund', quote: 'seconda', why: '', confidence: 0.95 },
@@ -154,7 +154,7 @@ test('la stessa categoria citata due volte resta una, con la citazione più sicu
   assert.deepEqual(findings[0].quotes, ['prima']);
 });
 
-test('una fiducia bassa abbassa la severità, ma non la azzera', () => {
+test('low confidence lowers severity, but doesn\'t zero it', () => {
   const [sure] = fromServer([{ category: 'arbitration', quote: 'x', why: '', confidence: 1 }]);
   const [unsure] = fromServer([{ category: 'arbitration', quote: 'x', why: '', confidence: 0 }]);
   assert.ok(unsure.severity < sure.severity);
@@ -163,7 +163,7 @@ test('una fiducia bassa abbassa la severità, ma non la azzera', () => {
 
 // ── conseguenze ─────────────────────────────────────────────────────────────
 
-test('le cifre del server diventano durata, preavviso e penale', () => {
+test('the server\'s figures become term, notice and exit fee', () => {
   const t = termsFromServer(RESPONSE().terms);
   assert.equal(t.minTerm.months, 12);
   assert.equal(t.notice.days, 30);
@@ -172,7 +172,7 @@ test('le cifre del server diventano durata, preavviso e penale', () => {
   assert.equal(t.period, 'month');
 });
 
-test('una cifra non numerica o negativa non entra nei conti', () => {
+test('a non-numeric or negative figure stays out of the totals', () => {
   const t = termsFromServer({ minimum_term_months: { value: 'dodici', quote: 'x' }, exit_fee: { value: -5, quote: 'x' }, notice_days: null });
   assert.equal(t.minTerm, null);
   assert.equal(t.penalty, null);
@@ -180,7 +180,7 @@ test('una cifra non numerica o negativa non entra nei conti', () => {
   assert.deepEqual(termsFromServer(null).minTerm, null);
 });
 
-test('il prezzo della pagina vince su quello letto nel testo', () => {
+test('the page price wins over the one read in the text', () => {
   const server = termsFromServer(RESPONSE().terms);
   assert.equal(mergePricing({ amount: 24.99, currency: 'EUR', period: 'month' }, server).amount, 24.99);
   const fromText = mergePricing({}, server);
@@ -189,7 +189,7 @@ test('il prezzo della pagina vince su quello letto nel testo', () => {
   assert.equal(fromText.source, 'server');
 });
 
-test('il costo worst-case somma canone, penale e costi una tantum', () => {
+test('the worst-case cost adds fees, exit fee and one-off costs', () => {
   const findings = fromServer(RESPONSE().findings);
   const terms = termsFromServer(RESPONSE().terms);
   const cost = computeCost({ ctx: CTX_SUBSCRIPTION, findings, terms });
@@ -200,7 +200,7 @@ test('il costo worst-case somma canone, penale e costi una tantum', () => {
   assert.ok(cost.understated, 'il prezzo mostrato sottostima nettamente l’impegno');
 });
 
-test('una spesa per ogni rata viene moltiplicata per i cicli', () => {
+test('a per-instalment charge is multiplied by the cycles', () => {
   const terms = termsFromServer({ ...RESPONSE().terms, exit_fee: null, extra_fees: [{ label: 'Incasso', value: 2, per_cycle: true, quote: 'x' }] });
   const cost = computeCost({ ctx: CTX_SUBSCRIPTION, findings: [], terms });
   const line = cost.lines.find((l) => l.kind === 'extra');
@@ -208,13 +208,13 @@ test('una spesa per ogni rata viene moltiplicata per i cicli', () => {
   assert.match(line.label, /× 12/);
 });
 
-test('un costo accessorio senza cifra valida non entra nei conti', () => {
+test('an extra cost without a valid figure stays out of the totals', () => {
   const t = termsFromServer({ extra_fees: [{ label: 'x', value: 0, per_cycle: false, quote: 'q' }, { label: 'y', value: 'tanti', quote: 'q' }, null] });
   assert.deepEqual(t.extras, []);
   assert.deepEqual(termsFromServer({}).extras, []);
 });
 
-test('senza durata minima ma con rinnovo automatico si assume un anno', () => {
+test('without a minimum term but with automatic renewal one year is assumed', () => {
   const ctx = { pricing: { amount: 10, currency: 'EUR', period: 'month', recurring: true } };
   const findings = fromServer([{ category: 'auto_renewal', quote: 'si rinnova', why: '', confidence: 0.9 }]);
   const cost = computeCost({ ctx, findings, terms: termsFromServer({}) });
@@ -222,7 +222,7 @@ test('senza durata minima ma con rinnovo automatico si assume un anno', () => {
   assert.equal(cost.worstCase, 120);
 });
 
-test('la timeline mette la scadenza di disdetta prima del rinnovo', () => {
+test('the timeline puts the cancellation deadline before the renewal', () => {
   const findings = fromServer(RESPONSE().findings);
   const cost = computeCost({ ctx: CTX_SUBSCRIPTION, findings, terms: termsFromServer(RESPONSE().terms) });
   const timeline = buildTimeline({ ctx: CTX_SUBSCRIPTION, cost, findings, actionType: 'subscribe', now: T0 });
@@ -232,13 +232,13 @@ test('la timeline mette la scadenza di disdetta prima del rinnovo', () => {
   assert.ok(deadline, 'manca la scadenza di disdetta');
   assert.ok(renewal, 'manca il rinnovo');
   assert.ok(new Date(deadline.at) < new Date(renewal.at));
-  // 12 mesi meno 30 giorni di preavviso → metà luglio 2027
+  // 12 months minus 30 days of notice → mid July 2027
   assert.match(deadline.when, /luglio 2027/);
 });
 
 // ── profilo personale ───────────────────────────────────────────────────────
 
-test('il profilo cambia la severità della stessa clausola', () => {
+test('the profile changes the severity of the same clause', () => {
   const findings = fromServer(RESPONSE().findings);
   const base = findings.find((f) => f.category === 'ip_license').severity;
 
@@ -250,7 +250,7 @@ test('il profilo cambia la severità della stessa clausola', () => {
   assert.deepEqual(photographer.personalReasons, ['Proprietà intellettuale', 'Lavoro freelance / professionale']);
 });
 
-test('il moltiplicatore è limitato e con rendimento decrescente', () => {
+test('the multiplier is capped, with diminishing returns', () => {
   const all = multiplierFor('ai_training', { ip: true, privacy: true, freelance: true, business: true });
   assert.ok(all.multiplier <= 1.9);
   assert.ok(all.multiplier > 1.45);
@@ -258,15 +258,15 @@ test('il moltiplicatore è limitato e con rendimento decrescente', () => {
 
 // ── punteggio ───────────────────────────────────────────────────────────────
 
-test('aggregateSeverity fa dominare il rischio più grave', () => {
+test('aggregateSeverity lets the most serious risk dominate', () => {
   const one = aggregateSeverity([{ severity: 80 }]);
   const ten = aggregateSeverity(Array.from({ length: 10 }, () => ({ severity: 30 })));
   assert.ok(one > ten, 'un rischio grave deve pesare più di dieci tiepidi');
 });
 
-test('la pressione economica cresce in modo logaritmico e limitato', () => {
-  // Asserzioni sul *comportamento*, non sui numeri: il tetto è un parametro di
-  // calibrazione e cambierà ancora. Che sia monotona e limitata, no.
+test('economic pressure grows logarithmically and is capped', () => {
+  // Assertions on *behaviour*, not numbers: the cap is a calibration parameter
+  // and will change again. That it is monotonic and capped won't.
   assert.equal(moneyPressure(0), 0);
   assert.equal(moneyPressure(-5), 0);
   let previous = -1;
@@ -276,16 +276,16 @@ test('la pressione economica cresce in modo logaritmico e limitato', () => {
     assert.ok(v < 50, `contributo sproporzionato per ${amount} €: ${v}`);
     previous = v;
   }
-  // La crescita deve rallentare: raddoppiare l'importo non raddoppia il peso.
+  // Growth must slow down: doubling the amount doesn't double the weight.
   const d1 = moneyPressure(200) - moneyPressure(100);
   const d2 = moneyPressure(20000) - moneyPressure(10000);
   assert.ok(Math.abs(d1 - d2) <= 2, 'la scala non è logaritmica');
 });
 
-test('i livelli coprono la scala senza buchi e in ordine', () => {
-  // Le soglie vengono dalla calibrazione (test/calibration.test.mjs) e si
-  // sposteranno ancora: qui si verifica solo che la scala resti continua,
-  // monotona e completa.
+test('the levels cover the scale with no gaps and in order', () => {
+  // Thresholds come from calibration (test/calibration.test.mjs) and will move
+  // again: here we only check that the scale stays continuous, monotonic and
+  // complete.
   const order = ['safe', 'review', 'commitment', 'high_risk', 'critical'];
   assert.equal(levelForScore(0).id, 'safe');
   assert.equal(levelForScore(100).id, 'critical');
@@ -302,14 +302,14 @@ test('i livelli coprono la scala senza buchi e in ordine', () => {
   assert.equal(seen.size, order.length, 'qualche livello è irraggiungibile');
 });
 
-test('shouldBlock rispetta la soglia scelta dall’utente', () => {
+test('shouldBlock respects the threshold chosen by the user', () => {
   assert.equal(shouldBlock('review', 'commitment'), false);
   assert.equal(shouldBlock('commitment', 'commitment'), true);
   assert.equal(shouldBlock('critical', 'high_risk'), true);
   assert.equal(shouldBlock('high_risk', 'critical'), false);
 });
 
-test('un solo indizio debole non fa scattare l’allarme rosso', () => {
+test('a single weak clue doesn\'t trigger the red alert', () => {
   const { score, level } = computeScore({
     findings: [{ severity: 60, confidence: 0.6, category: 'jurisdiction' }],
     cost: {},
@@ -322,7 +322,7 @@ test('un solo indizio debole non fa scattare l’allarme rosso', () => {
 
 // ── motore consumer UE/IT ───────────────────────────────────────────────────
 
-test('il motore italiano segnala arbitrato, foro e modifiche unilaterali', () => {
+test('the Italian engine flags arbitration, court and unilateral changes', () => {
   const findings = fromServer(RESPONSE().findings);
   const cost = computeCost({ ctx: CTX_SUBSCRIPTION, findings, terms: termsFromServer(RESPONSE().terms) });
   const consumer = runConsumerChecks({ text: CONTRACT, findings, ctx: CTX_SUBSCRIPTION, cost, actionType: 'subscribe', jurisdiction: 'IT' });
@@ -336,14 +336,14 @@ test('il motore italiano segnala arbitrato, foro e modifiche unilaterali', () =>
   assert.ok(consumer.disclaimer.length > 0);
 });
 
-test('fuori da UE/IT il motore consumer non si attiva', () => {
+test('outside the EU/IT the consumer engine doesn\'t kick in', () => {
   const findings = fromServer(RESPONSE().findings);
   const consumer = runConsumerChecks({ text: CONTRACT, findings, jurisdiction: 'US' });
   assert.equal(consumer.applicable, false);
   assert.equal(consumer.boost, 0);
 });
 
-test('il consenso precompilato viene segnalato come non valido', () => {
+test('pre-ticked consent is flagged as invalid', () => {
   const ctx = { form: { precheckedConsents: 1 } };
   const findings = [{ category: 'profiling', severity: 40 }];
   const consumer = runConsumerChecks({ text: 'profilazione', findings, ctx, jurisdiction: 'IT' });
@@ -352,7 +352,7 @@ test('il consenso precompilato viene segnalato come non valido', () => {
 
 // ── pipeline completa ───────────────────────────────────────────────────────
 
-test('analisi end-to-end: numeri, livello e scadenza', async () => {
+test('end-to-end analysis: numbers, level and deadline', async () => {
   const settings = { ...SETTINGS, jurisdiction: 'IT', profile: { money: true, privacy: true, identity: true } };
   const v = await analyze({ text: CONTRACT, ctx: CTX_SUBSCRIPTION, actionType: 'subscribe', settings, now: T0, remote: remoteWith(RESPONSE()) });
 
@@ -367,7 +367,7 @@ test('analisi end-to-end: numeri, livello e scadenza', async () => {
   assert.ok(v.drivers.length > 0);
 });
 
-test('al server arrivano testo, azione, pulsante, indirizzo e giurisdizione', async () => {
+test('text, action, button, address and jurisdiction reach the server', async () => {
   let sent = null;
   await analyze({
     text: `  ${CONTRACT}  `,
@@ -383,7 +383,7 @@ test('al server arrivano testo, azione, pulsante, indirizzo e giurisdizione', as
   assert.equal(sent.text, sent.text.trim());
 });
 
-test('lo stesso contratto pesa di più per un freelance creativo', async () => {
+test('the same contract weighs more for a creative freelancer', async () => {
   const run = (profile) => analyze({ text: CONTRACT, ctx: CTX_SUBSCRIPTION, actionType: 'subscribe', settings: { ...SETTINGS, profile }, remote: remoteWith(RESPONSE()) });
   const plain = await run({ money: true });
   const creative = await run({ money: true, ip: true, freelance: true });
@@ -391,7 +391,7 @@ test('lo stesso contratto pesa di più per un freelance creativo', async () => {
   assert.ok(creative.findings.find((f) => f.category === 'ip_license').personalized);
 });
 
-test('una pagina senza rischi resta verde e non blocca', async () => {
+test('a page without risks stays green and doesn\'t block', async () => {
   const v = await analyze({
     text: 'Iscriviti alla newsletter per ricevere tre articoli a settimana. Puoi annullare l’iscrizione quando vuoi dal link in fondo alla email. Non condividiamo il tuo indirizzo con nessuno.',
     ctx: { url: 'https://blog.test', pricing: {}, form: {}, terms: {} },
@@ -404,14 +404,14 @@ test('una pagina senza rischi resta verde e non blocca', async () => {
   assert.ok(v.summary.length > 0, 'senza riassunto del server serve quello dell’estensione');
 });
 
-test('se il server non risponde l’analisi fallisce, non finge un verdetto', async () => {
+test('if the server doesn\'t answer the analysis fails, it doesn\'t fake a verdict', async () => {
   await assert.rejects(
     analyze({ text: CONTRACT, ctx: CTX_SUBSCRIPTION, actionType: 'subscribe', settings: SETTINGS, remote: async () => { throw new ServerError('quota', { status: 429 }); } }),
     (err) => err instanceof ServerError && err.code === 'quota'
   );
 });
 
-test('una pagina analizzata solo in parte lo dichiara', async () => {
+test('a page analysed only in part says so', async () => {
   const v = await analyze({ text: CONTRACT, ctx: CTX_SUBSCRIPTION, actionType: 'subscribe', settings: SETTINGS, remote: remoteWith({ ...RESPONSE(), truncated: true }) });
   assert.equal(v.engine.truncated, true);
 });
@@ -421,16 +421,16 @@ test('una pagina analizzata solo in parte lo dichiara', async () => {
 const ID = 'abcdefghijklmnopqrstuvwxyzabcdef';
 const BASE = `chrome-extension://${ID}/`;
 
-test('una pagina web non può chiedere le impostazioni integrali', () => {
+test('a web page cannot ask for the full settings', () => {
   const page = { id: ID, url: 'https://negozio.example/checkout', tab: { id: 7 } };
   for (const type of ['GET_SETTINGS', 'SET_SETTINGS', 'GET_PROOF', 'BUILD_LETTER']) {
     assert.equal(isAllowed(type, page, ID, BASE), false, `${type} consentito a una pagina web`);
   }
 });
 
-test('il pannello aperto come scheda resta autorizzato', () => {
-  // La notifica di scadenza apre il pannello con chrome.tabs.create, quindi
-  // `sender.tab` è definito: una guardia basata su quello lo bloccherebbe.
+test('the panel opened as a tab stays authorised', () => {
+  // The deadline notification opens the panel with chrome.tabs.create, so
+  // `sender.tab` is defined: a guard based on that would block it.
   const panel = { id: ID, url: `${BASE}src/sidepanel/sidepanel.html`, tab: { id: 9 } };
   const options = { id: ID, url: `${BASE}src/options/options.html` };
   for (const sender of [panel, options]) {
@@ -439,14 +439,14 @@ test('il pannello aperto come scheda resta autorizzato', () => {
   }
 });
 
-test('i messaggi non privilegiati restano aperti a tutti', () => {
+test('non-privileged messages stay open to everyone', () => {
   const page = { id: ID, url: 'https://negozio.example/checkout', tab: { id: 7 } };
   for (const type of ['ANALYZE_ACTION', 'GRANT_CONSENT', 'RECORD_DECISION', 'ALLOWLIST_ADD', 'GET_CONTENT_SETTINGS']) {
     assert.ok(isAllowed(type, page, ID, BASE), `${type} bloccato a un content script`);
   }
 });
 
-test('un’estensione diversa non passa la guardia', () => {
+test('a different extension doesn\'t pass the guard', () => {
   const other = { id: 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz', url: `${BASE}src/options/options.html` };
   assert.equal(isAllowed('GET_SETTINGS', other, ID, BASE), false);
 });

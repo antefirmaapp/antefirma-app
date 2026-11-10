@@ -1,19 +1,19 @@
 /**
- * Le schermate e i mini video del centro di aiuto, nelle tre lingue, dall'estensione vera.
+ * Help centre screenshots and short videos, in three languages, from the real extension.
  *
- *     node tools/help-shots.mjs [cartella]   (predefinita: ../antefirma-site/assets/help)
- *     node tools/help-shots.mjs --no-video    solo le schermate (più veloce)
- *     node tools/help-shots.mjs --lang=it     una lingua sola
+ *     node tools/help-shots.mjs [folder]     (default: ../antefirma-site/assets/help)
+ *     node tools/help-shots.mjs --no-video    screenshots only (faster)
+ *     node tools/help-shots.mjs --lang=it     a single language
  *
- * Da rifare a ogni versione che cambia l'aspetto dell'estensione: il sito le
- * mette nelle guide (help.mjs) con i nomi qui sotto, e una schermata che manca
- * semplicemente non compare. Come tools/media.mjs: estensione caricata in
- * Chromium, palestra inventata, server finto (demo-fixture.mjs), nessuna rete.
+ * Rerun for every version that changes how the extension looks: the website puts
+ * them in the guides (help.mjs) by the names below, and a missing screenshot
+ * simply doesn't appear. Like tools/media.mjs: extension loaded in Chromium,
+ * invented gym, fake server (demo-fixture.mjs), no network.
  *
- * Schermate: consenso, attesa, avviso, perche, pannello-esempi,
+ * Screenshots: consenso, attesa, avviso, perche, pannello-esempi,
  * pannello-risultato, calendario, impegni, lettera, opzioni-piano, opzioni-dati.
- * Video (15–20 s, .mp4 con ffmpeg): video-impegno, video-lettera, video-chiave.
- * Scrive anche sizes.json (larghezza e altezza di ogni immagine).
+ * Videos (15–20 s, .mp4 via ffmpeg): video-impegno, video-lettera, video-chiave.
+ * Also writes sizes.json (width and height of each image).
  */
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
@@ -44,7 +44,7 @@ async function launch(l, { video, viewport }) {
   return { context, extId: new URL(sw.url()).host };
 }
 
-/** Lingua, paese e dati per la lettera, come farebbe la persona. Il consenso no: si fotografa. */
+/** Language, country and letter details, as the person would set them. Not consent: it is screenshotted. */
 async function setup(context, extId, l, { consent = false } = {}) {
   const opt = await context.newPage();
   await opt.goto(`chrome-extension://${extId}/src/options/options.html`);
@@ -72,7 +72,7 @@ async function screens(l, dir) {
   const { context, extId } = await launch(l, { viewport: SITE });
   await setup(context, extId, l);
 
-  // Il momento del click: consenso, attesa, avviso, «Perché?».
+  // The moment of the click: consent, waiting, warning, "Why?".
   const pg = await context.newPage();
   const alert = pg.locator('antefirma-alert');
   await pg.goto(`https://${HOST[l]}/abbonati`);
@@ -95,7 +95,7 @@ async function screens(l, dir) {
   await pg.waitForTimeout(800);
   await pg.close();
 
-  // Il pannello: esempi, risultato, calendario, impegni, lettera.
+  // The panel: examples, result, calendar, commitments, letter.
   const panel = await context.newPage();
   await panel.setViewportSize(PANEL);
   await panel.goto(`chrome-extension://${extId}/src/sidepanel/sidepanel.html`);
@@ -103,7 +103,7 @@ async function screens(l, dir) {
   await panel.click('.source[data-source="paste"]');
   await panel.waitForTimeout(400);
   await shot(panel, dir, 'pannello-esempi');
-  // Un esempio si guarda e non si registra: per il risultato serve un'analisi (finta) del testo della palestra.
+  // An example is viewed, not recorded: the result needs a (fake) analysis of the gym text.
   await panel.fill('#paste-text', PAGE[l].terms);
   await panel.fill('#paste-price', '39'); await panel.selectOption('#paste-period', 'month');
   await panel.click('#run-paste');
@@ -124,7 +124,7 @@ async function screens(l, dir) {
   await shot(panel, dir, 'lettera');
   await panel.close();
 
-  // Le impostazioni: una sezione per volta.
+  // Settings: one section at a time.
   const opt = await context.newPage();
   await opt.setViewportSize({ width: 820, height: 900 });
   await opt.goto(`chrome-extension://${extId}/src/options/options.html`);
@@ -138,7 +138,7 @@ async function screens(l, dir) {
   await context.close();
 }
 
-/** Un mini video: `run` muove la pagina, il resto (registrazione, .mp4, locandina) è qui. */
+/** A short video: `run` drives the page, the rest (recording, .mp4, poster) is here. */
 async function clip(l, dir, name, viewport, run) {
   const vids = mkdtempSync(join(tmpdir(), 'af-hvid-'));
   const { context, extId } = await launch(l, { video: vids, viewport });
@@ -151,13 +151,13 @@ async function clip(l, dir, name, viewport, run) {
   const webm = await video.path();
   await context.close();
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', webm, '-c:v', 'libx264', '-preset', 'slow', '-crf', '28', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', join(dir, `${name}.mp4`)]);
-  // La locandina: l'ultimo fotogramma, che mostra il risultato.
+  // The poster: the last frame, which shows the result.
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-sseof', '-0.6', '-i', join(dir, `${name}.mp4`), '-frames:v', '1', '-q:v', '4', join(dir, `${name}.jpg`)]);
   sizes[`${name}.jpg`] = { w: viewport.width, h: viewport.height };
   rmSync(vids, { recursive: true, force: true });
 }
 
-/** Un cursore visibile nel video (Playwright non lo disegna). */
+/** A visible cursor in the video (Playwright doesn't draw one). */
 const CURSOR = `(() => { const c = document.createElement('div'); c.id = '__cur';
   c.style.cssText = 'position:fixed;left:0;top:0;width:22px;height:22px;border-radius:50%;background:rgba(255,224,74,.85);border:2px solid #15203a;pointer-events:none;z-index:2147483647;transform:translate(-50px,-50px);transition:transform .25s ease';
   document.documentElement.append(c);
@@ -173,7 +173,7 @@ async function press(page, sel, wait = 700) {
 const panelUrl = (id) => `chrome-extension://${id}/src/sidepanel/sidepanel.html`;
 
 async function videos(l, dir) {
-  // Registrare un impegno e metterlo in calendario.
+  // Recording a commitment and adding it to the calendar.
   await clip(l, dir, 'video-impegno', PANEL, async (p, id) => {
     await p.goto(panelUrl(id)); await p.evaluate(CURSOR); await p.waitForTimeout(900);
     await press(p, '.source[data-source="paste"]', 900);
@@ -186,7 +186,7 @@ async function videos(l, dir) {
     await p.locator('#cal-ics').scrollIntoViewIfNeeded(); await p.waitForTimeout(1200);
     await press(p, '#tab-btn-commitments', 2500);
   });
-  // Preparare la lettera, e cambiarne la lingua.
+  // Preparing the letter, and changing its language.
   await clip(l, dir, 'video-lettera', PANEL, async (p, id) => {
     await p.goto(panelUrl(id)); await p.evaluate(CURSOR);
     await p.click('.source[data-source="paste"]'); await p.fill('#paste-text', PAGE[l].terms);
@@ -202,7 +202,7 @@ async function videos(l, dir) {
     await p.selectOption('#letter-lang', { it: 'it', en: 'en', es: 'es' }[l]); await p.waitForTimeout(1500);
     await p.mouse.wheel(0, 500); await p.waitForTimeout(2000);
   });
-  // Inserire la chiave del piano (finta: il server di prova la accetta).
+  // Entering the plan key (fake: the test server accepts it).
   await clip(l, dir, 'video-chiave', PANEL, async (p, id) => {
     await p.goto(`chrome-extension://${id}/src/options/options.html`); await p.evaluate(CURSOR); await p.waitForTimeout(600);
     await p.locator('#piano').scrollIntoViewIfNeeded(); await p.waitForTimeout(1200);
@@ -222,5 +222,5 @@ for (const l of LANGS) {
   await screens(l, dir);
   if (VIDEO) await videos(l, dir);
   writeFileSync(join(dir, 'sizes.json'), JSON.stringify(sizes, null, 1) + '\n');
-  console.log(`${l}: ${readdirSync(dir).length} file`);
+  console.log(`${l}: ${readdirSync(dir).length} files`);
 }

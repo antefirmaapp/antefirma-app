@@ -1,6 +1,6 @@
 /**
- * Il client del server: token dell'installazione, nuovo tentativo dopo un 401,
- * traduzione degli errori. `fetch` e `chrome.storage` sono sostituiti da finti.
+ * The server client: installation token, retry after a 401, error translation.
+ * `fetch` and `chrome.storage` are replaced by fakes.
  */
 
 import test from 'node:test';
@@ -22,7 +22,7 @@ function memoryStorage() {
 const json = (status, body, headers = {}) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...headers } });
 
-/** Un server finto che risponde con le funzioni date, una per rotta. */
+/** A fake server answering with the given functions, one per route. */
 function fakeServer(routes) {
   const calls = [];
   const fetchImpl = async (url, init) => {
@@ -36,7 +36,7 @@ function fakeServer(routes) {
 
 const OK = { findings: [], terms: {}, summary: 'nulla', dropped: 0, truncated: false, model: 'm', cached: false, quota: { remaining: 9 } };
 
-test('l’id dell’installazione si genera una volta e poi resta', async () => {
+test('the installation id is generated once and then stays', async () => {
   const storage = memoryStorage();
   const a = await installId({ storage });
   const b = await installId({ storage });
@@ -44,7 +44,7 @@ test('l’id dell’installazione si genera una volta e poi resta', async () => 
   assert.match(a, /^[0-9a-f-]{36}$/);
 });
 
-test('la registrazione conserva il token e manda solo l’id', async () => {
+test('registration keeps the token and sends only the id', async () => {
   const storage = memoryStorage();
   const { fetchImpl, calls } = fakeServer({ '/v1/register': () => json(200, { token: 'tok-1' }) });
   const token = await register({ storage, fetchImpl, base: BASE });
@@ -53,7 +53,7 @@ test('la registrazione conserva il token e manda solo l’id', async () => {
   assert.equal(storage.data.antefirmaAuth.token, 'tok-1');
 });
 
-test('la prima analisi si registra da sé e usa il token', async () => {
+test('the first analysis registers by itself and uses the token', async () => {
   const storage = memoryStorage();
   const { fetchImpl, calls } = fakeServer({
     '/v1/register': () => json(200, { token: 'tok-1' }),
@@ -66,7 +66,7 @@ test('la prima analisi si registra da sé e usa il token', async () => {
   assert.equal(calls[1].body.action, 'subscribe');
 });
 
-test('i tipi di azione e la giurisdizione diventano quelli del server', async () => {
+test('action types and jurisdiction become the server\'s', async () => {
   const storage = memoryStorage();
   await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });
   const { fetchImpl, calls } = fakeServer({ '/v1/analyze': () => json(200, OK) });
@@ -79,7 +79,7 @@ test('i tipi di azione e la giurisdizione diventano quelli del server', async ()
   assert.deepEqual(calls.map((c) => c.body.userCountry), ['IT', 'GB', 'IT', 'IT']);
 });
 
-test('a un token scaduto se ne chiede uno nuovo e si riprova una volta', async () => {
+test('an expired token is replaced and the call retried once', async () => {
   const storage = memoryStorage();
   await storage.set({ antefirmaAuth: { installId: 'i', token: 'vecchio' } });
   const { fetchImpl, calls } = fakeServer({
@@ -91,7 +91,7 @@ test('a un token scaduto se ne chiede uno nuovo e si riprova una volta', async (
   assert.deepEqual(calls.map((c) => c.path), ['/v1/analyze', '/v1/register', '/v1/analyze']);
 });
 
-test('un 401 ostinato non diventa un ciclo infinito', async () => {
+test('a stubborn 401 doesn\'t become an endless loop', async () => {
   const storage = memoryStorage();
   const { fetchImpl, calls } = fakeServer({
     '/v1/register': () => json(200, { token: 't' }),
@@ -101,7 +101,7 @@ test('un 401 ostinato non diventa un ciclo infinito', async () => {
   assert.equal(calls.filter((c) => c.path === '/v1/analyze').length, 2);
 });
 
-test('la quota esaurita arriva come errore con un messaggio per la persona', async () => {
+test('quota exhausted arrives as an error with a message for the person', async () => {
   const storage = memoryStorage();
   await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });
   const { fetchImpl } = fakeServer({ '/v1/analyze': () => json(429, { error: 'quota', message: 'daily limit' }) });
@@ -113,7 +113,7 @@ test('la quota esaurita arriva come errore con un messaggio per la persona', asy
   });
 });
 
-test('finite le analisi gratuite del mese, il messaggio lo dice', async () => {
+test('with this month\'s free analyses used up, the message says so', async () => {
   const storage = memoryStorage();
   await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });
   const { fetchImpl } = fakeServer({ '/v1/analyze': () => json(429, { error: 'quota_month' }, { 'retry-after': '1950000' }) });
@@ -125,28 +125,28 @@ test('finite le analisi gratuite del mese, il messaggio lo dice', async () => {
   });
 });
 
-test('il servizio occupato riporta quando riprovare', async () => {
+test('a busy service reports when to retry', async () => {
   const storage = memoryStorage();
   await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });
   const { fetchImpl } = fakeServer({ '/v1/analyze': () => json(503, { error: 'busy' }, { 'retry-after': '30' }) });
   await assert.rejects(analyzeRemote({ text: 'x' }, { storage, fetchImpl, base: BASE }), (e) => e.code === 'busy' && e.retryAfter === 30);
 });
 
-test('senza rete l’errore dice che il server non è raggiungibile', async () => {
+test('without network the error says the server is unreachable', async () => {
   const storage = memoryStorage();
   await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });
   const fetchImpl = async () => { throw new TypeError('Failed to fetch'); };
   await assert.rejects(analyzeRemote({ text: 'x' }, { storage, fetchImpl, base: BASE }), (e) => e.code === 'network');
 });
 
-test('il tempo scaduto si distingue dalla rete assente', async () => {
+test('a timeout is told apart from a missing network', async () => {
   const storage = memoryStorage();
   await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });
   const fetchImpl = async () => { throw new DOMException('timeout', 'TimeoutError'); };
   await assert.rejects(analyzeRemote({ text: 'x' }, { storage, fetchImpl, base: BASE }), (e) => e.code === 'timeout');
 });
 
-test('una risposta senza JSON non fa esplodere il client', async () => {
+test('a response without JSON doesn\'t blow up the client', async () => {
   const storage = memoryStorage();
   await storage.set({ antefirmaAuth: { installId: 'i', token: 't' } });
   const fetchImpl = async () => new Response('<html>gateway</html>', { status: 502 });
@@ -167,7 +167,7 @@ function planServer(routes) {
   return { fetchImpl, calls };
 }
 
-test('piano: lettura con GET e token, nuovo token dopo un 401', async () => {
+test('plan: read with GET and token, new token after a 401', async () => {
   const storage = memoryStorage();
   let n = 0;
   const { fetchImpl, calls } = planServer({
@@ -182,7 +182,7 @@ test('piano: lettura con GET e token, nuovo token dopo un 401', async () => {
   assert.equal(lic[1].auth, 'Bearer v1.tok2');
 });
 
-test('piano: acquisto, attivazione e rimozione', async () => {
+test('plan: purchase, activation and removal', async () => {
   const storage = memoryStorage();
   const { fetchImpl, calls } = planServer({
     '/v1/register': () => json(200, { token: 'v1.t' }),

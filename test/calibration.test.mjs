@@ -1,17 +1,17 @@
 /**
- * Calibrazione del punteggio.
+ * Score calibration.
  *
- * Le asserzioni sono in ordine di robustezza decrescente, ed è voluto:
+ * The assertions are in order of decreasing robustness, on purpose:
  *
- *  1. **Nessuna saturazione** — la scala deve distinguere. È il difetto che
- *     questi test sono nati per impedire: con il motore precedente otto casi
- *     su nove davano CRITICAL, compreso un SaaS onesto senza vincoli.
- *  2. **Ordinamento** — un contratto peggiore deve risultare peggiore. Vale
- *     comunque si spostino le soglie, ed è la promessa vera del prodotto.
- *  3. **Blocca / non blocca** — il comportamento che l'utente sperimenta.
- *  4. **Fascia esatta** — l'asserzione più debole, perché dipende da nove
- *     etichette scritte a mano. Quando arriveranno testi presi da siti veri,
- *     è questa che andrà rivista per prima.
+ *  1. **No saturation** — the scale must discriminate. It is the defect these
+ *     tests were born to prevent: with the previous engine eight cases out of
+ *     nine gave CRITICAL, including an honest SaaS with no lock-in.
+ *  2. **Ordering** — a worse contract must come out worse. It holds however the
+ *     thresholds move, and it is the product's real promise.
+ *  3. **Blocks / doesn't block** — the behaviour the user experiences.
+ *  4. **Exact band** — the weakest assertion, because it depends on nine
+ *     hand-written labels. When texts from real sites arrive, this is the one
+ *     to revise first.
  */
 
 import test from 'node:test';
@@ -24,12 +24,12 @@ import { multiplierFor } from '../src/core/profile.js';
 import { CORPUS, ORDERING, BAND_ORDER } from './fixtures/corpus.mjs';
 import { RESPONSES } from './fixtures/responses.mjs';
 
-/** Il server sostituito dalla sua risposta registrata per quel testo. */
+/** The server replaced by its recorded answer for that text. */
 const recorded = (id) => async () => structuredClone(RESPONSES[id]);
 
 const T0 = new Date('2026-08-15T10:00:00Z').getTime();
 
-/** Analizza tutto il corpus una volta sola: i test poi leggono da qui. */
+/** Analyses the whole corpus once: the tests then read from here. */
 const scored = new Map();
 for (const c of CORPUS) {
   const verdict = await analyze({
@@ -49,28 +49,28 @@ for (const c of CORPUS) {
 const get = (id) => scored.get(id);
 const scores = [...scored.values()].map((s) => s.score);
 
-// ── 1. la scala deve distinguere ────────────────────────────────────────────
+// ── 1. the scale must discriminate ──────────────────────────────────────────
 
-test('nessun caso tocca il tetto: 100 resta irraggiungibile', () => {
+test('no case hits the cap: 100 stays unreachable', () => {
   for (const s of scored.values()) {
     assert.ok(s.score < 100, `${s.id} è saturo a ${s.score}`);
   }
 });
 
-test('i punteggi sono distribuiti, non ammassati in alto', () => {
+test('scores are spread out, not piled up at the top', () => {
   const distinct = new Set(scores).size;
   const spread = Math.max(...scores) - Math.min(...scores);
   assert.ok(distinct >= 7, `solo ${distinct} valori distinti su ${scores.length} casi`);
   assert.ok(spread >= 60, `la scala usata è larga solo ${spread} punti`);
 
-  // E devono essere usate almeno quattro fasce su cinque: se il corpus copre
-  // dalla newsletter al finanziamento predatorio e finisce tutto in due
-  // fasce, il livello non sta dicendo niente.
+  // And at least four bands out of five must be used: if the corpus goes from
+  // the newsletter to the predatory loan and everything ends up in two bands,
+  // the level is saying nothing.
   const bands = new Set([...scored.values()].map((s) => s.band));
   assert.ok(bands.size >= 4, `usate solo ${bands.size} fasce: ${[...bands].join(', ')}`);
 });
 
-test('la compressione è monotona e non raggiunge mai 100', () => {
+test('compression is monotonic and never reaches 100', () => {
   let previous = -1;
   for (let raw = 0; raw <= 400; raw += 5) {
     const v = compressSeverity(raw);
@@ -78,19 +78,19 @@ test('la compressione è monotona e non raggiunge mai 100', () => {
     assert.ok(v < 100, `compressSeverity(${raw}) = ${v}`);
     previous = v;
   }
-  // Sotto il ginocchio deve restare fedele: lì la precisione serve.
+  // Below the knee it must stay faithful: precision matters there.
   assert.equal(compressSeverity(30), 30);
   assert.equal(compressSeverity(50), 50);
 });
 
-test('una clausola gravissima pesa più di otto ordinarie', () => {
+test('a very serious clause weighs more than eight ordinary ones', () => {
   const severe = aggregateSeverity([{ severity: 90 }]);
   const many = aggregateSeverity(Array.from({ length: 8 }, () => ({ severity: 45 })));
   assert.ok(severe > many, `${severe} non supera ${many}`);
 });
 
-test('la pressione economica distingue gli ordini di grandezza', () => {
-  // Il difetto precedente: 886 € e 12.590 € distavano quattro punti.
+test('economic pressure tells orders of magnitude apart', () => {
+  // The previous defect: €886 and €12,590 were four points apart.
   assert.ok(moneyPressure(12590) - moneyPressure(886) >= 12);
   assert.ok(moneyPressure(100) < moneyPressure(1000));
   assert.ok(moneyPressure(1000) < moneyPressure(10000));
@@ -98,7 +98,7 @@ test('la pressione economica distingue gli ordini di grandezza', () => {
 
 // ── 2. ordinamento ──────────────────────────────────────────────────────────
 
-test('un contratto peggiore risulta peggiore', () => {
+test('a worse contract comes out worse', () => {
   for (const [worse, better] of ORDERING) {
     const a = get(worse);
     const b = get(better);
@@ -109,7 +109,7 @@ test('un contratto peggiore risulta peggiore', () => {
   }
 });
 
-test('la catena principale è ordinata dall’inizio alla fine', () => {
+test('the main chain is ordered from start to end', () => {
   const chain = ['newsletter', 'saas_fair', 'ecommerce', 'saas_annual', 'telco_24m', 'predatory_loan'];
   const values = chain.map((id) => get(id).score);
   const ranked = [...values].sort((a, b) => a - b);
@@ -118,7 +118,7 @@ test('la catena principale è ordinata dall’inizio alla fine', () => {
 
 // ── 3. comportamento sperimentato dall'utente ───────────────────────────────
 
-test('i casi innocui non interrompono l’utente', () => {
+test('harmless cases don\'t interrupt the user', () => {
   for (const id of ['newsletter', 'saas_fair', 'cookie_banner']) {
     const s = get(id);
     assert.equal(
@@ -140,13 +140,13 @@ test('i casi gravi fermano l’utente', () => {
   }
 });
 
-test('il livello più grave è riservato a un caso solo', () => {
+test('the most serious level is reserved for a single case', () => {
   const criticalOnes = [...scored.values()].filter((s) => s.band === 'critical');
   assert.equal(criticalOnes.length, 1, `troppi CRITICAL: ${criticalOnes.map((c) => c.id).join(', ')}`);
   assert.equal(criticalOnes[0].id, 'predatory_loan');
 });
 
-// ── 4. fasce attese (l'asserzione più debole) ───────────────────────────────
+// ── 4. expected bands (the weakest assertion) ───────────────────────────────
 
 test('ogni caso cade nella fascia etichettata a mano', () => {
   const failures = [];
@@ -159,15 +159,15 @@ test('ogni caso cade nella fascia etichettata a mano', () => {
   assert.deepEqual(failures, [], `\n  ${failures.join('\n  ')}\n`);
 });
 
-test('le fasce attese sono valori legittimi', () => {
+test('the expected bands are legitimate values', () => {
   for (const c of CORPUS) {
     assert.ok(BAND_ORDER.includes(c.band), `fascia inesistente nel corpus: ${c.band}`);
   }
 });
 
-// ── 5. il profilo sposta, ma non stravolge ──────────────────────────────────
+// ── 5. the profile shifts, but doesn't upend ────────────────────────────────
 
-test('il profilo creativo alza il contratto di cessione, non gli altri', async () => {
+test('the creative profile raises the assignment contract, not the others', async () => {
   const withIp = { ...DEFAULT_SETTINGS, profile: { money: true, ip: true, freelance: true } };
   const withoutIp = { ...DEFAULT_SETTINGS, profile: { money: true } };
 
@@ -188,20 +188,20 @@ test('il profilo creativo alza il contratto di cessione, non gli altri', async (
   const assignmentWithoutIp = await run('freelance_assignment', withoutIp);
   assert.ok(assignmentWithIp > assignmentWithoutIp, 'la cessione dei diritti deve pesare di più per chi vive del proprio lavoro');
 
-  // Su un contratto che non tocca i contenuti, il profilo creativo non deve
-  // spostare quasi nulla: se lo facesse, non starebbe personalizzando.
+  // On a contract that doesn't touch content, the creative profile must shift
+  // almost nothing: if it did, it wouldn't be personalising.
   const telcoWithIp = await run('telco_24m', withIp);
   const telcoWithoutIp = await run('telco_24m', withoutIp);
   assert.ok(Math.abs(telcoWithIp - telcoWithoutIp) <= 2, `il profilo IP sposta la telco di ${Math.abs(telcoWithIp - telcoWithoutIp)} punti`);
 });
 
-// ── le fasce alte devono essere raggiungibili anche senza prezzo ────────────
+// ── the high bands must be reachable without a price too ────────────────────
 
-test('un contratto grave senza prezzo può arrivare a HIGH RISK', async () => {
-  // Il tetto delle sole clausole era 75, con HIGH RISK a 76: per un utente
-  // fuori dall'UE — che non riceve il contributo del motore consumer — le due
-  // fasce alte erano *strutturalmente* irraggiungibili senza un prezzo
-  // estraibile. Una cessione totale dei diritti d'autore usciva COMMITMENT.
+test('a serious contract without a price can reach HIGH RISK', async () => {
+  // The cap for clauses alone was 75, with HIGH RISK at 76: for a user outside
+  // the EU — who gets no contribution from the consumer engine — the two high
+  // bands were *structurally* unreachable without an extractable price. A full
+  // assignment of copyright came out as COMMITMENT.
   const c = CORPUS.find((x) => x.id === 'freelance_assignment');
   for (const jurisdiction of ['IT', 'US']) {
     const verdict = await analyze({
@@ -220,7 +220,7 @@ test('un contratto grave senza prezzo può arrivare a HIGH RISK', async () => {
   }
 });
 
-test('il residuo distingue fra due clausole e sette', () => {
+test('the residual tells two clauses from seven', () => {
   const severe = { severity: 85 };
   const media = { severity: 45 };
   const due = aggregateSeverity([severe, media]);
@@ -228,17 +228,17 @@ test('il residuo distingue fra due clausole e sette', () => {
   assert.ok(four > due, `quattro clausole (${four}) non pesano più di due (${due})`);
 });
 
-test('la pressione economica distingue ancora sopra i 15.000 €', () => {
+test('economic pressure still distinguishes above €15,000', () => {
   assert.ok(
     moneyPressure(200_000) > moneyPressure(15_000),
     'un mutuo da 200.000 € pesa quanto un finanziamento da 15.000 €'
   );
 });
 
-test('il profilo predefinito non declassa la cessione dei diritti', () => {
-  // «l'utente non ha attivato l'area» non è «all'utente non interessa»: il
-  // profilo predefinito non contiene `ip`, e la categoria più grave del
-  // dizionario veniva attenuata del 15% per quasi tutte le installazioni.
+test('the default profile doesn\'t downgrade the assignment of rights', () => {
+  // "the user didn't enable the area" is not "the user doesn't care": the
+  // default profile doesn't contain `ip`, and the most serious category in the
+  // dictionary was damped by 15% for almost every installation.
   const { multiplier } = multiplierFor('ip_assignment', DEFAULT_SETTINGS.profile);
   assert.ok(multiplier >= 1, `moltiplicatore ${multiplier} sul profilo predefinito`);
 });

@@ -1,9 +1,9 @@
 /**
- * Il materiale di prova comune a tools/media.mjs (sito) e tools/help-shots.mjs (guida):
- * una palestra inventata nelle tre lingue, su un dominio che non esiste, e un
- * server di AnteFirma finto, così non si spende nessuna analisi e non serve la rete.
+ * Test material shared by tools/media.mjs (website) and tools/help-shots.mjs (help):
+ * an invented gym in three languages, on a domain that doesn't exist, and a fake
+ * AnteFirma server, so no analysis is spent and no network is needed.
  */
-/** La pagina di esempio, nelle tre lingue: sito, prezzo e condizioni inventati. */
+/** The example page, in three languages: invented site, price and terms. */
 export const PAGE = {
   it: { title: 'Palestra Orizzonte — Abbonamento Plus', name: 'Abbonamento Plus', per: 'al mese', btn: 'Abbonati ora', feats: ['Sala pesi e corsi illimitati', 'Accesso 7 giorni su 7', 'App con le schede di allenamento'],
     terms: 'L’abbonamento ha una durata minima di 12 mesi dalla data di attivazione. Il contratto si rinnova automaticamente per un ulteriore anno salvo disdetta inviata con almeno 30 giorni di preavviso. In caso di recesso anticipato è dovuta una penale di 120 €. La quota di iscrizione non è rimborsabile.',
@@ -39,7 +39,7 @@ ul{padding-left:20px;color:#414852}button{width:100%;margin-top:16px;background:
 document.getElementById('f').addEventListener('submit',(e)=>{e.preventDefault();});</script></body></html>`;
 };
 
-// Un dominio inventato (.example non esiste): l'avviso e la lettera mostrano il nome del sito, non 127.0.0.1.
+// An invented domain (.example doesn't exist): the warning and the letter show the site's name, not 127.0.0.1.
 export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example' };
 
 export const verdict = (l) => {
@@ -59,8 +59,8 @@ export const verdict = (l) => {
 
 
 /**
- * Il server finto. `delay`: quanto «pensa» l'analisi. Una chiave che comincia
- * con AF- attiva il piano Pro, così si può mostrare anche l'attivazione.
+ * The fake server. `delay`: how long the analysis "thinks". A key starting with
+ * AF- activates the Pro plan, so activation can be shown too.
  */
 export async function mockServer(context, l, { delay = 1800 } = {}) {
   let plan = 'free';

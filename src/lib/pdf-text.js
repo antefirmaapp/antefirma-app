@@ -1,15 +1,15 @@
 /**
- * Estrattore di testo da PDF, senza dipendenze esterne.
+ * PDF text extractor, with no external dependencies.
  *
- * Manifest V3 vieta di caricare codice remoto, quindi una libreria come pdf.js
- * andrebbe impacchettata nell'estensione. Per l'MVP basta molto meno: i
- * contratti che interessano qui sono PDF testuali, non scansioni.
+ * Manifest V3 forbids loading remote code, so a library like pdf.js would have
+ * to be bundled into the extension. Much less is enough here: the contracts that
+ * matter are text PDFs, not scans.
  *
- * Cosa fa: individua i content stream, li decomprime con DecompressionStream
- * (FlateDecode è zlib) e legge gli operatori di testo (Tj, TJ, ', ").
- * Cosa NON fa: OCR di scansioni, font con codifiche esotiche senza ToUnicode,
- * filtri diversi da Flate. In quei casi restituisce poco o nulla e lo dichiara,
- * così l'utente può incollare il testo a mano.
+ * What it does: finds the content streams, inflates them with
+ * DecompressionStream (FlateDecode is zlib) and reads the text operators (Tj, TJ, ', ").
+ * What it does NOT do: OCR of scans, fonts with exotic encodings without
+ * ToUnicode, filters other than Flate. In those cases it returns little or
+ * nothing and says so, so the user can paste the text by hand.
  */
 
 import { t } from '../i18n/index.js';
@@ -74,16 +74,16 @@ export async function extractPdfText(buffer) {
   };
 }
 
-/** Individua i blocchi `stream … endstream` e il filtro dichiarato nel dizionario. */
+/** Finds the `stream … endstream` blocks and the filter declared in the dictionary. */
 function findStreams(raw, bytes) {
   const out = [];
-  // `\b` evita di riagganciare la parola dentro `endstream`.
+  // `\b` avoids matching the word again inside `endstream`.
   const re = /\bstream\r?\n?/g;
   let m;
   while ((m = re.exec(raw)) !== null) {
     const start = m.index + m[0].length;
 
-    // Il dizionario dell'oggetto precede la parola chiave `stream`.
+    // The object's dictionary precedes the `stream` keyword.
     const dictStart = findDictStart(raw, m.index);
     const dict = dictStart >= 0 ? raw.slice(dictStart, m.index) : '';
 
@@ -94,7 +94,7 @@ function findStreams(raw, bytes) {
     const flate = /\/Filter\s*(?:\[\s*)?\/FlateDecode/.test(dict);
     const anyFilter = /\/Filter\s*(?:\[\s*)?\/(\w+)/.exec(dict);
 
-    // Immagini e font non contengono testo utile.
+    // Images and fonts contain no useful text.
     if (/\/Subtype\s*\/(Image|Type1C|TrueType|CIDFontType\dC)/.test(dict)) continue;
 
     out.push({
@@ -108,13 +108,13 @@ function findStreams(raw, bytes) {
 }
 
 /**
- * Risale al `<<` che apre il dizionario dello stream, bilanciando le parentesi.
+ * Walks back to the `<<` opening the stream's dictionary, balancing brackets.
  *
- * Un `lastIndexOf('<<')` prende il dizionario *annidato* quando c'è
- * `<< /Filter /FlateDecode /DecodeParms << /Predictor 1 >> /Length N >>`, cioè
- * la forma che scrivono quasi tutti i generatori: /Filter finisce fuori dalla
- * fetta esaminata, `flate` diventa false e il flusso compresso viene letto come
- * testo in chiaro — cioè scartato, in silenzio.
+ * A `lastIndexOf('<<')` picks the *nested* dictionary when there is
+ * `<< /Filter /FlateDecode /DecodeParms << /Predictor 1 >> /Length N >>`, the
+ * form almost every generator writes: /Filter ends up outside the slice
+ * examined, `flate` becomes false and the compressed stream is read as plain
+ * text — that is, silently discarded.
  */
 function findDictStart(raw, streamIdx) {
   const floor = Math.max(1, streamIdx - 20000);
@@ -133,12 +133,12 @@ function findDictStart(raw, streamIdx) {
 }
 
 /**
- * Confine dello stream. `/Length` è autorevole e `endstream` no: la parola può
- * comparire dentro il contenuto (un contratto che la nomina, un font, un JPEG),
- * e cercarla a occhio tronca il testo a metà senza dirlo a nessuno.
+ * The stream's end. `/Length` is authoritative and `endstream` isn't: the word
+ * can appear inside the content (a contract naming it, a font, a JPEG), and
+ * searching for it blindly cuts the text in half without telling anyone.
  */
 function findStreamEnd(raw, bytes, start, dict) {
-  // Attenzione a `/Length 7 0 R`: è un riferimento indiretto, non una lunghezza.
+  // Beware of `/Length 7 0 R`: it is an indirect reference, not a length.
   const declared = /\/Length\s+(\d+)(?!\s*\d+\s+R)/.exec(dict);
   if (declared) {
     const end = start + Number(declared[1]);
@@ -168,15 +168,15 @@ async function inflate(data) {
 }
 
 /**
- * Soglia di kerning oltre la quale lo spostamento è uno spazio, in millesimi
- * di em. È il valore che usa pdf.js: sotto stanno le correzioni fra lettere
- * (crenatura, giustificazione), sopra c'è una parola nuova.
+ * Kerning threshold beyond which a shift is a space, in thousandths of an em.
+ * It is the value pdf.js uses: below are corrections between letters (kerning,
+ * justification), above is a new word.
  */
 const WORD_GAP = -120;
 
 /**
- * Legge gli operatori di testo di un content stream PDF.
- * Un mini-parser: sufficiente per Tj/TJ/'/" e per i salti di riga.
+ * Reads the text operators of a PDF content stream.
+ * A mini-parser: enough for Tj/TJ/'/" and line breaks.
  */
 function readTextOperators(content) {
   const out = [];
@@ -191,9 +191,9 @@ function readTextOperators(content) {
     if (ch === '[') { arrayDepth += 1; i += 1; continue; }
     if (ch === ']') { arrayDepth = Math.max(0, arrayDepth - 1); i += 1; continue; }
 
-    // Dentro un array `TJ` i numeri fra i letterali *sono* gli spazi: è così
-    // che Word, LibreOffice e InDesign impaginano il testo giustificato.
-    // Ignorarli incolla le parole e ogni `\b` delle regole smette di agganciare.
+    // Inside a `TJ` array the numbers between literals *are* the spaces: that is
+    // how Word, LibreOffice and InDesign lay out justified text. Ignoring them
+    // glues words together and the text stops being readable.
     if (arrayDepth > 0 && (ch === '-' || ch === '.' || (ch >= '0' && ch <= '9'))) {
       const num = /^[-+]?\d*\.?\d+/.exec(content.slice(i, i + 24));
       if (num) {
@@ -218,13 +218,13 @@ function readTextOperators(content) {
       continue;
     }
 
-    // Operatori che implicano un a capo o uno spazio.
+    // Operators implying a line break or a space.
     if (/[A-Za-z'"*]/.test(ch)) {
       const opMatch = /^(T[dDJjm*wLcz]|'|"|BT|ET|Tf|TD)/.exec(content.slice(i, i + 3));
       if (opMatch) {
         const op = opMatch[1];
-        // `Tm` riposiziona come `Td`: chi impagina con la matrice (InDesign,
-        // molti generatori) altrimenti consegna la pagina su una riga sola.
+        // `Tm` repositions like `Td`: whoever lays out with the matrix (InDesign,
+        // many generators) would otherwise deliver the page on a single line.
         if (op === 'Td' || op === 'TD' || op === 'Tm' || op === 'T*' || op === 'ET') out.push('\n');
         else if (op === 'Tj' || op === 'TJ' || op === "'" || op === '"') pendingSpace = true;
         i += op.length;
@@ -299,37 +299,37 @@ function normalizeExtracted(text) {
     .replace(/[ \t]{2,}/g, ' ')
     .replace(/\s*\n\s*/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
-    // Ricompone le parole spezzate a fine riga con trattino.
+    // Rejoin words hyphenated at the end of a line.
     .replace(/(\w)-\n(\w)/g, '$1$2')
     .trim();
 }
 
 /**
- * Caratteri che un documento italiano può contenere: lettere (accentate
- * comprese), cifre, spaziatura e la punteggiatura d'uso corrente.
+ * Characters an Italian document can contain: letters (accented ones
+ * included), digits, spacing and common punctuation.
  *
- * Comprende anche i punti elenco e le legature (ﬁ, ﬂ), che escono di continuo
- * da un PDF ben estratto. Deliberatamente *non* comprende i caratteri di
- * controllo, i simboli sciolti (¨ ¤ ± ¬ ¶) e le lettere fuori dall'alfabeto
- * latino: sono esattamente ciò che produce un'estrazione andata male, cioè un
- * font senza ToUnicode letto come latin1 (`Ã¨`, `â¬`) o gli indici di glifo
- * grezzi (`\x01\x02`).
+ * It also includes bullets and ligatures (ﬁ, ﬂ), which come out of a well
+ * extracted PDF all the time. It deliberately does *not* include control
+ * characters, stray symbols (¨ ¤ ± ¬ ¶) and letters outside the Latin
+ * alphabet: they are exactly what a failed extraction produces, i.e. a font
+ * without ToUnicode read as latin1 (`Ã¨`, `â¬`) or raw glyph indexes
+ * (`\x01\x02`).
  */
 const PLAUSIBLE = /[A-Za-zÀ-ÖØ-öø-ÿ0-9\s.,;:!?'"()[\]{}«»“”‘’%&@#*+=/\\<>_°§©®™•·…€$£–—ﬀ-ﬆ-]/g;
 
 /**
- * Quota di caratteri plausibili: se è bassa, l'estrazione è andata male.
+ * Share of plausible characters: if it is low, extraction went wrong.
  *
- * La metrica precedente contava solo lettere e spazi, quindi ogni cifra e ogni
- * segno d'interpunzione valeva zero. Su un contratto formattato — articoli
- * numerati, importi, IVA, P.IVA — misurava 0,70 (una tabella di costi anche
- * meno) contro lo 0,99 della prosa: un documento estratto benissimo passava a
- * un soffio dalla soglia di 0,5, e bastava un allegato tariffario per farlo
- * dichiarare inaffidabile. Contare anche cifre e punteggiatura rende la misura
- * insensibile alla formattazione e sensibile solo al mojibake, che è la cosa
- * che vogliamo davvero riconoscere. Misurato: prosa, tabella di importi ed
- * elenco puntato stanno tutti a 1,00; il testo mojibake a 0,88; i glifi grezzi
- * a 0,60. La soglia sta a 0,90, cioè nel vuoto fra le due popolazioni.
+ * The previous metric counted only letters and spaces, so every digit and
+ * punctuation mark was worth zero. On a formatted contract — numbered articles,
+ * amounts, VAT, VAT numbers — it measured 0.70 (a cost table even less) against
+ * 0.99 for prose: a perfectly extracted document came within a whisker of the
+ * 0.5 threshold, and a price-list annex was enough to declare it unreliable.
+ * Counting digits and punctuation too makes the measure insensitive to
+ * formatting and sensitive only to mojibake, which is what we really want to
+ * detect. Measured: prose, an amount table and a bulleted list all score 1.00;
+ * mojibake text 0.88; raw glyphs 0.60. The threshold is 0.90, in the gap
+ * between the two populations.
  */
 function plausibleRatio(text) {
   const sample = text.slice(0, 4000);

@@ -1,7 +1,6 @@
 /**
- * Test delle quattro funzionalità aggiunte dopo il primo rilascio:
- * modello on-device, analisi speculativa, prova di cosa hai accettato,
- * kit di uscita.
+ * Tests of the features added after the first release: on-device model,
+ * speculative analysis, proof of what you accepted, exit kit.
  *
  *   node --test test/features.test.mjs
  */
@@ -39,9 +38,9 @@ const CTX = {
 const T0 = new Date('2026-08-15T10:00:00Z').getTime();
 
 /**
- * La risposta che il server darebbe al contratto: le citazioni sono copiate dal
- * testo, le cifre portano il passo da cui vengono. `text` permette di usarla
- * anche su una versione modificata del contratto.
+ * The answer the server would give to the contract: quotes are copied from the
+ * text, figures carry the passage they come from. `text` allows using it on a
+ * modified version of the contract too.
  */
 function serverResponse(text = CONTRACT, { penalty = 120, extra = [] } = {}) {
   const f = (category, quote) => {
@@ -82,9 +81,9 @@ async function verdictFor(settings = {}, response = serverResponse()) {
   });
 }
 
-// ── 3. prova di cosa hai accettato ──────────────────────────────────────────
+// ── 3. proof of what you accepted ───────────────────────────────────────────
 
-test('lo snapshot fissa impronta, data e numeri del verdetto', async () => {
+test('the snapshot records fingerprint, date and the verdict\'s numbers', async () => {
   const verdict = await verdictFor();
   const snap = await createSnapshot({ text: CONTRACT, verdict, now: T0 });
 
@@ -96,7 +95,7 @@ test('lo snapshot fissa impronta, data e numeri del verdetto', async () => {
   assert.ok(snap.excerpt.length > 100);
 });
 
-test('un testo identico produce la stessa impronta, uno diverso no', async () => {
+test('an identical text produces the same fingerprint, a different one doesn\'t', async () => {
   const a = await createSnapshot({ text: CONTRACT, verdict: {}, now: T0 });
   const b = await createSnapshot({ text: CONTRACT, verdict: {}, now: T0 + 1000 });
   const c = await createSnapshot({ text: CONTRACT.replace('24 mesi', '36 mesi'), verdict: {}, now: T0 });
@@ -104,11 +103,11 @@ test('un testo identico produce la stessa impronta, uno diverso no', async () =>
   assert.notEqual(a.hash, c.hash);
 });
 
-test('il confronto dice di quanto è cambiato l’impegno, non che "i termini sono cambiati"', async () => {
+test('the comparison says how much the commitment changed, not that "the terms changed"', async () => {
   const before = await verdictFor();
   const snap = await createSnapshot({ text: CONTRACT, verdict: before, now: T0 });
 
-  // Il fornitore raddoppia la penale e aggiunge la modifica unilaterale del prezzo.
+  // The provider doubles the exit fee and adds unilateral price changes.
   const after = CONTRACT
     .replace('€ 120,00', '€ 300,00')
     .concat('\n7. Il fornitore può modificare unilateralmente il prezzo del servizio.');
@@ -131,7 +130,7 @@ test('il confronto dice di quanto è cambiato l’impegno, non che "i termini so
   assert.match(diff.summary, /impegno potenziale è salito/);
 });
 
-test('condizioni invariate non generano allarmi', async () => {
+test('unchanged terms raise no alarm', async () => {
   const verdict = await verdictFor();
   const snap = await createSnapshot({ text: CONTRACT, verdict, now: T0 });
   const diff = compareSnapshot(snap, { text: CONTRACT, verdict, newHash: snap.hash });
@@ -141,7 +140,7 @@ test('condizioni invariate non generano allarmi', async () => {
   assert.match(diff.summary, /identiche/);
 });
 
-test('l’attestazione contiene l’impronta ed è onesta sul proprio valore', async () => {
+test('the attestation contains the fingerprint and is honest about its own value', async () => {
   const snap = await createSnapshot({ text: CONTRACT, verdict: await verdictFor(), now: T0 });
   const text = attestation(snap, { host: 'streampro.test' });
   assert.ok(text.includes(snap.hash));
@@ -150,7 +149,7 @@ test('l’attestazione contiene l’impronta ed è onesta sul proprio valore', a
 
 // ── 4. kit di uscita ────────────────────────────────────────────────────────
 
-test('l’impegno nasce dal verdetto con scadenze coerenti', async () => {
+test('the commitment is born from the verdict with consistent deadlines', async () => {
   const verdict = await verdictFor();
   const snap = await createSnapshot({ text: CONTRACT, verdict, now: T0 });
   const c = buildCommitment({ verdict, snapshot: snap, now: T0 });
@@ -170,7 +169,7 @@ test('l’impegno nasce dal verdetto con scadenze coerenti', async () => {
   assert.ok(new Date(c.deadlineAt) < new Date(c.renewalAt));
 });
 
-test('il piano dei promemoria copre 30, 7 e 1 giorno prima della scadenza', async () => {
+test('the reminder plan covers 30, 7 and 1 day before the deadline', async () => {
   const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
   const plan = planReminders(c, T0);
   assert.deepEqual(plan.map((r) => r.days), REMINDER_OFFSETS_DAYS.slice().sort((a, b) => b - a));
@@ -181,23 +180,23 @@ test('il piano dei promemoria copre 30, 7 e 1 giorno prima della scadenza', asyn
   }
 });
 
-test('la passata quotidiana sceglie un solo promemoria, il più urgente', async () => {
+test('the daily pass picks a single reminder, the most urgent', async () => {
   const base = buildCommitment({ verdict: await verdictFor(), now: T0 });
   const c = { ...base, reminders: planReminders(base, T0) };
   const deadline = new Date(c.deadlineAt).getTime();
 
-  // Molto prima: niente da dire.
+  // Much earlier: nothing to say.
   assert.equal(dueReminder(c, T0), null);
 
-  // A 20 giorni dalla scadenza è dovuto quello a 30, non ancora quello a 7.
+  // 20 days before the deadline the 30-day one is due, not yet the 7-day one.
   const twenty = deadline - 20 * 86_400_000;
   assert.equal(dueReminder(c, twenty).days, 30);
 
-  // A due giorni dalla scadenza quello a 1 giorno non è ancora dovuto.
+  // Two days before the deadline the 1-day one is not due yet.
   assert.equal(dueReminder(c, deadline - 2 * 86_400_000).days, 7);
 
-  // Dopo una pausa lunga del browser sarebbero dovuti tutti e tre: ne esce
-  // uno solo, il più urgente. Tre notifiche di fila si disattivano, non si leggono.
+  // After a long browser pause all three would be due: only one comes out, the
+  // most urgent. Three notifications in a row get switched off, not read.
   const few = deadline - 6 * 3_600_000;
   assert.equal(dueReminder(c, few).days, 1);
 
@@ -205,35 +204,35 @@ test('la passata quotidiana sceglie un solo promemoria, il più urgente', async 
   const sent = { ...c, reminders: c.reminders.map((r) => ({ ...r, fired: true })) };
   assert.equal(dueReminder(sent, few), null);
 
-  // Un impegno disdetto non disturba più.
+  // A cancelled commitment doesn't disturb any more.
   assert.equal(dueReminder({ ...c, status: 'cancelled' }, few), null);
 });
 
-test('la finestra chiusa mentre il browser era spento viene comunque segnalata', async () => {
+test('a window that closed while the browser was off is still reported', async () => {
   const base = buildCommitment({ verdict: await verdictFor(), now: T0 });
   const c = { ...base, reminders: planReminders(base, T0) };
   const after = new Date(c.deadlineAt).getTime() + 5 * 86_400_000;
 
-  // È il caso che prima produceva silenzio: nessun promemoria è più dovuto…
+  // The case that used to produce silence: no reminder is due any more…
   assert.equal(dueReminder(c, after), null);
-  // …ma l'utente deve sapere che il contratto si è rinnovato.
+  // …but the user must know the contract renewed.
   assert.equal(missedWindow(c, after), true);
-  // Una volta sola, però.
+  // Only once, though.
   assert.equal(missedWindow({ ...c, missedNotified: true }, after), false);
   assert.equal(missedWindow(c, T0), false);
 });
 
-test('chi scopre l’estensione a ridosso della scadenza viene avvisato subito e con il numero giusto', async () => {
+test('whoever discovers the extension close to the deadline is warned at once, with the right number', async () => {
   const base = buildCommitment({ verdict: await verdictFor(), now: T0 });
   const late = new Date(base.deadlineAt).getTime() - 10 * 86_400_000;
   const plan = planReminders(base, late);
 
-  // Il promemoria "mancano 30 giorni" ha una data ormai passata: nasce
-  // consumato, altrimenti partirebbe dicendo una cosa falsa.
+  // The "30 days left" reminder has a date already gone: it is born used,
+  // otherwise it would fire saying something false.
   const thirty = plan.find((r) => r.days === 30);
   assert.equal(thirty.fired, true);
 
-  // Al suo posto ce n'è uno immediato, con i giorni reali.
+  // In its place there is an immediate one, with the real days.
   const urgente = plan.find((r) => r.kind === 'urgent');
   assert.ok(urgente, 'manca il promemoria immediato');
   assert.equal(urgente.days, 10);
@@ -243,7 +242,7 @@ test('chi scopre l’estensione a ridosso della scadenza viene avvisato subito e
   assert.equal(dueReminder(c, late).days, 10, 'è lui che deve partire per primo');
 });
 
-test('lo stato dice quanto manca e quanto costa non fare niente', async () => {
+test('the state says how long is left and what doing nothing costs', async () => {
   const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
   const deadline = new Date(c.deadlineAt).getTime();
 
@@ -257,7 +256,7 @@ test('lo stato dice quanto manca e quanto costa non fare niente', async () => {
   assert.ok(doing.label.includes('Se non disdici'));
 });
 
-test('il riepilogo somma l’esposizione e trova la prossima scadenza', async () => {
+test('the summary adds up exposure and finds the next deadline', async () => {
   const a = buildCommitment({ verdict: await verdictFor(), now: T0, id: 'a' });
   const b = { ...a, id: 'b', worstCase: 100, deadlineAt: new Date(T0 + 5 * 86_400_000).toISOString() };
   const c = { ...a, id: 'c', status: 'cancelled', worstCase: 999 };
@@ -269,7 +268,7 @@ test('il riepilogo somma l’esposizione e trova la prossima scadenza', async ()
   assert.equal(s.urgent, 1);
 });
 
-test('il file .ics è valido e porta i promemoria dentro il calendario', async () => {
+test('the .ics file is valid and carries the reminders into the calendar', async () => {
   const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
   const ics = buildIcs(c, { now: T0 });
 
@@ -279,15 +278,15 @@ test('il file .ics è valido e porta i promemoria dentro il calendario', async (
   assert.equal((ics.match(/BEGIN:VALARM/g) || []).length, 3);
   assert.ok(ics.includes('TRIGGER:-P30D'));
   assert.match(ics, /DTSTART;VALUE=DATE:20280(6|7)\d{2}/);
-  // Le righe non devono superare i 75 ottetti, altrimenti il file è invalido.
+  // Lines must not exceed 75 octets, or the file is invalid.
   for (const line of ics.split('\r\n')) {
     assert.ok(line.length <= 75, `riga troppo lunga: ${line.slice(0, 40)}…`);
   }
-  // Le virgole nelle descrizioni vanno protette.
+  // Commas in descriptions must be escaped.
   assert.ok(!/[^\\],.*DESCRIPTION/.test(ics.split('\r\n').find((l) => l.startsWith('DESCRIPTION')) || ''));
 });
 
-test('la lettera giusta dipende da quanto tempo è passato', async () => {
+test('the right letter depends on how much time has passed', async () => {
   const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
   assert.equal(suggestKind(c, T0 + 3 * 86_400_000), LETTER_KINDS.WITHDRAWAL, 'entro 14 giorni: recesso');
   assert.equal(suggestKind(c, T0 + 200 * 86_400_000), LETTER_KINDS.CANCELLATION, 'dopo: disdetta');
@@ -296,7 +295,7 @@ test('la lettera giusta dipende da quanto tempo è passato', async () => {
   assert.equal(suggestKind(altered, T0 + 200 * 86_400_000), LETTER_KINDS.CHANGE);
 });
 
-test('la lettera di disdetta è completa e cita la norma corretta', async () => {
+test('the cancellation letter is complete and quotes the right law', async () => {
   const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
   const identity = { name: 'Mario Rossi', address: 'Via Roma 1, Milano', email: 'mario@esempio.it', customerId: 'AB-123' };
   const letter = buildLetter(c, identity, LETTER_KINDS.CANCELLATION, T0 + 200 * 86_400_000);
@@ -313,7 +312,7 @@ test('la lettera di disdetta è completa e cita la norma corretta', async () => 
   assert.match(letter.filename, /^disdetta-streampro-\d{4}-\d{2}-\d{2}\.txt$/);
 });
 
-test('senza i dati dell’utente la lettera resta usabile, con i segnaposto', async () => {
+test('without the user\'s details the letter stays usable, with placeholders', async () => {
   const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
   const letter = buildLetter(c, {}, LETTER_KINDS.WITHDRAWAL, T0);
   assert.ok(letter.text.includes('[Nome e cognome]'));
@@ -321,7 +320,7 @@ test('senza i dati dell’utente la lettera resta usabile, con i segnaposto', as
   assert.ok(letter.text.includes('artt. 52-59'));
 });
 
-test('la lettera di recesso per modifica richiama la clausola cambiata', async () => {
+test('the withdrawal letter after a change refers to the changed clause', async () => {
   const c = {
     ...buildCommitment({ verdict: await verdictFor(), now: T0 }),
     changes: [{ severity: 'major', summary: 'Il tuo impegno potenziale è salito da 648,76 € a 828,76 €.' }],
@@ -332,7 +331,7 @@ test('la lettera di recesso per modifica richiama la clausola cambiata', async (
   assert.ok(letter.text.includes('art. 33 c. 2 lett. m)'));
 });
 
-test('la lettera riporta l’impronta dello snapshot come riferimento', async () => {
+test('the letter quotes the snapshot fingerprint as a reference', async () => {
   const verdict = await verdictFor();
   const snap = await createSnapshot({ text: CONTRACT, verdict, now: T0 });
   const c = buildCommitment({ verdict, snapshot: snap, now: T0 });
@@ -340,7 +339,7 @@ test('la lettera riporta l’impronta dello snapshot come riferimento', async ()
   assert.ok(letter.text.includes(snap.hash.slice(0, 32)));
 });
 
-test('un impegno senza conseguenze nel tempo non produce scadenze', () => {
+test('a commitment without consequences over time produces no deadlines', () => {
   const c = buildCommitment({
     verdict: { host: 'blog.test', level: { id: 'safe' }, cost: {}, findings: [] },
     now: T0,
@@ -351,41 +350,41 @@ test('un impegno senza conseguenze nel tempo non produce scadenze', () => {
   assert.equal(commitmentState(c, T0).urgency, 'none');
 });
 
-// ── una prova senza testo non è una prova ───────────────────────────────────
+// ── a proof without text is not a proof ─────────────────────────────────────
 
-test('uno snapshot senza testo si dichiara vuoto', async () => {
+test('a snapshot without text declares itself empty', async () => {
   const empty = await createSnapshot({ text: '', verdict: {} });
   assert.equal(empty.empty, true);
   assert.equal(empty.chars, 0);
 });
 
-test('lo snapshot di un contratto vero non è vuoto', async () => {
+test('the snapshot of a real contract is not empty', async () => {
   const complete = await createSnapshot({ text: CONTRACT, verdict: {} });
   assert.equal(complete.empty, false);
   assert.equal(complete.hash, await sha256(complete.text));
 });
 
-test('l’impronta della stringa vuota non deve poter passare per una verifica riuscita', async () => {
+test('the fingerprint of the empty string must not pass for a successful verification', async () => {
   const a = await createSnapshot({ text: '', verdict: {} });
   const b = await createSnapshot({ text: '   ', verdict: {} });
-  // Le due impronte coincidono: è esattamente il motivo per cui il flag serve.
+  // The two fingerprints match: exactly why the flag is needed.
   assert.equal(a.hash, b.hash);
   assert.ok(a.empty && b.empty, 'senza il flag, la verifica direbbe «✓ corrisponde»');
 });
 
-test('la penale in mensilità entra nel totale, in tre lingue', async () => {
+test('an exit fee in monthly payments enters the total, in three languages', async () => {
   const { computeCost } = await import('../src/core/consequence.js');
   const base = { ctx: { pricing: { amount: 39, period: 'month', currency: 'EUR' } }, terms: { minTerm: { months: 12, raw: '12 mesi' }, extras: [{ amount: 49, label: 'Quota di iscrizione' }] } };
   for (const quote of ['In caso di recesso anticipato è dovuta una penale pari a tre mensilità', 'Early termination incurs a fee equal to three monthly payments', 'La baja anticipada conlleva una penalización equivalente a tres cuotas mensuales']) {
     const c = computeCost({ ...base, findings: [{ category: 'early_termination_penalty', quote }] });
     assert.equal(c.worstCase, 468 + 117 + 49, quote);
   }
-  // Una penale già in cifra dal server non si tocca.
+  // An exit fee already given as a figure by the server is left alone.
   const c2 = computeCost({ ...base, terms: { ...base.terms, penalty: { amount: 120 } }, findings: [{ category: 'early_termination_penalty', quote: 'tre mensilità' }] });
   assert.equal(c2.worstCase, 468 + 120 + 49);
 });
 
-test('la cronologia usa la penale calcolata dalle mensilità', async () => {
+test('the timeline uses the exit fee computed from monthly payments', async () => {
   const { computeCost, buildTimeline } = await import('../src/core/consequence.js');
   const ctx = { pricing: { amount: 39, period: 'month', currency: 'EUR' } };
   const findings = [{ category: 'early_termination_penalty', quote: 'una penale pari a tre mensilità' }];
@@ -394,7 +393,7 @@ test('la cronologia usa la penale calcolata dalle mensilità', async () => {
   assert.match(step.items[0], /117/);
 });
 
-test('la lettera in spagnolo e in inglese, con le norme e il mezzo d’invio del paese', async () => {
+test('the letter in Spanish and English, with the country\'s laws and sending method', async () => {
   const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
   const es = buildLetter(c, { name: 'Lucía García' }, LETTER_KINDS.WITHDRAWAL, T0, 'es');
   assert.equal(es.lang, 'es');

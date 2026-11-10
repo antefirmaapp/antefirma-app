@@ -1,6 +1,6 @@
 /**
- * Le traduzioni: { 'frase italiana': ['english', 'español'] }.
- * Generato dalle frasi del codice: la chiave deve restare identica al testo italiano usato in t().
+ * Translations: { 'Italian sentence': ['English', 'Spanish'] }.
+ * Generated from the code's sentences: the key must stay identical to the Italian text used in t().
  */
 globalThis.AF_I18N.add({
   ", AnteFirma ferma il click per qualche secondo e ti dice tre cose:": [", AnteFirma pauses the click for a few seconds and tells you three things:", ", AnteFirma detiene el clic unos segundos y te dice tres cosas:"],

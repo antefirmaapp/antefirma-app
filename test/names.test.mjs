@@ -1,16 +1,16 @@
-/** Il nome dell'impegno: chi vende, non chi incassa (Paddle, Stripe…). */
+/** The commitment's name: who sells, not who collects the payment (Paddle, Stripe…). */
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { providerName, merchantFromTitle, isPaymentHost } from '../src/core/commitments.js';
 
-test('servizi di pagamento riconosciuti, siti normali no', () => {
+test('payment services recognised, normal sites not', () => {
   assert.ok(isPaymentHost('sandbox-buy.paddle.com'));
   assert.ok(isPaymentHost('checkout.stripe.com'));
   assert.ok(!isPaymentHost('www.netflix.com'));
   assert.ok(!isPaymentHost('notpaddle.com.evil.it'));
 });
 
-test('il venditore dal titolo o dal nome dichiarato dalla pagina', () => {
+test('the seller from the title or from the name the page declares', () => {
   assert.equal(merchantFromTitle('Checkout – Acme Pro'), 'Acme Pro');
   assert.equal(merchantFromTitle('Pagamento sicuro | Palestra Orizzonte'), 'Palestra Orizzonte');
   assert.equal(merchantFromTitle('Checkout'), null);

@@ -1,20 +1,20 @@
 /**
- * AnteFirma web: la versione da usare (e installare) senza estensione, su web.antefirma.app.
+ * AnteFirma web: the version to use (and install) without the extension, on web.antefirma.app.
  *
- *     node tools/web-build.mjs [cartella]   (predefinita: dist/web)
- *     node tools/web-build.mjs --icons      rigenera le icone in web/icons (serve Playwright)
+ *     node tools/web-build.mjs [folder]     (default: dist/web)
+ *     node tools/web-build.mjs --icons      regenerates the icons in web/icons (needs Playwright)
  *
- * È lo stesso codice dell'estensione — pannello, impostazioni e «sfondo» —
- * con web/shim.js che imita le API di Chrome nella pagina. Il risultato è
- * un'app installabile (PWA): manifest, icone, service worker per aprirsi
- * anche senza rete. Il Worker «antefirma-web» (wrangler.toml) la pubblica a
- * ogni push: la build non ha dipendenze, le icone sono già nel repository.
+ * It is the same code as the extension — panel, settings and "background" —
+ * with web/shim.js imitating Chrome's APIs in the page. The result is an
+ * installable app (PWA): manifest, icons, a service worker to open offline too.
+ * The "antefirma-web" Worker (wrangler.toml) publishes it on every push: the
+ * build has no dependencies, the icons are already in the repository.
  *
- * Che cosa fa: analizza testo incollato e PDF, tiene impegni, scadenze,
- * promemoria, lettere e piano. Che cosa non può fare una pagina web: fermare i
- * click sugli altri siti e leggere le altre schede. Per quello c'è l'estensione.
+ * What it does: analyses pasted text and PDFs, keeps commitments, deadlines,
+ * reminders, letters and the plan. What a web page cannot do: stop clicks on
+ * other sites and read other tabs. That is what the extension is for.
  *
- * Il server deve ammettere l'origine https://web.antefirma.app (APP_ORIGINS).
+ * The server must allow the origin https://web.antefirma.app (APP_ORIGINS).
  */
 import { readFileSync, writeFileSync, rmSync, mkdirSync, cpSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, dirname, resolve, relative } from 'node:path';
@@ -32,10 +32,10 @@ rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
 for (const p of ['background', 'core', 'i18n', 'lib', 'sidepanel', 'options', 'icons']) cpSync(join(ROOT, 'src', p), join(OUT, 'src', p), { recursive: true });
 for (const f of ['shim.js', 'boot.js', 'web.css']) cpSync(join(ROOT, 'web', f), join(OUT, 'web', f));
-if (!existsSync(ICONS)) throw new Error('mancano le icone: node tools/web-build.mjs --icons');
+if (!existsSync(ICONS)) throw new Error('icons missing: node tools/web-build.mjs --icons');
 cpSync(ICONS, join(OUT, 'icons'), { recursive: true });
 
-/** Le pagine ricevono lo strato web prima dei loro script. */
+/** Pages get the web layer before their own scripts. */
 const HEAD = `
   <meta name="theme-color" content="#15203a">
   <meta name="description" content="AnteFirma: prima di accettare, sai a che cosa ti impegni. Analizza contratti e condizioni, ricorda le scadenze, scrive la lettera di disdetta.">
@@ -49,12 +49,12 @@ const HEAD = `
 const prepare = (file, extra = (h) => h) => extra(readFileSync(file, 'utf8')
   .replace('<html lang="it">', `<html lang="it" data-version="${version}">`)
   .replace('</head>', HEAD));
-// Il pannello è la pagina principale, alla radice: <base> tiene validi i suoi percorsi relativi.
+// The panel is the main page, at the root: <base> keeps its relative paths valid.
 writeFileSync(join(OUT, 'index.html'), prepare(join(OUT, 'src', 'sidepanel', 'sidepanel.html'), (h) => h.replace('<head>', '<head>\n  <base href="/src/sidepanel/">')));
 rmSync(join(OUT, 'src', 'sidepanel', 'sidepanel.html'));
-// Chi arriva al vecchio indirizzo del pannello (link interni dell'estensione) torna alla radice.
+// Whoever arrives at the panel's old address (internal extension links) goes back to the root.
 writeFileSync(join(OUT, '_redirects'), '/src/sidepanel/sidepanel.html / 301\n/src/sidepanel/sidepanel / 301\n/src/options/options.html /settings/ 301\n/src/options/options /settings/ 301\n');
-// Le impostazioni su /settings/, non nella cartella dell'estensione: <base> tiene validi i percorsi.
+// Settings at /settings/, not in the extension folder: <base> keeps the paths valid.
 const opt = join(OUT, 'src', 'options', 'options.html');
 mkdirSync(join(OUT, 'settings'), { recursive: true });
 writeFileSync(join(OUT, 'settings', 'index.html'), prepare(opt, (h) => h
@@ -66,7 +66,7 @@ writeFileSync(join(OUT, 'manifest.webmanifest'), JSON.stringify({
   name: 'AnteFirma', short_name: 'AnteFirma',
   description: 'Prima di accettare, sai a che cosa ti impegni: analizza contratti e condizioni, ricorda le scadenze, scrive la lettera di disdetta.',
   id: '/', start_url: '/', scope: '/', display: 'standalone',
-  // «Apri con AnteFirma» per i PDF, con l'app installata (Chrome ed Edge sul computer).
+  // "Open with AnteFirma" for PDFs, with the app installed (Chrome and Edge on desktop).
   file_handlers: [{ action: '/', accept: { 'application/pdf': ['.pdf'] }, launch_type: 'single-client' }],
   background_color: '#f5f6f8', theme_color: '#15203a', lang: 'it',
   icons: [
@@ -76,8 +76,8 @@ writeFileSync(join(OUT, 'manifest.webmanifest'), JSON.stringify({
   ],
 }, null, 2) + '\n');
 
-// Regole di sicurezza della pagina: solo i propri file, il server di AnteFirma per le analisi
-// e le statistiche di visita di Cloudflare (senza cookie), che Cloudflare aggiunge da sé.
+// The page's security rules: only its own files, the AnteFirma server for analyses
+// and Cloudflare's visit statistics (cookieless), which Cloudflare injects itself.
 writeFileSync(join(OUT, '_headers'), `/*
   Content-Security-Policy: default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.antefirma.app https://cloudflareinsights.com; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'
   X-Content-Type-Options: nosniff
@@ -87,18 +87,18 @@ writeFileSync(join(OUT, '_headers'), `/*
   Cache-Control: no-cache
 `);
 
-// Il service worker: i file dell'app in memoria, così si apre anche senza rete.
+// The service worker: the app's files cached, so it opens offline too.
 const files = [];
 const walk = (d) => { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p); else files.push('/' + relative(OUT, p).split('\\').join('/')); } };
 walk(OUT);
 const urls = files.filter((f) => !['/sw.js', '/_headers', '/_redirects'].includes(f))
   .map((f) => (f.endsWith('/index.html') ? f.slice(0, -'index.html'.length) : f.replace(/\.html$/, '')));
-writeFileSync(join(OUT, 'sw.js'), `/* AnteFirma web ${version}: generato da tools/web-build.mjs. */
+writeFileSync(join(OUT, 'sw.js'), `/* AnteFirma web ${version}: generated by tools/web-build.mjs. */
 const CACHE = 'antefirma-web-${version}-${Date.now().toString(36)}';
 const FILES = ${JSON.stringify(urls)};
 self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
-// Prima la rete (gli aggiornamenti arrivano subito), la copia se la rete manca. Le API non passano di qui.
+// Network first (updates arrive at once), the cached copy when offline. API calls don't go through here.
 self.addEventListener('fetch', (e) => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return;
@@ -106,9 +106,9 @@ self.addEventListener('fetch', (e) => {
     .catch(() => caches.match(e.request, { ignoreSearch: true }).then((r) => r || (e.request.mode === 'navigate' ? caches.match('/') : undefined))));
 });
 `);
-console.log(`AnteFirma web ${version}: ${files.length} file in ${OUT}`);
+console.log(`AnteFirma web ${version}: ${files.length} files in ${OUT}`);
 
-/** Le icone: lo scudo del marchio, disegnato dal browser a 192 e 512 pixel. Si rifanno solo se cambia il marchio. */
+/** The icons: the brand shield, drawn by the browser at 192 and 512 pixels. Redone only if the brand changes. */
 async function makeIcons() {
   const SHIELD = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 72"><path d="M32 4 L55.5 10 C57.5 10.6 58.5 12.2 58.5 14.2 V34 C58.5 48.5 48.5 59.5 34.2 66.6 C33.3 67.1 30.7 67.1 29.8 66.6 C15.5 59.5 5.5 48.5 5.5 34 V14.2 C5.5 12.2 6.5 10.6 8.5 10 Z" fill="#ffe04a"/><path d="M32 6.6 L52.9 11.9 C54.9 12.4 55.9 13.8 55.9 15.5 V32.4 C55.9 46.4 46.6 56.4 33.9 62.7 C33.3 63.2 30.7 63.2 30.1 62.7 C17.4 56.4 8.1 46.4 8.1 32.4 V15.5 C8.1 13.8 9.1 12.4 11.1 11.9 Z" fill="#15203a"/><path d="M32 15.5V37.5M22.47 21L41.53 32M22.47 32L41.53 21" stroke="#ffe04a" stroke-width="6.4" stroke-linecap="round"/><path d="M19 49.5 C22 44 26 43.5 29 47 S34.5 52 38 47.5 S43 42.5 45 43" fill="none" stroke="#ffe04a" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   mkdirSync(ICONS, { recursive: true });
@@ -122,5 +122,5 @@ async function makeIcons() {
     await page.screenshot({ path: join(ICONS, `${name}.png`), omitBackground: bg === 'transparent' });
   }
   await browser.close();
-  console.log('icone scritte in web/icons');
+  console.log('icons written to web/icons');
 }

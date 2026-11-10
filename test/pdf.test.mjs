@@ -1,16 +1,16 @@
 /**
- * L'estrattore PDF, sui file veri.
+ * The PDF extractor, on real files.
  *
- * Qui i fallimenti sono silenziosi: un PDF letto male non dà un errore, dà una
- * stringa vuota o parole incollate — e a valle diventano zero finding, che
- * l'utente legge come «contratto pulito». Quattro difetti erano vivi da sempre
- * perché nessuno guardava il testo estratto: il kerning degli array `TJ`,
- * `/DecodeParms` che nascondeva `/Filter`, `endstream` dentro il contenuto e
- * una soglia di affidabilità tarata sulla sola prosa.
+ * Failures here are silent: a badly read PDF gives no error, it gives an empty
+ * string or glued words — which downstream become zero findings, read by the
+ * user as "clean contract". Four defects had always been alive because nobody
+ * looked at the extracted text: kerning in `TJ` arrays, `/DecodeParms` hiding
+ * `/Filter`, `endstream` inside the content, and a reliability threshold tuned
+ * on prose alone.
  *
- * Per questo ogni caso finisce sul motore a regole, non sull'uguaglianza fra
- * stringhe: la domanda vera non è «il testo è identico?» ma «le clausole si
- * vedono ancora?».
+ * That is why every case checks what matters, not string equality: the real
+ * question is not "is the text identical?" but "can the clauses still be
+ * seen?".
  */
 
 import test from 'node:test';
@@ -19,7 +19,7 @@ import assert from 'node:assert/strict';
 import { extractPdfText } from '../src/lib/pdf-text.js';
 import { makePdf, tjStream, tmStream, kernedStream } from './fixtures/pdf.mjs';
 
-/** Un contratto con dentro quattro condizioni che il motore deve riconoscere. */
+/** A contract with four conditions the engine must recognise. */
 const CONTRACT = [
   'CONTRATTO DI ABBONAMENTO N. 2026/00841 - TelcoUno S.p.A., P.IVA 01234567890',
   'Art. 1 (Durata) La durata minima e\' di 24 mesi dalla data di attivazione.',
@@ -29,15 +29,15 @@ const CONTRACT = [
 ];
 
 /**
- * Le quattro condizioni che devono arrivare intatte al server. Senza il motore
- * a regole non si chiede più «le riconosci?», ma «sono nel testo, leggibili?»:
- * il riconoscimento è compito del server, la leggibilità del testo è nostra.
+ * The four conditions that must reach the server intact. Without the rule
+ * engine the question is no longer "do you recognise them?", but "are they in
+ * the text, readable?": recognition is the server's job, readability is ours.
  */
 const KEY_PHRASES = ['durata minima', 'si rinnova automaticamente', '30 giorni prima della scadenza', 'penale di 179,40 euro'];
 
 const flat = (text) => text.replace(/\s+/g, ' ').replace(/e'/g, 'e\'');
 
-/** Le quattro clausole del contratto si leggono nel testo estratto. */
+/** The contract's four clauses can be read in the extracted text. */
 function assertClausesVisible(text, label) {
   const t = flat(text);
   for (const phrase of KEY_PHRASES) {
@@ -47,7 +47,7 @@ function assertClausesVisible(text, label) {
 
 // ── il caso nominale ────────────────────────────────────────────────────────
 
-test('un PDF compresso con Tj e Td restituisce il testo, riga per riga', async () => {
+test('a compressed PDF with Tj and Td returns the text, line by line', async () => {
   const r = await extractPdfText(makePdf(tjStream(CONTRACT)));
 
   assert.equal(r.streams, 1);
@@ -58,7 +58,7 @@ test('un PDF compresso con Tj e Td restituisce il testo, riga per riga', async (
   assertClausesVisible(r.text, 'Tj+Td');
 });
 
-test('un testo estratto bene si dichiara affidabile e non allega note', async () => {
+test('well-extracted text declares itself reliable and attaches no notes', async () => {
   const r = await extractPdfText(makePdf(tjStream(CONTRACT)));
 
   assert.equal(r.reliable, true, `dichiarato inaffidabile: ${r.note}`);
@@ -68,12 +68,12 @@ test('un testo estratto bene si dichiara affidabile e non allega note', async ()
 // ── i quattro difetti ───────────────────────────────────────────────────────
 
 /**
- * Il layout dominante di Word, LibreOffice e InDesign: gli spazi non sono
- * caratteri, sono offset negativi fra i letterali dell'array. Prima della
- * correzione questo PDF dava "Ilcanonee'di19,99euro", cioè zero finding perché
- * ogni `\b` delle regole smetteva di agganciare.
+ * The dominant layout of Word, LibreOffice and InDesign: spaces are not
+ * characters, they are negative offsets between the array's literals. Before
+ * the fix this PDF gave "Ilcanonee'di19,99euro", i.e. zero findings because
+ * every `\b` of the rules stopped matching.
  */
-test('gli array TJ con kerning conservano gli spazi fra le parole', async () => {
+test('TJ arrays with kerning keep the spaces between words', async () => {
   const r = await extractPdfText(makePdf(kernedStream(CONTRACT)));
 
   assert.match(r.text, /durata minima e' di 24 mesi/);
@@ -82,19 +82,19 @@ test('gli array TJ con kerning conservano gli spazi fra le parole', async () => 
   assertClausesVisible(r.text, 'TJ con kerning');
 });
 
-test('il kerning fine resta kerning e non diventa uno spazio', async () => {
-  // -40 millesimi di em è una crenatura fra lettere, non uno stacco fra parole.
+test('fine kerning stays kerning and doesn\'t become a space', async () => {
+  // -40 thousandths of an em is kerning between letters, not a gap between words.
   const r = await extractPdfText(makePdf(kernedStream(['penale di 179,40 euro'], -40)));
 
   assert.match(r.text, /penaledi179,40euro/, 'un offset minimo non deve generare spazi');
 });
 
 /**
- * `<< /Filter /FlateDecode /DecodeParms << … >> /Length N >>`: risalendo con
- * lastIndexOf('<<') si finiva nel dizionario annidato, /Filter spariva, il
- * flusso compresso veniva letto come testo in chiaro e buttato via.
+ * `<< /Filter /FlateDecode /DecodeParms << … >> /Length N >>`: walking back
+ * with lastIndexOf('<<') ended in the nested dictionary, /Filter disappeared,
+ * the compressed stream was read as plain text and thrown away.
  */
-test('/DecodeParms non nasconde il filtro del flusso compresso', async () => {
+test('/DecodeParms doesn\'t hide the compressed stream\'s filter', async () => {
   const r = await extractPdfText(makePdf(tjStream(CONTRACT), { decodeParms: true }));
 
   assert.match(r.text, /durata minima e' di 24 mesi/);
@@ -103,10 +103,10 @@ test('/DecodeParms non nasconde il filtro del flusso compresso', async () => {
 });
 
 /**
- * `/Length` è autorevole, `endstream` no: un contratto che nomina la parola
- * (o un font, o un JPEG che la contiene per caso) troncava lo stream a metà.
+ * `/Length` is authoritative, `endstream` isn't: a contract naming the word (or
+ * a font, or a JPEG containing it by chance) cut the stream in half.
  */
-test('la parola endstream dentro il testo non tronca lo stream', async () => {
+test('the word endstream inside the text doesn\'t truncate the stream', async () => {
   const lines = ['Nota tecnica: la parola endstream compare in questo paragrafo.', ...CONTRACT];
   const r = await extractPdfText(makePdf(tjStream(lines), { compress: false }));
 
@@ -114,7 +114,7 @@ test('la parola endstream dentro il testo non tronca lo stream', async () => {
   assertClausesVisible(r.text, 'endstream nel testo');
 });
 
-test('senza /Length il confine dello stream resta endstream', async () => {
+test('without /Length the stream boundary stays endstream', async () => {
   const r = await extractPdfText(makePdf(tjStream(CONTRACT), { compress: false, length: false }));
 
   assert.match(r.text, /penale di 179,40 euro/);
@@ -122,13 +122,13 @@ test('senza /Length il confine dello stream resta endstream', async () => {
 });
 
 /**
- * La vecchia metrica contava solo lettere e spazi: cifre e punteggiatura
- * valevano zero. Un contratto in prosa misurava 0,99, ma bastava allegare il
- * piano di fatturazione — che è mezzo contratto reale — per scendere sotto la
- * soglia di 0,5 e far dichiarare inaffidabile un PDF estratto alla perfezione.
- * Il testo qui sotto misura 0,42 con la metrica vecchia e 1,00 con la nuova.
+ * The old metric counted only letters and spaces: digits and punctuation were
+ * worth zero. A prose contract measured 0.99, but attaching the billing plan —
+ * half a real contract — was enough to drop below the 0.5 threshold and declare
+ * a perfectly extracted PDF unreliable. The text below measures 0.42 with the
+ * old metric and 1.00 with the new one.
  */
-test('un contratto con allegato tariffario resta affidabile', async () => {
+test('a contract with a price-list annex stays reliable', async () => {
   const rate = [];
   for (let i = 1; i <= 14; i += 1) {
     rate.push(`${String(i).padStart(2, '0')} ${String((i % 12) + 1).padStart(2, '0')}/0${(i % 9) + 1}/2026 29,90 6,58 36,48 - cod. 4471-${1000 + i}`);
@@ -147,8 +147,8 @@ test('un contratto con allegato tariffario resta affidabile', async () => {
   assertClausesVisible(r.text, 'contratto con tariffario');
 });
 
-test('un testo di soli glifi grezzi si dichiara inaffidabile', async () => {
-  // Font senza ToUnicode: quello che esce sono indici di glifo, non lettere.
+test('text made only of raw glyphs declares itself unreliable', async () => {
+  // Font without ToUnicode: what comes out are glyph indexes, not letters.
   let glifi = '';
   for (let i = 0; i < 400; i += 1) glifi += String.fromCharCode(1 + ((i * 37) % 160));
   const r = await extractPdfText(makePdf(tjStream([glifi])));
@@ -157,9 +157,9 @@ test('un testo di soli glifi grezzi si dichiara inaffidabile', async () => {
   assert.match(r.note, /verificalo/);
 });
 
-// ── varianti di impaginazione e di codifica ─────────────────────────────────
+// ── layout and encoding variants ────────────────────────────────────────────
 
-test('un PDF impaginato con Tm invece che con Td non finisce su una riga sola', async () => {
+test('a PDF laid out with Tm instead of Td doesn\'t end up on a single line', async () => {
   const r = await extractPdfText(makePdf(tmStream(CONTRACT)));
 
   assert.match(r.text, /durata minima e' di 24 mesi/);
@@ -167,7 +167,7 @@ test('un PDF impaginato con Tm invece che con Td non finisce su una riga sola', 
   assertClausesVisible(r.text, 'Tm');
 });
 
-test('uno stream non compresso viene letto come uno compresso', async () => {
+test('an uncompressed stream is read like a compressed one', async () => {
   const r = await extractPdfText(makePdf(tjStream(CONTRACT), { compress: false }));
 
   assert.equal(r.decoded, 1);
@@ -175,21 +175,21 @@ test('uno stream non compresso viene letto come uno compresso', async () => {
   assertClausesVisible(r.text, 'stream in chiaro');
 });
 
-// ── i casi in cui deve arrendersi, dicendolo ────────────────────────────────
+// ── the cases where it must give up, saying so ──────────────────────────────
 
 /**
- * Un PDF cifrato non si legge: l'unica risposta onesta è fermarsi. Il
- * pannello mostra il messaggio e invita a incollare il testo a mano; quello
- * che non deve succedere è restituire i byte cifrati come se fossero testo.
+ * An encrypted PDF can't be read: the only honest answer is to stop. The panel
+ * shows the message and asks to paste the text by hand; what must not happen is
+ * returning the encrypted bytes as if they were text.
  */
-test('un PDF cifrato si ferma invece di restituire spazzatura', async () => {
+test('an encrypted PDF stops instead of returning garbage', async () => {
   await assert.rejects(
     () => extractPdfText(makePdf(tjStream(CONTRACT), { encrypt: true })),
     /cifratura/i
   );
 });
 
-test('un file che non è un PDF viene rifiutato subito', async () => {
+test('a file that isn\'t a PDF is refused at once', async () => {
   const buf = Buffer.from('Questo è un contratto in testo semplice, con penale e rinnovo automatico.', 'utf8');
   await assert.rejects(
     () => extractPdfText(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)),
@@ -197,8 +197,8 @@ test('un file che non è un PDF viene rifiutato subito', async () => {
   );
 });
 
-test('un PDF senza testo estraibile lo dichiara invece di fingere', async () => {
-  // Una scansione: solo grafica, nessun operatore di testo.
+test('a PDF without extractable text says so instead of pretending', async () => {
+  // A scan: graphics only, no text operator.
   const r = await extractPdfText(makePdf('q 1 0 0 RG 56 56 480 720 re S Q\n'));
 
   assert.equal(r.text, '');
@@ -206,7 +206,7 @@ test('un PDF senza testo estraibile lo dichiara invece di fingere', async () => 
   assert.match(r.note, /scansione/i);
 });
 
-test('le immagini incorporate non finiscono nel testo', async () => {
+test('embedded images don\'t end up in the text', async () => {
   const r = await extractPdfText(makePdf(tjStream(CONTRACT)));
 
   assert.ok(!/�/.test(r.text));

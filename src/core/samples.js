@@ -1,11 +1,11 @@
 /**
- * Gli esempi del pannello: quattro contratti inventati, con la risposta che il
- * server darebbe. Servono a vedere come funziona senza incollare niente e senza
- * consumare un'analisi: lo sfondo li fa passare per lo stesso calcolo delle
- * analisi vere, ma nessun testo lascia il computer.
+ * The panel's examples: four invented contracts, with the answer the server
+ * would give. They show how it works without pasting anything and without using
+ * an analysis: the background runs them through the same computation as real
+ * analyses, but no text leaves the computer.
  *
- * Ogni frase citata è copiata parola per parola dal testo dell'esempio, come
- * pretende il server per le analisi vere. Gli stessi testi sono sul sito.
+ * Every quoted sentence is copied word for word from the example's text, as the
+ * server requires for real analyses. The same texts are on the website.
  */
 export const SAMPLES = {
   "gym": {

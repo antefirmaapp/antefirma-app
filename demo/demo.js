@@ -1,7 +1,7 @@
 /**
- * Solo per le pagine di prova: dà un riscontro visibile quando un pulsante
- * viene davvero premuto, così si distingue «l'estensione ha bloccato» da
- * «l'estensione ha lasciato passare». Non c'entra nulla con AnteFirma.
+ * Demo pages only: gives visible feedback when a button is really pressed, to
+ * tell "the extension blocked it" from "the extension let it through". It has
+ * nothing to do with AnteFirma itself.
  */
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-outcome]');

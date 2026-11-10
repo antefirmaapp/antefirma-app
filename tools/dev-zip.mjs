@@ -1,16 +1,16 @@
 /**
- * Il pacchetto per sviluppatori e tester: uno ZIP da caricare in Chrome o Edge
- * con «Carica estensione non pacchettizzata», senza passare da git.
+ * The package for developers and testers: a ZIP to load in Chrome or Edge with
+ * "Load unpacked", without going through git.
  *
- *     node tools/dev-zip.mjs          →  dist/antefirma-dev-<versione>.zip
+ *     node tools/dev-zip.mjs          →  dist/antefirma-dev-<version>.zip
  *
- * Nel manifest del pacchetto entra una chiave pubblica fissa: così l'estensione
- * ha sempre lo stesso ID (DEV_ID qui sotto), chiunque la installi e in qualunque
- * cartella, e il server la riconosce (ALLOWED_ORIGINS) una volta per tutte.
- * La chiave privata non serve per caricare l'estensione e non è conservata.
+ * A fixed public key goes into the package's manifest: so the extension always
+ * has the same ID (DEV_ID below), whoever installs it and in whatever folder, and
+ * the server recognises it (ALLOWED_ORIGINS) once and for all. The private key
+ * isn't needed to load the extension and is not kept.
  *
- * Il manifest del repository resta senza chiave: la versione per il Chrome Web
- * Store prende l'ID che le assegna lo store.
+ * The repository's manifest stays without a key: the Chrome Web Store version
+ * gets the ID the store assigns.
  */
 import { readFileSync, writeFileSync, mkdirSync, rmSync, cpSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';

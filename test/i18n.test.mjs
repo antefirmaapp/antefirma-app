@@ -1,8 +1,8 @@
 /**
- * Le lingue: ogni frase passata a t()/tn() nel codice e ogni testo delle
- * pagine HTML ha la sua traduzione in inglese e in spagnolo, con gli stessi
- * segnaposti. Una frase dimenticata resterebbe in italiano per chi usa
- * l'estensione in un'altra lingua.
+ * Languages: every sentence passed to t()/tn() in the code and every text of
+ * the HTML pages has its English and Spanish translation, with the same
+ * placeholders. A forgotten sentence would stay in Italian for whoever uses the
+ * extension in another language.
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -19,7 +19,7 @@ function files(dir, ext) {
   });
 }
 
-/** Le frasi letterali dentro t('…') e tn(n, '…', '…'). */
+/** The literal sentences inside t('…') and tn(n, '…', '…'). */
 function keysIn(src) {
   const out = [];
   const str = String.raw`'((?:[^'\\]|\\.)*)'`;
@@ -30,7 +30,7 @@ function keysIn(src) {
 
 const vars = (s) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort().join(',');
 
-test('ogni frase del codice ha la traduzione inglese e spagnola', () => {
+test('every sentence in the code has an English and a Spanish translation', () => {
   const missing = [];
   for (const f of files('src', '.js')) {
     if (f.includes('i18n')) continue;
@@ -39,7 +39,7 @@ test('ogni frase del codice ha la traduzione inglese e spagnola', () => {
   assert.deepEqual(missing, []);
 });
 
-test('le traduzioni hanno gli stessi segnaposti dell’italiano', () => {
+test('translations have the same placeholders as the Italian', () => {
   const bad = [];
   for (const [k, [en, es]] of Object.entries(dict)) {
     if (!en || !es) bad.push(`vuota: ${k}`);
@@ -48,7 +48,7 @@ test('le traduzioni hanno gli stessi segnaposti dell’italiano', () => {
   assert.deepEqual(bad, []);
 });
 
-test('t(): lingua, segnaposti, ripiego sull’italiano', () => {
+test('t(): language, placeholders, fallback to Italian', () => {
   setLang('en');
   assert.equal(t('Disdici entro {n} giorni', { n: 5 }), 'Cancel within 5 days');
   assert.equal(t('frase che non esiste'), 'frase che non esiste');
@@ -62,7 +62,7 @@ test('t(): lingua, segnaposti, ripiego sull’italiano', () => {
   setLang('it');
 });
 
-test('etichette e testi dei vocabolari hanno la traduzione', async () => {
+test('labels and texts of the vocabularies have translations', async () => {
   const { RISK_CATEGORIES, LEVELS, ACTION_LABELS, PROTECTION_LABELS } = await import('../src/core/constants.js');
   const { LETTER_LABELS } = await import('../src/core/letter.js');
   const { runConsumerChecks } = await import('../src/core/eu.js');
@@ -71,7 +71,7 @@ test('etichette e testi dei vocabolari hanno la traduzione', async () => {
     ...LEVELS.flatMap((l) => [l.label, l.headline]),
     ...Object.values(ACTION_LABELS), ...Object.values(PROTECTION_LABELS), ...Object.values(LETTER_LABELS),
   ];
-  // Le tutele: tutti i controlli, con un testo che li fa scattare tutti o quasi.
+  // Protections: all the checks, with a text that triggers all or almost all of them.
   const text = 'arbitrato foro competente rinuncia azioni collettive modifica unilaterale responsabilità nessun rimborso rinnovo tacito vendita dati terze parti addestrare';
   const findings = Object.keys(RISK_CATEGORIES).map((category) => ({ category, severity: 50 }));
   const r = runConsumerChecks({ text, findings, ctx: { form: { bundledConsent: true, precheckedConsents: 1 } }, cost: { notice: { months: 3 }, hasAutoRenewal: true }, actionType: 'purchase', jurisdiction: 'IT' });
@@ -80,7 +80,7 @@ test('etichette e testi dei vocabolari hanno la traduzione', async () => {
   assert.deepEqual(missing, []);
 });
 
-test('i testi delle pagine HTML hanno la traduzione', () => {
+test('the HTML pages\' texts have translations', () => {
   const missing = [];
   const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|https?:\/\/\S+)$/;
   for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html']) {

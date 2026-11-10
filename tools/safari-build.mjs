@@ -1,18 +1,18 @@
 /**
- * L'estensione per Safari (macOS): prepara la cartella da dare al convertitore di Apple.
+ * The Safari (macOS) extension: prepares the folder to give to Apple's converter.
  *
  *     node tools/safari-build.mjs          →  dist/safari/
  *
- * Safari esegue le stesse web extension di Chrome, con tre differenze che
- * contano qui:
- *  - non c'è il pannello laterale: il pannello si apre come finestrella del
- *    pulsante nella barra (action.default_popup) e, dal menu contestuale, in una scheda;
- *  - non c'è l'API delle notifiche: i promemoria restano nel pannello e nel
- *    calendario (.ics), che è comunque il canale che consigliamo;
- *  - ogni installazione ha un'origine sua (safari-web-extension://<uuid>): il
- *    server la accetta con ALLOW_SAFARI=1.
+ * Safari runs the same web extensions as Chrome, with three differences that
+ * matter here:
+ *  - there is no side panel: the panel opens as the toolbar button's popup
+ *    (action.default_popup) and, from the context menu, in a tab;
+ *  - there is no notifications API: reminders stay in the panel and in the
+ *    calendar (.ics), which is the channel we recommend anyway;
+ *  - every installation has its own origin (safari-web-extension://<uuid>): the
+ *    server accepts it with ALLOW_SAFARI=1.
  *
- * Il pacchetto vero si costruisce su un Mac con Xcode (vedi README, «Safari»):
+ * The real package is built on a Mac with Xcode (see README, "Safari"):
  *
  *     xcrun safari-web-extension-converter dist/safari --project-location safari-xcode \
  *       --app-name AnteFirma --bundle-identifier app.antefirma.safari --macos-only --copy-resources
@@ -40,8 +40,8 @@ delete safari.side_panel;
 delete safari.minimum_chrome_version;
 writeFileSync(join(OUT, 'manifest.json'), JSON.stringify(safari, null, 2) + '\n');
 
-// Nella finestrella del pulsante il pannello ha bisogno di una larghezza: in Safari è il contenuto a darla.
+// In the button's popup the panel needs a width: in Safari the content provides it.
 const css = join(OUT, 'src', 'sidepanel', 'sidepanel.css');
-writeFileSync(css, readFileSync(css, 'utf8') + '\n/* Safari: il pannello vive nella finestrella del pulsante. */\nhtml { min-width: 400px; min-height: 560px; }\n');
+writeFileSync(css, readFileSync(css, 'utf8') + '\n/* Safari: the panel lives in the toolbar button popup. */\nhtml { min-width: 400px; min-height: 560px; }\n');
 
-console.log(`dist/safari pronto (versione ${manifest.version}). Su un Mac: vedi README, sezione «Safari».`);
+console.log(`dist/safari ready (version ${manifest.version}). On a Mac: see README, "Safari".`);

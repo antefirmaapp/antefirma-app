@@ -1,15 +1,15 @@
 /**
- * Video e schermate dell'estensione vera, per il sito, in italiano, inglese e spagnolo.
+ * Videos and screenshots of the real extension, for the website, in Italian, English and Spanish.
  *
- *     node tools/media.mjs [cartella]     (predefinita: ../antefirma-site/assets/media)
+ *     node tools/media.mjs [folder]     (default: ../antefirma-site/assets/media)
  *
- * Carica l'estensione in Chromium come fa test/smoke.mjs, con il server di
- * AnteFirma finto (nessuna analisi spesa, niente rete), su una pagina di
- * esempio inventata: la stessa palestra della home del sito. Registra il
- * percorso del click (video .mp4 con ffmpeg) e fotografa l'avviso, il pannello
- * degli impegni e la lettera. Scrive anche media.json, che il sito legge.
+ * Loads the extension in Chromium like test/smoke.mjs, with a fake AnteFirma
+ * server (no analysis spent, no network), on an invented example page: the same
+ * gym as on the website's home page. It records the click path (.mp4 video via
+ * ffmpeg) and screenshots the warning, the commitments panel and the letter. It
+ * also writes media.json, which the website reads.
  *
- * Richiede Playwright con Chromium e ffmpeg.
+ * Requires Playwright with Chromium, and ffmpeg.
  */
 import { mkdtempSync, mkdirSync, rmSync, readdirSync, writeFileSync, statSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
@@ -44,7 +44,7 @@ async function record(l) {
   const sw = context.serviceWorkers()[0] || await context.waitForEvent('serviceworker', { timeout: 20000 });
   const extId = new URL(sw.url()).host;
 
-  // Lingua, consenso e dati per la lettera, come farebbe la persona.
+  // Language, consent and letter details, as the person would set them.
   const opt = await context.newPage();
   await opt.goto(`chrome-extension://${extId}/src/options/options.html`);
   await opt.waitForTimeout(800);
@@ -87,7 +87,7 @@ async function record(l) {
   await pg.close();
   const webm = await video.path();
 
-  // Il pannello degli impegni e la lettera.
+  // The commitments panel and the letter.
   const panel = await context.newPage();
   await panel.setViewportSize({ width: 420, height: 720 });
   await panel.goto(`chrome-extension://${extId}/src/sidepanel/sidepanel.html`);
@@ -95,13 +95,13 @@ async function record(l) {
   await panel.click('#tab-btn-commitments');
   await panel.waitForTimeout(900);
   await panel.screenshot({ path: join(dir, 'impegni.jpg'), type: 'jpeg', quality: 85 });
-  // La lettera, nella lingua del fornitore (italiano, spagnolo o inglese).
+  // The letter, in the provider's language (Italian, Spanish or English).
   await panel.locator('[data-act="letter"]').first().click();
   await panel.waitForTimeout(1000);
   await panel.screenshot({ path: join(dir, 'lettera.jpg'), type: 'jpeg', quality: 85 });
   await context.close();
 
-  // .mp4 (H.264) per tutti i browser; avvio veloce in streaming.
+  // .mp4 (H.264) for every browser; fast start for streaming.
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', webm, '-c:v', 'libx264', '-preset', 'slow', '-crf', '30', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', join(dir, 'demo.mp4')]);
   rmSync(vids, { recursive: true, force: true });
   const [a1, a2, a3] = ALT[l];

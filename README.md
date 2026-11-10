@@ -1,283 +1,274 @@
-# AnteFirma*
+# AnteFirma
 
-**Prima di firmare, sai a che cosa ti impegni.**
+**Before you sign, you know what you are committing to.**
 
-[antefirma.app](https://antefirma.app) · estensione per Chrome ed Edge (Manifest V3) · versione 0.5.0
+[antefirma.app](https://antefirma.app) · extension for Chrome and Edge (Manifest V3) · web app at
+[web.antefirma.app](https://web.antefirma.app) · Safari build prepared
 
-Si accende quando stai per premere un pulsante che ti impegna — Accetta,
-Abbonati, Acquista, Firma — e ti dice in euro e in date a che cosa ti stai
-impegnando: costo reale, durata minima, rinnovo automatico, penali, preavvisi,
-arbitrato, licenze sui contenuti, uso dei dati. Il risultato non è
-`Risk score 73/100`, ma:
+It kicks in when you are about to press a button that commits you — Accept,
+Subscribe, Buy, Sign — and tells you in euros and dates what you are committing
+to: real cost, minimum term, automatic renewal, exit fees, notice periods,
+arbitration, licences on your content, use of your data. The result is not
+`Risk score 73/100` but:
 
-> **Vedi 19,99 €/mese, ma stai impegnando fino a 648,76 €**
-> 19,99 € × 24 cicli + penale 120,00 € + attivazione 49,00 €
-> 📌 Entro il 16 giugno 2028 devi inviare la disdetta.
+> **You see €19.99/month, but you are committing up to €648.76**
+> €19.99 × 24 cycles + exit fee €120.00 + activation €49.00
+> 📌 You must send the cancellation by 16 June 2028.
 
-Ogni avviso cita la frase esatta della pagina da cui nasce: se la frase non c'è,
-l'avviso non compare. Dopo il sì: promemoria prima dell'ultimo giorno utile per
-disdire, lettera di disdetta già scritta (Italia e Spagna), elenco degli impegni
-nel pannello laterale. Nessun account.
+Every warning quotes the exact sentence of the page it comes from: if the
+sentence isn't there, the warning doesn't appear. After the yes: reminders before
+the last day to cancel, a cancellation letter already written (Italian, Spanish
+or English, with the laws of the provider's country), the list of commitments in
+the side panel. No account.
+
+The interface is in Italian, English and Spanish. Code, comments, tests and
+documentation are in English (`npm run check:english` enforces it).
 
 ---
 
-## Come funziona
+## How it works
 
 ```
-pulsante premuto ──► content script (sospende il click, legge la pagina)
+button pressed ──► content script (holds the click, reads the page)
                           │
                           ▼
-                    service worker ──► POST /v1/analyze ──► server di AnteFirma ──► Claude
-                          │                                   (scarta ogni rischio la cui
-                          │                                    citazione non è nel testo)
+                    service worker ──► POST /v1/analyze ──► AnteFirma server ──► Claude
+                          │                                   (drops every risk whose
+                          │                                    quote isn't in the text)
                           ▼
-     severità ed etichette · costo · scadenze · profilo · tutele UE/IT · punteggio
+     severity and labels · cost · deadlines · profile · EU/IT protections · score
                           │
                           ▼
-                 avviso sulla pagina  →  Torna indietro / Continua comunque
+           warning on the page  →  Go back / Continue and remind me to cancel
 ```
 
-- **L'analisi la fa il server** (`antefirma-server`): l'estensione non contiene
-  nessuna chiave. Manda il testo della pagina, l'indirizzo, il tipo di azione,
-  il testo del pulsante e il paese; riceve i rischi con la citazione e le
-  condizioni economiche, ciascuna con il passo da cui nasce.
-- **Severità, etichette e colori li decide l'estensione**
-  (`src/core/constants.js`), non il modello. La fiducia del modello sposta la
-  severità solo verso il basso, e di poco.
-- **Il costo** si calcola soltanto con le cifre che il server ha verificato nel
-  passo citato — canone, durata, preavviso, penale e costi accessori
-  (`extra_fees`: attivazione, istruttoria, spese per rata moltiplicate per i
-  cicli) — più il prezzo letto nella pagina vicino al pulsante (che vince
-  su quello letto nel testo).
-- **Profilo personale, tutele UE/IT, punteggio, scadenze**: tutto in locale,
-  come prima.
-- **Se il server non risponde**, l'avviso lo dice e lascia scegliere. Non c'è un
-  verdetto di ripiego: fingere un «tutto a posto» sarebbe peggio.
+- **The server does the analysis** (`antefirma-server`): the extension holds no
+  key. It sends the page text, the address, the action type, the button text and
+  the country; it receives the risks with their quotes and the economic terms,
+  each with the passage it comes from.
+- **Severities, labels and colours are decided by the extension**
+  (`src/core/constants.js`), not by the model. The model's confidence only moves
+  severity downwards, and only a little.
+- **The cost** is computed only from the figures the server verified in the
+  quoted passage — fee, term, notice, exit fee and extra costs (`extra_fees`:
+  activation, setup, per-instalment charges multiplied by the cycles) — plus the
+  price read on the page near the button (which wins over the one in the text).
+- **Personal profile, EU/IT protections, score, deadlines**: all local.
+- **If the server doesn't answer**, the warning says so and lets the user choose.
+  There is no fallback verdict: faking "all fine" would be worse.
 
-Non c'è più il motore a regole locale né il modello sul dispositivo (fino alla
-0.4). Non c'è più nemmeno la pre-analisi prima del click: con il server
-consumerebbe una quota a ogni pulsante visto.
+### Consent
 
-### Il consenso
+The page text goes to the server only after an explicit yes, asked at the first
+analysis inside the warning (or in the panel, or in settings). This is exactly
+what the Chrome Web Store requires: an explanation in the interface and an act of
+acceptance before collection. The "Yes, analyse" button only accepts real clicks
+(`isTrusted`): the warning lives in an open shadow root, and a page script must
+not be able to press it on the person's behalf.
 
-Il testo della pagina parte verso il server solo dopo un sì esplicito, chiesto
-alla prima analisi dentro l'avviso (o nel pannello, o nelle impostazioni). Il
-Chrome Web Store chiede proprio questo: una spiegazione nell'interfaccia e un
-atto di accettazione prima della raccolta. Il pulsante «Sì, analizza» accetta
-solo click veri (`isTrusted`): l'avviso sta in uno shadow root aperto, e uno
-script della pagina non deve poterlo premere al posto della persona.
+### The token
 
-Chi aggiorna dalla 0.4 perde il consenso dato allora (riguardava l'invio ad
-Anthropic o OpenAI con la propria chiave) e la chiave viene cancellata dal
-disco: cambia chi riceve il testo, quindi si chiede di nuovo.
-
-### Il token
-
-All'installazione l'estensione genera un id casuale (`crypto.randomUUID()`) e
-chiede un token al server (`POST /v1/register`). Il token identifica
-l'installazione, non la persona, e scade dopo 90 giorni: a un 401 se ne chiede
-uno nuovo e si riprova una volta. Le quote giornaliere sono per installazione,
-per indirizzo IP e globali.
+On installation the extension generates a random id (`crypto.randomUUID()`) and
+asks the server for a token (`POST /v1/register`). The token identifies the
+installation, not the person, and expires after 90 days: on a 401 a new one is
+requested and the call retried once.
 
 ---
 
-## Installazione (sviluppo)
+## Installation (development)
 
-Servono Chrome, Edge o Brave **versione 116 o successiva**.
+Chrome, Edge or Brave **version 116 or later**.
 
-1. Apri `chrome://extensions` e attiva **Modalità sviluppatore**.
-2. **Carica estensione non pacchettizzata** e seleziona questa cartella.
-3. Al primo caricamento si apre la pagina delle impostazioni.
+1. Open `chrome://extensions` and turn on **Developer mode**.
+2. **Load unpacked** and select this folder.
+3. On first load the welcome page opens.
 
-Prova: servi `demo/` con un server locale (`python3 -m http.server -d demo`) e
-premi «Conferma abbonamento» in `checkout.html`. Il pulsante «Iscriviti alla
-newsletter» **non** deve far scattare niente.
+Try it: serve `demo/` with a local server (`python3 -m http.server -d demo`) and
+press "Conferma abbonamento" in `checkout.html`. The "Iscriviti alla newsletter"
+button must **not** trigger anything. There is also a demo page at
+https://antefirma.app/demo/.
 
-### Contro un server locale
+```bash
+npm ci                 # dev dependencies: ESLint, fast-check, axe-core
+npm test               # unit, golden and contract tests
+npm run test:e2e       # the extension in a real Chromium (needs Playwright)
+npm run lint
+npm run check:english
+```
 
-L'indirizzo del server sta in un solo posto, `src/core/config.js`
-(`https://api.antefirma.app`). Per provare con `npm start` di `antefirma-server`:
+### Against a local server
 
-1. in `src/core/config.js` metti `http://localhost:8787`;
-2. in `manifest.json` aggiungi `http://localhost:8787/*` a `host_permissions`;
-3. avvia il server con `ALLOWED_ORIGINS` vuoto (accetta qualsiasi origine) o con
-   l'id che l'estensione ha in `chrome://extensions`.
+The server address lives in one place, `src/core/config.js`
+(`https://api.antefirma.app`). To test with `npm start` in `antefirma-server`:
 
-Non pubblicare questi due cambiamenti.
+1. in `src/core/config.js` set `http://localhost:8787`;
+2. in `manifest.json` add `http://localhost:8787/*` to `host_permissions`;
+3. start the server with an empty `ALLOWED_ORIGINS` (accepts any origin) or with
+   the id the extension has in `chrome://extensions`.
+
+Don't publish these two changes.
 
 ---
 
-## Permessi richiesti e perché
+## Permissions and why
 
-| Permesso | A cosa serve |
+| Permission | What it is for |
 |---|---|
-| `https://api.antefirma.app/*` | il server di analisi |
-| `<all_urls>` | l'intercettazione deve funzionare su qualsiasi sito; scaricare il documento dei termini collegato al pulsante |
-| `activeTab`, `scripting` | leggere la pagina corrente quando lo chiedi dal pannello |
-| `storage` + `unlimitedStorage` | impostazioni, cache, impegni e il testo integrale delle prove |
-| `alarms` | la passata quotidiana e il controllo delle condizioni |
-| `notifications` | i promemoria delle scadenze |
-| `sidePanel` | il pannello con analisi manuali, impegni e storico |
-| `contextMenus` | «Analizza il testo selezionato» |
+| `https://api.antefirma.app/*` | the analysis server |
+| `<all_urls>` | interception must work on any site; downloading the terms document linked to the button |
+| `activeTab`, `scripting` | reading the current page when you ask from the panel |
+| `storage` + `unlimitedStorage` | settings, cache, commitments and the full text of proofs |
+| `alarms` | the daily pass and the terms check |
+| `notifications` | deadline reminders |
+| `sidePanel` | the panel with manual analyses, commitments and history |
+| `contextMenus` | "Analyse the selected text" |
 
-## Che cosa esce dal browser
+## What leaves the browser
 
-**Verso il server di AnteFirma, solo dopo il consenso:** il testo della pagina
-(al massimo 80.000 caratteri), il suo indirizzo, il tipo di azione, il testo del
-pulsante, la lingua e il paese scelto nelle impostazioni, il token
-dell'installazione.
+**To the AnteFirma server, only after consent:** the page text (at most 80,000
+characters), its address, the action type, the button text, the language and the
+country chosen in settings, the installation token.
 
-**Non esce:** la cronologia, i dati per le lettere di disdetta, gli impegni
-registrati, le prove, il profilo personale.
+**Never leaves:** browsing history, letter details, recorded commitments,
+proofs, the personal profile.
 
-Il controllo delle condizioni già accettate rilegge il documento pubblico e,
-solo se il testo è cambiato, lo fa rileggere al server (si può spegnere nelle
-impostazioni: allora dice soltanto che il testo è cambiato).
-
----
-
-## Kit di uscita e prova
-
-Invariati dalla 0.4: impegni registrati con scadenze e promemoria a 30, 7 e 1
-giorno, file `.ics`, lettera di disdetta o di recesso (Italia e Spagna),
-impronta SHA-256 del testo accettato con attestazione, controllo periodico delle
-condizioni.
+The check of terms already accepted re-reads the public document and, only if
+the text changed, has the server read it again (it can be turned off in
+settings: then it only says the text changed).
 
 ---
 
-## Pacchetto per sviluppatori e tester
+## Developer and tester package
 
 ```bash
-node tools/dev-zip.mjs     # → dist/antefirma-dev-<versione>.zip
+node tools/dev-zip.mjs     # → dist/antefirma-dev-<version>.zip
 ```
 
-Il pacchetto ha nel manifest una chiave pubblica fissa, quindi l'ID è sempre
-`alfaikbfkaimaejlhghbjffihjgoigoh`, autorizzato nel server (`ALLOWED_ORIGINS`).
-Lo ZIP si carica nel bucket R2 `antefirma-backup` (giurisdizione UE) sotto
-`dev/` e si scarica dal pannello, **Strumenti → Estensione per sviluppatori**.
-Il manifest del repository resta senza chiave: lo store assegna il suo ID.
+The package's manifest carries a fixed public key, so the ID is always
+`alfaikbfkaimaejlhghbjffihjgoigoh`, allowed on the server (`ALLOWED_ORIGINS`).
+The ZIP is uploaded to the R2 bucket `antefirma-backup` (EU jurisdiction) under
+`dev/` and downloaded from the admin panel, **Tools → Developer extension**. The
+repository's manifest stays without a key: the store assigns its own ID.
 
-## AnteFirma web (da installare sul computer)
+## AnteFirma web (installable on the desktop)
 
 ```bash
-node tools/web-build.mjs        # → dist/web, pubblicata su web.antefirma.app
-node tools/web-build.mjs --icons   # solo se cambia il marchio: rigenera web/icons (serve Playwright)
+node tools/web-build.mjs           # → dist/web, published on web.antefirma.app
+node tools/web-build.mjs --icons   # only if the brand changes: regenerates web/icons (needs Playwright)
 ```
 
-Si pubblica da sola: il Worker **antefirma-web** (`wrangler.toml` in questa cartella) è
-collegato a questo repository con Workers Builds (build `node tools/web-build.mjs`,
-pubblicazione `npx wrangler deploy`). Ogni push aggiorna anche la versione web.
-`dist/web/_headers` fissa le regole di sicurezza della pagina (CSP: solo i propri
-file e api.antefirma.app).
+It publishes itself: the **antefirma-web** Worker (`wrangler.toml` in this folder)
+is linked to this repository with Workers Builds (build `node tools/web-build.mjs`,
+deploy `npx wrangler deploy`). Every push updates the web version too.
+`dist/web/_headers` sets the page's security rules (CSP: only its own files and
+api.antefirma.app).
 
-Lo stesso codice di pannello, impostazioni e «sfondo», con `web/shim.js` che
-imita le API di Chrome in una pagina normale (IndexedDB, timer, notifiche del
-browser). È un'app installabile (PWA): manifest, icone, service worker.
-Fa: testo incollato e PDF, impegni, scadenze, lettere, piano e chiave.
-Non può: fermare i click sugli altri siti o leggere le altre schede (per quello
-serve l'estensione). Il server deve ammettere l'origine `https://web.antefirma.app` (`APP_ORIGINS`).
+The same panel, settings and "background" code, with `web/shim.js` imitating
+Chrome's APIs in a normal page (IndexedDB, timers, browser notifications). It is
+an installable app (PWA): manifest, icons, service worker. It does: pasted text
+and PDFs, commitments, deadlines, letters, plan and key. It cannot: stop clicks
+on other sites or read other tabs (that needs the extension). The server must
+allow the origin `https://web.antefirma.app` (`APP_ORIGINS`).
 
-## Guida, schermate e video
+## Help, screenshots and videos
 
-Il centro di aiuto è sul sito (`antefirma.app/aiuto/`, testi in `antefirma-site/help.mjs`).
-Il «?» del pannello, delle impostazioni e dell'avviso ci porta con `src/core/help.js`
-(stesse chiavi e stessi indirizzi: lo controlla `test/help.test.mjs`).
+The help centre is on the website (`antefirma.app/aiuto/`, texts in
+`antefirma-site/help.mjs`). The "?" in the panel, settings and warning leads
+there through `src/core/help.js` (same keys and addresses: `test/help.test.mjs`
+checks it).
 
-A ogni versione che cambia l'aspetto, si rifanno le immagini e il manuale:
+For every version that changes the look, regenerate the images and the manual:
 
-    node tools/help-shots.mjs                  # schermate e video 15–20 s, it/en/es → ../antefirma-site/assets/help
-    (cd ../antefirma-site && node tools/manual-pdf.mjs)   # pagina Team + manuale PDF nelle tre lingue
+    node tools/help-shots.mjs                             # screenshots and 15–20 s videos, it/en/es → ../antefirma-site/assets/help
+    (cd ../antefirma-site && node tools/manual-pdf.mjs)   # Team page + PDF manual in three languages
 
-Entrambi usano un server finto e un sito inventato: nessuna analisi spesa, nessun dato vero.
+Both use a fake server and an invented site: no analysis spent, no real data.
 
 ## Safari (Mac)
 
 ```bash
-node tools/safari-build.mjs     # → dist/safari: manifest senza pannello laterale e notifiche
+node tools/safari-build.mjs     # → dist/safari: manifest without side panel and notifications
 ```
 
-Poi, **su un Mac con Xcode** (non si può fare da Linux):
+Then, **on a Mac with Xcode** (it can't be done from Linux):
 
 ```bash
 xcrun safari-web-extension-converter dist/safari --project-location safari-xcode \
   --app-name AnteFirma --bundle-identifier app.antefirma.safari --macos-only --copy-resources
 ```
 
-1. Apri il progetto in Xcode, scegli il tuo Team in *Signing & Capabilities*, premi Run.
-2. In Safari: *Impostazioni → Avanzate → Mostra funzioni per sviluppatori*, poi
-   *Sviluppo → Consenti estensioni non firmate*; attiva AnteFirma in *Impostazioni → Estensioni*.
-3. Per pubblicarla serve l'Apple Developer Program (99 USD l'anno) e l'invio da
-   App Store Connect, come per un'app.
+1. Open the project in Xcode, choose your Team in *Signing & Capabilities*, press Run.
+2. In Safari: *Settings → Advanced → Show features for web developers*, then
+   *Develop → Allow unsigned extensions*; enable AnteFirma in *Settings → Extensions*.
+3. Publishing needs the Apple Developer Program (USD 99 a year) and submission
+   through App Store Connect, like an app.
 
-In Safari il pannello si apre dal pulsante nella barra (finestrella) e dal menu
-contestuale (scheda); le notifiche non ci sono, i promemoria restano nel pannello
-e nel calendario (.ics). Il server accetta le origini `safari-web-extension://`
-con `ALLOW_SAFARI=1`. Da provare su un Mac prima della pubblicazione: il service
-worker come modulo richiede Safari 16.4 o successivo.
+In Safari the panel opens from the toolbar button (popup) and from the context
+menu (tab); there are no notifications, reminders stay in the panel and in the
+calendar (.ics). The server accepts `safari-web-extension://` origins with
+`ALLOW_SAFARI=1`. To be tested on a Mac before publishing: a module service
+worker needs Safari 16.4 or later.
 
-## Test
+## Tests
 
-```bash
-node --test test/*.test.mjs
-```
-
-| file | che cosa prova |
+| file | what it covers |
 |---|---|
-| `engine.test.mjs` | dalla risposta del server al verdetto: severità, costo, scadenze, profilo, tutele, punteggio; guardie dei messaggi |
-| `server.test.mjs` | client del server: token, nuovo tentativo dopo un 401, errori |
-| `calibration.test.mjs` | il punteggio resta tarato sui nove testi di `fixtures/corpus.mjs` |
-| `features.test.mjs` | prova, impegni, promemoria, `.ics`, lettere |
-| `actions.test.mjs` | quali pulsanti vengono intercettati |
-| `pdf.test.mjs` | estrazione del testo dai PDF |
-| `i18n.test.mjs` | ogni frase del codice e delle pagine ha la traduzione inglese e spagnola, con gli stessi segnaposti |
+| `engine.test.mjs` | from the server's answer to the verdict: severity, cost, deadlines, profile, protections, score; message guards |
+| `server.test.mjs` | server client: token, retry after a 401, errors |
+| `calibration.test.mjs` | the score stays calibrated on the nine texts of `fixtures/corpus.mjs` |
+| `features.test.mjs` | proof, commitments, reminders, `.ics`, letters |
+| `actions.test.mjs` | which buttons are intercepted; price choice on the page |
+| `pdf.test.mjs` | text extraction from PDFs |
+| `i18n.test.mjs` | every sentence of code and pages has its English and Spanish translation, with the same placeholders |
+| `golden.test.mjs` | verdicts, panel HTML (it/en/es), letters (3 × 3) and `.ics` compared with approved copies in `test/golden/` (`UPDATE_GOLDEN=1` to accept a deliberate change) |
+| `contract.test.mjs` | test fixtures and the demo mock match the API contract shared with the server (`test/contract/`) |
+| `help.test.mjs`, `names.test.mjs` | help links; seller name on payment pages |
+| `smoke.mjs` | the extension in a real Chromium with a fake server: interception, consent, verdict and cost, "Continue and remind me", "Upgrade to Pro", Spanish settings, English warning and panel (`SHOTS=folder` saves screenshots) |
 
-Il server è sostituito da risposte scritte a mano o registrate
-(`fixtures/responses.mjs`, ricavate una volta dal vecchio motore a regole). La
-bravura del modello si misura nel server con `npm run eval`.
-
-`test/smoke.mjs` prova l'estensione in un Chromium vero, con il server finto: intercettazione del click, consenso, verdetto con il costo, «Continua comunque», il pulsante «Passa a Pro» a analisi finite, impostazioni in spagnolo, avviso e pannello in inglese. `node test/smoke.mjs` (con `SHOTS=cartella` salva anche le schermate).
+The server is replaced by hand-written or recorded answers
+(`fixtures/responses.mjs`). The model's quality is measured on the server with
+`npm run eval`. GitHub Actions runs lint, the English check, tests with coverage
+thresholds, the web build and the end-to-end check on every push.
 
 ---
 
-## Struttura del codice
+## Code structure
 
 ```
-manifest.json, _locales/{it,en,es}   nome e descrizione nelle tre lingue
-src/background/service-worker.js     messaggi, consenso, analisi, impegni, allarmi
-src/content/                         detector, contesto della pagina, avviso
-src/core/config.js                   indirizzo del server
-src/core/server.js                   client del server: token, analisi, errori
-src/core/analyzer.js                 dalla risposta del server al verdetto
-src/core/consequence.js              costo e timeline dalle cifre verificate
-src/core/{profile,eu,scoring}.js     profilo, tutele UE/IT, punteggio
-src/core/{commitments,letter,ics,proof}.js  kit di uscita e prova
-src/sidepanel/, src/options/         pannello e impostazioni (con la sezione Piano)
-src/i18n/                            lingue: t(), dizionario it→en/es, traduzione delle pagine
+manifest.json, _locales/{it,en,es}   name and description in three languages
+src/background/service-worker.js     messages, consent, analysis, commitments, alarms
+src/content/                         detector, page context, warning
+src/core/config.js                   server address
+src/core/server.js                   server client: token, analysis, errors
+src/core/analyzer.js                 from the server's answer to the verdict
+src/core/consequence.js              cost and timeline from verified figures
+src/core/{profile,eu,scoring}.js     profile, EU/IT protections, score
+src/core/{commitments,letter,ics,proof}.js  exit kit and proof
+src/core/help.js                     links to the help centre
+src/sidepanel/, src/options/         panel and settings
+src/i18n/                            languages: t(), dictionary, page translation
+src/lib/pdf-text.js                  dependency-free PDF text extractor
+web/                                 the web app layer (shim, boot, styles, icons)
+tools/                               builds, screenshots, dev package, English check
 ```
 
-Convenzioni: identificatori in inglese, commenti e testi per l'utente in
-italiano. Nessun segreto nel codice.
+Conventions: everything in English except user-facing text; no secrets in code.
 
-**Lingue.** I testi si scrivono in italiano dentro `t('…')` (o `tn(n, '…', '…')`
-per singolare e plurale); la traduzione inglese e spagnola va in
-`src/i18n/dict.js`, con la frase italiana come chiave. Le pagine HTML restano
-scritte in italiano e le traduce `src/i18n/dom.js` all'apertura. La lingua si
-sceglie nelle impostazioni («Automatica» segue il browser; fuori da it/es,
-inglese) e vale anche per le risposte del server. `test/i18n.test.mjs` fallisce
-se una frase non ha la traduzione. Le lettere di disdetta restano in italiano:
-sono documenti per i contratti italiani.
+**Languages.** User-facing sentences are written inside `t('…')` (or
+`tn(n, '…', '…')` for singular and plural); their translations live in
+`src/i18n/dict.js`. HTML pages are translated by `src/i18n/dom.js` when they
+open. The language is chosen in settings ("Automatic" follows the browser;
+outside it/es, English) and also applies to the server's answers.
+`test/i18n.test.mjs` fails if a sentence has no translation.
 
-## Limiti noti
+## Known limits
 
-- **Le lettere di disdetta sono solo in italiano**, per i contratti italiani.
-- **Il modello può tacere un rischio**: la verifica delle citazioni impedisce
-  che ne inventi, non che ne ometta. Una pagina può provare a convincerlo a
-  tacere.
+- **The model can stay silent about a risk**: quote verification stops it from
+  inventing risks, not from omitting them. A page can try to talk it into silence.
 
-## Avvertenza legale
+## Legal notice
 
-AnteFirma produce **analisi automatica a scopo informativo. Non è consulenza
-legale.** I riferimenti normativi servono a indicare dove guardare, non a
-stabilire la validità di una clausola nel caso concreto. Le lettere generate
-sono modelli da verificare prima dell'invio. Il calcolo dell'impegno è una stima
-ricavata dal testo, non un preventivo.
+AnteFirma produces **automated analysis for information only. It is not legal
+advice.** Legal references show where to look, not whether a clause is valid in a
+specific case. Generated letters are templates to check before sending. The
+commitment figure is an estimate derived from the text, not a quote.

@@ -1,12 +1,12 @@
 /**
- * Test del riconoscimento delle azioni.
+ * Tests of action recognition.
  *
- * actions.js è un classic script che si registra su globalThis: importarlo
- * qui lo esegue e basta, senza bisogno di DOM né di API di Chrome.
+ * actions.js is a classic script that registers itself on globalThis: importing
+ * it here just runs it, with no DOM and no Chrome APIs needed.
  *
- * Questi test valgono più di quanto sembri: ogni falso positivo qui è un
- * blocco su un pulsante innocuo, ed è il modo più rapido per far disinstallare
- * l'estensione. Ogni falso negativo è un impegno che passa senza avviso.
+ * These tests are worth more than they look: every false positive here is a
+ * block on a harmless button, the quickest way to get the extension
+ * uninstalled. Every false negative is a commitment that passes unwarned.
  */
 
 import { readFileSync } from 'node:fs';
@@ -17,7 +17,7 @@ import '../src/content/actions.js';
 
 const { classifyText, ACTION_LABELS, ACTION_PATTERNS } = globalThis.__CF.actions;
 
-test('riconosce i pulsanti di impegno in italiano', () => {
+test('recognises commitment buttons in Italian', () => {
   const cases = {
     'Conferma abbonamento': 'subscribe',
     'Abbonati ora': 'subscribe',
@@ -41,7 +41,7 @@ test('riconosce i pulsanti di impegno in italiano', () => {
   }
 });
 
-test('riconosce i pulsanti di impegno in inglese', () => {
+test('recognises commitment buttons in English', () => {
   const cases = {
     'Subscribe now': 'subscribe',
     'Start free trial': 'subscribe',
@@ -59,7 +59,7 @@ test('riconosce i pulsanti di impegno in inglese', () => {
   }
 });
 
-test('non blocca i pulsanti innocui', () => {
+test('doesn\'t block harmless buttons', () => {
   const innocui = [
     'Iscriviti alla newsletter',
     'Scopri di più',
@@ -81,7 +81,7 @@ test('non blocca i pulsanti innocui', () => {
   }
 });
 
-test('il rifiuto ha sempre la precedenza sull’accettazione', () => {
+test('a refusal always takes precedence over acceptance', () => {
   const optOuts = [
     'Rifiuta tutti i cookie',
     'Continua senza accettare',
@@ -98,19 +98,19 @@ test('il rifiuto ha sempre la precedenza sull’accettazione', () => {
   }
 });
 
-test('a parità di match vince l’azione più impegnativa', () => {
+test('on equal matches the most binding action wins', () => {
   assert.equal(classifyText('Accetta e firma il contratto'), 'sign');
   assert.equal(classifyText('Accetta le condizioni e paga ora'), 'purchase');
   assert.equal(classifyText('Registrati e abbonati'), 'subscribe');
 });
 
-test('ogni tipo riconosciuto ha una sua etichetta leggibile', () => {
+test('every recognised type has a readable label', () => {
   for (const p of ACTION_PATTERNS) {
     assert.ok(ACTION_LABELS[p.type], `etichetta mancante per ${p.type}`);
   }
 });
 
-test('testo vuoto o assente non produce nulla', () => {
+test('empty or missing text produces nothing', () => {
   assert.equal(classifyText(''), null);
   assert.equal(classifyText(null), null);
   assert.equal(classifyText(undefined), null);
@@ -118,7 +118,7 @@ test('testo vuoto o assente non produce nulla', () => {
 
 // ── richiamo: etichette viste in produzione ─────────────────────────────────
 
-test('riconosce le formule di pagamento che si trovano nei checkout veri', () => {
+test('recognises the payment wording found in real checkouts', () => {
   const cases = {
     'Continua e paga': 'purchase',
     'Vai al pagamento': 'purchase',
@@ -137,7 +137,7 @@ test('riconosce le formule di pagamento che si trovano nei checkout veri', () =>
   }
 });
 
-test('riconosce le formule di attivazione di un abbonamento', () => {
+test('recognises subscription activation wording', () => {
   const cases = {
     'Attiva ora': 'subscribe',
     'Conferma e attiva': 'subscribe',
@@ -154,7 +154,7 @@ test('riconosce le formule di attivazione di un abbonamento', () => {
   }
 });
 
-test('riconosce accesso delegato e consenso nelle forme brevi', () => {
+test('recognises delegated access and consent in short forms', () => {
   assert.equal(classifyText('Accedi con Google'), 'oauth');
   assert.equal(classifyText('Continua con l’account Google'), 'oauth');
   assert.equal(classifyText('Consenti'), 'consent');
@@ -162,12 +162,12 @@ test('riconosce accesso delegato e consenso nelle forme brevi', () => {
 });
 
 /**
- * La controprova del punto precedente: allargare le tabelle è utile solo se
- * non allarga anche i falsi allarmi. «Continua» da solo non deve bastare —
- * per quello c'è il fallback strutturale del detector, che chiede al DOM se
- * siamo in un checkout invece di indovinarlo dal testo.
+ * The counter-check of the previous point: widening the tables only helps if it
+ * doesn't widen false alarms too. "Continua" alone must not be enough — that is
+ * what the detector's structural fallback is for: it asks the DOM whether we are
+ * in a checkout instead of guessing from the text.
  */
-test('i pulsanti generici e quelli innocui restano fuori', () => {
+test('generic and harmless buttons stay out', () => {
   const outside = [
     'Continua', 'Avanti', 'Conferma', 'Procedi', 'Continue', 'Next', 'Ok',
     'Iscriviti alla newsletter', 'Passa alla modalità scura', 'Attiva le notifiche',
@@ -182,11 +182,11 @@ test('i pulsanti generici e quelli innocui restano fuori', () => {
 // ── opt-out posizionale ────────────────────────────────────────────────────
 
 /**
- * L'opt-out valutato come veto assoluto mangiava impegni veri: "cancel
- * anytime" è microcopy standard nei checkout in inglese, e cancellava
- * l'abbonamento che lo conteneva.
+ * Treating the opt-out as an absolute veto ate real commitments: "cancel
+ * anytime" is standard checkout microcopy in English, and it cancelled the
+ * subscription that contained it.
  */
-test('un opt-out in coda non cancella l’azione che lo precede', () => {
+test('a trailing opt-out doesn\'t cancel the action before it', () => {
   const cases = {
     'Subscribe — cancel anytime': 'subscribe',
     'Subscribe now, cancel anytime': 'subscribe',
@@ -200,7 +200,7 @@ test('un opt-out in coda non cancella l’azione che lo precede', () => {
   }
 });
 
-test('un opt-out in testa vince comunque', () => {
+test('a leading opt-out wins anyway', () => {
   const cases = [
     'Annulla e torna al carrello',
     'Chiudi senza pagare',
@@ -214,11 +214,11 @@ test('un opt-out in testa vince comunque', () => {
 });
 
 /**
- * Il test «il rifiuto ha sempre la precedenza» resta verde per una ragione
- * precisa, e va verificata invece che data per scontata: in tutti e nove i
- * suoi casi il rifiuto è la prima parola dell'etichetta.
+ * The test "a refusal always takes precedence" stays green for a precise reason,
+ * and it should be verified rather than taken for granted: in all nine of its
+ * cases the refusal is the first word of the label.
  */
-test('nei nove casi di rifiuto storici il match cade nel primo terzo', () => {
+test('in the nine historical refusal cases the match falls in the first third', () => {
   const optOuts = [
     'Rifiuta tutti i cookie', 'Continua senza accettare', 'Solo i cookie necessari',
     'Non accetto', 'Reject all', 'Decline', 'Gestisci preferenze',
@@ -228,8 +228,8 @@ test('nei nove casi di rifiuto storici il match cade nel primo terzo', () => {
   for (const text of optOuts) {
     const m = OPT_OUT.exec(text);
     if (!m) {
-      // «Gestisci preferenze» non è un opt-out riconosciuto: resta null perché
-      // nessuna azione lo intercetta, ed è comunque il risultato giusto.
+      // "Gestisci preferenze" is not a recognised opt-out: it stays null because
+      // no action catches it, which is the right result anyway.
       assert.equal(classifyText(text), null, `"${text}" senza opt-out e senza azione`);
       continue;
     }
@@ -238,14 +238,14 @@ test('nei nove casi di rifiuto storici il match cade nel primo terzo', () => {
   }
 });
 
-test('un’azione debole non regge il confronto con un opt-out, ovunque sia', () => {
-  // signup pesa 1: "Registrati" più un rifiuto resta un rifiuto.
+test('a weak action doesn\'t stand against an opt-out, wherever it is', () => {
+  // signup weighs 1: "Registrati" plus a refusal stays a refusal.
   assert.equal(classifyText('Registrati oppure annulla'), null);
   // sign pesa 5: la firma regge.
   assert.equal(classifyText('Sottoscrivi il documento oppure annulla'), 'sign');
 });
 
-test('classifyDetail distingue «non ho trovato niente» da «è un rifiuto»', () => {
+test('classifyDetail tells "found nothing" from "it\'s a refusal"', () => {
   const { classifyDetail } = globalThis.__CF.actions;
   assert.deepEqual(classifyDetail('Cerca'), { type: null, weight: 0, vetoed: false });
   assert.equal(classifyDetail('Annulla').vetoed, true);
@@ -254,7 +254,7 @@ test('classifyDetail distingue «non ho trovato niente» da «è un rifiuto»', 
 
 // ── spagnolo ───────────────────────────────────────────────────────────────
 
-test('riconosce i pulsanti di impegno in spagnolo', () => {
+test('recognises commitment buttons in Spanish', () => {
   const cases = {
     'Firmar': 'sign',
     'Firmar el contrato': 'sign',
@@ -305,13 +305,13 @@ test('riconosce i pulsanti di impegno in spagnolo', () => {
 });
 
 /**
- * Bloccare un opt-out è il contrario di ciò che serve: l'utente sta già
- * rifiutando, e l'unico effetto dell'avviso sarebbe rimandarlo indietro verso
- * il pulsante che accetta. Qui non basta che il risultato sia null: si
- * controlla anche che sia null *per veto*, perché è il veto a impedire agli
- * attributi HTML di rimettere in gioco l'azione (vedi classifyDetail).
+ * Blocking an opt-out is the opposite of what is needed: the user is already
+ * refusing, and the warning's only effect would be to send them back towards the
+ * accepting button. A null result is not enough here: it must be null *by veto*,
+ * because the veto is what stops HTML attributes from bringing the action back
+ * into play (see classifyDetail).
  */
-test('gli opt-out spagnoli non vengono mai intercettati', () => {
+test('Spanish opt-outs are never intercepted', () => {
   const { classifyDetail } = globalThis.__CF.actions;
   const optOuts = [
     'Rechazar',
@@ -337,10 +337,10 @@ test('gli opt-out spagnoli non vengono mai intercettati', () => {
 });
 
 /**
- * Molti siti spagnoli scrivono i pulsanti senza accenti, e chi ci clicca sopra
- * si impegna esattamente quanto chi clicca su quello del sito scritto bene.
+ * Many Spanish sites write buttons without accents, and whoever clicks them
+ * commits exactly as much as someone clicking a correctly written one.
  */
-test('le forme accentate e quelle senza accento valgono uguale', () => {
+test('accented and unaccented forms count the same', () => {
   const pairs = [
     ['Suscríbete', 'Suscribete', 'subscribe'],
     ['Regístrate', 'Registrate', 'signup'],
@@ -356,19 +356,19 @@ test('le forme accentate e quelle senza accento valgono uguale', () => {
 });
 
 /**
- * Il difetto che in questo progetto è già costato tre regole, dimostrato
- * invece che raccontato: `\b` in JavaScript è definito su [A-Za-z0-9_], e fra
- * uno spazio e una vocale accentata non c'è nessuna transizione da agganciare.
- * Una regola che ci si appoggia non fallisce con un errore: semplicemente non
- * scatta mai, e il pulsante passa.
+ * The defect that has already cost this project three rules, demonstrated
+ * rather than told: `\b` in JavaScript is defined on [A-Za-z0-9_], and between a
+ * space and an accented vowel there is no transition to hook onto. A rule
+ * relying on it doesn't fail with an error: it simply never fires, and the
+ * button gets through.
  */
-test('il confine di parola spagnolo non si appoggia a \\b', () => {
+test('the Spanish word boundary doesn\'t rely on \\b', () => {
   assert.equal(/\bsuscr\w+\b/i.test('Suscríbete'), false, '\\w+ dovrebbe fermarsi davanti alla í');
   assert.equal(/\b(únete)\b/i.test('Únete ahora'), false, '\\b prima di un’accentata non dovrebbe agganciare');
   assert.equal(/(?<![\wÀ-ÿ])(únete)(?![\wÀ-ÿ])/i.test('Únete ahora'), true, 'il lookaround invece deve agganciare');
 
-  // La controprova su ciò che spediamo davvero: nessun \b confina con una
-  // lettera accentata, né prima né dopo.
+  // The counter-check on what we actually ship: no \b borders an accented
+  // letter, neither before nor after.
   const { OPT_OUT } = globalThis.__CF.actions;
   const sources = [...ACTION_PATTERNS.map((p) => p.re.source), OPT_OUT.source];
   for (const src of sources) {
@@ -376,8 +376,8 @@ test('il confine di parola spagnolo non si appoggia a \\b', () => {
     assert.ok(!/[^\x00-\x7F]\\b/.test(src), `una lettera accentata precede un \\b: ${src.slice(0, 60)}`);
   }
 
-  // E il comportamento che ne dipende, con l'accento in mezzo alla frase e
-  // appiccicato alla punteggiatura, dove un confine rotto salterebbe fuori.
+  // And the behaviour that depends on it, with the accent mid-sentence and
+  // stuck to punctuation, where a broken boundary would show.
   assert.equal(classifyText('¡Suscríbete!'), 'subscribe');
   assert.equal(classifyText('Volver atrás'), null);
   assert.equal(classifyText('Sólo las necesarias, gracias'), null);
@@ -385,11 +385,11 @@ test('il confine di parola spagnolo non si appoggia a \\b', () => {
 });
 
 /**
- * L'equivalente spagnolo di «Subscribe — cancel anytime»: «cancela cuando
- * quieras» è la rassicurazione che accompagna l'abbonamento, non il pulsante
- * che lo disdice. Trattarla da veto cancellerebbe l'impegno vero.
+ * The Spanish equivalent of "Subscribe — cancel anytime": "cancela cuando
+ * quieras" is the reassurance that comes with the subscription, not the button
+ * that cancels it. Treating it as a veto would cancel the real commitment.
  */
-test('un opt-out spagnolo in coda non cancella l’azione che lo precede', () => {
+test('a trailing Spanish opt-out doesn\'t cancel the action before it', () => {
   const cases = {
     'Suscribirse — cancela cuando quieras': 'subscribe',
     'Suscríbete y cancela cuando quieras': 'subscribe',
@@ -399,16 +399,16 @@ test('un opt-out spagnolo in coda non cancella l’azione che lo precede', () =>
   for (const [text, wanted] of Object.entries(cases)) {
     assert.equal(classifyText(text), wanted, `"${text}" cancellato da un opt-out in coda`);
   }
-  // In testa invece comanda, come in italiano e in inglese.
+  // At the start it commands instead, as in Italian and English.
   assert.equal(classifyText('Cancelar y volver al carrito'), null);
   assert.equal(classifyText('Rechazar y seguir comprando'), null);
 });
 
 /**
- * «Entendido» è il gemello di «Ho capito»: da solo su un pulsante chiude un
- * banner e vale un consenso, dentro una frase è solo una parola.
+ * "Entendido" is the twin of "Ho capito": alone on a button it closes a banner
+ * and counts as consent, inside a sentence it is just a word.
  */
-test('«Entendido» vale come consenso solo quando è tutta l’etichetta', () => {
+test('"Entendido" counts as consent only when it is the whole label', () => {
   assert.equal(classifyText('Entendido'), 'consent');
   assert.equal(classifyText('¡Entendido!'), 'consent');
   assert.equal(classifyText('Hemos entendido tus preferencias'), null);
@@ -416,11 +416,11 @@ test('«Entendido» vale come consenso solo quando è tutta l’etichetta', () =
 });
 
 /**
- * Come per l'italiano e l'inglese: allargare le tabelle serve solo se non
- * allarga anche i falsi allarmi. «Continuar» da solo resta fuori — al resto
- * pensa il fallback strutturale del detector.
+ * As for Italian and English: widening the tables only helps if it doesn't
+ * widen false alarms too. "Continuar" alone stays out — the detector's
+ * structural fallback takes care of the rest.
  */
-test('i pulsanti generici e quelli innocui spagnoli restano fuori', () => {
+test('generic and harmless Spanish buttons stay out', () => {
   const outside = [
     'Continuar', 'Siguiente', 'Confirmar', 'Aceptar',
     'Buscar', 'Más información', 'Ver planes', 'Comparar planes', 'Añadir a la cesta',
@@ -433,26 +433,26 @@ test('i pulsanti generici e quelli innocui spagnoli restano fuori', () => {
 });
 
 /**
- * Parole spagnole che somigliano al contrario di quello che fanno, e che senza
- * un confine di parola preciso finirebbero nel tipo sbagliato.
+ * Spanish words that look like the opposite of what they do, and that without a
+ * precise word boundary would end up in the wrong type.
  */
-test('le parole che si somigliano finiscono comunque nel tipo giusto', () => {
-  // «Confirmar» contiene «firmar», ma conferma un ordine: vale 4, non 5.
+test('words that look alike still end up in the right type', () => {
+  // "Confirmar" contains "firmar", but confirms an order: it weighs 4, not 5.
   assert.equal(classifyText('Confirmar pedido'), 'purchase');
   // «Volver a comprar» non torna indietro: riacquista.
   assert.equal(classifyText('Volver a comprar'), 'purchase');
-  // «Darse de alta» apre un account, «Darse de baja» lo chiude.
+  // "Darse de alta" opens an account, "Darse de baja" closes it.
   assert.equal(classifyText('Darse de alta'), 'signup');
   assert.equal(classifyText('Darse de baja'), null);
 });
 
-// ── prezzo: quale dei prezzi in pagina è quello che ti impegna ─────────────
+// ── price: which of the prices on the page is the one you commit to ─────────
 
 /**
- * context.js vive nella pagina, ma dipende dal DOM solo attraverso tre funzioni
- * di `CF.util` e da `document`/`getComputedStyle`: con altrettanti stub gira in
- * Node, e la scelta del prezzo — la parte che decide il numero grande
- * dell'avviso — smette di essere l'unica non coperta da test.
+ * context.js lives in the page, but depends on the DOM only through three
+ * `CF.util` functions and `document`/`getComputedStyle`: with as many stubs it
+ * runs in Node, and choosing the price — the part that decides the warning's
+ * big number — stops being the only part without tests.
  */
 function node(tag, { cls = '', struck = false, text = '', children = [] } = {}) {
   const n = {
@@ -482,7 +482,7 @@ function descendants(n) {
 function loadContext(body) {
   const all = [body, ...descendants(body)];
   const CF = globalThis.__CF;
-  delete CF.context; // il file si registra una volta sola: si rilegge da capo
+  delete CF.context; // the file registers itself once only: reload it from scratch
   CF.util = {
     labelOf: (el) => (el?.innerText || '').trim(),
     deepQueryAll: (_sel, root = body, limit = 400) =>
@@ -500,14 +500,14 @@ function loadContext(body) {
   return CF.context;
 }
 
-/** Costruisce una pagina con un pulsante e le righe di testo date. */
+/** Builds a page with a button and the given lines of text. */
 function page(lines, extra = []) {
   const btn = node('button', { text: 'Abbonati ora' });
   const body = node('body', { children: [...lines.map((t) => node('div', { text: t })), ...extra, btn] });
   return { body, btn };
 }
 
-test('fra promozione e prezzo a regime vince il prezzo a regime', () => {
+test('between promotional and regular price the regular price wins', () => {
   const { body, btn } = page([
     'StreamPro Premium: tutto il catalogo senza pubblicità, su quattro dispositivi, in 4K e con i download offline.',
     'Primi 3 mesi a 9,99 €/mese, poi 19,99 €/mese. Disdici quando vuoi.',
@@ -518,7 +518,7 @@ test('fra promozione e prezzo a regime vince il prezzo a regime', () => {
   assert.equal(p.introductory?.amount, 9.99, 'il prezzo promozionale va conservato, non buttato');
 });
 
-test('vale anche per le offerte sul primo anno', () => {
+test('it holds for first-year offers too', () => {
   const { body, btn } = page([
     'Piano professionale: fatturazione elettronica illimitata, conservazione a norma e assistenza dedicata.',
     '99,00 €/anno il primo anno, poi 149,00 €/anno alla scadenza.',
@@ -529,7 +529,7 @@ test('vale anche per le offerte sul primo anno', () => {
   assert.equal(p.introductory?.amount, 99);
 });
 
-test('il prezzo barrato è il listino, non l’impegno', () => {
+test('a struck-through price is the list price, not the commitment', () => {
   const { body, btn } = page(
     ['Offerta di lancio sul piano mensile: tutte le funzioni incluse, nessun limite di utilizzo, assistenza inclusa.'],
     [node('div', { children: [
@@ -542,7 +542,7 @@ test('il prezzo barrato è il listino, non l’impegno', () => {
   assert.equal(p.introductory, null, 'un listino barrato non è una promozione da conservare');
 });
 
-test('un prezzo barrato da un antenato con classe conta come barrato', () => {
+test('a price struck through by an ancestor with a class counts as struck through', () => {
   const { body, btn } = page(
     ['Abbonamento annuale al servizio, con tutte le funzioni professionali incluse e assistenza prioritaria.'],
     [node('div', { cls: 'price original-price', children: [node('span', { text: '149,00 €/anno' })] }),
@@ -552,8 +552,8 @@ test('un prezzo barrato da un antenato con classe conta come barrato', () => {
   assert.equal(p.amount, 99);
 });
 
-test('a parità di periodicità, nel dubbio si sbaglia dalla parte più cara', () => {
-  // Nessun marcatore di regime: resta comunque il più alto, mai il primo trovato.
+test('with the same period, when in doubt err on the expensive side', () => {
+  // No regular-price marker: the highest still wins, never the first found.
   const { body, btn } = page([
     'Il servizio è disponibile con due formule di pagamento, entrambe attivabili subito e senza vincoli tecnici.',
     'Formula leggera 12,00 €/mese. Formula completa 24,00 €/mese.',
@@ -563,7 +563,7 @@ test('a parità di periodicità, nel dubbio si sbaglia dalla parte più cara', (
   assert.equal(p.introductory, null, 'due piani alternativi non sono un’offerta a due tempi');
 });
 
-test('un prezzo solo resta quello che è', () => {
+test('a single price stays what it is', () => {
   const { body, btn } = page([
     'Abbonamento StreamPro: catalogo completo, quattro dispositivi in contemporanea, nessuna pubblicità.',
     'Il canone è pari a € 19,99 al mese, oltre a spese di attivazione una tantum di € 49,00.',

@@ -3,13 +3,16 @@
   "private": true,
   "description": "AnteFirma browser extension and web app (web.antefirma.app).",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=90 --test-coverage-functions=85 test/*.test.mjs",
     "test:e2e": "node test/smoke.mjs",
     "lint": "eslint .",
-    "check": "npm run lint && npm test"
+    "check": "npm run lint && npm test",
+    "check:english": "node tools/no-italian.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
