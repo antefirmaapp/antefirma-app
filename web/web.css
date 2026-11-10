@@ -1,6 +1,7 @@
-/* AnteFirma web: lo stesso pannello dell'estensione, in una finestra. */
+/* AnteFirma web: lo stesso pannello dell'estensione, in una finestra.
+   Niente overflow nascosto sul body: si propagherebbe alla finestra e la pagina non scorrerebbe più. */
 html[data-web] body { max-width: 560px; margin: 0 auto; min-height: 100vh; box-shadow: 0 0 0 1px rgba(21, 32, 58, .08); }
-@media (min-width: 700px) { html[data-web] { background: #eef1f5; } html[data-web] body { margin-block: 24px; min-height: calc(100vh - 48px); border-radius: 14px; overflow: hidden; } }
+@media (min-width: 700px) { html[data-web] { background: #eef1f5; } html[data-web] body { margin-block: 24px; min-height: calc(100vh - 48px); border-radius: 14px; } }
 @media (prefers-color-scheme: dark) and (min-width: 700px) { html[data-web] { background: #0b1120; } }
 /* Una pagina web non può leggere le altre schede né scaricare un indirizzo qualsiasi. */
 html[data-web] .source[data-source="page"], html[data-web] .source[data-source="url"] { display: none !important; }
