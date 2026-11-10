@@ -147,7 +147,7 @@ test('the attestation contains the fingerprint and is honest about its own value
   assert.ok(/non è una certificazione con valore legale autonomo/i.test(text));
 });
 
-// ── 4. kit di uscita ────────────────────────────────────────────────────────
+// ── 4. exit kit ────────────────────────────────────────────────────────────
 
 test('the commitment is born from the verdict with consistent deadlines', async () => {
   const verdict = await verdictFor();
@@ -200,7 +200,7 @@ test('the daily pass picks a single reminder, the most urgent', async () => {
   const few = deadline - 6 * 3_600_000;
   assert.equal(dueReminder(c, few).days, 1);
 
-  // Segnati come inviati, tacciono.
+  // Once marked as sent, they stay quiet.
   const sent = { ...c, reminders: c.reminders.map((r) => ({ ...r, fired: true })) };
   assert.equal(dueReminder(sent, few), null);
 

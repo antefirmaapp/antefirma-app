@@ -11,7 +11,7 @@ async function send(type, payload) {
 
 (async () => {
   let settings = {};
-  try { settings = await send('GET_SETTINGS'); } catch { /* resta l'italiano */ }
+  try { settings = await send('GET_SETTINGS'); } catch { /* Italian stays */ }
   setLang(resolveLang(settings.uiLang, chrome.i18n.getUILanguage()));
   translateDom(document.body);
   document.title = t('welcomeAntefirma');

@@ -14,7 +14,7 @@ export const ACTION_TYPES = {
   SIGNUP: 'signup',
   CONSENT: 'consent',
   OAUTH: 'oauth',
-  MANUAL: 'manual', // analisi lanciata dal side panel
+  MANUAL: 'manual', // analysis started from the side panel
 };
 
 export const ACTION_LABELS = {

@@ -45,7 +45,7 @@ function assertClausesVisible(text, label) {
   }
 }
 
-// ── il caso nominale ────────────────────────────────────────────────────────
+// ── the nominal case ───────────────────────────────────────────────────────
 
 test('a compressed PDF with Tj and Td returns the text, line by line', async () => {
   const r = await extractPdfText(makePdf(tjStream(CONTRACT)));

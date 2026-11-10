@@ -24,7 +24,7 @@ import { helpUrl } from '../core/help.js';
 
 const $ = (sel) => document.querySelector(sel);
 
-let send = async () => { throw new Error('bridge non inizializzato'); };
+let send = async () => { throw new Error('bridge not initialised'); };
 let cache = [];
 
 /** Search and filters survive re-rendering: they are the user's point of view. */
@@ -36,7 +36,7 @@ let pending = null;
 /** Beyond this threshold sifting by eye no longer works. */
 const SEARCH_THRESHOLD = 8;
 
-// ── ordinamento e raggruppamento ────────────────────────────────────────────
+// ── sorting and grouping ────────────────────────────────────────────────────
 
 /**
  * Storage stacks with `unshift`: the list's natural order is recording order,
@@ -87,7 +87,7 @@ function matchesQuery(c, query) {
   return query.split(/\s+/).filter(Boolean).every((word) => haystack.includes(word));
 }
 
-// ── avvio ───────────────────────────────────────────────────────────────────
+// ── start-up ────────────────────────────────────────────────────────────────
 
 let isWeb = false;
 export function init(sender, opts = {}) {
@@ -348,7 +348,7 @@ function toggleMenu(id) {
   menu.querySelector('button')?.focus();
 }
 
-// ── azioni ──────────────────────────────────────────────────────────────────
+// ── actions ─────────────────────────────────────────────────────────────────
 
 /** Actions that don't talk to the service worker: no waiting to show. */
 const INSTANT = new Set(['menu', 'menu-close', 'delete-ask', 'delete-confirm', 'reset-view']);
@@ -482,7 +482,7 @@ async function finalizeDelete() {
   }
 }
 
-// ── le quattro azioni ───────────────────────────────────────────────────────
+// ── the four actions ────────────────────────────────────────────────────────
 
 export async function showLetter(id, kind = null, lang = null) {
   const letter = await send('BUILD_LETTER', { id, kind, lang });
@@ -605,7 +605,7 @@ async function exportArchive(id) {
   download((proof.filename || `archivio-${id}.txt`).replace('prova-', 'archivio-'), body, 'text/plain');
 }
 
-// ── modale e download ───────────────────────────────────────────────────────
+// ── modal and download ──────────────────────────────────────────────────────
 
 export function openModal(title, bodyHtml, actions = []) {
   $('#modal-title').textContent = title;

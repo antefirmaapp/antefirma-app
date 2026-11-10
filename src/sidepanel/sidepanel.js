@@ -17,7 +17,7 @@ const state = { source: null, busy: false };
 /** The web version (web.antefirma.app): same panel, without what a web page cannot do. */
 const isWeb = document.documentElement.dataset.web === '1';
 
-// ── infrastruttura ──────────────────────────────────────────────────────────
+// ── infrastructure ──────────────────────────────────────────────────────────
 
 async function send(type, payload) {
   const res = await chrome.runtime.sendMessage({ type, payload });
@@ -241,7 +241,7 @@ function quotaOut() {
   paintQuota({ month: { limit: Number($('#quota')?.dataset.limit) || 5, remaining: 0 } });
 }
 
-// ── selezione della sorgente ────────────────────────────────────────────────
+// ── choosing the source ─────────────────────────────────────────────────────
 
 const BLOCKS = { paste: '#input-paste', pdf: '#input-pdf', url: '#input-url' };
 
@@ -265,7 +265,7 @@ document.querySelectorAll('.source').forEach((btn) => {
   });
 });
 
-// ── 1. pagina corrente ──────────────────────────────────────────────────────
+// ── 1. current page ────────────────────────────────────────────────────────
 
 async function analyzeCurrentPage() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -298,7 +298,7 @@ async function analyzeCurrentPage() {
   }
 }
 
-// ── 2. testo incollato ──────────────────────────────────────────────────────
+// ── 2. pasted text ─────────────────────────────────────────────────────────
 
 $('#run-paste').addEventListener('click', () => {
   const text = $('#paste-text').value.trim();
@@ -407,7 +407,7 @@ $('#run-url').addEventListener('click', async () => {
   }
 });
 
-// ── schede e storico ────────────────────────────────────────────────────────
+// ── tabs and history ────────────────────────────────────────────────────────
 
 const TABS = [...document.querySelectorAll('.tab')];
 
@@ -552,7 +552,7 @@ async function handlePanelRequest(req) {
   }
 }
 
-// ── esempi, PDF nella versione web ──────────────────────────────────────────
+// ── examples, PDF in the web version ────────────────────────────────────────
 
 function setupExtras() {
   // The examples under the box: first-time users almost never have a contract at hand.
@@ -585,7 +585,7 @@ document.addEventListener('click', (e) => {
   if (b) runSample(b.dataset.trySample);
 });
 
-// ── avvio ───────────────────────────────────────────────────────────────────
+// ── start-up ────────────────────────────────────────────────────────────────
 
 (async function init() {
   try {

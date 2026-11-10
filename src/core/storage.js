@@ -77,7 +77,7 @@ export async function clearCache() {
   await chrome.storage.local.set({ [CACHE_KEY]: {} });
 }
 
-// ── storico ─────────────────────────────────────────────────────────────────
+// ── history ─────────────────────────────────────────────────────────────────
 
 /**
  * History is the "digital footprint": what I committed to, when, with which
@@ -107,7 +107,7 @@ export async function clearHistory() {
   await chrome.storage.local.set({ [HISTORY_KEY]: [] });
 }
 
-// ── impegni ─────────────────────────────────────────────────────────────────
+// ── commitments ─────────────────────────────────────────────────────────────
 
 const COMMITMENTS_KEY = 'commitments';
 const SNAPSHOTS_KEY = 'snapshots';

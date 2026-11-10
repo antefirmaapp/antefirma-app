@@ -153,7 +153,7 @@ test('a response without JSON doesn\'t blow up the client', async () => {
   await assert.rejects(analyzeRemote({ text: 'x' }, { storage, fetchImpl, base: BASE }), (e) => e.code === 'upstream');
 });
 
-// ── piano ───────────────────────────────────────────────────────────────────
+// ── plan ────────────────────────────────────────────────────────────────────
 
 import { getLicense, startCheckout, activateLicense, deactivateLicense } from '../src/core/server.js';
 

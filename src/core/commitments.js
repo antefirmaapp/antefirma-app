@@ -184,7 +184,7 @@ export function missedWindow(commitment, now = Date.now()) {
   return new Date(commitment.deadlineAt).getTime() < now;
 }
 
-/** Stato calcolato, per la UI. */
+/** Computed state, for the UI. */
 export function commitmentState(commitment, now = Date.now()) {
   if (!commitment) return { label: '—', urgency: 'none', daysLeft: null };
   if (commitment.status === COMMITMENT_STATUS.CANCELLED) {
@@ -225,7 +225,7 @@ export function costOfDoingNothing(commitment) {
   };
 }
 
-/** Riepilogo dell'esposizione complessiva, per l'intestazione del pannello. */
+/** Summary of the overall exposure, for the panel header. */
 export function portfolioSummary(commitments = [], now = Date.now()) {
   const active = commitments.filter((c) => c.status === COMMITMENT_STATUS.ACTIVE);
   const byCurrency = new Map();

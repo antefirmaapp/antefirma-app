@@ -417,7 +417,7 @@ test('a page analysed only in part says so', async () => {
   assert.equal(v.engine.truncated, true);
 });
 
-// ── superficie esposta ai content script ────────────────────────────────────
+// ── surface exposed to content scripts ─────────────────────────────────────
 
 const ID = 'abcdefghijklmnopqrstuvwxyzabcdef';
 const BASE = `chrome-extension://${ID}/`;

@@ -451,7 +451,7 @@
     }
 
     /**
-     * @param {string} html contenuto del dialogo
+     * @param {string} html the dialog content
      * @param {{ role?: string, label?: string, labelledby?: string }} [aria]
      */
     render(html, aria = {}) {

@@ -102,7 +102,7 @@ export function buildLetter(commitment = {}, identity = {}, kind = null, now = D
   };
 }
 
-// ── i testi, per lingua ─────────────────────────────────────────────────────
+// ── the texts, per language ────────────────────────────────────────────────────
 
 const service = ({ c, fmt, X }) => {
   const parts = [];

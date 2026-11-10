@@ -439,7 +439,7 @@ test('generic and harmless Spanish buttons stay out', () => {
 test('words that look alike still end up in the right type', () => {
   // "Confirmar" contains "firmar", but confirms an order: it weighs 4, not 5.
   assert.equal(classifyText('Confirmar pedido'), 'purchase');
-  // «Volver a comprar» non torna indietro: riacquista.
+  // "Volver a comprar" doesn't go back: it buys again.
   assert.equal(classifyText('Volver a comprar'), 'purchase');
   // "Darse de alta" opens an account, "Darse de baja" closes it.
   assert.equal(classifyText('Darse de alta'), 'signup');

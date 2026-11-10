@@ -1,5 +1,5 @@
 /**
- * Pagina impostazioni.
+ * Settings page.
  */
 
 import { PROTECTION_LABELS } from '../core/constants.js';
@@ -141,9 +141,9 @@ function flash(message) {
   }, 3000);
 }
 
-// ── eventi ──────────────────────────────────────────────────────────────────
+// ── events ──────────────────────────────────────────────────────────────────
 
-// ── piano ───────────────────────────────────────────────────────────────────
+// ── plan ────────────────────────────────────────────────────────────────────
 
 const PLAN_NAMES = { free: 'free', pro: 'Pro', max: 'Max', team: 'Team' };
 const planName = (p) => (PLAN_NAMES[p] ? t(PLAN_NAMES[p]) : p);
@@ -359,7 +359,7 @@ let initialLang = 'auto';
     const s = await send('GET_SETTINGS');
     initialLang = s.uiLang || 'auto';
     setLang(resolveLang(initialLang, chrome.i18n.getUILanguage()));
-  } catch { /* resta l'italiano */ }
+  } catch { /* Italian stays */ }
   translateDom(document.body);
   document.title = t('antefirmaSettings');
   adaptForWeb();

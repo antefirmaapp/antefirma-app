@@ -46,7 +46,7 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
   const profile = settings.profile || DEFAULT_SETTINGS.profile;
   const jurisdiction = settings.jurisdiction || 'IT';
 
-  // 1. Il server.
+  // 1. The server.
   const response = await remote({
     text: clean,
     url: ctx.url || null,
@@ -65,17 +65,17 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
   const enrichedCtx = { ...ctx, pricing: mergePricing(ctx.pricing, terms) };
   const cost = computeCost({ ctx: enrichedCtx, findings: raw, terms });
 
-  // 4. Personalizzazione sul profilo.
+  // 4. Personalisation from the profile.
   const findings = personalize(raw, profile);
 
-  // 5. Tutele consumer UE/IT.
+  // 5. EU/IT consumer protections.
   const consumer = runConsumerChecks({ text: clean, findings, ctx: enrichedCtx, cost, actionType, jurisdiction });
 
-  // 6. Punteggio della decisione.
+  // 6. Decision score.
   const analyzed = clean.length > 120 || Boolean(enrichedCtx.pricing?.amount);
   const { score, level, components, drivers } = computeScore({ findings, cost, consumer, actionType, analyzed });
 
-  // 7. Timeline delle conseguenze.
+  // 7. Timeline of consequences.
   const timeline = buildTimeline({ ctx: enrichedCtx, cost, findings, actionType, now: started });
 
   return {
@@ -165,7 +165,7 @@ export function fromServer(serverFindings = []) {
     .sort((a, b) => b.severity - a.severity);
 }
 
-// ── testi del verdetto ───────────────────────────────────────────────────────
+// ── verdict texts ──────────────────────────────────────────────────────────
 
 function headlineFor({ level, cost, actionType }) {
   if (cost.understated && cost.worstCaseLabel) {

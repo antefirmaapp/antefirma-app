@@ -65,7 +65,7 @@ async function api(route) {
   if (path === '/v1/analyze') {
     fake.analyzeCalls += 1;
     fake.lastLang = JSON.parse(req.postData() || '{}').uiLang;
-    if (fake.delay) await new Promise((r) => setTimeout(r, fake.delay)); // per vedere l'attesa
+    if (fake.delay) await new Promise((r) => setTimeout(r, fake.delay)); // to see the waiting state
     if (fake.mode === 'quota') return json(429, { error: 'quota_month', message: 'server' });
     return json(200, { ...VERDICT, notice: fake.notice, findings: VERDICT.findings.map((f) => ({ ...f, why: fake.lastLang === 'en' ? 'English reason.' : 'Motivo.' })) });
   }

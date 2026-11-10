@@ -1,23 +1,23 @@
 /**
- * Generatore di PDF minimi, senza dipendenze esterne.
+ * A generator of minimal PDFs, with no external dependencies.
  *
- * Serve a testare l'estrattore su file veri e non su stringhe finte: i quattro
- * difetti che hanno motivato questi test (kerning, /DecodeParms, /Length,
- * soglia di affidabilità) vivono tutti nel confine fra byte e testo, e una
- * fixture che salti la compressione o l'impaginazione degli oggetti non li
- * riprodurrebbe. Catalog, pages, page e trailer sono fissi: l'unica variabile
- * è il content stream, che è l'unica cosa che l'estrattore legge davvero.
+ * It tests the extractor on real files, not fake strings: the four defects that
+ * prompted these tests (kerning, /DecodeParms, /Length, reliability threshold)
+ * all live at the boundary between bytes and text, and a fixture skipping
+ * compression or object layout wouldn't reproduce them. Catalog, pages, page
+ * and trailer are fixed: the only variable is the content stream, the only
+ * thing the extractor really reads.
  */
 
 import { deflateSync } from 'node:zlib';
 
 /**
- * @param {string} content        Content stream (operatori PDF, latin1).
+ * @param {string} content        Content stream (PDF operators, latin1).
  * @param {object} [opts]
- * @param {boolean} [opts.compress=true]   Comprime con FlateDecode.
- * @param {boolean} [opts.decodeParms]     Aggiunge /DecodeParms << … >> al dizionario.
- * @param {boolean} [opts.length=true]     Dichiara /Length (false = solo `endstream` come confine).
- * @param {boolean} [opts.encrypt]         Aggiunge /Encrypt al trailer.
+ * @param {boolean} [opts.compress=true]   Compresses with FlateDecode.
+ * @param {boolean} [opts.decodeParms]     Adds /DecodeParms << … >> to the dictionary.
+ * @param {boolean} [opts.length=true]     Declares /Length (false = only `endstream` as the boundary).
+ * @param {boolean} [opts.encrypt]         Adds /Encrypt to the trailer.
  * @returns {ArrayBuffer}
  */
 export function makePdf(content, opts = {}) {
@@ -37,7 +37,7 @@ export function makePdf(content, opts = {}) {
     '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
     '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R'
       + ' /Resources << /Font << /F1 5 0 R >> >> >>',
-    null, // 4 0 obj: il content stream, montato a parte perché è binario
+    null, // 4 0 obj: the content stream, assembled separately because it is binary
     '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
   ];
 
@@ -66,7 +66,7 @@ export function makePdf(content, opts = {}) {
   return pdf.buffer.slice(pdf.byteOffset, pdf.byteOffset + pdf.byteLength);
 }
 
-/** Content stream con `Tj`: una riga di testo per ogni voce. */
+/** Content stream with `Tj`: one line of text per item. */
 export function tjStream(lines) {
   const body = lines
     .map((l, i) => `${i === 0 ? '' : '0 -16 Td\n'}(${escapeLiteral(l)}) Tj\n`)
@@ -74,7 +74,7 @@ export function tjStream(lines) {
   return `BT\n/F1 11 Tf\n56 780 Td\n${body}ET\n`;
 }
 
-/** Come `tjStream`, ma posiziona con `Tm` invece che con `Td` (stile InDesign). */
+/** Like `tjStream`, but positions with `Tm` instead of `Td` (InDesign style). */
 export function tmStream(lines) {
   const body = lines
     .map((l, i) => `1 0 0 1 56 ${780 - i * 16} Tm\n(${escapeLiteral(l)}) Tj\n`)
@@ -83,8 +83,8 @@ export function tmStream(lines) {
 }
 
 /**
- * Content stream con array `TJ`: ogni spazio diventa un offset di kerning.
- * È il modo in cui Word, LibreOffice e InDesign scrivono il testo giustificato.
+ * Content stream with a `TJ` array: every space becomes a kerning offset.
+ * That is how Word, LibreOffice and InDesign write justified text.
  */
 export function kernedStream(lines, gap = -278) {
   const body = lines

@@ -129,7 +129,7 @@ a.icon-btn { text-decoration: none; font-weight: 700; display: inline-grid; plac
   .status.error { background: #2a1616; border-color: #5a2626; color: #f5b5b5; }
 }
 
-/* ── risultato ───────────────────────────────────────────────────────────── */
+/* ── result ──────────────────────────────────────────────────────────────── */
 .verdict { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .verdict .bar { height: 4px; background: var(--level-color, #888); }
 .verdict .head { padding: 12px 13px; border-bottom: 1px solid var(--line); }
@@ -197,7 +197,7 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 
 .disclaimer { font-size: 10.5px; color: var(--muted); padding: 10px 13px; border-top: 1px solid var(--line); line-height: 1.45; }
 
-/* ── storico ─────────────────────────────────────────────────────────────── */
+/* ── history ─────────────────────────────────────────────────────────────── */
 .history-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
 .h-item {
   border: 1px solid var(--line); border-left: 3px solid var(--level-color, var(--line));
@@ -214,7 +214,7 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 .foot { padding: 8px 14px; border-top: 1px solid var(--line); }
 .empty { text-align: center; color: var(--muted); font-size: 12.5px; padding: 26px 10px; line-height: 1.5; }
 
-/* ── impegni ─────────────────────────────────────────────────────────────── */
+/* ── commitments ─────────────────────────────────────────────────────────── */
 .portfolio {
   border: 1px solid var(--line); border-radius: 11px; padding: 12px;
   margin-bottom: 12px; background: var(--soft);
@@ -264,7 +264,7 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 .c-actions button:hover { border-color: var(--muted); }
 .c-actions button.strong { background: var(--accent); color: var(--bg); border-color: transparent; }
 
-/* ── modale ──────────────────────────────────────────────────────────────── */
+/* ── modal ───────────────────────────────────────────────────────────────── */
 .modal {
   position: fixed; inset: 0; background: rgba(10, 12, 16, .55);
   display: flex; align-items: center; justify-content: center; padding: 14px; z-index: 50;
@@ -322,7 +322,7 @@ details summary { cursor: pointer; font-size: 12px; color: var(--muted); font-we
 .c-group[data-group='week'] { color: #a4262c; }
 .c-group[data-group='month'] { color: #a35a12; }
 
-/* ── menu «⋯» e azioni distruttive ───────────────────────────────────────── */
+/* ── "⋯" menu and destructive actions ────────────────────────────────────── */
 .c-menu-wrap { position: relative; margin-left: auto; }
 .c-more { min-width: 34px; letter-spacing: .1em; line-height: 1; }
 .c-menu {
@@ -390,7 +390,7 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
   outline: 2px solid #2563eb; outline-offset: 2px;
 }
 
-/* ── contrasto in tema scuro ─────────────────────────────────────────────── */
+/* ── dark theme contrast ─────────────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   /*
    * Band colours arrive as an inline style (`--level-color`) from constants.js
@@ -421,7 +421,7 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
   .step[data-kind='penalty']::before { background: #ff7b7b; }
 }
 
-/* ── larghezze ───────────────────────────────────────────────────────────── */
+/* ── widths ──────────────────────────────────────────────────────────────── */
 
 /* The side panel can be narrowed to almost 250 px: two columns of sources no
    longer fit at that point. */

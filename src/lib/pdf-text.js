@@ -46,7 +46,7 @@ export async function extractPdfText(buffer) {
       data = inflated;
       decodedCount += 1;
     } else if (s.filter && s.filter !== 'none') {
-      continue; // filtro non supportato (DCT, CCITT, LZW…)
+      continue; // unsupported filter (DCT, CCITT, LZW…)
     } else {
       decodedCount += 1;
     }
@@ -161,7 +161,7 @@ async function inflate(data) {
       const buf = await new Response(stream).arrayBuffer();
       return new Uint8Array(buf);
     } catch {
-      /* prova il formato successivo */
+      /* try the next format */
     }
   }
   return null;
@@ -282,7 +282,7 @@ function readLiteralString(content, start) {
 function hexToString(hex) {
   const clean = hex.replace(/[^0-9a-f]/gi, '');
   let out = '';
-  // I testi esadecimali nei PDF sono spesso UTF-16BE.
+  // Hex strings in PDFs are often UTF-16BE.
   const isUtf16 = clean.length % 4 === 0 && /^(00|fe|d[89ab])/i.test(clean.slice(0, 2));
   const step = isUtf16 ? 4 : 2;
   for (let i = 0; i + step <= clean.length; i += step) {

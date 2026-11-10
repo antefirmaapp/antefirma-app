@@ -1,15 +1,15 @@
 /**
- * Insieme di riferimento per la calibrazione del punteggio.
+ * Reference set for score calibration.
  *
- * Nove testi che coprono la scala, etichettati a mano con la **fascia** attesa
- * — non con un numero. È una scelta deliberata: i test sul numero esatto si
- * rompono a ogni ritocco del motore e finiscono per essere aggiornati
- * meccanicamente, cioè per non verificare più niente. I test sulla fascia e
- * sull'ordinamento reggono, perché descrivono ciò che il prodotto promette:
- * che un contratto peggiore risulti peggiore.
+ * Nine texts covering the scale, labelled by hand with the expected **band** —
+ * not with a number. A deliberate choice: tests on the exact number break at
+ * every engine tweak and end up being updated mechanically, i.e. no longer
+ * verifying anything. Tests on the band and on ordering hold, because they
+ * describe what the product promises: that a worse contract comes out
+ * worse.
  *
- * Le etichette sono un giudizio, non una verità. Vanno discusse e riviste
- * quando arriveranno i testi presi da siti veri.
+ * The labels are a judgement, not a truth. They should be discussed and
+ * revised when texts from real sites arrive.
  */
 
 export const CORPUS = [
@@ -62,10 +62,10 @@ italiana e il foro competente è quello del consumatore.`,
   {
     id: 'ecommerce',
     label: 'Acquisto una tantum con rimborsi esclusi',
-    // Etichettato inizialmente 'review' e corretto dopo la prima misurazione:
-    // un divieto assoluto di rimborso più un termine di otto giorni per
-    // contestare la conformità — contro i due anni di garanzia legale — non è
-    // una condizione "da rivedere", è un impegno che vale la pena fermare.
+    // Labelled 'review' at first and corrected after the first measurement: an
+    // absolute ban on refunds plus an eight-day deadline to dispute conformity —
+    // against the two-year legal guarantee — is not a condition "to review", it
+    // is a commitment worth stopping.
     band: 'commitment',
     actionType: 'purchase',
     pricing: { amount: 89.9, currency: 'EUR', period: null, recurring: false },
@@ -166,25 +166,25 @@ del contratto.`,
 ];
 
 /**
- * Catene di ordinamento che devono valere sempre.
- * Sono asserzioni sul *comportamento promesso*: un contratto peggiore deve
- * risultare peggiore. Solo confronti difendibili — non si mette in fila tutto
- * con tutto, perché fra un banner di cookie e un acquisto una tantum l'ordine
- * è opinabile e il test diventerebbe arbitrario.
+ * Ordering chains that must always hold.
+ * They are assertions on *promised behaviour*: a worse contract must come out
+ * worse. Only defensible comparisons — not everything against everything,
+ * because between a cookie banner and a one-off purchase the order is
+ * debatable and the test would become arbitrary.
  */
 /**
- * Lo stesso contratto — telco_24m — nelle tre forme in cui una pagina reale lo
- * presenta: prosa, elenco puntato, tabella di riepilogo.
+ * The same contract — telco_24m — in the three forms a real page presents it:
+ * prose, bulleted list, summary table.
  *
- * Sta fuori da CORPUS di proposito. CORPUS misura la *distribuzione* del
- * punteggio e aggiungerci tre varianti dello stesso caso la falserebbe; qui si
- * misura una proprietà diversa e altrettanto importante: **le stesse condizioni
- * devono dare lo stesso verdetto comunque siano impaginate**.
+ * It stays out of CORPUS on purpose. CORPUS measures the score's
+ * *distribution* and adding three variants of the same case would skew it;
+ * here a different and equally important property is measured: **the same
+ * terms must give the same verdict however they are laid out**.
  *
- * È la classe di errore che i nove testi non potevano far emergere, perché
- * sono tutti prosa in paragrafi: innerText mette ogni voce di elenco e ogni
- * cella su una riga a sé, e prima dell'accorpamento delle righe corte il
- * motore su queste due forme non vedeva assolutamente nulla.
+ * It is the class of error the nine texts couldn't reveal, because they are
+ * all prose in paragraphs: innerText puts every list item and every cell on a
+ * line of its own, and before short lines were merged the engine saw nothing
+ * at all in these two forms.
  */
 export const LAYOUTS = [
   {
@@ -218,7 +218,7 @@ Rimborsi\tnessun rimborso`,
   },
 ];
 
-/** Condizioni che ogni impaginazione deve far emergere. */
+/** Terms every layout must bring out. */
 export const LAYOUT_CORE_CATEGORIES = [
   'auto_renewal',
   'minimum_term',
@@ -226,7 +226,7 @@ export const LAYOUT_CORE_CATEGORIES = [
   'no_refund',
 ];
 
-/** Il contesto economico della pagina è lo stesso nelle tre forme. */
+/** The page's economic context is the same in the three forms. */
 export const LAYOUT_PRICING = { amount: 29.9, currency: 'EUR', period: 'month', recurring: true };
 
 export const ORDERING = [

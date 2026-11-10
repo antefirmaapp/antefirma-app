@@ -107,7 +107,7 @@ async function token(opts) {
   return auth.token || register(opts);
 }
 
-// ── analisi ─────────────────────────────────────────────────────────────────
+// ── analysis ────────────────────────────────────────────────────────────────
 
 /**
  * Sends the text to the server and returns its answer as is.
@@ -143,7 +143,7 @@ export async function analyzeRemote(
   throw new ServerError('auth', { status: 401 });
 }
 
-// ── piano ───────────────────────────────────────────────────────────────────
+// ── plan ────────────────────────────────────────────────────────────────────
 
 /** A call with the token, retried once after a 401. */
 async function authed(path, payload, { storage = chrome.storage.local, fetchImpl = fetch, base = API_BASE, method = 'POST' } = {}) {

@@ -17,7 +17,7 @@
   const BASE = new URL('../', document.currentScript.src).href; // the web version's root
   document.documentElement.dataset.web = '1';
 
-  // ── archivio ──────────────────────────────────────────────────────────
+  // ── storage ───────────────────────────────────────────────────────────
   const DB = new Promise((resolve, reject) => {
     const req = indexedDB.open('antefirma', 1);
     req.onupgradeneeded = () => req.result.createObjectStore('kv');
@@ -130,7 +130,7 @@
     onAlarm: { addListener: (f) => onAlarm.push(f) },
   };
 
-  // ── il resto ──────────────────────────────────────────────────────────
+  // ── the rest ──────────────────────────────────────────────────────────
   const noopEvent = { addListener() {}, removeListener() {} };
   // The panel lives at the root and settings at /settings/: extension paths lead there, with query and #.
   const appUrl = (p) => new URL(p.replace(/^\//, '').replace(/^src\/sidepanel\/sidepanel(\.html)?/, '').replace(/^src\/options\/options(\.html)?/, 'settings/'), BASE).href;
@@ -165,7 +165,7 @@
       async query() { return [{ id: -1, url: location.href, title: document.title }]; },
       async update() { return {}; },
     },
-    scripting: { async executeScript() { throw new Error('Nella versione web non si può leggere un\'altra scheda: incolla il testo o carica il PDF.'); } },
+    scripting: { async executeScript() { throw new Error(globalThis.AF_I18N.t('webCannotReadOtherTab')); } },
     alarms,
     notifications: {
       async create(id, o) {

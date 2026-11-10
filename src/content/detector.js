@@ -19,7 +19,7 @@
 
   const CLICKABLE = 'button, a[href], input[type="submit"], input[type="button"], [role="button"], [type="submit"]';
 
-  /** I nostri elementi: nessun click al loro interno va classificato. */
+  /** Our own elements: no click inside them is classified. */
   const OURS = new Set(['VINCOLO-AVVISO', 'VINCOLO-NOTA']);
 
   /**
@@ -60,7 +60,7 @@
    */
   const ACTIONABLE_SELECTOR = 'button, input[type=submit], input[type=button], [role="button"]';
 
-  /** Quanti pulsanti contiene questo sottoalbero, compreso l'elemento stesso. */
+  /** How many buttons this subtree contains, the element itself included. */
   function countActionable(node) {
     return node.querySelectorAll(ACTIONABLE_SELECTOR).length + (node.matches?.(ACTIONABLE_SELECTOR) ? 1 : 0);
   }
@@ -456,7 +456,7 @@
 
 
 
-  // ── notifica non bloccante ─────────────────────────────────────────────────
+  // ── non-blocking notification ──────────────────────────────────────────────
 
   /**
    * The REVIEW band is the **most frequent** case: it doesn't block, so all the
@@ -686,7 +686,7 @@
     if (bar) {
       // Freeze the width reached, otherwise the bar would go backwards.
       const w = bar.getBoundingClientRect().width;   // larghezza *trasformata*
-      const full = bar.offsetWidth || w || 1;        // larghezza di layout
+      const full = bar.offsetWidth || w || 1;        // layout width
       bar.style.transition = 'none';
       bar.style.transform = `scaleX(${Math.max(0, Math.min(1, w / full))})`;
     }
@@ -694,7 +694,7 @@
 
   function resumeToast() {
     if (toast.timer || !toast.current) return;
-    if (!toast.left) return; // notifica persistente: nessun timer da riprendere
+    if (!toast.left) return; // persistent notification: no timer to resume
     toast.startedAt = Date.now();
     toast.timer = setTimeout(advanceToast, toast.left);
     const bar = lifeBar();

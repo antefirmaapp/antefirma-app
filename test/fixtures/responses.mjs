@@ -1,18 +1,18 @@
 /**
- * Risposte registrate del server, una per testo di `corpus.mjs`.
+ * Recorded server answers, one per text of `corpus.mjs`.
  *
- * Hanno la forma esatta di `POST /v1/analyze` (findings con citazione, terms
- * con il passo da cui nasce ogni cifra) e servono a provare tutto ciò che
- * l'estensione fa **dopo** il server: severità, costo, profilo, tutele,
- * punteggio, scadenze.
+ * They have the exact shape of `POST /v1/analyze` (findings with quotes, terms
+ * with the passage each figure comes from) and serve to test everything the
+ * extension does **after** the server: severity, cost, profile, protections,
+ * score, deadlines.
  *
- * Da dove vengono: sono state ricavate una volta sola dal vecchio motore a
- * regole (versione 0.4), sugli stessi testi, e ogni citazione è stata
- * ritrovata parola per parola nel testo — come fa il server. Non misurano
- * quindi la bravura del modello, che si misura con `npm run eval` nel server:
- * misurano che, a parità di risposta, il punteggio resti tarato.
+ * Where they come from: derived once from the old rule engine (version 0.4),
+ * on the same texts, and every quote was found again word for word in the
+ * text — as the server does. So they don't measure the model's quality, which
+ * is measured with `npm run eval` on the server: they measure that, for the
+ * same answer, the score stays calibrated.
  *
- * Quando il server sarà online conviene sostituirle con risposte vere.
+ * Once the server has real traffic they should be replaced with real answers.
  */
 export const RESPONSES = {
  "newsletter": {

@@ -27,20 +27,20 @@ const stage = join(ROOT, 'dist', 'antefirma-dev');
 rmSync(stage, { recursive: true, force: true });
 mkdirSync(stage, { recursive: true });
 for (const p of ['src', '_locales']) cpSync(join(ROOT, p), join(stage, p), { recursive: true });
-writeFileSync(join(stage, 'manifest.json'), JSON.stringify({ ...manifest, key: DEV_KEY, version_name: `${version} sviluppo` }, null, 2) + '\n');
-writeFileSync(join(stage, 'LEGGIMI.txt'), [
-  `AnteFirma ${version} · versione per sviluppatori e tester`,
+writeFileSync(join(stage, 'manifest.json'), JSON.stringify({ ...manifest, key: DEV_KEY, version_name: `${version} dev` }, null, 2) + '\n');
+writeFileSync(join(stage, 'README.txt'), [
+  `AnteFirma ${version} · developer and tester build`,
   '',
-  'Installazione in Chrome (o Edge):',
-  '1. Estrai questo ZIP in una cartella che non sposterai.',
-  '2. Apri chrome://extensions (in Edge: edge://extensions).',
-  '3. Attiva «Modalità sviluppatore».',
-  '4. «Carica estensione non pacchettizzata» → scegli la cartella che contiene manifest.json.',
+  'Installing in Chrome (or Edge):',
+  '1. Extract this ZIP into a folder you will not move.',
+  '2. Open chrome://extensions (in Edge: edge://extensions).',
+  '3. Turn on "Developer mode".',
+  '4. "Load unpacked" → choose the folder that contains manifest.json.',
   '',
-  `L'ID dell'estensione è sempre ${DEV_ID}: il server di AnteFirma lo riconosce.`,
+  `The extension ID is always ${DEV_ID}: the AnteFirma server recognises it.`,
   '',
-  'Aggiornare: scarica il nuovo ZIP dal pannello, sostituisci il contenuto della cartella,',
-  'poi in chrome://extensions premi il pulsante «Ricarica» sulla scheda di AnteFirma.',
+  'Updating: download the new ZIP from the admin panel, replace the folder\'s content,',
+  'then press "Reload" on the AnteFirma card in chrome://extensions.',
   '',
 ].join('\n'));
 const zip = join(ROOT, 'dist', `antefirma-dev-${version}.zip`);

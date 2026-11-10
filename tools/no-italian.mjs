@@ -27,17 +27,25 @@ if (existsSync(allowFile)) {
   ALLOW = ALLOW.concat(readFileSync(allowFile, 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#')).map((g) => new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*/g, '§').replace(/\*/g, '[^/]*').replace(/§/g, '.*') + '$')));
 }
 
-const WORDS = new Set(('il lo gli della delle dello degli dei del che non sono nel nella nelle negli alla alle allo dalla dalle dal ' +
-  'quando questo questa questi queste quello quella quelli anche più già perché ogni essere viene vengono deve devono ' +
-  'una uno sulla sulle sul tra fra senza dopo prima poi così cosa chi dove qui qua sempre mai ancora oppure ovvero ' +
-  'serve servono quindi altrimenti solo soltanto altro altra niente nessuno nessuna tutto tutti tutte ciò cioè se ' +
-  'hanno può possono fa fanno resta restano manca mancano sia siano erano').split(' '));
-const ACCENT = /[àèìòùé]/i;
+// Italian and English function words. A comment is Italian when Italian words
+// outnumber English ones (at least two), or when it has Italian words and no
+// English word at all.
+const IT = new Set(('di del della dei delle degli il lo gli una che con nel nella nei alla alle dal dalla dai sono è ' +
+  'questo questa questi quando anche senza prima dopo ogni tutti tutto perché già più non si ma come se da al ai sul ' +
+  'sulla tra fra cosa chi dove resta serve va vale ci ne loro suo sua tuo tua essere stato fatto fare può possono deve ' +
+  'devono viene vengono qui così poi quindi oppure solo sempre mai niente nulla caso testo pagina parte un uno le la').split(' '));
+const STRONG = new Set([...IT].filter((w) => !['i', 'e', 'o', 'la', 'le', 'un', 'come', 'se', 'ne', 'ci', 'caso', 'parte', 'solo', 'fare', 'va', 'si', 'ma', 'da', 'al', 'ai', 'lo', 'no'].includes(w)));
+const EN = new Set(('the of and to a in is it that for on with as by be this are from or an not at if but its has have was ' +
+  'which when so no all can must only one they their there than then them these those we you your our out up do does into ' +
+  'over what who why how').split(' '));
 
 function flagged(text) {
-  const words = text.toLowerCase().match(/[a-zàèéìòù']+/g) || [];
-  const hits = words.filter((w) => WORDS.has(w.replace(/^[a-z]+'/, ''))).length;
-  return hits >= (LOOSE ? 1 : 2) || (hits >= 1 && ACCENT.test(text)) || (LOOSE && ACCENT.test(text)) || /\b(è|perché|più|già|così|cioè)\b/i.test(text);
+  // `non-blocking`, `i18n`, `e2e`: English compounds and identifiers, not Italian words.
+  const words = (text.toLowerCase().replace(/\bnon-/g, ' ').replace(/`[^`]*`/g, ' ').match(/[a-zàèéìòù]{2,}/g) || []);
+  const it = words.filter((w) => IT.has(w)).length;
+  const en = words.filter((w) => EN.has(w)).length;
+  const min = LOOSE ? 1 : 2;
+  return (it >= min && it > en) || (it >= 1 && en === 0 && words.length >= 2 && words.some((w) => STRONG.has(w)));
 }
 
 /** Comments and string literals of a JS-like file, with their line numbers. */
@@ -85,7 +93,9 @@ const found = [];
 for (const f of files) {
   const src = readFileSync(f, 'utf8');
   const ext = extname(f);
-  const items = ['.md', '.yml'].includes(ext) ? src.split('\n').map((text, k) => ({ kind: 'text', line: k + 1, text }))
+  // Markdown: prose only; fenced code blocks hold examples (often Italian page text).
+  const items = ext === '.md' ? src.replace(/```[\s\S]*?```/g, (m) => m.replace(/[^\n]/g, '')).split('\n').map((text, k) => ({ kind: 'text', line: k + 1, text }))
+    : ext === '.yml' ? src.split('\n').map((text, k) => ({ kind: 'text', line: k + 1, text }))
     : ext === '.html' ? htmlPieces(src)
     : pieces(src);
   for (const it of items) {
@@ -101,4 +111,4 @@ else {
   for (const [f, xs] of Object.entries(byFile)) console.log(`${f}: ${xs.length}`);
   console.log(`${found.length} Italian ${found.length === 1 ? 'line' : 'lines'} in ${Object.keys(byFile).length} files`);
 }
-process.exit(found.length ? 1 : 0);
+process.exitCode = found.length ? 1 : 0; // not exit(): it would cut long output piped to another program
