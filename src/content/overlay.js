@@ -952,10 +952,6 @@
       : tn(n, 'ti resta {n} analisi gratuita questo mese', 'ti restano {n} analisi gratuite questo mese'));
   }
 
-  /** Da dove viene questo verdetto: conta per la fiducia che merita. */
-  function engineLabel(engine = {}) {
-    return engine.cached ? t('AI (analisi già fatta per questo testo)') : 'AI';
-  }
 
   function renderFinding(f) {
     const ink = sevPalette(f.severity);

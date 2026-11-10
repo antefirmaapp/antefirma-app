@@ -1,0 +1,21 @@
+{
+  "name": "antefirma-app",
+  "private": true,
+  "description": "AnteFirma browser extension and web app (web.antefirma.app).",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=90 --test-coverage-functions=85 test/*.test.mjs",
+    "test:e2e": "node test/smoke.mjs",
+    "lint": "eslint .",
+    "check": "npm run lint && npm test"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "axe-core": "4.10.3",
+    "eslint": "9.39.1",
+    "fast-check": "4.3.0",
+    "globals": "16.5.0"
+  }
+}

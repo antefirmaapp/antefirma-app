@@ -1,0 +1,27 @@
+# Runs on every push and pull request: lint, unit + golden + contract tests with
+# coverage thresholds, then the extension end-to-end check in a real Chromium.
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:coverage
+      - name: Web app build
+        run: node tools/web-build.mjs
+      - name: Install Chromium for the end-to-end check
+        run: npm install --no-save playwright@1.55.0 && npx playwright install --with-deps chromium
+      - name: Extension end-to-end check
+        run: xvfb-run -a npm run test:e2e

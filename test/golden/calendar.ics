@@ -1,0 +1,43 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//AnteFirma//IT
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:golden-1-disdetta@vincolo
+DTSTAMP:20260815T100000Z
+DTSTART;VALUE=DATE:20260915
+DTEND;VALUE=DATE:20260916
+SUMMARY:Disdetta Saas_fair
+DESCRIPTION:Ultimo giorno utile per disdire Saas_fair.\nScadenza del period
+ o: 15 settembre 2026.\nImpegno stimato: 12\,00 €.\nPagina: https://saas_fa
+ ir.test/checkout\nPromemoria creato da AnteFirma.
+URL:https://saas_fair.test/checkout
+TRANSP:TRANSPARENT
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P30D
+DESCRIPTION:Disdetta Saas_fair — mancano 30 giorni
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P7D
+DESCRIPTION:Disdetta Saas_fair — mancano 7 giorni
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:Disdetta Saas_fair — mancano 1 giorni
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+UID:golden-1-rinnovo@vincolo
+DTSTAMP:20260815T100000Z
+DTSTART;VALUE=DATE:20260915
+DTEND;VALUE=DATE:20260916
+SUMMARY:Rinnovo Saas_fair
+DESCRIPTION:Il contratto con Saas_fair si rinnova oggi.
+URL:https://saas_fair.test/checkout
+TRANSP:TRANSPARENT
+END:VEVENT
+END:VCALENDAR

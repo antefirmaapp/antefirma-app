@@ -1,0 +1,62 @@
+Ejercicio del derecho de desistimiento — Saas_fair
+desistimiento-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+A la atención de Saas_fair
+[Dirección de la empresa / email indicado en las condiciones]
+
+Lugar y fecha: ______________, 15 de agosto de 2026
+
+Enviada por: ☐ burofax   ☐ correo certificado con acuse de recibo   ☐ formulario online   ☐ email
+
+Asunto: ejercicio del derecho de desistimiento
+
+Estimados señores de Saas_fair:
+
+Por la presente les comunico que desisto del contrato de prestación
+del servicio "SaaS mensile senza vincoli" (compromiso estimado 12,00 €), celebrado el 15 de agosto de 2026.
+
+Ejerzo el derecho de desistimiento previsto para los contratos a distancia, dentro del plazo
+de catorce días naturales desde la celebración del contrato, sin necesidad de justificación
+y sin penalización alguna.
+
+Por ello les solicito:
+  1. el cese inmediato del servicio y de cualquier cargo asociado;
+  2. la devolución de las cantidades abonadas en un plazo máximo de catorce días desde
+     la recepción de esta comunicación, por el mismo medio de pago utilizado;
+  3. la confirmación por escrito de la recepción de esta comunicación.
+
+Titular del contrato: Mario Rossi
+Dirección: Via Roma 1, 20100 Milano
+Email de contacto: mario.rossi@example.com
+Código de cliente / número de contrato: C-42
+Contratado en: https://saas_fair.test/checkout
+
+Atentamente,
+
+Mario Rossi
+
+Firma _______________________
+Fecha 15 de agosto de 2026
+
+—
+Normativa de referencia:
+  · Real Decreto Legislativo 1/2007 (TRLGDCU), arts. 102-108 — derecho de desistimiento en contratos a distancia
+  · Anexo B del TRLGDCU — modelo de formulario de desistimiento
+  · Directiva 2011/83/UE
+
+Documento generado automáticamente por AnteFirma a partir de las condiciones
+analizadas. Revisa los datos entre corchetes antes de enviarlo. No constituye
+asesoramiento legal.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia con un mezzo che lasci prova della data: burofax o raccomandata con ricevuta di ritorno.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Real Decreto Legislativo 1/2007 (TRLGDCU), arts. 102-108 — derecho de desistimiento en contratos a distancia
+Anexo B del TRLGDCU — modelo de formulario de desistimiento
+Directiva 2011/83/UE

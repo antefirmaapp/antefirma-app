@@ -1,0 +1,61 @@
+Disdetta contratto — Saas_fair
+disdetta-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Spett.le Saas_fair
+[Indirizzo del fornitore / PEC / email indicata nelle condizioni]
+
+Luogo e data: ______________, 15 agosto 2026
+
+Trasmessa a mezzo: ☐ PEC   ☐ raccomandata A/R   ☐ modulo online   ☐ email
+
+Oggetto: disdetta del contratto — esclusione del rinnovo automatico
+
+Spettabile Saas_fair,
+
+con la presente comunico la disdetta del contratto relativo a "SaaS mensile senza vincoli" (impegno stimato 12,00 €),
+attivato in data 15 agosto 2026.
+
+La presente disdetta è inviata affinché il contratto non si rinnovi alla scadenza del 15 settembre 2026,
+nel rispetto del termine di preavviso previsto dalle condizioni contrattuali.
+
+Chiedo pertanto:
+  1. conferma scritta della ricezione della presente e della data di efficacia della disdetta;
+  2. la cessazione di ogni addebito a decorrere dalla scadenza indicata;
+  3. l’indicazione di eventuali importi ritenuti dovuti, con il relativo titolo contrattuale.
+
+Preciso che nessun addebito ulteriore potrà considerarsi legittimo per periodi successivi
+alla scadenza sopra indicata.
+
+Intestatario del contratto: Mario Rossi
+Indirizzo: Via Roma 1, 20100 Milano
+Email di contatto: mario.rossi@example.com
+Codice cliente / numero contratto: C-42
+Sottoscritto tramite: https://saas_fair.test/checkout
+
+Distinti saluti,
+
+Mario Rossi
+
+Firma _______________________
+Data 15 agosto 2026
+
+—
+Riferimenti normativi utili:
+  · D.Lgs. 206/2005, art. 33 c. 2 lett. i) — rinnovo tacito con preavviso eccessivo
+  · Codice civile, artt. 1373 e 1341
+
+Documento generato automaticamente da AnteFirma a partire dalle condizioni
+contrattuali analizzate. Verifica i dati fra parentesi quadre prima di inviarlo. Non
+costituisce consulenza legale.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia con un mezzo che lasci prova della data: PEC o raccomandata A/R.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+D.Lgs. 206/2005, art. 33 c. 2 lett. i) — rinnovo tacito con preavviso eccessivo
+Codice civile, artt. 1373 e 1341

@@ -1,0 +1,1155 @@
+{
+ "newsletter": {
+  "level": "safe",
+  "score": 5,
+  "headline": "Stai creando un account accettandone le condizioni",
+  "summary": "Nel testo disponibile non sono state trovate clausole che ti impegnano.",
+  "mustRemember": null,
+  "cost": {
+   "currency": "EUR",
+   "displayed": null,
+   "worstCase": null,
+   "worstCaseLabel": null,
+   "lines": [],
+   "horizonMonths": null,
+   "horizonReason": null,
+   "minTerm": null,
+   "notice": null,
+   "penalty": null,
+   "extras": [],
+   "hasRecurring": false,
+   "hasAutoRenewal": false,
+   "uncertain": false,
+   "understated": false
+  },
+  "timeline": [
+   {
+    "when": "Ora",
+    "at": "2026-08-15T10:00:00.000Z",
+    "items": [
+     "crei l’account"
+    ],
+    "kind": "now"
+   }
+  ],
+  "findings": [],
+  "consumer": {
+   "applicable": true,
+   "jurisdiction": "IT",
+   "boost": 0,
+   "disclaimer": "Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.",
+   "flags": []
+  }
+ },
+ "cookie_banner": {
+  "level": "review",
+  "score": 49,
+  "headline": "Stai autorizzando un trattamento dei tuoi dati",
+  "summary": "Il testo contiene 2 condizioni rilevanti: condivisione dati con terze parti, profilazione e pubblicità mirata.",
+  "mustRemember": null,
+  "cost": {
+   "currency": "EUR",
+   "displayed": null,
+   "worstCase": null,
+   "worstCaseLabel": null,
+   "lines": [],
+   "horizonMonths": null,
+   "horizonReason": null,
+   "minTerm": null,
+   "notice": null,
+   "penalty": null,
+   "extras": [],
+   "hasRecurring": false,
+   "hasAutoRenewal": false,
+   "uncertain": false,
+   "understated": false
+  },
+  "timeline": [
+   {
+    "when": "Ora",
+    "at": "2026-08-15T10:00:00.000Z",
+    "items": [
+     "autorizzi il trattamento dei dati descritto nell’informativa"
+    ],
+    "kind": "now"
+   }
+  ],
+  "findings": [
+   {
+    "category": "data_sharing",
+    "severity": 38,
+    "quote": "I dati raccolti attraverso questi strumenti potranno essere condivisi con terze parti\nappartenenti al circuito pubblicitario a fini di profilazione e pubblicità mirata"
+   },
+   {
+    "category": "profiling",
+    "severity": 25,
+    "quote": "Questo sito utilizza cookie tecnici necessari al funzionamento e, previo tuo\nconsenso, cookie di profilazione propri e di terze parti"
+   }
+  ],
+  "consumer": {
+   "applicable": true,
+   "jurisdiction": "IT",
+   "boost": 0,
+   "disclaimer": "Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.",
+   "flags": []
+  }
+ },
+ "saas_fair": {
+  "level": "review",
+  "score": 36,
+  "headline": "Stai per assumere un impegno economico stimato in 12,00 €",
+  "summary": "Il testo contiene una condizione rilevante: limitazione di responsabilità. L’impegno economico potenziale stimato è 12,00 € (un solo ciclo di fatturazione). 2 condizioni meritano una verifica rispetto alle tutele previste per i consumatori.",
+  "mustRemember": null,
+  "cost": {
+   "currency": "EUR",
+   "displayed": "12,00 € / mese",
+   "worstCase": 12,
+   "worstCaseLabel": "12,00 €",
+   "lines": [
+    {
+     "label": "12,00 € × 1 mese",
+     "amount": 12,
+     "kind": "recurring"
+    }
+   ],
+   "horizonMonths": 1,
+   "horizonReason": "un solo ciclo di fatturazione",
+   "minTerm": null,
+   "notice": null,
+   "penalty": null,
+   "extras": [],
+   "hasRecurring": true,
+   "hasAutoRenewal": false,
+   "uncertain": false,
+   "understated": false
+  },
+  "timeline": [
+   {
+    "when": "Ora",
+    "at": "2026-08-15T10:00:00.000Z",
+    "items": [
+     "parte l’abbonamento"
+    ],
+    "kind": "now"
+   },
+   {
+    "when": "15 settembre 2026",
+    "at": "2026-09-15T10:00:00.000Z",
+    "items": [
+     "scade il periodo di impegno"
+    ],
+    "kind": "end"
+   }
+  ],
+  "findings": [
+   {
+    "category": "liability_limitation",
+    "severity": 31,
+    "quote": "Il fornitore non sarà responsabile per danni indiretti derivanti da interruzioni del\nservizio dovute a cause di forza maggiore"
+   }
+  ],
+  "consumer": {
+   "applicable": true,
+   "jurisdiction": "IT",
+   "boost": 7,
+   "disclaimer": "Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.",
+   "flags": [
+    {
+     "id": "eu.liability",
+     "title": "Esclusione o limitazione di responsabilità",
+     "note": "Escludere o limitare la responsabilità del professionista per danno alla persona, o per inadempimento, rientra tra le clausole presunte vessatorie; alcune sono nulle anche se trattate individualmente.",
+     "refs": [
+      "Codice del Consumo, artt. 33 c. 2 lett. a)-b) e 36 c. 2",
+      "Codice civile, art. 1229"
+     ],
+     "categories": [
+      "liability_limitation"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.withdrawal",
+     "title": "Diritto di recesso di 14 giorni non menzionato",
+     "note": "Negli acquisti a distanza il consumatore ha di norma 14 giorni per recedere senza motivazione, con obblighi informativi precisi a carico del venditore. Il testo analizzato non sembra menzionarlo.",
+     "refs": [
+      "Codice del Consumo, artt. 52-59",
+      "Direttiva 2011/83/UE"
+     ],
+     "categories": [],
+     "boost": 10
+    }
+   ]
+  }
+ },
+ "ecommerce": {
+  "level": "commitment",
+  "score": 69,
+  "headline": "Stai per assumere un impegno economico stimato in 89,90 €",
+  "summary": "Il testo contiene 2 condizioni rilevanti: nessun rimborso, limitazione di responsabilità. L’impegno economico potenziale stimato è 89,90 €. 3 condizioni meritano una verifica rispetto alle tutele previste per i consumatori.",
+  "mustRemember": null,
+  "cost": {
+   "currency": "EUR",
+   "displayed": "89,90 €",
+   "worstCase": 89.9,
+   "worstCaseLabel": "89,90 €",
+   "lines": [
+    {
+     "label": "Importo",
+     "amount": 89.9,
+     "kind": "oneoff"
+    }
+   ],
+   "horizonMonths": null,
+   "horizonReason": null,
+   "minTerm": null,
+   "notice": null,
+   "penalty": null,
+   "extras": [],
+   "hasRecurring": false,
+   "hasAutoRenewal": false,
+   "uncertain": false,
+   "understated": false
+  },
+  "timeline": [
+   {
+    "when": "Ora",
+    "at": "2026-08-15T10:00:00.000Z",
+    "items": [
+     "l’ordine viene inviato"
+    ],
+    "kind": "now"
+   }
+  ],
+  "findings": [
+   {
+    "category": "no_refund",
+    "severity": 50,
+    "quote": "I prodotti personalizzati non sono rimborsabili in alcun caso, nemmeno in caso di mancato\nutilizzo"
+   },
+   {
+    "category": "liability_limitation",
+    "severity": 31,
+    "quote": "Il venditore non sarà in alcun modo responsabile per ritardi imputabili al\ncorriere"
+   }
+  ],
+  "consumer": {
+   "applicable": true,
+   "jurisdiction": "IT",
+   "boost": 11,
+   "disclaimer": "Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.",
+   "flags": [
+    {
+     "id": "eu.liability",
+     "title": "Esclusione o limitazione di responsabilità",
+     "note": "Escludere o limitare la responsabilità del professionista per danno alla persona, o per inadempimento, rientra tra le clausole presunte vessatorie; alcune sono nulle anche se trattate individualmente.",
+     "refs": [
+      "Codice del Consumo, artt. 33 c. 2 lett. a)-b) e 36 c. 2",
+      "Codice civile, art. 1229"
+     ],
+     "categories": [
+      "liability_limitation"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.withdrawal",
+     "title": "Diritto di recesso di 14 giorni non menzionato",
+     "note": "Negli acquisti a distanza il consumatore ha di norma 14 giorni per recedere senza motivazione, con obblighi informativi precisi a carico del venditore. Il testo analizzato non sembra menzionarlo.",
+     "refs": [
+      "Codice del Consumo, artt. 52-59",
+      "Direttiva 2011/83/UE"
+     ],
+     "categories": [],
+     "boost": 10
+    },
+    {
+     "id": "eu.no_refund",
+     "title": "Esclusione generalizzata dei rimborsi",
+     "note": "Un divieto assoluto di rimborso mal si concilia con il diritto di recesso e con la garanzia legale di conformità, che non possono essere esclusi per contratto con un consumatore.",
+     "refs": [
+      "Codice del Consumo, artt. 52-59 e 128-135",
+      "Direttiva UE 2019/771"
+     ],
+     "categories": [
+      "no_refund"
+     ],
+     "boost": 10
+    }
+   ]
+  }
+ },
+ "social_ip": {
+  "level": "commitment",
+  "score": 78,
+  "headline": "Stai creando un account accettandone le condizioni",
+  "summary": "Il testo contiene 7 condizioni rilevanti: modifica unilaterale delle condizioni, licenza sui tuoi contenuti, uso dei contenuti per addestrare ai. 3 condizioni meritano una verifica rispetto alle tutele previste per i consumatori.",
+  "mustRemember": null,
+  "cost": {
+   "currency": "EUR",
+   "displayed": null,
+   "worstCase": null,
+   "worstCaseLabel": null,
+   "lines": [],
+   "horizonMonths": null,
+   "horizonReason": null,
+   "minTerm": null,
+   "notice": null,
+   "penalty": null,
+   "extras": [],
+   "hasRecurring": false,
+   "hasAutoRenewal": false,
+   "uncertain": false,
+   "understated": false
+  },
+  "timeline": [
+   {
+    "when": "Ora",
+    "at": "2026-08-15T10:00:00.000Z",
+    "items": [
+     "crei l’account",
+     "autorizzi il trattamento dei dati descritto nell’informativa"
+    ],
+    "kind": "now"
+   }
+  ],
+  "findings": [
+   {
+    "category": "unilateral_change",
+    "severity": 60,
+    "quote": "Ci riserviamo il diritto di modificare in qualsiasi momento i presenti termini"
+   },
+   {
+    "category": "ip_license",
+    "severity": 38,
+    "quote": "Caricando contenuti sulla\npiattaforma, l'utente concede alla società una licenza mondiale, gratuita, perpetua e\nirrevocabile di usare, riprodurre, modificare, adattare e distribuire tali contenuti,\nanche per l'addestramento di modelli di intelligenza artificia"
+   },
+   {
+    "category": "ai_training",
+    "severity": 38,
+    "quote": "cabile di usare, riprodurre, modificare, adattare e distribuire tali contenuti,\nanche per l'addestramento di modelli di intelligenza artificiale"
+   },
+   {
+    "category": "data_sharing",
+    "severity": 38,
+    "quote": "I dati raccolti potranno essere condivisi con terze parti a fini di profilazione e\npubblicità personalizzata, e potranno essere trasferiti al di fuori dell'Unione Europea"
+   },
+   {
+    "category": "third_party_transfer",
+    "severity": 36,
+    "quote": "I dati raccolti potranno essere condivisi con terze parti a fini di profilazione e\npubblicità personalizzata, e potranno essere trasferiti al di fuori dell'Unione Europea"
+   },
+   {
+    "category": "data_retention",
+    "severity": 36,
+    "quote": "I dati vengono conservati anche dopo la chiusura dell'account"
+   },
+   {
+    "category": "profiling",
+    "severity": 25,
+    "quote": "I dati raccolti potranno essere condivisi con terze parti a fini di profilazione e\npubblicità personalizzata, e potranno essere trasferiti al di fuori dell'Unione Europea"
+   }
+  ],
+  "consumer": {
+   "applicable": true,
+   "jurisdiction": "IT",
+   "boost": 10,
+   "disclaimer": "Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.",
+   "flags": [
+    {
+     "id": "eu.unilateral",
+     "title": "Modifica unilaterale di condizioni o prezzo",
+     "note": "Le clausole che consentono al professionista di modificare unilateralmente il contratto o il prezzo senza un giustificato motivo indicato nel contratto, e senza diritto di recesso per il consumatore, sono presunte vessatorie.",
+     "refs": [
+      "Codice del Consumo, art. 33 c. 2 lett. m) e o)",
+      "Direttiva 93/13/CEE, allegato punto 1 lett. j) e l)"
+     ],
+     "categories": [
+      "unilateral_change",
+      "price_change"
+     ],
+     "boost": 12
+    },
+    {
+     "id": "eu.transfer",
+     "title": "Trasferimento dati fuori dallo SEE",
+     "note": "Il trasferimento verso Paesi terzi richiede una base specifica (decisione di adeguatezza, clausole contrattuali tipo o altre garanzie). Verifica che l’informativa la indichi.",
+     "refs": [
+      "GDPR, artt. 44-49"
+     ],
+     "categories": [
+      "third_party_transfer"
+     ],
+     "boost": 8
+    },
+    {
+     "id": "eu.ai_training",
+     "title": "Uso dei contenuti per addestrare modelli AI",
+     "note": "Se i contenuti includono dati personali serve una base giuridica specifica e informazione trasparente; per le opere protette rileva anche la riserva sui text and data mining.",
+     "refs": [
+      "GDPR, artt. 6 e 13",
+      "Direttiva UE 2019/790, art. 4",
+      "Reg. UE 2024/1689 (AI Act)"
+     ],
+     "categories": [
+      "ai_training"
+     ],
+     "boost": 8
+    }
+   ]
+  }
+ },
+ "saas_annual": {
+  "level": "commitment",
+  "score": 84,
+  "headline": "Stai per assumere un impegno economico stimato in 240,00 €",
+  "summary": "Il testo contiene 6 condizioni rilevanti: modifica unilaterale delle condizioni, durata minima vincolante, rinnovo automatico. L’impegno economico potenziale stimato è 240,00 € (durata minima dichiarata: 12 mesi). 6 condizioni meritano una verifica rispetto alle tutele previste per i consumatori.",
+  "mustRemember": "Entro il 15 luglio 2027: devi inviare la disdetta (preavviso di 30 giorni) — è la data da segnare in calendario",
+  "cost": {
+   "currency": "EUR",
+   "displayed": "240,00 € / anno",
+   "worstCase": 240,
+   "worstCaseLabel": "240,00 €",
+   "lines": [
+    {
+     "label": "240,00 € × 1 anno",
+     "amount": 240,
+     "kind": "recurring"
+    }
+   ],
+   "horizonMonths": 12,
+   "horizonReason": "durata minima dichiarata: 12 mesi",
+   "minTerm": {
+    "months": 12,
+    "raw": "12 mesi",
+    "quote": "12 mesi"
+   },
+   "notice": {
+    "months": 1,
+    "days": 30,
+    "raw": "30 giorni",
+    "quote": "30 giorni"
+   },
+   "penalty": null,
+   "extras": [],
+   "hasRecurring": true,
+   "hasAutoRenewal": true,
+   "uncertain": false,
+   "understated": false
+  },
+  "timeline": [
+   {
+    "when": "Ora",
+    "at": "2026-08-15T10:00:00.000Z",
+    "items": [
+     "parte l’abbonamento",
+     "accetti il rinnovo automatico"
+    ],
+    "kind": "now"
+   },
+   {
+    "when": "Entro il 15 luglio 2027",
+    "at": "2027-07-15T10:00:00.000Z",
+    "items": [
+     "devi inviare la disdetta (preavviso di 30 giorni) — è la data da segnare in calendario"
+    ],
+    "kind": "deadline"
+   },
+   {
+    "when": "15 agosto 2027",
+    "at": "2027-08-15T10:00:00.000Z",
+    "items": [
+     "scade il periodo: se non hai disdetto, il contratto si rinnova"
+    ],
+    "kind": "renewal"
+   },
+   {
+    "when": "Poi fino al 15 agosto 2028",
+    "at": "2028-08-15T10:00:00.000Z",
+    "items": [
+     "nuovo periodo per altri 240,00 €"
+    ],
+    "kind": "renewal"
+   }
+  ],
+  "findings": [
+   {
+    "category": "unilateral_change",
+    "severity": 60,
+    "quote": "Il fornitore si riserva il diritto di modificare le condizioni economiche dandone\ncomunicazione con congruo preavviso"
+   },
+   {
+    "category": "minimum_term",
+    "severity": 56,
+    "quote": "Il contratto ha una durata\nminima di 12 mesi"
+   },
+   {
+    "category": "auto_renewal",
+    "severity": 56,
+    "quote": "Alla scadenza il contratto si rinnova automaticamente per un uguale\nperiodo, salvo disdetta da comunicarsi con preavviso di almeno 30 giorni prima della\nscadenza"
+   },
+   {
+    "category": "no_refund",
+    "severity": 50,
+    "quote": "Gli importi versati non sono rimborsabili in caso di recesso anticipato"
+   },
+   {
+    "category": "notice_period",
+    "severity": 38,
+    "quote": "Alla scadenza il contratto si rinnova automaticamente per un uguale\nperiodo, salvo disdetta da comunicarsi con preavviso di almeno 30 giorni prima della\nscadenza"
+   },
+   {
+    "category": "liability_limitation",
+    "severity": 31,
+    "quote": "Il servizio è fornito così com'è, nei limiti massimi\nconsentiti dalla legge"
+   }
+  ],
+  "consumer": {
+   "applicable": true,
+   "jurisdiction": "IT",
+   "boost": 20,
+   "disclaimer": "Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.",
+   "flags": [
+    {
+     "id": "eu.unilateral",
+     "title": "Modifica unilaterale di condizioni o prezzo",
+     "note": "Le clausole che consentono al professionista di modificare unilateralmente il contratto o il prezzo senza un giustificato motivo indicato nel contratto, e senza diritto di recesso per il consumatore, sono presunte vessatorie.",
+     "refs": [
+      "Codice del Consumo, art. 33 c. 2 lett. m) e o)",
+      "Direttiva 93/13/CEE, allegato punto 1 lett. j) e l)"
+     ],
+     "categories": [
+      "unilateral_change",
+      "price_change"
+     ],
+     "boost": 12
+    },
+    {
+     "id": "eu.liability",
+     "title": "Esclusione o limitazione di responsabilità",
+     "note": "Escludere o limitare la responsabilità del professionista per danno alla persona, o per inadempimento, rientra tra le clausole presunte vessatorie; alcune sono nulle anche se trattate individualmente.",
+     "refs": [
+      "Codice del Consumo, artt. 33 c. 2 lett. a)-b) e 36 c. 2",
+      "Codice civile, art. 1229"
+     ],
+     "categories": [
+      "liability_limitation"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.withdrawal",
+     "title": "Diritto di recesso di 14 giorni non menzionato",
+     "note": "Negli acquisti a distanza il consumatore ha di norma 14 giorni per recedere senza motivazione, con obblighi informativi precisi a carico del venditore. Il testo analizzato non sembra menzionarlo.",
+     "refs": [
+      "Codice del Consumo, artt. 52-59",
+      "Direttiva 2011/83/UE"
+     ],
+     "categories": [],
+     "boost": 10
+    },
+    {
+     "id": "eu.no_refund",
+     "title": "Esclusione generalizzata dei rimborsi",
+     "note": "Un divieto assoluto di rimborso mal si concilia con il diritto di recesso e con la garanzia legale di conformità, che non possono essere esclusi per contratto con un consumatore.",
+     "refs": [
+      "Codice del Consumo, artt. 52-59 e 128-135",
+      "Direttiva UE 2019/771"
+     ],
+     "categories": [
+      "no_refund"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.tacit_renewal",
+     "title": "Rinnovo tacito con preavviso lungo",
+     "note": "Le clausole che prevedono il rinnovo tacito imponendo al consumatore un termine di disdetta eccessivamente anticipato rispetto alla scadenza sono presunte vessatorie.",
+     "refs": [
+      "Codice del Consumo, art. 33 c. 2 lett. i)"
+     ],
+     "categories": [
+      "auto_renewal"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.vexatious_form",
+     "title": "Clausole onerose senza approvazione specifica",
+     "note": "Nelle condizioni generali predisposte da una parte, alcune clausole particolarmente onerose non hanno effetto se non specificamente approvate per iscritto: una singola spunta cumulativa può non bastare.",
+     "refs": [
+      "Codice civile, art. 1341 c. 2"
+     ],
+     "categories": [],
+     "boost": 6
+    }
+   ]
+  }
+ },
+ "telco_24m": {
+  "level": "high_risk",
+  "score": 91,
+  "headline": "Vedi 29,90 € / mese, ma stai impegnando fino a 886,60 €",
+  "summary": "Il testo contiene 8 condizioni rilevanti: penale di recesso, modifica unilaterale del prezzo, durata minima vincolante. L’impegno economico potenziale stimato è 886,60 € (durata minima dichiarata: 24 mesi). 6 condizioni meritano una verifica rispetto alle tutele previste per i consumatori.",
+  "mustRemember": "Entro il 15 giugno 2028: devi inviare la disdetta (preavviso di 60 giorni) — è la data da segnare in calendario",
+  "cost": {
+   "currency": "EUR",
+   "displayed": "29,90 € / mese",
+   "worstCase": 886.6,
+   "worstCaseLabel": "886,60 €",
+   "lines": [
+    {
+     "label": "29,90 € × 24 mesi",
+     "amount": 717.6,
+     "kind": "recurring"
+    },
+    {
+     "label": "Penale di recesso",
+     "amount": 120,
+     "kind": "penalty"
+    },
+    {
+     "label": "Attivazione",
+     "amount": 49,
+     "kind": "extra"
+    }
+   ],
+   "horizonMonths": 24,
+   "horizonReason": "durata minima dichiarata: 24 mesi",
+   "minTerm": {
+    "months": 24,
+    "raw": "24 mesi",
+    "quote": "24 mesi"
+   },
+   "notice": {
+    "months": 2,
+    "days": 60,
+    "raw": "60 giorni",
+    "quote": "60 giorni"
+   },
+   "penalty": {
+    "amount": 120,
+    "quote": "120,00 euro"
+   },
+   "extras": [
+    {
+     "amount": 49,
+     "label": "Attivazione",
+     "perCycle": false,
+     "raw": "49,00 euro"
+    }
+   ],
+   "hasRecurring": true,
+   "hasAutoRenewal": true,
+   "uncertain": false,
+   "understated": true
+  },
+  "timeline": [
+   {
+    "when": "Ora",
+    "at": "2026-08-15T10:00:00.000Z",
+    "items": [
+     "parte l’abbonamento",
+     "accetti il rinnovo automatico"
+    ],
+    "kind": "now"
+   },
+   {
+    "when": "Entro il 15 giugno 2028",
+    "at": "2028-06-15T10:00:00.000Z",
+    "items": [
+     "devi inviare la disdetta (preavviso di 60 giorni) — è la data da segnare in calendario"
+    ],
+    "kind": "deadline"
+   },
+   {
+    "when": "15 agosto 2028",
+    "at": "2028-08-15T10:00:00.000Z",
+    "items": [
+     "scade il periodo: se non hai disdetto, il contratto si rinnova"
+    ],
+    "kind": "renewal"
+   },
+   {
+    "when": "Poi fino al 15 agosto 2030",
+    "at": "2030-08-15T10:00:00.000Z",
+    "items": [
+     "nuovo periodo per altri 717,60 €"
+    ],
+    "kind": "renewal"
+   },
+   {
+    "when": "Se esci prima",
+    "at": null,
+    "items": [
+     "paghi una penale di 120,00 €"
+    ],
+    "kind": "penalty"
+   }
+  ],
+  "findings": [
+   {
+    "category": "early_termination_penalty",
+    "severity": 81,
+    "quote": "In caso di recesso prima della scadenza del periodo minimo è dovuta una penale pari a\n120,00 euro, oltre al rimborso degli sconti già goduti"
+   },
+   {
+    "category": "price_change",
+    "severity": 63,
+    "quote": "Il fornitore può modificare unilateralmente il prezzo del servizio dandone\ncomunicazione sul proprio sito"
+   },
+   {
+    "category": "minimum_term",
+    "severity": 56,
+    "quote": "Il contratto ha una durata minima di 24 mesi a decorrere dalla data di\nattivazione"
+   },
+   {
+    "category": "auto_renewal",
+    "severity": 56,
+    "quote": "Alla scadenza il contratto si rinnova automaticamente per un uguale periodo,\nsalvo disdetta da comunicarsi con preavviso di almeno 60 giorni"
+   },
+   {
+    "category": "no_refund",
+    "severity": 50,
+    "quote": "Gli importi versati non sono\nrimborsabili"
+   },
+   {
+    "category": "hidden_costs",
+    "severity": 49,
+    "quote": "Il canone mensile è pari a 29,90 euro, oltre a spese di attivazione una tantum di\n49,00 euro"
+   },
+   {
+    "category": "notice_period",
+    "severity": 38,
+    "quote": "Alla scadenza il contratto si rinnova automaticamente per un uguale periodo,\nsalvo disdetta da comunicarsi con preavviso di almeno 60 giorni"
+   },
+   {
+    "category": "liability_limitation",
+    "severity": 31,
+    "quote": "Il fornitore non sarà in alcun modo responsabile per\ninterruzioni del servizio"
+   }
+  ],
+  "consumer": {
+   "applicable": true,
+   "jurisdiction": "IT",
+   "boost": 20,
+   "disclaimer": "Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.",
+   "flags": [
+    {
+     "id": "eu.unilateral",
+     "title": "Modifica unilaterale di condizioni o prezzo",
+     "note": "Le clausole che consentono al professionista di modificare unilateralmente il contratto o il prezzo senza un giustificato motivo indicato nel contratto, e senza diritto di recesso per il consumatore, sono presunte vessatorie.",
+     "refs": [
+      "Codice del Consumo, art. 33 c. 2 lett. m) e o)",
+      "Direttiva 93/13/CEE, allegato punto 1 lett. j) e l)"
+     ],
+     "categories": [
+      "unilateral_change",
+      "price_change"
+     ],
+     "boost": 12
+    },
+    {
+     "id": "eu.liability",
+     "title": "Esclusione o limitazione di responsabilità",
+     "note": "Escludere o limitare la responsabilità del professionista per danno alla persona, o per inadempimento, rientra tra le clausole presunte vessatorie; alcune sono nulle anche se trattate individualmente.",
+     "refs": [
+      "Codice del Consumo, artt. 33 c. 2 lett. a)-b) e 36 c. 2",
+      "Codice civile, art. 1229"
+     ],
+     "categories": [
+      "liability_limitation"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.withdrawal",
+     "title": "Diritto di recesso di 14 giorni non menzionato",
+     "note": "Negli acquisti a distanza il consumatore ha di norma 14 giorni per recedere senza motivazione, con obblighi informativi precisi a carico del venditore. Il testo analizzato non sembra menzionarlo.",
+     "refs": [
+      "Codice del Consumo, artt. 52-59",
+      "Direttiva 2011/83/UE"
+     ],
+     "categories": [],
+     "boost": 10
+    },
+    {
+     "id": "eu.no_refund",
+     "title": "Esclusione generalizzata dei rimborsi",
+     "note": "Un divieto assoluto di rimborso mal si concilia con il diritto di recesso e con la garanzia legale di conformità, che non possono essere esclusi per contratto con un consumatore.",
+     "refs": [
+      "Codice del Consumo, artt. 52-59 e 128-135",
+      "Direttiva UE 2019/771"
+     ],
+     "categories": [
+      "no_refund"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.tacit_renewal",
+     "title": "Rinnovo tacito con preavviso lungo",
+     "note": "Le clausole che prevedono il rinnovo tacito imponendo al consumatore un termine di disdetta eccessivamente anticipato rispetto alla scadenza sono presunte vessatorie.",
+     "refs": [
+      "Codice del Consumo, art. 33 c. 2 lett. i)"
+     ],
+     "categories": [
+      "auto_renewal"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.vexatious_form",
+     "title": "Clausole onerose senza approvazione specifica",
+     "note": "Nelle condizioni generali predisposte da una parte, alcune clausole particolarmente onerose non hanno effetto se non specificamente approvate per iscritto: una singola spunta cumulativa può non bastare.",
+     "refs": [
+      "Codice civile, art. 1341 c. 2"
+     ],
+     "categories": [],
+     "boost": 6
+    }
+   ]
+  }
+ },
+ "freelance_assignment": {
+  "level": "high_risk",
+  "score": 89,
+  "headline": "Stai firmando un documento vincolante",
+  "summary": "Il testo contiene 5 condizioni rilevanti: cessione di diritti, uso dei contenuti per addestrare ai, arbitrato obbligatorio. 5 condizioni meritano una verifica rispetto alle tutele previste per i consumatori.",
+  "mustRemember": null,
+  "cost": {
+   "currency": "EUR",
+   "displayed": null,
+   "worstCase": null,
+   "worstCaseLabel": null,
+   "lines": [],
+   "horizonMonths": null,
+   "horizonReason": null,
+   "minTerm": null,
+   "notice": null,
+   "penalty": null,
+   "extras": [],
+   "hasRecurring": false,
+   "hasAutoRenewal": false,
+   "uncertain": false,
+   "understated": false
+  },
+  "timeline": [
+   {
+    "when": "Ora",
+    "at": "2026-08-15T10:00:00.000Z",
+    "items": [
+     "il documento risulta firmato"
+    ],
+    "kind": "now"
+   }
+  ],
+  "findings": [
+   {
+    "category": "ip_assignment",
+    "severity": 95,
+    "quote": "La cessione dei diritti è definitiva e comprende il\ndiritto di modificare, adattare e sublicenziare le opere a terzi senza ulteriore compenso"
+   },
+   {
+    "category": "ai_training",
+    "severity": 70,
+    "quote": "I contenuti potranno essere utilizzati per l'addestramento di modelli di intelligenza\nartificiale"
+   },
+   {
+    "category": "arbitration",
+    "severity": 66,
+    "quote": "Ogni controversia sarà devoluta ad arbitrato rituale e il foro competente\nesclusivo è quello di Dublino"
+   },
+   {
+    "category": "jurisdiction",
+    "severity": 41,
+    "quote": "Ogni controversia sarà devoluta ad arbitrato rituale e il foro competente\nesclusivo è quello di Dublino"
+   },
+   {
+    "category": "liability_limitation",
+    "severity": 31,
+    "quote": "La società non sarà responsabile per il mancato pagamento\nda parte dei committenti"
+   }
+  ],
+  "consumer": {
+   "applicable": true,
+   "jurisdiction": "IT",
+   "boost": 17,
+   "disclaimer": "Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.",
+   "flags": [
+    {
+     "id": "eu.arbitration",
+     "title": "Arbitrato obbligatorio imposto al consumatore",
+     "note": "Nei contratti con i consumatori le clausole che impongono il ricorso obbligatorio ad arbitrato, sottraendo la controversia al giudice ordinario, sono elencate tra quelle presunte vessatorie.",
+     "refs": [
+      "Codice del Consumo, art. 33 c. 2 lett. t)",
+      "Direttiva 93/13/CEE"
+     ],
+     "categories": [
+      "arbitration"
+     ],
+     "boost": 12
+    },
+    {
+     "id": "eu.jurisdiction",
+     "title": "Foro diverso da quello del consumatore",
+     "note": "Il consumatore può di regola agire ed essere convenuto davanti al giudice del proprio domicilio; le clausole che spostano la competenza altrove sono presunte vessatorie.",
+     "refs": [
+      "Codice del Consumo, art. 33 c. 2 lett. u)",
+      "Reg. UE 1215/2012, artt. 17-19"
+     ],
+     "categories": [
+      "jurisdiction"
+     ],
+     "boost": 12
+    },
+    {
+     "id": "eu.liability",
+     "title": "Esclusione o limitazione di responsabilità",
+     "note": "Escludere o limitare la responsabilità del professionista per danno alla persona, o per inadempimento, rientra tra le clausole presunte vessatorie; alcune sono nulle anche se trattate individualmente.",
+     "refs": [
+      "Codice del Consumo, artt. 33 c. 2 lett. a)-b) e 36 c. 2",
+      "Codice civile, art. 1229"
+     ],
+     "categories": [
+      "liability_limitation"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.vexatious_form",
+     "title": "Clausole onerose senza approvazione specifica",
+     "note": "Nelle condizioni generali predisposte da una parte, alcune clausole particolarmente onerose non hanno effetto se non specificamente approvate per iscritto: una singola spunta cumulativa può non bastare.",
+     "refs": [
+      "Codice civile, art. 1341 c. 2"
+     ],
+     "categories": [],
+     "boost": 6
+    },
+    {
+     "id": "eu.ai_training",
+     "title": "Uso dei contenuti per addestrare modelli AI",
+     "note": "Se i contenuti includono dati personali serve una base giuridica specifica e informazione trasparente; per le opere protette rileva anche la riserva sui text and data mining.",
+     "refs": [
+      "GDPR, artt. 6 e 13",
+      "Direttiva UE 2019/790, art. 4",
+      "Reg. UE 2024/1689 (AI Act)"
+     ],
+     "categories": [
+      "ai_training"
+     ],
+     "boost": 8
+    }
+   ]
+  }
+ },
+ "predatory_loan": {
+  "level": "critical",
+  "score": 94,
+  "headline": "Vedi 189,00 € / mese, ma stai impegnando fino a 12.830,00 €",
+  "summary": "Il testo contiene 7 condizioni rilevanti: penale di recesso, arbitrato obbligatorio, durata minima vincolante. L’impegno economico potenziale stimato è 12.830,00 € (durata minima dichiarata: 60 mesi). 6 condizioni meritano una verifica rispetto alle tutele previste per i consumatori.",
+  "mustRemember": null,
+  "cost": {
+   "currency": "EUR",
+   "displayed": "189,00 € / mese",
+   "worstCase": 12830,
+   "worstCaseLabel": "12.830,00 €",
+   "lines": [
+    {
+     "label": "189,00 € × 60 mesi",
+     "amount": 11340,
+     "kind": "recurring"
+    },
+    {
+     "label": "Penale di recesso",
+     "amount": 900,
+     "kind": "penalty"
+    },
+    {
+     "label": "Istruttoria",
+     "amount": 350,
+     "kind": "extra"
+    },
+    {
+     "label": "Incasso (4,00 € × 60)",
+     "amount": 240,
+     "kind": "extra"
+    }
+   ],
+   "horizonMonths": 60,
+   "horizonReason": "durata minima dichiarata: 60 mesi",
+   "minTerm": {
+    "months": 60,
+    "raw": "60 mesi",
+    "quote": "60 mesi"
+   },
+   "notice": null,
+   "penalty": {
+    "amount": 900,
+    "quote": "900,00 euro"
+   },
+   "extras": [
+    {
+     "amount": 350,
+     "label": "Istruttoria",
+     "perCycle": false,
+     "raw": "350,00 euro"
+    },
+    {
+     "amount": 4,
+     "label": "Incasso",
+     "perCycle": true,
+     "raw": "4,00 euro"
+    }
+   ],
+   "hasRecurring": true,
+   "hasAutoRenewal": false,
+   "uncertain": false,
+   "understated": true
+  },
+  "timeline": [
+   {
+    "when": "Ora",
+    "at": "2026-08-15T10:00:00.000Z",
+    "items": [
+     "parte l’abbonamento",
+     "il documento risulta firmato"
+    ],
+    "kind": "now"
+   },
+   {
+    "when": "15 agosto 2031",
+    "at": "2031-08-15T10:00:00.000Z",
+    "items": [
+     "scade il periodo di impegno"
+    ],
+    "kind": "end"
+   },
+   {
+    "when": "Se esci prima",
+    "at": null,
+    "items": [
+     "paghi una penale di 900,00 €"
+    ],
+    "kind": "penalty"
+   }
+  ],
+  "findings": [
+   {
+    "category": "early_termination_penalty",
+    "severity": 81,
+    "quote": "In caso di estinzione anticipata è dovuta una penale pari a 900,00 euro"
+   },
+   {
+    "category": "arbitration",
+    "severity": 66,
+    "quote": "Ogni controversia sarà devoluta ad arbitrato rituale vincolante;"
+   },
+   {
+    "category": "minimum_term",
+    "severity": 56,
+    "quote": "Il contratto ha una durata minima di 60 mesi"
+   },
+   {
+    "category": "no_refund",
+    "severity": 50,
+    "quote": "Gli importi versati non sono rimborsabili in alcun caso"
+   },
+   {
+    "category": "hidden_costs",
+    "severity": 49,
+    "quote": "Il finanziamento prevede il rimborso in 60 rate mensili da 189,00 euro ciascuna,\noltre a spese di istruttoria una tantum di 350,00 euro e spese di incasso di 4,00 euro per\nogni rata"
+   },
+   {
+    "category": "jurisdiction",
+    "severity": 41,
+    "quote": "Il foro competente esclusivo è quello di Dublino"
+   },
+   {
+    "category": "liability_limitation",
+    "severity": 31,
+    "quote": "Il finanziatore non sarà in alcun modo responsabile per danni derivanti dall'esecuzione\ndel contratto"
+   }
+  ],
+  "consumer": {
+   "applicable": true,
+   "jurisdiction": "IT",
+   "boost": 21,
+   "disclaimer": "Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.",
+   "flags": [
+    {
+     "id": "eu.arbitration",
+     "title": "Arbitrato obbligatorio imposto al consumatore",
+     "note": "Nei contratti con i consumatori le clausole che impongono il ricorso obbligatorio ad arbitrato, sottraendo la controversia al giudice ordinario, sono elencate tra quelle presunte vessatorie.",
+     "refs": [
+      "Codice del Consumo, art. 33 c. 2 lett. t)",
+      "Direttiva 93/13/CEE"
+     ],
+     "categories": [
+      "arbitration"
+     ],
+     "boost": 12
+    },
+    {
+     "id": "eu.jurisdiction",
+     "title": "Foro diverso da quello del consumatore",
+     "note": "Il consumatore può di regola agire ed essere convenuto davanti al giudice del proprio domicilio; le clausole che spostano la competenza altrove sono presunte vessatorie.",
+     "refs": [
+      "Codice del Consumo, art. 33 c. 2 lett. u)",
+      "Reg. UE 1215/2012, artt. 17-19"
+     ],
+     "categories": [
+      "jurisdiction"
+     ],
+     "boost": 12
+    },
+    {
+     "id": "eu.liability",
+     "title": "Esclusione o limitazione di responsabilità",
+     "note": "Escludere o limitare la responsabilità del professionista per danno alla persona, o per inadempimento, rientra tra le clausole presunte vessatorie; alcune sono nulle anche se trattate individualmente.",
+     "refs": [
+      "Codice del Consumo, artt. 33 c. 2 lett. a)-b) e 36 c. 2",
+      "Codice civile, art. 1229"
+     ],
+     "categories": [
+      "liability_limitation"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.withdrawal",
+     "title": "Diritto di recesso di 14 giorni non menzionato",
+     "note": "Negli acquisti a distanza il consumatore ha di norma 14 giorni per recedere senza motivazione, con obblighi informativi precisi a carico del venditore. Il testo analizzato non sembra menzionarlo.",
+     "refs": [
+      "Codice del Consumo, artt. 52-59",
+      "Direttiva 2011/83/UE"
+     ],
+     "categories": [],
+     "boost": 10
+    },
+    {
+     "id": "eu.no_refund",
+     "title": "Esclusione generalizzata dei rimborsi",
+     "note": "Un divieto assoluto di rimborso mal si concilia con il diritto di recesso e con la garanzia legale di conformità, che non possono essere esclusi per contratto con un consumatore.",
+     "refs": [
+      "Codice del Consumo, artt. 52-59 e 128-135",
+      "Direttiva UE 2019/771"
+     ],
+     "categories": [
+      "no_refund"
+     ],
+     "boost": 10
+    },
+    {
+     "id": "eu.vexatious_form",
+     "title": "Clausole onerose senza approvazione specifica",
+     "note": "Nelle condizioni generali predisposte da una parte, alcune clausole particolarmente onerose non hanno effetto se non specificamente approvate per iscritto: una singola spunta cumulativa può non bastare.",
+     "refs": [
+      "Codice civile, art. 1341 c. 2"
+     ],
+     "categories": [],
+     "boost": 6
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,62 @@
+Esercizio del diritto di recesso — Saas_fair
+recesso-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Spett.le Saas_fair
+[Indirizzo del fornitore / PEC / email indicata nelle condizioni]
+
+Luogo e data: ______________, 15 agosto 2026
+
+Trasmessa a mezzo: ☐ PEC   ☐ raccomandata A/R   ☐ modulo online   ☐ email
+
+Oggetto: esercizio del diritto di recesso
+
+Spettabile Saas_fair,
+
+con la presente comunico il mio recesso dal contratto avente ad oggetto la fornitura
+del servizio "SaaS mensile senza vincoli" (impegno stimato 12,00 €), concluso in data 15 agosto 2026.
+
+Esercito il diritto di recesso previsto per i contratti a distanza, entro il termine di
+quattordici giorni dalla conclusione del contratto, senza necessità di motivazione e
+senza alcun onere a mio carico.
+
+Chiedo pertanto:
+  1. la cessazione immediata del servizio e di ogni addebito collegato;
+  2. il rimborso di quanto eventualmente già corrisposto, entro quattordici
+     giorni dal ricevimento della presente, con lo stesso mezzo di pagamento utilizzato;
+  3. conferma scritta della ricezione della presente comunicazione.
+
+Intestatario del contratto: Mario Rossi
+Indirizzo: Via Roma 1, 20100 Milano
+Email di contatto: mario.rossi@example.com
+Codice cliente / numero contratto: C-42
+Sottoscritto tramite: https://saas_fair.test/checkout
+
+Distinti saluti,
+
+Mario Rossi
+
+Firma _______________________
+Data 15 agosto 2026
+
+—
+Riferimenti normativi utili:
+  · D.Lgs. 206/2005 (Codice del Consumo), artt. 52-59 — diritto di recesso nei contratti a distanza
+  · Allegato I, parte B, del Codice del Consumo — modulo di recesso tipo
+  · Direttiva 2011/83/UE
+
+Documento generato automaticamente da AnteFirma a partire dalle condizioni
+contrattuali analizzate. Verifica i dati fra parentesi quadre prima di inviarlo. Non
+costituisce consulenza legale.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia con un mezzo che lasci prova della data: PEC o raccomandata A/R.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+D.Lgs. 206/2005 (Codice del Consumo), artt. 52-59 — diritto di recesso nei contratti a distanza
+Allegato I, parte B, del Codice del Consumo — modulo di recesso tipo
+Direttiva 2011/83/UE

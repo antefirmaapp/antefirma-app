@@ -1,0 +1,60 @@
+Baja por modificación unilateral — Saas_fair
+baja-por-modificacion-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+A la atención de Saas_fair
+[Dirección de la empresa / email indicado en las condiciones]
+
+Lugar y fecha: ______________, 15 de agosto de 2026
+
+Enviada por: ☐ burofax   ☐ correo certificado con acuse de recibo   ☐ formulario online   ☐ email
+
+Asunto: baja por modificación unilateral de las condiciones del contrato
+
+Estimados señores de Saas_fair:
+
+He detectado una modificación de las condiciones del contrato relativo a "SaaS mensile senza vincoli" (compromiso estimado 12,00 €),
+respecto a las que acepté el 15 de agosto de 2026.
+
+La modificación afecta a las condiciones económicas o de prestación del servicio.
+
+Al no aceptar las nuevas condiciones, les comunico la baja del contrato con efecto inmediato,
+sin penalización ni gastos de desconexión, por tratarse de una modificación unilateral
+que no he solicitado.
+
+Por ello les solicito:
+  1. la confirmación por escrito de la baja y de su fecha de efecto;
+  2. el cese de cualquier cargo;
+  3. la devolución de las cantidades abonadas por periodos posteriores a la baja.
+
+Titular del contrato: Mario Rossi
+Dirección: Via Roma 1, 20100 Milano
+Email de contacto: mario.rossi@example.com
+Código de cliente / número de contrato: C-42
+Contratado en: https://saas_fair.test/checkout
+
+Atentamente,
+
+Mario Rossi
+
+Firma _______________________
+Fecha 15 de agosto de 2026
+
+—
+Normativa de referencia:
+  · Real Decreto Legislativo 1/2007, art. 85.3 — modificación unilateral sin motivos válidos
+  · Directiva 93/13/CEE, anexo, punto 1, letras j) y l)
+
+Documento generado automáticamente por AnteFirma a partir de las condiciones
+analizadas. Revisa los datos entre corchetes antes de enviarlo. No constituye
+asesoramiento legal.
+
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia con un mezzo che lasci prova della data: burofax o raccomandata con ricevuta di ritorno.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Real Decreto Legislativo 1/2007, art. 85.3 — modificación unilateral sin motivos válidos
+Directiva 93/13/CEE, anexo, punto 1, letras j) y l)

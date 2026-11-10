@@ -18,7 +18,7 @@
 import { esc } from './render.js';
 import { formatMoney } from '../core/text.js';
 import { commitmentState, costOfDoingNothing, portfolioSummary, formatDate } from '../core/commitments.js';
-import { LETTER_LABELS } from '../core/letter.js';
+import { LETTER_LABELS, LETTER_KINDS } from '../core/letter.js';
 import { t, tn, locale, getLang } from '../i18n/index.js';
 import { helpUrl } from '../core/help.js';
 
