@@ -22,6 +22,6 @@ jobs:
       - name: Web app build
         run: node tools/web-build.mjs
       - name: Install Chromium for the end-to-end check
-        run: npm install --no-save playwright@1.55.0 && npx playwright install --with-deps chromium
+        run: npm install --no-save playwright@1.63.0 && npx playwright install --with-deps chromium
       - name: Extension end-to-end check
         run: xvfb-run -a npm run test:e2e
