@@ -50,6 +50,8 @@ body {
 .brand { display: flex; align-items: center; gap: 9px; }
 .brand strong { display: block; font-size: 13.5px; }
 .brand span { display: block; font-size: 11px; color: var(--muted); }
+/* Stretto (il pannello di Chrome ha già il nome sopra): via il motto, restano analisi rimaste, ? e ⚙. */
+@media (max-width: 520px) { .brand span { display: none; } }
 
 .icon-btn {
   background: none; border: 1px solid var(--line); border-radius: 8px;
@@ -113,6 +115,8 @@ button.link { background: none; border: none; color: var(--muted); font: inherit
 
 .muted { color: var(--muted); }
 .small { font-size: 11.5px; line-height: 1.45; }
+a.icon-btn { text-decoration: none; font-weight: 700; display: inline-grid; place-items: center; }
+.hint-first { margin: 6px 0 0; padding: 6px 10px; border-radius: 8px; background: rgba(255, 224, 74, .2); color: inherit; }
 
 .status {
   padding: 10px 12px; border-radius: 9px; background: var(--soft);

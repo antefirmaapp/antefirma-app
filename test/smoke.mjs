@@ -162,7 +162,7 @@ try {
   await opt.click('#save');
   await opt.waitForTimeout(1500);
   await shot(opt, 'impostazioni-es');
-  check('le impostazioni passano allo spagnolo', (await opt.textContent('#piano h2')) === 'Plan' && (await opt.textContent('#save')) === 'Guardar');
+  check('le impostazioni passano allo spagnolo', (await opt.textContent('#piano h2')).replace(/\s*\?$/, '') === 'Plan' && /ayuda\/planes-y-clave/.test(await opt.getAttribute('#piano .help-q', 'href')) && (await opt.textContent('#save')) === 'Guardar');
   check('il piano si legge in spagnolo', (await opt.textContent('#plan-summary')).includes('Plan gratuito'));
 
   // L'avviso in inglese.

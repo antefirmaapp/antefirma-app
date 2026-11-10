@@ -177,6 +177,19 @@ Fa: testo incollato e PDF, impegni, scadenze, lettere, piano e chiave.
 Non può: fermare i click sugli altri siti o leggere le altre schede (per quello
 serve l'estensione). Il server deve ammettere l'origine `https://web.antefirma.app` (`APP_ORIGINS`).
 
+## Guida, schermate e video
+
+Il centro di aiuto è sul sito (`antefirma.app/aiuto/`, testi in `antefirma-site/help.mjs`).
+Il «?» del pannello, delle impostazioni e dell'avviso ci porta con `src/core/help.js`
+(stesse chiavi e stessi indirizzi: lo controlla `test/help.test.mjs`).
+
+A ogni versione che cambia l'aspetto, si rifanno le immagini e il manuale:
+
+    node tools/help-shots.mjs                  # schermate e video 15–20 s, it/en/es → ../antefirma-site/assets/help
+    (cd ../antefirma-site && node tools/manual-pdf.mjs)   # pagina Team + manuale PDF nelle tre lingue
+
+Entrambi usano un server finto e un sito inventato: nessuna analisi spesa, nessun dato vero.
+
 ## Safari (Mac)
 
 ```bash

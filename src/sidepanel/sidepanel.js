@@ -10,6 +10,7 @@ import { formatMoney } from '../core/text.js';
 import { t, setLang, resolveLang, locale, getLang } from '../i18n/index.js';
 import { translateDom } from '../i18n/dom.js';
 import { SAMPLES } from '../core/samples.js';
+import { helpUrl } from '../core/help.js';
 
 const $ = (sel) => document.querySelector(sel);
 const state = { source: null, busy: false };
@@ -126,7 +127,7 @@ function paintQuota(q) {
     el.id = 'quota';
     el.className = 'quota';
     el.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#piano') }));
-    $('#open-options').before(el);
+    $('#open-help').before(el);
   }
   el.textContent = t('{n} di {m} analisi rimaste questo mese', { n: m.remaining, m: m.limit });
   el.classList.toggle('low', m.remaining <= 1);
@@ -394,7 +395,11 @@ const TABS = [...document.querySelectorAll('.tab')];
  * dentro la barra ci si muove con le frecce, non con Tab, che deve saltare
  * direttamente al contenuto della scheda aperta.
  */
+/** Il «?» porta alla guida della scheda aperta. */
+const HELP_OF_TAB = { analyze: 'analizzare', commitments: 'impegni', history: 'problemi' };
 function selectTab(name, { focus = false } = {}) {
+  const help = document.getElementById('open-help');
+  if (help) help.href = helpUrl(HELP_OF_TAB[name] || '', getLang());
   for (const t of TABS) {
     const on = t.dataset.tab === name;
     t.classList.toggle('active', on);

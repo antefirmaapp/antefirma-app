@@ -5,6 +5,7 @@
 import { PROTECTION_LABELS } from '../core/constants.js';
 import { t, setLang, resolveLang, locale, getLang } from '../i18n/index.js';
 import { translateDom } from '../i18n/dom.js';
+import { helpUrl } from '../core/help.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -296,6 +297,17 @@ if (new URLSearchParams(location.search).has('welcome')) {
   $('#welcome').hidden = false;
 }
 
+/** Un «?» accanto al titolo di ogni sezione: apre la guida su quell'argomento. */
+function addHelpLinks() {
+  for (const h of document.querySelectorAll('h2[data-help]')) {
+    const a = document.createElement('a');
+    a.className = 'help-q'; a.textContent = '?'; a.target = '_blank'; a.rel = 'noopener';
+    a.href = helpUrl(h.dataset.help, getLang());
+    a.title = a.ariaLabel = t('Aiuto: {s}', { s: h.textContent.trim() });
+    h.append(' ', a);
+  }
+}
+
 // La lingua prima di tutto: la pagina è scritta in italiano e si traduce qui.
 let initialLang = 'auto';
 (async () => {
@@ -307,6 +319,7 @@ let initialLang = 'auto';
   translateDom(document.body);
   document.title = t('AnteFirma — Impostazioni');
   adaptForWeb();
+  addHelpLinks();
   load();
   showServerStatus();
   showPlan();

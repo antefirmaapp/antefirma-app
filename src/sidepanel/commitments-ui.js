@@ -19,7 +19,8 @@ import { esc } from './render.js';
 import { formatMoney } from '../core/text.js';
 import { commitmentState, costOfDoingNothing, portfolioSummary, formatDate } from '../core/commitments.js';
 import { LETTER_LABELS } from '../core/letter.js';
-import { t, tn, locale } from '../i18n/index.js';
+import { t, tn, locale, getLang } from '../i18n/index.js';
+import { helpUrl } from '../core/help.js';
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -462,8 +463,10 @@ export async function showLetter(id, kind = null, lang = null) {
     `
       <div class="letter-opts"><select id="letter-kind" aria-label="${esc(t('Tipo di lettera'))}">${options}</select>
       <select id="letter-lang" aria-label="${esc(t('Lingua della lettera'))}" title="${esc(t('La lingua del fornitore a cui la mandi'))}">${langs}</select></div>
+      ${firstTime('letter-lang') ? `<p class="hint-first muted small">${esc(t('Tipo e lingua si cambiano qui: la lingua è quella del fornitore, non la tua.'))}</p>` : ''}
       <ul class="checklist">${letter.checklist.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>
       <pre id="letter-text">${esc(letter.text)}</pre>
+      <p class="muted small"><a href="${helpUrl('lettera', getLang())}" target="_blank" rel="noopener">${esc(t('Come spedirla e quale tipo scegliere'))}</a></p>
     `,
     [
       { label: t('Copia'), act: (btn) => copy(letter.text, btn) },
@@ -473,6 +476,15 @@ export async function showLetter(id, kind = null, lang = null) {
 
   $('#letter-kind').addEventListener('change', (e) => showLetter(id, e.target.value, $('#letter-lang').value));
   $('#letter-lang').addEventListener('change', (e) => showLetter(id, $('#letter-kind').value, e.target.value));
+}
+
+/** Una riga di spiegazione che compare solo le prime volte (tre aperture), poi non disturba più. */
+function firstTime(key) {
+  try {
+    const k = `af-hint-${key}`, n = Number(localStorage.getItem(k) || 0);
+    localStorage.setItem(k, String(n + 1));
+    return n < 3;
+  } catch { return false; }
 }
 
 async function downloadIcs(id) {

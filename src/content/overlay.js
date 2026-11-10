@@ -224,6 +224,7 @@
        Serve a chi vuole controllare, non a chi deve decidere in tre secondi. */
     .provenance { font-size: 11px; color: #6b7280; padding: 0 22px 4px; line-height: 1.5; }
     .disclaimer { font-size: 11px; color: #6b7280; padding: 0 22px 12px; line-height: 1.45; }
+    .disclaimer a.help { color: inherit; text-decoration: underline; white-space: nowrap; }
     @keyframes pulse { 0%, 100% { opacity: 1 } 50% { opacity: .45 } }
     .loading { padding: 40px 22px; text-align: center; }
     .spinner {
@@ -776,7 +777,7 @@
               : ''
           }
           <div class="provenance">${esc((verdict.engine?.cached ? t('Analisi già fatta per questo testo') : t('Analisi automatica di AnteFirma')) + quotaNote(verdict))}</div>
-          <div class="disclaimer">${esc(consumer.disclaimer || t('Analisi automatica a scopo informativo. Non è un parere legale.'))}</div>
+          <div class="disclaimer">${esc(consumer.disclaimer || t('Analisi automatica a scopo informativo. Non è un parere legale.'))} <a class="help" href="https://antefirma.app${{ en: '/en/help/the-warning/', es: '/es/ayuda/el-aviso/' }[I.lang] || '/aiuto/l-avviso/'}" target="_blank" rel="noopener">${esc(t('Come leggere l’avviso'))}</a></div>
         </div>
       `,
         { role: 'alertdialog', labelledby: 'v-title' }

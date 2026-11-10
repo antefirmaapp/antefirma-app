@@ -39,7 +39,9 @@ header p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
   background: var(--card); border: 1px solid var(--line); border-radius: 13px;
   padding: 18px 20px; margin-bottom: 14px;
 }
-.card h2 { margin: 0 0 4px; font-size: 15px; }
+.card h2 { margin: 0 0 4px; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.help-q { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; border: 1px solid currentColor; font-size: 11px; font-weight: 700; color: var(--muted, #6b7280); text-decoration: none; opacity: .75; }
+.help-q:hover, .help-q:focus-visible { opacity: 1; color: inherit; }
 .lead { color: var(--muted); font-size: 12.5px; line-height: 1.55; margin: 0 0 14px; }
 .lead.small { margin-top: 12px; margin-bottom: 0; }
 
