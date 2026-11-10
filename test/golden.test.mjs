@@ -28,7 +28,7 @@ async function verdictOf(c, lang = 'it') {
   return analyze({
     text: c.text, ctx: { url: `https://${c.id}.test/checkout`, title: c.label, pricing: c.pricing || {}, terms: {}, form: {} },
     actionType: c.actionType, remote: async () => structuredClone(RESPONSES[c.id]),
-    settings: settings({ profile: c.profile || DEFAULT_SETTINGS.profile }), now: T0,
+    settings: settings({ profile: c.profile || DEFAULT_SETTINGS.profile, uiLang: lang }), now: T0,
   });
 }
 

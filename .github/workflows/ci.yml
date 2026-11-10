@@ -1,5 +1,6 @@
-# Runs on every push and pull request: lint, unit + golden + contract tests with
-# coverage thresholds, then the extension end-to-end check in a real Chromium.
+# Runs on every push and pull request: lint, the English check, unit + golden +
+# contract + property tests with coverage thresholds, then the extension and the
+# web app in a real Chromium (with axe-core accessibility checks).
 name: CI
 on:
   push:
@@ -26,3 +27,5 @@ jobs:
         run: npm install --no-save playwright@1.63.0 && npx playwright install --with-deps chromium
       - name: Extension end-to-end check
         run: xvfb-run -a npm run test:e2e
+      - name: Web app in a real browser (first visit, consent, verdict, accessibility, phone)
+        run: node test/web.mjs

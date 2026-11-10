@@ -30,6 +30,21 @@ const check = (name, ok, detail = '') => {
   results.push(ok);
   console.log(`${ok ? '  ok  ' : 'NOT OK'}  ${name}${detail ? ` — ${detail}` : ''}`);
 };
+/**
+ * Accessibility with axe-core: no "serious" or "critical" violation. Injected
+ * through the DevTools protocol, so the extension pages' CSP doesn't stop it;
+ * axe also looks inside the warning's open shadow root.
+ */
+const AXE = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
+const a11y = async (pg, name, context = 'document') => {
+  if (!(await pg.evaluate(() => Boolean(window.axe)))) await pg.evaluate(AXE);
+  const found = await pg.evaluate(async (sel) => {
+    const r = await window.axe.run(sel === 'document' ? document : sel, { resultTypes: ['violations'] });
+    return r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
+      .map((v) => `${v.id} (${v.nodes.slice(0, 2).map((n) => n.target.flat().join(' ')).join(' | ')})`);
+  }, context);
+  check(`${name}: no serious accessibility problems`, found.length === 0, found.join('; '));
+};
 
 // The demo page, served locally.
 const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.pdf': 'application/pdf' };
@@ -123,6 +138,8 @@ try {
   check('the warning says how many free analyses are left', (await shadow('.provenance')).includes('ti restano 4 analisi gratuite'));
   const box = await page.evaluate(() => { const r = document.querySelector('antefirma-alert').getBoundingClientRect(); return { w: r.width, h: r.height }; });
   check('the warning covers the page', box.w > 300 && box.h > 300);
+  await a11y(page, 'the warning', 'antefirma-alert');
+  await a11y(opt, 'settings');
   check('settings show the installation code', /^[0-9a-f-]{36}$/.test(await opt.textContent('#install-id')));
   await alert(page).locator('details.why > summary').click(); // "Why?": clauses and exact sentences
   await alert(page).locator('[data-feedback]').first().click();
@@ -198,6 +215,7 @@ try {
   await panel.click('#tab-btn-commitments');
   await panel.waitForTimeout(800);
   check('the commitment is recorded with its deadline', (await panel.locator('.c-item:not(.example)').count()) === 1);
+  await a11y(panel, 'the side panel with a commitment');
   // The welcome page
   const wel = await context.newPage();
   wel.on('pageerror', (e) => errors.push(`welcome: ${e.message}`));
@@ -205,6 +223,7 @@ try {
   await wel.waitForTimeout(800);
   check('the welcome page opens translated and with consent already given', (await wel.textContent('h1')) === 'Welcome to AnteFirma' && await wel.isVisible('#granted'));
   await shot(wel, 'benvenuto-en');
+  await a11y(wel, 'the welcome page');
 } catch (err) {
   check('the run reaches the end', false, err.message);
 } finally {

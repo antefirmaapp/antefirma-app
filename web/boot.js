@@ -48,10 +48,9 @@ const W = {
   hi: tw('webWelcomeTitle'), steps: [tw('webWelcomeStep1'), tw('webWelcomeStep2'), tw('webWelcomeStep3')],
   note: tw('webWelcomeNote'), sample: tw('webWelcomeSample'), paste: tw('webWelcomePaste'),
 };
-const L2 = W || { ph: ['', ''] };
 const result = document.getElementById('result');
-if (result && W) {
-  const ph = () => { if (!result.innerHTML.trim()) result.innerHTML = `<div class="web-placeholder"><strong>${L2.ph[0]}</strong>${L2.ph[1]}</div>`; };
+if (result) {
+  const ph = () => { if (!result.innerHTML.trim()) result.innerHTML = `<div class="web-placeholder"><strong>${W.ph[0]}</strong>${W.ph[1]}</div>`; };
   ph();
   // When an analysis clears the result, the placeholder must not cover it again.
   new MutationObserver(() => { if (!result.innerHTML.trim() && !document.getElementById('status')?.hidden) return; ph(); }).observe(result, { childList: true });
@@ -60,7 +59,7 @@ if (result && W) {
 // ── welcome on first opening ────────────────────────────────────────────────
 let seen = false;
 try { seen = !!localStorage.getItem('af-web-welcome'); } catch { /* storage unavailable */ }
-if (W && !seen && document.getElementById('tab-analyze')) {
+if (!seen && document.getElementById('tab-analyze')) {
   const box = document.createElement('div');
   box.className = 'web-welcome';
   box.setAttribute('role', 'dialog');

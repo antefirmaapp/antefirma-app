@@ -114,7 +114,7 @@ function renderFindings(list) {
           </div>
           <div class="plain">${esc(f.plain || f.why || '')}</div>
           ${f.quote ? `<div class="quote">“${esc(f.quote)}”</div>` : ''}
-          ${tags.length ? `<div class="plain" style="opacity:.75;font-size:11px">${esc(tags.join(' · '))}</div>` : ''}
+          ${tags.length ? `<div class="plain tags">${esc(tags.join(' · '))}</div>` : ''}
         </div>`;
       })
       .join('')}`;
