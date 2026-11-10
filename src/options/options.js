@@ -125,7 +125,7 @@ async function save() {
     });
     // Cambiata la lingua: la pagina si ridisegna nella nuova.
     if ($('#uiLang').value !== initialLang) { location.reload(); return; }
-    flash(t('Impostazioni salvate.'));
+    flash(t('Salvato ✓'));
   } catch (err) {
     flash(t('Errore: {x}', { x: err.message }));
   } finally {
@@ -234,6 +234,20 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) show
 
 $('#save').addEventListener('click', save);
 
+// Si salva da sé: le caselle e i menu subito, i campi di testo quando li lasci. «Salva» resta per chi lo cerca.
+// La lingua no: cambiarla ridisegna la pagina, e lo fa «Salva», quando hai finito.
+const AUTO = '#enabled, #blockFrom, #jurisdiction, #minBlockAmount, #trackCommitments, #reminders, #watchChanges, #watchUsesRemote, #id-name, #id-email, #id-address, #id-customer, #allowlist, #profile-grid input';
+let autoTimer = null;
+document.addEventListener('change', (e) => {
+  if (!e.target.matches?.(AUTO)) return;
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(save, 250);
+});
+$('#uiLang').addEventListener('change', () => { $('#save-status').textContent = t('Premi Salva per cambiare lingua'); });
+document.addEventListener('input', (e) => {
+  if (e.target.matches?.(AUTO) && /^(INPUT|TEXTAREA)$/.test(e.target.tagName) && e.target.type !== 'checkbox') $('#save-status').textContent = t('Modifiche non salvate');
+});
+
 $('#grant-consent').addEventListener('click', async () => {
   const { remoteConsentAt } = await send('GRANT_CONSENT');
   showConsent(remoteConsentAt);
@@ -297,6 +311,36 @@ if (new URLSearchParams(location.search).has('welcome')) {
   $('#welcome').hidden = false;
 }
 
+/**
+ * L'indice delle sezioni: fisso a sinistra sugli schermi larghi, con la
+ * sezione in vista evidenziata. Sugli schermi stretti non c'è (CSS).
+ */
+function addToc() {
+  const nav = document.createElement('nav');
+  nav.className = 'toc';
+  nav.setAttribute('aria-label', t('Sezioni'));
+  const links = [];
+  for (const sec of document.querySelectorAll('section.card')) {
+    const h = sec.querySelector('h2');
+    if (!h || sec.hidden) continue;
+    if (!sec.id) sec.id = 's-' + (h.dataset.help || links.length);
+    const a = document.createElement('a');
+    a.href = '#' + sec.id;
+    a.textContent = h.firstChild?.textContent.trim() || h.textContent.trim();
+    nav.append(a);
+    links.push([sec, a]);
+  }
+  document.body.append(nav);
+  // Evidenziata: l'ultima sezione il cui titolo ha superato un terzo della finestra.
+  const mark = () => {
+    let cur = links[0]?.[0];
+    for (const [sec] of links) if (sec.getBoundingClientRect().top <= innerHeight / 3) cur = sec;
+    for (const [sec, a] of links) a.classList.toggle('on', sec === cur);
+  };
+  addEventListener('scroll', mark, { passive: true });
+  mark();
+}
+
 /** Un «?» accanto al titolo di ogni sezione: apre la guida su quell'argomento. */
 function addHelpLinks() {
   for (const h of document.querySelectorAll('h2[data-help]')) {
@@ -320,6 +364,7 @@ let initialLang = 'auto';
   document.title = t('AnteFirma — Impostazioni');
   adaptForWeb();
   addHelpLinks();
+  addToc();
   load();
   showServerStatus();
   showPlan();

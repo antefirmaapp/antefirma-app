@@ -415,6 +415,8 @@
         ctx: {
           url: location.href,
           title: document.title,
+          // Il nome del venditore, se la pagina lo dichiara: serve quando a incassare è Paddle, Stripe…
+          merchant: (document.querySelector('meta[property="og:site_name"],meta[name="application-name"]')?.content || '').trim().slice(0, 60) || null,
           buttonText: labelOf(target),
           actionType,
           pricing: extractPricing(target),

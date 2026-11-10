@@ -84,11 +84,28 @@ export function buildCommitment({ verdict = {}, snapshot = null, decision = 'pro
   };
 }
 
+/**
+ * Chi incassa per conto d'altri: il nome del dominio è quello del servizio di
+ * pagamento, non di chi vende. Lì il venditore si cerca nel titolo della pagina.
+ */
+const PAYMENT_HOSTS = /(^|\.)(paddle\.com|stripe\.com|paypal\.com|lemonsqueezy\.com|chargebee\.com|recurly\.com|fastspring\.com|gumroad\.com|2checkout\.com|checkout\.com|adyen\.com|mollie\.com|klarna\.com|satispay\.com|nexi\.it|sumup\.com|shopify\.com)$/i;
+const CHECKOUT_WORDS = /\b(checkout|check-out|pagamento|pago|payment|pay|paga|secure|sicuro|seguro|cassa|ordine|order|pedido|paddle|stripe|paypal|lemon ?squeezy|chargebee|recurly|fastspring|gumroad|klarna|sandbox)\b/gi;
+export const isPaymentHost = (host = '') => PAYMENT_HOSTS.test(String(host).replace(/^www\./, ''));
+
+/** Il venditore dal titolo di una pagina di pagamento («Checkout – Acme Pro» → «Acme Pro»); null se non c'è. */
+export function merchantFromTitle(title = '') {
+  const parts = String(title).split(/\s+[-–—|·:]\s+|\s*\|\s*/).map((p) => p.replace(CHECKOUT_WORDS, '').replace(/\s{2,}/g, ' ').trim())
+    .filter((p) => p.length >= 2 && /\p{L}/u.test(p));
+  return parts[0] ? parts[0].slice(0, 60) : null;
+}
+
 /** Nome leggibile del fornitore, ricavato da titolo o dominio. */
 export function providerName(verdict = {}) {
   const host = (verdict.host || '').replace(/^www\./, '');
   // Senza sito né titolo il nome resta vuoto: lettera e pannello mettono il segnaposto nella loro lingua.
   if (!host) return verdict.title || null;
+  // Una pagina di Paddle, Stripe…: il nome giusto è nel titolo; altrimenti vuoto, e si rinomina dal pannello.
+  if (isPaymentHost(host)) return (verdict.merchant && merchantFromTitle(verdict.merchant)) || merchantFromTitle(verdict.title || '');
   const base = host.split('.')[0];
   return base ? base.charAt(0).toUpperCase() + base.slice(1) : host;
 }

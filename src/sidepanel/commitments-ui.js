@@ -219,7 +219,7 @@ function renderPortfolio(s) {
   return `
     <div class="big">${esc(totals)}</div>
     <div class="cap">${esc(tn(s.count, 'esposizione complessiva su {n} impegno attivo', 'esposizione complessiva su {n} impegni attivi'))}</div>
-    ${s.next ? `<div class="next">${esc(t('Prossima scadenza:'))} <strong>${esc(s.next.c.provider || s.next.c.host || '')}</strong> — ${esc(s.next.state.label.toLowerCase())}</div>` : ''}
+    ${s.next ? `<div class="next">${esc(t('Prossima scadenza:'))} <strong>${esc(s.next.c.provider || s.next.c.host || t('Senza nome'))}</strong> — ${esc(s.next.state.label.toLowerCase())}</div>` : ''}
   `;
 }
 
@@ -231,13 +231,14 @@ function renderItem(c, state = commitmentState(c)) {
   return `
     <div class="c-item" data-commitment="${id}">
       <div class="c-top">
-        <span class="c-name">${esc(c.provider || c.host || t('Impegno'))}</span>
+        ${c.provider || c.host
+          ? `<span class="c-name">${esc(c.provider || c.host)}</span>`
+          : `<button class="c-name c-unnamed" data-act="rename" data-id="${id}" title="${esc(t('Rinomina'))}">${esc(t('Senza nome'))} ✎</button>`}
         <span class="c-amount">${c.worstCase != null ? esc(formatMoney(c.worstCase, c.currency)) : ''}</span>
       </div>
-      ${c.headline ? `<div class="c-head">${esc(c.headline)}</div>` : ''}
+      ${subline(c) ? `<div class="c-head">${esc(subline(c))}</div>` : ''}
       <span class="c-state" data-urgency="${esc(state.urgency)}">${esc(state.label)}</span>
       ${doing && state.urgency !== 'done' ? `<div class="c-nothing">${esc(doing.label)}</div>` : ''}
-      ${c.renewalAt ? `<div class="c-nothing">${esc(t('Scadenza del periodo: {d}.', { d: formatDate(new Date(c.renewalAt)) }).replace(/\.$/, ''))}${c.noticeMonths ? ` · ${esc(t('preavviso {n} giorni', { n: Math.round(c.noticeMonths * 30) }))}` : ''}</div>` : ''}
       ${lastChange && lastChange.changed ? `<div class="c-change">⚠️ ${esc(lastChange.summary)}</div>` : ''}
       ${lastChange && !lastChange.changed ? `<div class="c-nothing">✓ ${esc(t('Verificato il {d}: condizioni invariate.', { d: new Date(lastChange.checkedAt).toLocaleDateString(locale()) }))}</div>` : ''}
       ${state.urgency !== 'done' && c.deadlineAt && !c.inCalendar
@@ -256,9 +257,44 @@ function renderItem(c, state = commitmentState(c)) {
   `;
 }
 
+/**
+ * La riga sotto il nome: ciò che non si legge già a destra (il totale).
+ * Quando finisce o si rinnova, con il preavviso; altrimenti quanto costa uscire.
+ */
+function subline(c) {
+  const notice = c.noticeMonths ? ' · ' + t('preavviso {n} giorni', { n: Math.round(c.noticeMonths * 30) }) : '';
+  if (c.renewalAt) {
+    const d = formatDate(new Date(c.renewalAt));
+    return (c.autoRenewal ? t('Si rinnova da solo il {d}', { d }) : t('Il periodo finisce il {d}', { d })) + notice;
+  }
+  if (c.penalty) return t('Uscire prima costa {x}', { x: formatMoney(c.penalty, c.currency) });
+  return '';
+}
+
+/** Il nome dell'impegno, deciso da chi lo usa: quello ricavato dal sito può essere sbagliato (Paddle, Stripe…). */
+function renameCommitment(id) {
+  const c = cache.find((x) => x.id === id);
+  if (!c) return;
+  closeMenus();
+  openModal(t('Rinomina'), `<label class="field"><span>${esc(t('Nome del fornitore o del servizio'))}</span>
+    <input id="rename-input" maxlength="80" value="${esc(c.provider || '')}" placeholder="${esc(c.host || t('es. Palestra Orizzonte'))}"></label>
+    <p class="muted small">${esc(t('Compare nel pannello, nei promemoria e nella lettera di disdetta.'))}</p>`, [
+    { label: t('Salva'), act: async () => {
+      const name = $('#rename-input').value.trim().slice(0, 80);
+      await send('UPDATE_COMMITMENT', { id, patch: { provider: name || null } });
+      closeModal();
+      await load();
+    } },
+  ]);
+  const inp = $('#rename-input');
+  inp.focus(); inp.select();
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#modal-foot button')?.click(); });
+}
+
 function renderMenu(c) {
   const id = esc(c.id);
   return `
+    <button data-act="rename" data-id="${id}">${esc(t('Rinomina'))}</button>
     <button data-act="check" data-id="${id}">${esc(t('Verifica modifiche'))}</button>
     <button data-act="proof" data-id="${id}">${esc(t('Prova di cosa hai accettato'))}</button>
     <button data-act="export" data-id="${id}">${esc(t('Esporta l’archivio'))}</button>
@@ -355,6 +391,7 @@ async function onAction(event) {
     if (act === 'check') await showChanges(id);
     if (act === 'proof') await showProof(id);
     if (act === 'export') await exportArchive(id);
+    if (act === 'rename') renameCommitment(id);
     if (act === 'cancelled') {
       await send('UPDATE_COMMITMENT', { id, patch: { status: 'cancelled' } });
       await load();

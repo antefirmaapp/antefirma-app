@@ -160,7 +160,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     .then((result) => sendResponse({ ok: true, result }))
     .catch((err) => {
       console.error('[AnteFirma]', msg?.type, err);
-      sendResponse({ ok: false, error: err?.message || String(err) });
+      sendResponse({ ok: false, error: err?.message || String(err), code: err?.code });
     });
   return true;
 });
@@ -970,11 +970,10 @@ async function checkCheckout() {
  */
 async function showQuotaBadge(quota) {
   if (!chrome.action?.setBadgeText) return;
-  try {
-    const left = quota?.plan === 'free' ? quota.month?.remaining : null;
-    await chrome.action.setBadgeText({ text: left != null ? String(left) : '' });
-    if (left != null) await chrome.action.setBadgeBackgroundColor({ color: left <= 1 ? '#b3261e' : '#6b7280' });
-  } catch { /* nessuna icona da aggiornare */ }
+  // Le analisi rimaste stanno nel pannello: un numero rosso sull'icona sembra un errore o una notifica.
+  // Qui si toglie soltanto quello che le versioni precedenti avevano scritto.
+  void quota;
+  try { await chrome.action.setBadgeText({ text: '' }); } catch { /* nessuna icona da aggiornare */ }
 }
 
 async function upgrade() {

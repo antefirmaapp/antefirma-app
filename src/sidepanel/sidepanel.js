@@ -22,7 +22,7 @@ const isWeb = document.documentElement.dataset.web === '1';
 async function send(type, payload) {
   const res = await chrome.runtime.sendMessage({ type, payload });
   if (!res) throw new Error(t('Nessuna risposta dal motore.'));
-  if (!res.ok) throw new Error(res.error);
+  if (!res.ok) throw Object.assign(new Error(res.error), { code: res.code });
   return res.result;
 }
 
@@ -130,13 +130,19 @@ function paintQuota(q) {
     $('#open-help').before(el);
   }
   el.textContent = t('{n} di {m} analisi rimaste questo mese', { n: m.remaining, m: m.limit });
+  el.dataset.limit = m.limit;
   el.classList.toggle('low', m.remaining <= 1);
 }
 
+/** In fondo: le tutele scelte, in parole e cliccabili, e se manca ancora il consenso. */
 function engineNote(settings) {
-  $('#engine-note').textContent =
-    t('Analisi: server di AnteFirma · giurisdizione {x}', { x: settings.jurisdiction }) +
-    (settings.remoteConsentAt ? '' : ' · ' + t('alla prima analisi ti chiederò il consenso'));
+  const code = settings.jurisdiction || 'IT';
+  let country = code;
+  try { country = new Intl.DisplayNames([getLang()], { type: 'region' }).of(code === 'UK' ? 'GB' : code) || code; } catch { /* resta il codice */ }
+  const el = $('#engine-note');
+  el.innerHTML = `<button class="link" id="note-country" title="${esc(t('Cambia nelle impostazioni'))}">${esc(t('Tutele: {x}', { x: country }))}</button>` +
+    (settings.remoteConsentAt ? '' : ' · ' + esc(t('alla prima analisi ti chiederò il consenso')));
+  $('#note-country').addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#tutele') }));
 }
 
 /** Un esempio pronto: stesso calcolo, nessun testo inviato, nessuna analisi consumata. */
@@ -213,10 +219,26 @@ async function analyze(payload, label) {
     status(null);
     showResult(verdict);
   } catch (err) {
-    status(err.message || t('Analisi non riuscita.'), 'error');
+    if (err.code === 'quota_month') quotaOut(); else status(err.message || t('Analisi non riuscita.'), 'error');
   } finally {
     state.busy = false;
   }
+}
+
+/** Analisi del mese finite: non è un errore. Quando ripartono e che cosa si può fare intanto. */
+function quotaOut() {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const el = $('#status');
+  el.hidden = false;
+  el.className = 'status quota-out';
+  el.innerHTML = `<b>${esc(t('Le analisi gratuite di questo mese sono finite.'))}</b>
+    <span>${esc(t('Ripartono il {d}. Gli esempi intanto sono sempre disponibili.', { d: next.toLocaleDateString(locale(), { day: 'numeric', month: 'long' }) }))}</span>
+    <span class="row"><button class="secondary" id="qo-sample">${esc(t('Prova un esempio'))}</button>
+    <button class="primary" id="qo-plans">${esc(t('Vedi i piani'))}</button></span>`;
+  $('#qo-sample').addEventListener('click', () => { status(null); runSample('gym'); });
+  $('#qo-plans').addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#piano') }));
+  paintQuota({ month: { limit: Number($('#quota')?.dataset.limit) || 5, remaining: 0 } });
 }
 
 // ── selezione della sorgente ────────────────────────────────────────────────
@@ -450,8 +472,8 @@ async function loadHistory() {
   }
 
   const now = Date.now();
-  el.innerHTML = list
-    .map((h) => {
+  el.innerHTML = groupHistory(list)
+    .map(({ h, count }) => {
       const when = new Date(h.at);
       const deadline = h.deadline ? new Date(h.deadline) : null;
       const daysLeft = deadline ? Math.round((deadline - now) / 86400000) : null;
@@ -466,10 +488,26 @@ async function loadHistory() {
         ${h.worstCase ? `<div class="h-cost">${esc(t('Impegno stimato: {x}.', { x: formatMoney(h.worstCase, h.currency || 'EUR') }))}</div>` : ''}
         ${deadline && daysLeft != null ? `<div class="h-deadline">⏰ ${esc(t('Disdetta entro il {d}', { d: deadline.toLocaleDateString(locale()) }))}${esc(daysLeft >= 0 ? ' — ' + t('fra {n} giorni', { n: daysLeft }) : ' — ' + t('scaduta'))}</div>` : ''}
         ${h.mustRemember && !deadline ? `<div class="h-deadline">📌 ${esc(h.mustRemember)}</div>` : ''}
-        <div class="h-decision">${esc(decisionLabel(h))}</div>
+        <div class="h-decision">${esc(decisionLabel(h))}${count > 1 ? ` · <span class="h-count">${esc(t('{n} volte', { n: count }))}</span>` : ''}</div>
       </div>`;
     })
     .join('');
+}
+
+/**
+ * Lo stesso avviso sullo stesso sito, lo stesso giorno e con la stessa decisione
+ * (chi riprova un acquisto, chi ricarica la pagina) diventa una scheda sola: «5 volte».
+ */
+function groupHistory(list) {
+  const out = [];
+  for (const h of list) {
+    const day = new Date(h.at).toDateString();
+    const key = [h.host, h.headline, h.decision, h.via, day].join('|');
+    const last = out[out.length - 1];
+    if (last && last.key === key) last.count++;
+    else out.push({ key, h, count: 1 });
+  }
+  return out;
 }
 
 /** Che cosa è successo davvero, non solo se l'utente ha proseguito. */
@@ -478,7 +516,7 @@ function decisionLabel(h) {
   if (h.decision !== 'proceed') return t('Nessuna decisione registrata');
   if (h.via === 'auto') return t('Proseguito senza blocco');
   if (h.via === 'allowlist') return t('Proseguito, sito escluso dagli avvisi');
-  return 'Hai proseguito';
+  return t('Hai proseguito');
 }
 
 $('#clear-history').addEventListener('click', async () => {

@@ -92,6 +92,7 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
     pricing: enrichedCtx.pricing || null,
     host: safeHost(ctx.url),
     title: ctx.title || null,
+    merchant: ctx.merchant || null,
     score,
     level: { ...level, label: t(level.label), headline: t(level.headline) },
     components,
