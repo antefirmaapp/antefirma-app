@@ -1,0 +1,15 @@
+# AnteFirma web: la versione installabile, su web.antefirma.app (Workers Static Assets).
+# Workers Builds, collegato a questo repository:
+#   comando di build:          node tools/web-build.mjs
+#   comando di pubblicazione:  npx wrangler deploy
+# L'estensione non usa questo file: è solo per il Worker «antefirma-web».
+name = "antefirma-web"
+compatibility_date = "2026-11-01"
+
+routes = [
+  { pattern = "web.antefirma.app", custom_domain = true },
+]
+
+[assets]
+directory = "./dist/web"
+html_handling = "auto-trailing-slash"

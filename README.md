@@ -160,16 +160,22 @@ Il manifest del repository resta senza chiave: lo store assegna il suo ID.
 ## AnteFirma web (da installare sul computer)
 
 ```bash
-node tools/web-build.mjs        # → ../antefirma-site/assets/app (il sito la pubblica su /app/)
+node tools/web-build.mjs        # → dist/web, pubblicata su web.antefirma.app
+node tools/web-build.mjs --icons   # solo se cambia il marchio: rigenera web/icons (serve Playwright)
 ```
+
+Si pubblica da sola: il Worker **antefirma-web** (`wrangler.toml` in questa cartella) è
+collegato a questo repository con Workers Builds (build `node tools/web-build.mjs`,
+pubblicazione `npx wrangler deploy`). Ogni push aggiorna anche la versione web.
+`dist/web/_headers` fissa le regole di sicurezza della pagina (CSP: solo i propri
+file e api.antefirma.app).
 
 Lo stesso codice di pannello, impostazioni e «sfondo», con `web/shim.js` che
 imita le API di Chrome in una pagina normale (IndexedDB, timer, notifiche del
 browser). È un'app installabile (PWA): manifest, icone, service worker.
 Fa: testo incollato e PDF, impegni, scadenze, lettere, piano e chiave.
 Non può: fermare i click sugli altri siti o leggere le altre schede (per quello
-serve l'estensione). Il server deve ammettere l'origine del sito (`APP_ORIGINS`).
-Dopo ogni modifica all'estensione: rifare la build e pubblicare il sito.
+serve l'estensione). Il server deve ammettere l'origine `https://web.antefirma.app` (`APP_ORIGINS`).
 
 ## Safari (Mac)
 

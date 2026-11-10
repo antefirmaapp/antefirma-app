@@ -132,7 +132,8 @@
 
   // ── il resto ──────────────────────────────────────────────────────────
   const noopEvent = { addListener() {}, removeListener() {} };
-  const appUrl = (p) => new URL(p.replace(/^\//, ''), BASE).href;
+  // Il pannello vive alla radice: i suoi vecchi indirizzi portano lì, con la stessa query.
+  const appUrl = (p) => new URL(p.replace(/^\//, '').replace(/^src\/sidepanel\/sidepanel(\.html)?/, ''), BASE).href;
   const onInstalled = [], onStartup = [];
   self.chrome = {
     runtime: {
@@ -141,7 +142,7 @@
       getURL: appUrl,
       getManifest: () => ({ version: document.documentElement.dataset.version || '' }),
       sendMessage,
-      openOptionsPage: () => { location.assign(appUrl(location.pathname.endsWith('.html') ? 'src/options/options.html' : 'src/options/options')); },
+      openOptionsPage: () => { location.assign(appUrl('src/options/options')); },
       onMessage: { addListener: (f) => onMessage.push(f), removeListener: (f) => { const i = onMessage.indexOf(f); if (i >= 0) onMessage.splice(i, 1); } },
       onInstalled: { addListener: (f) => onInstalled.push(f) },
       onStartup: { addListener: (f) => onStartup.push(f) },
