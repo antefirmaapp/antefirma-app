@@ -43,7 +43,8 @@ body {
   min-height: 100vh;
 }
 
-.top {
+/* Scoped to the header: a bare .top also matched the title row of every clause. */
+header.top {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
   padding: 12px 14px; border-bottom: 1px solid var(--line);
 }
@@ -440,7 +441,7 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
  * lines and a commitment card as wide as the screen.
  */
 @media (min-width: 700px) {
-  .top, .tabs, .foot { padding-inline: max(14px, calc((100% - 820px) / 2)); }
+  header.top, .tabs, .foot { padding-inline: max(14px, calc((100% - 820px) / 2)); }
   .panel { max-width: 820px; margin: 0 auto; padding: 18px 14px 30px; }
   .sources { grid-template-columns: repeat(4, 1fr); }
   .modal-card { max-width: 720px; }
@@ -476,7 +477,7 @@ a.btn-like { display: inline-flex; align-items: center; font-size: 13.5px; font-
 
 /* In Chrome's panel the name and logo are already above, in the browser bar:
    what stays here is analyses left, help and settings. The web version keeps the brand. */
-html:not([data-web]) .top .brand { display: none; }
-html:not([data-web]) .top { justify-content: flex-end; gap: 6px; }
-html:not([data-web]) .top .quota { margin-inline-start: 0; margin-inline-end: auto; }
+html:not([data-web]) header.top .brand { display: none; }
+html:not([data-web]) header.top { justify-content: flex-end; gap: 6px; }
+html:not([data-web]) header.top .quota { margin-inline-start: 0; margin-inline-end: auto; }
 #engine-note .link { font: inherit; color: inherit; padding: 0; text-decoration: underline; text-decoration-style: dotted; }

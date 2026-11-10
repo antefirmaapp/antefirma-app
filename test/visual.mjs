@@ -9,8 +9,8 @@
  * in light theme, with animations off and one font everywhere, loaded from
  * test/visual/fonts (not from the system), so the same code gives the same pixels.
  * Images are compared inside Chromium, without extra dependencies: a pixel
- * counts as different when a channel moves by more than 64 (antialiasing differs a
- * little between machines); a screen fails when more than 1 % of its pixels differ, or its size changes. On failure the new
+ * counts as different when a channel moves by more than 32; a screen fails when
+ * more than 0.2 % of its pixels differ, or its size changes. On failure the new
  * image and a diff (changed pixels in red) are written next to the baseline as
  * `<name>.new.png` and `<name>.diff.png`.
  */
@@ -23,7 +23,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
 const DIR = join(ROOT, 'test', 'visual');
 const UPDATE = process.env.UPDATE_VISUAL === '1';
-const TOLERANCE = 0.01;
+const TOLERANCE = 0.002;
 mkdirSync(DIR, { recursive: true });
 
 // Fixed clock, so dates and "days left" never change the picture.
@@ -63,7 +63,7 @@ async function compare(cmp, a, b) {
     for (let i = 0; i < da.data.length; i += 4) {
       const d = Math.max(Math.abs(da.data[i] - db.data[i]), Math.abs(da.data[i + 1] - db.data[i + 1]), Math.abs(da.data[i + 2] - db.data[i + 2]));
       const grey = (db.data[i] + db.data[i + 1] + db.data[i + 2]) / 3;
-      if (d > 64) {
+      if (d > 32) {
         changed++; out.data.set([255, 0, 0, 255], i);
         const px = (i / 4) % c.width, py = Math.floor(i / 4 / c.width);
         x0 = Math.min(x0, px); y0 = Math.min(y0, py); x1 = Math.max(x1, px); y1 = Math.max(y1, py);
