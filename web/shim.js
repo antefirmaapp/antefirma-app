@@ -132,8 +132,8 @@
 
   // ── il resto ──────────────────────────────────────────────────────────
   const noopEvent = { addListener() {}, removeListener() {} };
-  // Il pannello vive alla radice: i suoi vecchi indirizzi portano lì, con la stessa query.
-  const appUrl = (p) => new URL(p.replace(/^\//, '').replace(/^src\/sidepanel\/sidepanel(\.html)?/, ''), BASE).href;
+  // Il pannello vive alla radice e le impostazioni su /settings/: i percorsi dell'estensione portano lì, con query e #.
+  const appUrl = (p) => new URL(p.replace(/^\//, '').replace(/^src\/sidepanel\/sidepanel(\.html)?/, '').replace(/^src\/options\/options(\.html)?/, 'settings/'), BASE).href;
   const onInstalled = [], onStartup = [];
   self.chrome = {
     runtime: {

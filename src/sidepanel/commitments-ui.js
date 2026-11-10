@@ -448,8 +448,10 @@ async function finalizeDelete() {
 
 // ── le quattro azioni ───────────────────────────────────────────────────────
 
-export async function showLetter(id, kind = null) {
-  const letter = await send('BUILD_LETTER', { id, kind });
+export async function showLetter(id, kind = null, lang = null) {
+  const letter = await send('BUILD_LETTER', { id, kind, lang });
+  const langs = [['it', 'Italiano'], ['es', 'Español'], ['en', 'English']]
+    .map(([k, label]) => `<option value="${k}" ${k === letter.lang ? 'selected' : ''}>${label}</option>`).join('');
 
   const options = Object.entries(LETTER_LABELS)
     .map(([k, label]) => `<option value="${k}" ${k === letter.kind ? 'selected' : ''}>${esc(t(label))}</option>`)
@@ -458,7 +460,8 @@ export async function showLetter(id, kind = null) {
   openModal(
     t('Lettera pronta da inviare'),
     `
-      <select id="letter-kind">${options}</select>
+      <div class="letter-opts"><select id="letter-kind" aria-label="${esc(t('Tipo di lettera'))}">${options}</select>
+      <select id="letter-lang" aria-label="${esc(t('Lingua della lettera'))}" title="${esc(t('La lingua del fornitore a cui la mandi'))}">${langs}</select></div>
       <ul class="checklist">${letter.checklist.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>
       <pre id="letter-text">${esc(letter.text)}</pre>
     `,
@@ -468,7 +471,8 @@ export async function showLetter(id, kind = null) {
     ]
   );
 
-  $('#letter-kind').addEventListener('change', (e) => showLetter(id, e.target.value));
+  $('#letter-kind').addEventListener('change', (e) => showLetter(id, e.target.value, $('#letter-lang').value));
+  $('#letter-lang').addEventListener('change', (e) => showLetter(id, $('#letter-kind').value, e.target.value));
 }
 
 async function downloadIcs(id) {

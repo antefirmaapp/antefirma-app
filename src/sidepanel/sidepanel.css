@@ -456,3 +456,5 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
 a.btn-like { display: inline-flex; align-items: center; font-size: 13.5px; font-weight: 620; border-radius: 9px; padding: 10px 14px; text-decoration: none; color: var(--fg); background: var(--bg); border: 1px solid var(--line); }
 .example-note { margin-bottom: 10px; }
 .pdf-hint { margin: 10px 0 0; }
+.letter-opts { display: flex; gap: 8px; flex-wrap: wrap; }
+.letter-opts select { flex: 1 1 160px; }

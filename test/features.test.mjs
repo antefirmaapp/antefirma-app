@@ -393,3 +393,16 @@ test('la cronologia usa la penale calcolata dalle mensilità', async () => {
   const step = buildTimeline({ ctx, cost, findings }).find((s) => s.when === 'Se esci prima');
   assert.match(step.items[0], /117/);
 });
+
+test('la lettera in spagnolo e in inglese, con le norme e il mezzo d’invio del paese', async () => {
+  const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
+  const es = buildLetter(c, { name: 'Lucía García' }, LETTER_KINDS.WITHDRAWAL, T0, 'es');
+  assert.equal(es.lang, 'es');
+  assert.ok(es.text.includes('desistimiento') && es.text.includes('Real Decreto Legislativo 1/2007') && es.text.includes('burofax'));
+  assert.match(es.filename, /^desistimiento-/);
+  const en = buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'en');
+  assert.ok(en.text.includes('[Full name]') && en.text.includes('Directive 93/13/EEC') && en.text.includes('Yours faithfully'));
+  assert.match(en.filename, /^cancellation-/);
+  const { letterLangFor } = await import('../src/core/letter.js');
+  assert.deepEqual(['IT', 'ES', 'EU', 'UK'].map(letterLangFor), ['it', 'es', 'en', 'en']);
+});

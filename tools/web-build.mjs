@@ -53,9 +53,14 @@ const prepare = (file, extra = (h) => h) => extra(readFileSync(file, 'utf8')
 writeFileSync(join(OUT, 'index.html'), prepare(join(OUT, 'src', 'sidepanel', 'sidepanel.html'), (h) => h.replace('<head>', '<head>\n  <base href="/src/sidepanel/">')));
 rmSync(join(OUT, 'src', 'sidepanel', 'sidepanel.html'));
 // Chi arriva al vecchio indirizzo del pannello (link interni dell'estensione) torna alla radice.
-writeFileSync(join(OUT, '_redirects'), '/src/sidepanel/sidepanel.html / 301\n/src/sidepanel/sidepanel / 301\n');
+writeFileSync(join(OUT, '_redirects'), '/src/sidepanel/sidepanel.html / 301\n/src/sidepanel/sidepanel / 301\n/src/options/options.html /settings/ 301\n/src/options/options /settings/ 301\n');
+// Le impostazioni su /settings/, non nella cartella dell'estensione: <base> tiene validi i percorsi.
 const opt = join(OUT, 'src', 'options', 'options.html');
-writeFileSync(opt, prepare(opt, (h) => h.replace('<div class="wrap">', '<div class="wrap">\n    <a class="web-back" href="/">← AnteFirma</a>')));
+mkdirSync(join(OUT, 'settings'), { recursive: true });
+writeFileSync(join(OUT, 'settings', 'index.html'), prepare(opt, (h) => h
+  .replace('<head>', '<head>\n  <base href="/src/options/">')
+  .replace('<div class="wrap">', '<div class="wrap">\n    <a class="web-back" href="/">← AnteFirma</a>')));
+rmSync(opt);
 
 writeFileSync(join(OUT, 'manifest.webmanifest'), JSON.stringify({
   name: 'AnteFirma', short_name: 'AnteFirma',
@@ -87,7 +92,7 @@ const files = [];
 const walk = (d) => { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p); else files.push('/' + relative(OUT, p).split('\\').join('/')); } };
 walk(OUT);
 const urls = files.filter((f) => !['/sw.js', '/_headers', '/_redirects'].includes(f))
-  .map((f) => (f === '/index.html' ? '/' : f.replace(/\.html$/, '')));
+  .map((f) => (f.endsWith('/index.html') ? f.slice(0, -'index.html'.length) : f.replace(/\.html$/, '')));
 writeFileSync(join(OUT, 'sw.js'), `/* AnteFirma web ${version}: generato da tools/web-build.mjs. */
 const CACHE = 'antefirma-web-${version}-${Date.now().toString(36)}';
 const FILES = ${JSON.stringify(urls)};

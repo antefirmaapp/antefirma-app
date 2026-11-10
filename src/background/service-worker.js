@@ -18,7 +18,7 @@ import { htmlToText, hashText, normalize, formatMoney } from '../core/text.js';
 import { createSnapshot, compareSnapshot, sha256, attestation } from '../core/proof.js';
 import { buildCommitment, planReminders, dueReminder, missedWindow, commitmentState, COMMITMENT_STATUS } from '../core/commitments.js';
 import { buildIcs } from '../core/ics.js';
-import { buildLetter, suggestKind } from '../core/letter.js';
+import { buildLetter, suggestKind, letterLangFor } from '../core/letter.js';
 import { register, installId, ServerError, getLicense, startCheckout, activateLicense, deactivateLicense, sendFeedback } from '../core/server.js';
 import { API_BASE } from '../core/config.js';
 import { SAMPLES } from '../core/samples.js';
@@ -854,11 +854,12 @@ async function watchAllCommitments() {
 
 // ── kit di uscita ───────────────────────────────────────────────────────────
 
-async function letterFor({ id, kind } = {}) {
+async function letterFor({ id, kind, lang } = {}) {
   const commitment = await getCommitment(id);
   if (!commitment) throw new Error(t('Impegno non trovato.'));
   const settings = await getSettings();
-  return buildLetter(commitment, settings.identity || {}, kind || suggestKind(commitment));
+  // La lingua della lettera è quella del fornitore: di regola, quella del paese scelto nelle impostazioni.
+  return buildLetter(commitment, settings.identity || {}, kind || suggestKind(commitment), Date.now(), lang || letterLangFor(settings.jurisdiction));
 }
 
 async function icsFor(id) {

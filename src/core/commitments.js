@@ -87,7 +87,8 @@ export function buildCommitment({ verdict = {}, snapshot = null, decision = 'pro
 /** Nome leggibile del fornitore, ricavato da titolo o dominio. */
 export function providerName(verdict = {}) {
   const host = (verdict.host || '').replace(/^www\./, '');
-  if (!host) return verdict.title || 'Fornitore';
+  // Senza sito né titolo il nome resta vuoto: lettera e pannello mettono il segnaposto nella loro lingua.
+  if (!host) return verdict.title || null;
   const base = host.split('.')[0];
   return base ? base.charAt(0).toUpperCase() + base.slice(1) : host;
 }
