@@ -1,3 +1,6 @@
+/* La regola [hidden] dello user-agent perde contro display:flex delle classi: la si ribadisce. */
+[hidden] { display: none !important; }
+
 :root {
   --bg: #f5f6f8;
   --card: #ffffff;
