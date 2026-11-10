@@ -1,8 +1,8 @@
 /**
- * Accesso a chrome.storage: impostazioni, cache delle analisi, storico.
+ * Access to chrome.storage: settings, analysis cache, history.
  *
- * Tutto sta in `local` e non in `sync`: i dati per le lettere di disdetta e
- * gli impegni non devono girare per i dispositivi attraverso l'account Google.
+ * Everything lives in `local`, not `sync`: data for cancellation letters and
+ * commitments must not travel between devices through the Google account.
  */
 
 import { DEFAULT_SETTINGS } from './constants.js';
@@ -33,7 +33,7 @@ export async function setSettings(patch) {
   return next;
 }
 
-/** L'utente ha messo questo dominio in allowlist? */
+/** Has the user put this domain on the allowlist? */
 export function isAllowlisted(url, settings) {
   if (!url) return false;
   let host;
@@ -80,8 +80,8 @@ export async function clearCache() {
 // ── storico ─────────────────────────────────────────────────────────────────
 
 /**
- * Lo storico è il "digital footprint": a cosa mi sono impegnato, quando, con
- * che scadenze. Serve soprattutto per ritrovare le disdette da fare.
+ * History is the "digital footprint": what I committed to, when, with which
+ * deadlines. It mostly helps find the cancellations still to do.
  */
 export async function pushHistory(entry, limit = 100) {
   const { [HISTORY_KEY]: history = [] } = await chrome.storage.local.get(HISTORY_KEY);
@@ -113,8 +113,8 @@ const COMMITMENTS_KEY = 'commitments';
 const SNAPSHOTS_KEY = 'snapshots';
 
 /**
- * Il registro degli impegni è la memoria lunga del prodotto: sopravvive alla
- * pagina, alla sessione e — se l'utente vuole — anche al contratto.
+ * The commitment register is the product's long memory: it outlives the page,
+ * the session and — if the user wants — the contract itself.
  */
 export async function getCommitments() {
   const { [COMMITMENTS_KEY]: list = [] } = await chrome.storage.local.get(COMMITMENTS_KEY);
@@ -151,8 +151,8 @@ export async function deleteCommitment(id) {
 }
 
 /**
- * Il testo integrale accettato sta a parte: è voluminoso e serve solo quando
- * si vuole la prova o il confronto, non a ogni lettura della lista.
+ * The full accepted text is kept apart: it is bulky and only needed for the
+ * proof or the comparison, not on every read of the list.
  */
 export async function setSnapshotText(id, text) {
   const { [SNAPSHOTS_KEY]: map = {} } = await chrome.storage.local.get(SNAPSHOTS_KEY);

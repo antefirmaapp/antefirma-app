@@ -1,19 +1,19 @@
 /**
- * Chi può chiedere che cosa.
+ * Who may ask for what.
  *
- * I content script girano su `<all_urls>`, in ogni frame di ogni sito: tutto
- * ciò che il service worker risponde loro finisce nell'isolated world di quella
- * pagina. `GET_SETTINGS` restituiva l'oggetto integrale — chiave API, nome,
- * indirizzo, email — e il detector lo chiedeva a ogni caricamento; `SET_SETTINGS`
- * accettava un patch arbitrario, quindi un content script compromesso poteva
- * riscrivere la chiave o spegnere il firewall.
+ * Content scripts run on `<all_urls>`, in every frame of every site: whatever
+ * the service worker answers them ends up in that page's isolated world.
+ * `GET_SETTINGS` used to return the whole object — API key, name, address,
+ * email — and the detector asked for it on every load; `SET_SETTINGS` accepted
+ * an arbitrary patch, so a compromised content script could rewrite the key or
+ * switch the firewall off.
  *
- * Modulo separato e senza `chrome.*` perché la guardia è esattamente il genere
- * di logica che deve poter essere verificata in Node: sbagliarla non produce un
- * errore visibile, produce una superficie aperta.
+ * A separate module without `chrome.*`, because this guard is exactly the kind of
+ * logic that must be testable in Node: getting it wrong produces no visible
+ * error, it produces an open surface.
  */
 
-/** Messaggi che solo le pagine dell'estensione possono inviare. */
+/** Messages only extension pages may send. */
 export const PRIVILEGED_MESSAGES = new Set([
   'GET_SETTINGS',
   'SET_SETTINGS',
@@ -29,13 +29,13 @@ export const PRIVILEGED_MESSAGES = new Set([
 ]);
 
 /**
- * Il mittente è una pagina dell'estensione?
+ * Is the sender an extension page?
  *
- * Il discriminante è l'URL, non `sender.tab`: il pannello laterale aperto come
- * scheda — è così che lo apre la notifica di scadenza — ha un `sender.tab` come
- * qualsiasi pagina web, e una guardia basata su quello lo bloccherebbe.
+ * The discriminant is the URL, not `sender.tab`: the side panel opened as a
+ * tab — the way the deadline notification opens it — has a `sender.tab` like
+ * any web page, and a guard based on that would block it.
  *
- * @param {object} sender     `sender` di chrome.runtime.onMessage
+ * @param {object} sender     `sender` from chrome.runtime.onMessage
  * @param {string} runtimeId  chrome.runtime.id
  * @param {string} baseUrl    chrome.runtime.getURL('')
  */
@@ -45,7 +45,7 @@ export function isExtensionPage(sender, runtimeId, baseUrl) {
   return String(sender.url || '').startsWith(baseUrl);
 }
 
-/** Il messaggio è consentito a questo mittente? */
+/** Is the message allowed for this sender? */
 export function isAllowed(type, sender, runtimeId, baseUrl) {
   if (!PRIVILEGED_MESSAGES.has(type)) return true;
   return isExtensionPage(sender, runtimeId, baseUrl);

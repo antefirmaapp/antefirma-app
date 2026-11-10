@@ -1,15 +1,15 @@
 /**
- * Prova di cosa hai accettato.
+ * Proof of what you accepted.
  *
- * Al momento in cui l'utente prosegue, si fissa un'impronta del testo esatto
- * che stava accettando: hash SHA-256, data, estratto, e i numeri del verdetto.
+ * When the user goes ahead, a fingerprint of the exact text they were
+ * accepting is recorded: SHA-256 hash, date, excerpt, and the verdict's numbers.
  *
- * Serve a due cose molto concrete:
- *  - sei mesi dopo, quando il fornitore sostiene che avevi accettato altro,
- *    tu hai lo snapshot di quel giorno;
- *  - quando le condizioni cambiano, il confronto non dice "i termini sono
- *    cambiati" — informazione inutile — ma "il tuo impegno è passato da
- *    239,88 € a 479,76 €".
+ * It serves two very concrete purposes:
+ *  - six months later, when the provider claims you had accepted something
+ *    else, you have that day's snapshot;
+ *  - when the terms change, the comparison doesn't say "the terms changed" —
+ *    useless information — but "your commitment went from €239.88 to
+ *    €479.76".
  */
 
 import { normalize, formatMoney } from './text.js';
@@ -18,14 +18,14 @@ import { t, locale } from '../i18n/index.js';
 const MAX_STORED_CHARS = 200_000;
 
 /**
- * Sotto questa soglia non c'è niente da attestare. Il caso che conta non è il
- * testo corto ma il testo *assente*: lo SHA-256 della stringa vuota coincide
- * con sé stesso, quindi la verifica rispondeva «✓ il testo conservato
- * corrisponde all'impronta» su una prova che non conteneva nulla.
+ * Below this threshold there is nothing to attest. The case that matters is
+ * not short text but *missing* text: the SHA-256 of the empty string matches
+ * itself, so verification answered "✓ the stored text matches the
+ * fingerprint" on a proof that contained nothing.
  */
 const MIN_PROOF_CHARS = 40;
 
-/** SHA-256 in esadecimale. Disponibile sia nel service worker sia in Node. */
+/** SHA-256 in hex. Available both in the service worker and in Node. */
 export async function sha256(text) {
   const bytes = new TextEncoder().encode(String(text));
   const digest = await crypto.subtle.digest('SHA-256', bytes);
@@ -33,11 +33,11 @@ export async function sha256(text) {
 }
 
 /**
- * Costruisce lo snapshot da conservare.
+ * Builds the snapshot to keep.
  *
  * @param {object} p
- * @param {string} p.text     Testo accettato.
- * @param {object} p.verdict  Verdetto calcolato su quel testo.
+ * @param {string} p.text     Accepted text.
+ * @param {object} p.verdict  Verdict computed on that text.
  * @param {number} [p.now]
  */
 export async function createSnapshot({ text = '', verdict = {}, now = Date.now() } = {}) {
@@ -47,16 +47,16 @@ export async function createSnapshot({ text = '', verdict = {}, now = Date.now()
   return {
     hash,
     at: new Date(now).toISOString(),
-    /** Senza testo l'impronta non attesta niente: chi la usa deve saperlo. */
+    /** Without text the fingerprint attests nothing: whoever uses it must know. */
     empty: clean.length < MIN_PROOF_CHARS,
     chars: clean.length,
     truncated: clean.length > MAX_STORED_CHARS,
     excerpt: clean.slice(0, 600),
-    /** Il testo integrale resta in locale: è la prova vera e propria. */
+    /** The full text stays local: it is the actual proof. */
     text: clean.slice(0, MAX_STORED_CHARS),
     url: verdict.url || null,
     termsUrl: verdict.termsUrl || null,
-    /** Fotografia dei numeri, per il confronto futuro. */
+    /** A snapshot of the numbers, for later comparison. */
     verdict: {
       score: verdict.score ?? null,
       level: verdict.level?.id ?? null,
@@ -74,11 +74,11 @@ export async function createSnapshot({ text = '', verdict = {}, now = Date.now()
 function findRecurring(cost) {
   const line = (cost?.lines || []).find((l) => l.kind === 'recurring');
   if (!line || !cost?.horizonMonths) return null;
-  return null; // il canone unitario sta in ctx.pricing, non nelle righe aggregate
+  return null; // the unit fee is in ctx.pricing, not in the aggregated lines
 }
 
 /**
- * Confronta lo snapshot conservato con una nuova analisi delle stesse condizioni.
+ * Compares the stored snapshot with a new analysis of the same terms.
  *
  * @returns {{changed:boolean, hashChanged:boolean, costDelta:number|null, summary:string, added:string[], removed:string[], severity:'none'|'minor'|'major'}}
  */
@@ -100,8 +100,8 @@ export function compareSnapshot(snapshot, { text = '', verdict = {}, newHash = n
 
   const changed = hashChanged || added.length > 0 || removed.length > 0 || Boolean(costDelta);
 
-  // Un cambio è "major" quando tocca il portafoglio o aggiunge una categoria
-  // che pesa: è il caso in cui vale la pena disturbare l'utente.
+  // A change is "major" when it touches the wallet or adds a category that
+  // weighs: the case where it is worth disturbing the user.
   const heavy = ['auto_renewal', 'minimum_term', 'early_termination_penalty', 'no_refund', 'price_change', 'ip_assignment', 'data_sale', 'arbitration'];
   const severity = !changed
     ? 'none'
@@ -140,9 +140,9 @@ function describe({ changed, costDelta, currency, oldCost, newCost, added, remov
 }
 
 /**
- * Riga di attestazione leggibile, da allegare a un reclamo.
- * Non ha valore di certificazione: è una dichiarazione di ciò che il tuo
- * browser ha letto in quel momento, con l'impronta che lo rende verificabile.
+ * A readable attestation line, to attach to a complaint.
+ * It is not a certification: it is a statement of what your browser read at
+ * that moment, with the fingerprint that makes it verifiable.
  */
 export function attestation(snapshot, { host } = {}) {
   const d = new Date(snapshot.at);

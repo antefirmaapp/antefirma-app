@@ -1,13 +1,13 @@
 /**
- * Il client del server di AnteFirma.
+ * The AnteFirma server client.
  *
- * Gira **solo nel service worker**: lì valgono i permessi dell'estensione, e la
- * pagina non vede né il token né le risposte. Il server custodisce la chiave
- * del modello; l'estensione ha soltanto un token che identifica l'installazione
- * — non la persona — e scade dopo 90 giorni.
+ * It runs **only in the service worker**: the extension's permissions apply
+ * there, and the page sees neither the token nor the responses. The server
+ * keeps the model key; the extension only has a token that identifies the
+ * installation — not the person — and expires after 90 days.
  *
- * Tutto ciò che arriva dal server è testo scritto da un modello che ha letto
- * una pagina altrui: va mostrato come testo, mai come HTML.
+ * Everything that comes from the server is text written by a model that read
+ * someone else's page: show it as text, never as HTML.
  */
 
 import { API_BASE } from './config.js';
@@ -15,7 +15,7 @@ import { t } from '../i18n/index.js';
 
 const AUTH_KEY = 'antefirmaAuth';
 
-/** Le azioni che il server conosce, dai tipi di azione dell'estensione. */
+/** The actions the server knows, from the extension's action types. */
 const ACTION_MAP = {
   accept_terms: 'accept',
   subscribe: 'subscribe',
@@ -27,12 +27,12 @@ const ACTION_MAP = {
   manual: 'other',
 };
 
-/** Paese da mandare al server a partire dalla giurisdizione delle impostazioni. */
+/** The country to send to the server, from the jurisdiction in settings. */
 const COUNTRY_MAP = { IT: 'IT', ES: 'ES', UK: 'GB', US: 'US' };
 
 /**
- * Un errore del server con il codice che decide che cosa fare.
- * `message` è per l'utente (testo dell'estensione, mai quello del server).
+ * A server error with the code that decides what to do.
+ * `message` is for the user (the extension's own text, never the server's).
  */
 export class ServerError extends Error {
   constructor(code, { status = 0, retryAfter = null, detail = '' } = {}) {
@@ -83,7 +83,7 @@ async function writeAuth(storage, patch) {
   await storage.set({ [AUTH_KEY]: { ...current, ...patch } });
 }
 
-/** L'id casuale dell'installazione: generato una volta, conservato in locale. */
+/** The installation's random id: generated once, kept locally. */
 export async function installId({ storage = chrome.storage.local } = {}) {
   const auth = await readAuth(storage);
   if (auth.installId) return auth.installId;
@@ -92,7 +92,7 @@ export async function installId({ storage = chrome.storage.local } = {}) {
   return id;
 }
 
-/** Chiede un token nuovo al server con lo stesso id di installazione. */
+/** Asks the server for a new token with the same installation id. */
 export async function register({ storage = chrome.storage.local, fetchImpl = fetch, base = API_BASE } = {}) {
   const id = await installId({ storage });
   const res = await call(fetchImpl, `${base}/v1/register`, { installId: id });
@@ -110,8 +110,8 @@ async function token(opts) {
 // ── analisi ─────────────────────────────────────────────────────────────────
 
 /**
- * Manda il testo al server e restituisce la sua risposta così com'è.
- * A un 401 chiede un token nuovo e riprova una volta sola.
+ * Sends the text to the server and returns its answer as is.
+ * On a 401 it asks for a new token and retries once.
  *
  * @returns {Promise<{findings, terms, summary, dropped, truncated, model, cached, quota}>}
  */
@@ -145,7 +145,7 @@ export async function analyzeRemote(
 
 // ── piano ───────────────────────────────────────────────────────────────────
 
-/** Una chiamata con il token, con un nuovo tentativo dopo un 401. */
+/** A call with the token, retried once after a 401. */
 async function authed(path, payload, { storage = chrome.storage.local, fetchImpl = fetch, base = API_BASE, method = 'POST' } = {}) {
   const opts = { storage, fetchImpl, base };
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -161,11 +161,11 @@ async function authed(path, payload, { storage = chrome.storage.local, fetchImpl
 
 /** `{ plan: 'free'|'pro'|'max'|'team', active, status, periodEnd, cancelAt, activations, quota }` */
 export const getLicense = (o) => authed('/v1/license', undefined, { ...o, method: 'GET' });
-/** `{ claim, url }`: la pagina di acquisto, legata a questa installazione. */
+/** `{ claim, url }`: the purchase page, linked to this installation. */
 export const startCheckout = (plan, o) => authed('/v1/pro/checkout', { plan }, o);
 export const activateLicense = (key, o) => authed('/v1/license/activate', { key: String(key || '').trim() }, o);
 export const deactivateLicense = (o) => authed('/v1/license/deactivate', {}, o);
-/** «Avviso sbagliato»: solo la categoria, per migliorare l'analisi. */
+/** "Wrong warning?": only the category, to improve the analysis. */
 export const sendFeedback = (category, model, o) => authed('/v1/feedback', { category: String(category || '').slice(0, 40), model: model ? String(model).slice(0, 60) : undefined }, o);
 
 async function call(fetchImpl, url, payload, { bearer = null, signal, method = 'POST' } = {}) {

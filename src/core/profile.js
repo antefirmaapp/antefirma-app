@@ -1,18 +1,18 @@
 /**
  * Personal Risk Profile.
  *
- * La stessa clausola non pesa uguale per tutti: "concedi una licenza mondiale
- * sui contenuti caricati" è un fastidio per chi carica foto delle vacanze e un
- * problema serio per un fotografo che vive di quelle immagini.
+ * The same clause doesn't weigh the same for everyone: "you grant a worldwide
+ * licence on uploaded content" is a nuisance for someone uploading holiday
+ * photos and a serious problem for a photographer who lives off those images.
  *
- * Questo modulo trasforma le aree che l'utente dichiara di voler proteggere in
- * moltiplicatori applicati alla severità di ciascuna categoria.
+ * This module turns the areas the user wants to protect into multipliers
+ * applied to each category's severity.
  */
 
 import { RISK_CATEGORIES, PROTECTION_LABELS, DEFAULT_SETTINGS } from './constants.js';
 import { t } from '../i18n/index.js';
 
-/** Quanto un'area attiva amplifica le categorie che la toccano. */
+/** How much an active area amplifies the categories it touches. */
 const AREA_WEIGHT = {
   money: 1.25,
   privacy: 1.25,
@@ -24,36 +24,36 @@ const AREA_WEIGHT = {
 };
 
 /**
- * Tetto al moltiplicatore complessivo.
+ * Cap on the overall multiplier.
  *
- * Il profilo deve *ordinare* le clausole secondo ciò che ti sta a cuore, non
- * gonfiarle: se moltiplica troppo, una severità già alta tocca il tetto e la
- * personalizzazione smette di distinguere proprio nei casi che le interessano.
+ * The profile must *order* clauses by what you care about, not inflate them:
+ * if it multiplies too much, an already high severity hits the cap and
+ * personalisation stops distinguishing exactly in the cases it matters for.
  */
 const MAX_MULTIPLIER = 1.55;
 
-/** Se nessuna area della categoria è attiva, la severità viene attenuata. */
+/** If no area of the category is active, the severity is damped. */
 const UNSELECTED_DAMPENER = 0.85;
 
 /**
- * Sopra questa severità di base il dampener non si applica.
+ * Above this base severity the dampener does not apply.
  *
- * La logica confondeva due cose molto diverse: «l'utente ha dichiarato che
- * quest'area non gli interessa» e «l'utente non ci ha pensato». La seconda è il
- * caso normale — nessuno apre le impostazioni — e il profilo predefinito
- * (denaro, privacy, identità) non contiene né `ip` né `freelance`. Risultato:
- * `ip_assignment`, la categoria più grave del dizionario, veniva **declassata**
- * del 15% proprio per l'installazione che avrà quasi tutti gli utenti, e la
- * cessione totale dei diritti d'autore scendeva di una fascia.
+ * The logic used to confuse two very different things: "the user said this area
+ * doesn't matter to them" and "the user never thought about it". The second is
+ * the normal case — nobody opens settings — and the default profile (money,
+ * privacy, identity) contains neither `ip` nor `freelance`. Result:
+ * `ip_assignment`, the most serious category in the dictionary, was
+ * **downgraded** by 15% for exactly the installation almost every user has, and
+ * a full assignment of copyright dropped one band.
  *
- * Sopra 65 il danno è oggettivo e irreversibile, non una preferenza:
- * cessione dei diritti (85), vendita dei dati (70), dati biometrici (70),
- * penale di recesso (65). Il profilo può ordinare, non può assolvere.
+ * Above 65 the harm is objective and irreversible, not a preference: rights
+ * assignment (85), sale of data (70), biometric data (70), exit fee (65). The
+ * profile can order, it cannot absolve.
  */
 const DAMPENER_EXEMPT_BASE = 65;
 
 /**
- * Calcola il moltiplicatore per una categoria dato il profilo.
+ * Computes the multiplier for a category given the profile.
  * @returns {{multiplier:number, reasons:string[]}}
  */
 export function multiplierFor(category, profile = DEFAULT_SETTINGS.profile) {
@@ -66,8 +66,8 @@ export function multiplierFor(category, profile = DEFAULT_SETTINGS.profile) {
     return { multiplier: dampenable ? UNSELECTED_DAMPENER : 1, reasons: [] };
   }
 
-  // La prima area attiva pesa per intero, le successive con rendimento
-  // decrescente: due aree attive non devono raddoppiare il rischio.
+  // The first active area counts fully, the next ones with diminishing
+  // returns: two active areas must not double the risk.
   let multiplier = 1;
   const sorted = active.slice().sort((a, b) => (AREA_WEIGHT[b] || 1) - (AREA_WEIGHT[a] || 1));
   sorted.forEach((area, i) => {
@@ -82,14 +82,14 @@ export function multiplierFor(category, profile = DEFAULT_SETTINGS.profile) {
 }
 
 /**
- * Applica il profilo a una lista di finding.
- * Non muta gli oggetti in ingresso.
+ * Applies the profile to a list of findings.
+ * Does not mutate the input objects.
  */
 export function personalize(findings = [], profile = DEFAULT_SETTINGS.profile) {
   return findings
     .map((f) => {
       const { multiplier, reasons } = multiplierFor(f.category, profile);
-      // 95 e non 100: il vertice resta riservato a ciò che è grave di suo.
+      // 95, not 100: the top is reserved for what is serious in itself.
       const personalSeverity = Math.max(0, Math.min(95, Math.round(f.severity * multiplier)));
       return {
         ...f,
@@ -104,7 +104,7 @@ export function personalize(findings = [], profile = DEFAULT_SETTINGS.profile) {
 }
 
 /**
- * Riepilogo leggibile del profilo, per la UI.
+ * A readable summary of the profile, for the UI.
  */
 export function describeProfile(profile = DEFAULT_SETTINGS.profile) {
   const active = Object.entries(profile || {})

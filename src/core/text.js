@@ -1,8 +1,8 @@
 /**
- * Utility di testo: normalizzazione, estrazione da HTML, importi, impronte.
- * Il riconoscimento delle clausole e delle cifre nel testo lo fa il server.
+ * Text utilities: normalisation, extraction from HTML, amounts, fingerprints.
+ * Recognising clauses and figures in the text is the server's job.
  *
- * Nessuna dipendenza dal DOM: gira sia nel service worker sia nei test Node.
+ * No DOM dependency: it runs both in the service worker and in Node tests.
  */
 
 import { locale as currentLocale } from '../i18n/index.js';
@@ -19,8 +19,8 @@ export function normalize(text = '') {
 }
 
 /**
- * Estrae il testo leggibile da una stringa HTML, senza usare il DOM
- * (il service worker non ne ha uno).
+ * Extracts readable text from an HTML string, without the DOM (the service
+ * worker has none).
  */
 export function htmlToText(html = '') {
   let out = String(html);
@@ -57,8 +57,8 @@ function safeCodePoint(code) {
 }
 
 /**
- * Interpreta un importo scritto all'italiana (1.234,56) o all'inglese
- * (1,234.56) e restituisce un numero.
+ * Parses an amount written the Italian way (1.234,56) or the English way
+ * (1,234.56) and returns a number.
  */
 export function parseAmount(raw) {
   if (raw == null) return null;
@@ -67,14 +67,14 @@ export function parseAmount(raw) {
   const hasComma = s.includes(',');
   const hasDot = s.includes('.');
   if (hasComma && hasDot) {
-    // L'ultimo separatore che compare è quello decimale.
+    // The last separator present is the decimal one.
     if (s.lastIndexOf(',') > s.lastIndexOf('.')) {
       s = s.replace(/\./g, '').replace(',', '.');
     } else {
       s = s.replace(/,/g, '');
     }
   } else if (hasComma) {
-    // "1,99" è decimale; "1,234" con 3 cifre finali è migliaia.
+    // "1,99" is decimal; "1,234" with 3 trailing digits is thousands.
     s = /,\d{3}$/.test(s) ? s.replace(/,/g, '') : s.replace(',', '.');
   } else if (hasDot && /\.\d{3}$/.test(s)) {
     s = s.replace(/\./g, '');
@@ -88,7 +88,7 @@ export const PERIOD_MONTHS = {
   bimonth: 2, quarter: 3, semester: 6, year: 12,
 };
 
-/** Hash stabile e veloce (FNV-1a) per la cache delle analisi. */
+/** Stable, fast hash (FNV-1a) for the analysis cache. */
 export function hashText(text = '') {
   let h = 0x811c9dc5;
   const s = String(text);

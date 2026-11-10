@@ -1,8 +1,8 @@
 /**
- * Il «?» dell'estensione: porta alla pagina giusta del centro di aiuto, nella lingua dell'interfaccia.
+ * The extension's "?": opens the right help centre page, in the interface language.
  *
- * Le chiavi e gli slug sono gli stessi di help.mjs nel sito (antefirma-site):
- * se cambiano lì, vanno cambiati qui.
+ * Keys and slugs are the same as help.mjs on the website (antefirma-site): if
+ * they change there, they must change here (test/help.test.mjs checks it).
  */
 const SITE = 'https://antefirma.app';
 const ROOT = { it: '/aiuto/', en: '/en/help/', es: '/es/ayuda/' };
@@ -19,7 +19,7 @@ const SLUGS = {
 };
 export const HELP_TOPICS = Object.keys(SLUGS);
 
-/** L'indirizzo della guida su `topic` (o l'indice), con l'ancora di una domanda se serve. */
+/** The address of the guide on `topic` (or the index), with a question's anchor if needed. */
 export function helpUrl(topic, lang = 'it', anchor = '') {
   const l = ROOT[lang] ? lang : 'it';
   const slug = SLUGS[topic]?.[l];

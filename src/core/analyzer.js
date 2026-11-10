@@ -1,20 +1,20 @@
 /**
- * Orchestratore dell'analisi.
+ * Analysis orchestrator.
  *
- *   testo + contesto
- *        ↓  server di AnteFirma    (il modello legge la pagina; il server scarta
- *        ↓                          ogni rischio la cui citazione non c'è)
- *        ↓  severità ed etichette  (costanti dell'estensione)
- *        ↓  consequence engine     (€ / durata / date, dalle cifre verificate)
+ *   text + context
+ *        ↓  AnteFirma server       (the model reads the page; the server drops
+ *        ↓                          every risk whose quote isn't there)
+ *        ↓  severity and labels    (extension constants)
+ *        ↓  consequence engine     (€ / duration / dates, from the verified figures)
  *        ↓  personal risk profile
- *        ↓  motore consumer UE/IT
+ *        ↓  EU/IT consumer engine
  *        ↓  decision risk score
- *   verdetto
+ *   verdict
  *
- * Non c'è più un motore a regole locale: ogni avviso nasce da una frase della
- * pagina che il server ha ritrovato nel testo. Se il server non risponde,
- * l'analisi fallisce con un `ServerError` e l'interfaccia lo dice — non si
- * finge un verdetto «sicuro» che nessuno ha calcolato.
+ * There is no local rule engine any more: every warning comes from a sentence
+ * of the page that the server found again in the text. If the server doesn't
+ * answer, the analysis fails with a `ServerError` and the interface says so —
+ * we never fake a "safe" verdict that nobody computed.
  */
 
 import { analyzeRemote } from './server.js';
@@ -28,20 +28,20 @@ import { t, tn, setLang } from '../i18n/index.js';
 
 /**
  * @param {object} p
- * @param {string} p.text        Testo da analizzare (contratto, ToS, pagina).
- * @param {object} p.ctx         Contesto estratto dalla pagina.
- * @param {string} p.actionType  Tipo di azione intercettata.
- * @param {object} p.settings    Impostazioni utente.
+ * @param {string} p.text        Text to analyse (contract, ToS, page).
+ * @param {object} p.ctx         Context extracted from the page.
+ * @param {string} p.actionType  Type of the intercepted action.
+ * @param {object} p.settings    User settings.
  * @param {AbortSignal} [p.signal]
- * @param {number} [p.now]       Istante di riferimento (per i test).
- * @param {Function} [p.remote]  La chiamata al server (sostituibile nei test).
- * @throws {ServerError}         Se il server non ha potuto analizzare.
+ * @param {number} [p.now]       Reference time (for tests).
+ * @param {Function} [p.remote]  The server call (replaceable in tests).
+ * @throws {ServerError}         If the server could not analyse.
  */
 export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.MANUAL, settings = DEFAULT_SETTINGS, signal, now = Date.now(), remote = analyzeRemote } = {}) {
   const started = now;
   const clock = Date.now();
   const clean = normalize(text);
-  // La lingua dei testi del verdetto e delle risposte del server.
+  // The language of the verdict texts and of the server's answers.
   const lang = setLang(settings.uiLang || 'it');
   const profile = settings.profile || DEFAULT_SETTINGS.profile;
   const jurisdiction = settings.jurisdiction || 'IT';
@@ -57,10 +57,10 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
     signal,
   });
 
-  // 2. Severità ed etichette: le decide l'estensione, non il modello.
+  // 2. Severity and labels: decided by the extension, not by the model.
   const raw = fromServer(response?.findings || []);
 
-  // 3. Conseguenze economiche, dalle sole cifre che il server ha verificato.
+  // 3. Economic consequences, only from the figures the server verified.
   const terms = termsFromServer(response?.terms);
   const enrichedCtx = { ...ctx, pricing: mergePricing(ctx.pricing, terms) };
   const cost = computeCost({ ctx: enrichedCtx, findings: raw, terms });
@@ -85,9 +85,9 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
     url: ctx.url || null,
     termsUrl: ctx.terms?.url || null,
     /**
-     * Il prezzo risolto viaggia con il verdetto perché serve dopo: un
-     * ricontrollo delle stesse condizioni senza il prezzo della pagina
-     * ricalcola un impegno molto più basso e segnala un calo che non esiste.
+     * The resolved price travels with the verdict because it is needed later:
+     * re-checking the same terms without the page price would compute a much
+     * lower commitment and report a drop that doesn't exist.
      */
     pricing: enrichedCtx.pricing || null,
     host: safeHost(ctx.url),
@@ -120,12 +120,12 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
 }
 
 /**
- * Dai rischi del server ai finding dell'estensione.
+ * From the server's risks to the extension's findings.
  *
- * Una categoria compare una volta sola: se il server ne cita più passi, resta
- * quello con la fiducia più alta e gli altri vanno in `quotes`. Le categorie che
- * l'estensione non conosce vengono ignorate: senza severità non si sa come
- * pesarle.
+ * A category appears once only: if the server quotes several passages, the one
+ * with the highest confidence stays and the others go into `quotes`. Categories
+ * the extension doesn't know are ignored: without a severity there is no way to
+ * weigh them.
  */
 export function fromServer(serverFindings = []) {
   const byCategory = new Map();
@@ -156,9 +156,9 @@ export function fromServer(serverFindings = []) {
     }
   }
   /**
-   * La fiducia sposta la severità solo verso il basso, e di poco: un rischio
-   * citato ma incerto pesa meno di uno certo, ma non sparisce. Il server ha già
-   * verificato che la frase c'è.
+   * Confidence only moves severity downwards, and only a little: a quoted but
+   * uncertain risk weighs less than a certain one, but doesn't disappear. The
+   * server already verified the sentence is there.
    */
   return [...byCategory.values()]
     .map((f) => ({ ...f, severity: Math.round(f.severity * (0.8 + 0.2 * f.confidence)) }))

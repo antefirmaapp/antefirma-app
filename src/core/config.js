@@ -1,11 +1,11 @@
 /**
- * Indirizzo del server di AnteFirma.
+ * The AnteFirma server address.
  *
- * È l'unico posto in cui compare: per provare l'estensione contro un server
- * locale (`npm start` in antefirma-server) basta cambiarlo qui e aggiungere
- * l'origine corrispondente a `host_permissions` nel manifest.
+ * This is the only place it appears: to test the extension against a local
+ * server (`npm start` in antefirma-server) change it here and add the matching
+ * origin to `host_permissions` in the manifest.
  */
 export const API_BASE = 'https://api.antefirma.app';
 
-/** Durata massima di una chiamata di analisi, in millisecondi. */
+/** Maximum duration of an analysis call, in milliseconds. */
 export const ANALYZE_TIMEOUT_MS = 15_000;

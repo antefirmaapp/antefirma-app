@@ -1,9 +1,9 @@
 /**
- * Esportazione in formato calendario (RFC 5545).
+ * Calendar export (RFC 5545).
  *
- * Il promemoria dell'estensione funziona solo se Chrome è aperto. La scadenza
- * di una disdetta è una cosa troppo costosa per dipendere da questo: meglio
- * metterla anche nel calendario dell'utente, dove sopravvive a tutto.
+ * The extension's reminder only works while Chrome is open. A cancellation
+ * deadline is too costly to depend on that: better to put it in the user's
+ * calendar too, where it survives everything.
  */
 
 import { formatMoney } from './text.js';
@@ -13,8 +13,8 @@ import { t } from '../i18n/index.js';
 const CRLF = '\r\n';
 
 /**
- * Costruisce un file .ics con la scadenza di disdetta e, se nota, la data di
- * rinnovo. L'evento porta con sé i promemoria a 30, 7 e 1 giorno.
+ * Builds an .ics file with the cancellation deadline and, when known, the
+ * renewal date. The event carries reminders at 30, 7 and 1 day.
  */
 export function buildIcs(commitment, { now = Date.now(), prodId = '-//AnteFirma//IT' } = {}) {
   if (!commitment?.deadlineAt && !commitment?.renewalAt) return null;
@@ -135,7 +135,7 @@ function esc(text) {
     .replace(/\r?\n/g, '\\n');
 }
 
-/** Le righe oltre 75 ottetti vanno spezzate con uno spazio iniziale. */
+/** Lines over 75 octets must be folded with a leading space. */
 function fold(line) {
   if (line.length <= 75) return line;
   const parts = [line.slice(0, 75)];

@@ -1,15 +1,15 @@
 /**
  * EU / Italian Consumer Risk Engine.
  *
- * Molti concorrenti sono nati per il mercato americano e valutano le clausole
- * con un metro che in Europa non si applica. Qui la domanda non è solo
- * "questa clausola è sfavorevole?" ma "questa condizione regge davanti alle
- * tutele previste per i consumatori UE/italiani?".
+ * Many competitors were born for the US market and judge clauses by a yardstick
+ * that doesn't apply in Europe. Here the question is not only "is this clause
+ * unfavourable?" but "does this condition hold up against the protections EU
+ * and Italian consumers have?".
  *
- * ⚠️ Questo modulo produce **informazione automatizzata, non consulenza
- * legale**. I riferimenti normativi servono a far capire all'utente dove
- * guardare, non a stabilire la validità di una clausola nel caso concreto:
- * dipende dal contratto, dalle parti e dalla qualifica di consumatore.
+ * ⚠️ This module produces **automated information, not legal advice**. Legal
+ * references help the user know where to look, not decide whether a clause is
+ * valid in a specific case: that depends on the contract, the parties and
+ * whether the user is a consumer.
  */
 
 import { t } from '../i18n/index.js';
@@ -18,8 +18,8 @@ export const DISCLAIMER =
   'Analisi automatica a scopo informativo. Non è un parere legale: la validità di una clausola dipende dal contratto specifico e dalla qualifica delle parti.';
 
 /**
- * Ogni check collega una categoria di rischio al riferimento normativo che
- * la rende quantomeno discutibile in ambito consumer UE/IT.
+ * Each check links a risk category to the legal reference that makes it at
+ * least questionable for EU/Italian consumers.
  */
 const CHECKS = [
   {
@@ -78,9 +78,9 @@ const CHECKS = [
     test: ({ text, actionType, findings }) => {
       const isCommerce = ['purchase', 'subscribe'].includes(actionType) || findings.some((f) => ['auto_renewal', 'no_refund'].includes(f.category));
       if (!isCommerce) return false;
-      // Non basta che compaia la parola "recesso": serve il *diritto* di
-      // ripensamento con il suo termine. Un contratto può parlare a lungo di
-      // recesso anticipato e tacere completamente sui 14 giorni.
+      // The word "withdrawal" appearing is not enough: the *right* to change
+      // your mind, with its deadline, is needed. A contract can talk at length
+      // about early termination and say nothing about the 14 days.
       return !/\bdiritto\s+di\s+recesso\b|\bripensamento\b|\bright\s+(?:of|to)\s+withdraw\w*|\b14\s*(?:giorni|days)\b|\bcooling.?off\b|\brecesso\s+entro\b/i.test(text);
     },
   },
@@ -177,11 +177,11 @@ const CHECKS = [
  */
 export function runConsumerChecks({ text = '', findings = [], ctx = {}, cost = {}, actionType = 'accept_terms', jurisdiction = 'IT' } = {}) {
   /**
-   * La Spagna è UE: le direttive citate valgono, gli articoli del Codice del
-   * Consumo e del codice civile italiano no. Normalizzando `ES` a `EU` si
-   * ottiene esattamente questo — i tredici controlli di livello europeo
-   * restano, quello con `scopes: ['IT']` (art. 1341 c.c., clausole vessatorie
-   * con doppia sottoscrizione) resta fuori.
+   * Spain is in the EU: the directives quoted apply, the articles of the Italian
+   * Consumer Code and Civil Code don't. Normalising `ES` to `EU` gives exactly
+   * that — the thirteen EU-level checks stay, the one with `scopes: ['IT']`
+   * (art. 1341 of the Civil Code, unfair terms requiring a double signature)
+   * stays out.
    */
   if (jurisdiction === 'ES') jurisdiction = 'EU';
   const applicable = jurisdiction === 'IT' || jurisdiction === 'EU';
@@ -204,7 +204,7 @@ export function runConsumerChecks({ text = '', findings = [], ctx = {}, cost = {
         customHit = false;
       }
     }
-    // Se ha categorie, servono entrambe; se non ne ha, basta il test.
+    // With categories, both are needed; without, the test is enough.
     const hit = check.categories.length ? categoryHit && customHit : customHit;
     if (!hit) continue;
 
@@ -218,9 +218,9 @@ export function runConsumerChecks({ text = '', findings = [], ctx = {}, cost = {
     });
   }
 
-  // Il contributo al punteggio è smorzato *e* limitato: con il tetto precedente
-  // qualsiasi contratto con tre segnalazioni arrivava al massimo, e il motore
-  // consumer smetteva di distinguere fra un fastidio e un abuso.
+  // The contribution to the score is damped *and* capped: with the old cap any
+  // contract with three findings hit the maximum, and the consumer engine
+  // stopped telling a nuisance from an abuse.
   const raw = flags.reduce((s, f) => s + f.boost, 0);
   const boost = Math.round(Math.min(25, raw * 0.35));
 

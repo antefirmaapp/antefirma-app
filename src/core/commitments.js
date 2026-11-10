@@ -1,12 +1,12 @@
 /**
- * Registro degli impegni: il pezzo che trasforma un avviso di dieci secondi in
- * qualcosa che ti serve ancora fra ventiquattro mesi.
+ * The commitment register: the piece that turns a ten-second warning into
+ * something still useful twenty-four months later.
  *
- * Tutti i concorrenti ti aiutano a *non entrare*. Nessuno ti aiuta a *uscire*.
- * Qui l'impegno accettato diventa una scadenza con dei promemoria e, quando
- * arriva il momento, una lettera già scritta.
+ * Every competitor helps you *not get in*. Nobody helps you *get out*. Here an
+ * accepted commitment becomes a deadline with reminders and, when the time
+ * comes, a letter already written.
  *
- * Logica pura: nessuna API di Chrome, così è verificabile in Node.
+ * Pure logic: no Chrome APIs, so it can be tested in Node.
  */
 
 import { formatMoney, PERIOD_MONTHS } from './text.js';
@@ -21,12 +21,12 @@ export const COMMITMENT_STATUS = {
 
 const DAY = 86_400_000;
 
-/** Quanti giorni prima della scadenza farsi vivi. */
+/** How many days before the deadline to get in touch. */
 export const REMINDER_OFFSETS_DAYS = [30, 7, 1];
 
 /**
- * Costruisce un impegno a partire dal verdetto, nel momento in cui l'utente
- * decide di procedere.
+ * Builds a commitment from the verdict, at the moment the user decides to go
+ * ahead.
  */
 export function buildCommitment({ verdict = {}, snapshot = null, decision = 'proceed', now = Date.now(), id = null } = {}) {
   const cost = verdict.cost || {};
@@ -59,8 +59,8 @@ export function buildCommitment({ verdict = {}, snapshot = null, decision = 'pro
     categories: (verdict.findings || []).map((f) => f.category),
 
     currency: cost.currency || 'EUR',
-    // Il prezzo unitario e la sua periodicità: senza, il confronto futuro
-    // partirebbe da un contesto diverso e mentirebbe sui numeri.
+    // The unit price and its period: without them a later comparison would
+    // start from a different context and lie about the numbers.
     pricing: verdict.pricing
       ? { amount: verdict.pricing.amount ?? null, currency: verdict.pricing.currency || 'EUR', period: verdict.pricing.period || null, recurring: Boolean(verdict.pricing.recurring) }
       : null,
@@ -85,41 +85,41 @@ export function buildCommitment({ verdict = {}, snapshot = null, decision = 'pro
 }
 
 /**
- * Chi incassa per conto d'altri: il nome del dominio è quello del servizio di
- * pagamento, non di chi vende. Lì il venditore si cerca nel titolo della pagina.
+ * Those who collect on someone else's behalf: the domain is the payment
+ * service's, not the seller's. There the seller is looked for in the page title.
  */
 const PAYMENT_HOSTS = /(^|\.)(paddle\.com|stripe\.com|paypal\.com|lemonsqueezy\.com|chargebee\.com|recurly\.com|fastspring\.com|gumroad\.com|2checkout\.com|checkout\.com|adyen\.com|mollie\.com|klarna\.com|satispay\.com|nexi\.it|sumup\.com|shopify\.com)$/i;
 const CHECKOUT_WORDS = /\b(checkout|check-out|pagamento|pago|payment|pay|paga|secure|sicuro|seguro|cassa|ordine|order|pedido|paddle|stripe|paypal|lemon ?squeezy|chargebee|recurly|fastspring|gumroad|klarna|sandbox)\b/gi;
 export const isPaymentHost = (host = '') => PAYMENT_HOSTS.test(String(host).replace(/^www\./, ''));
 
-/** Il venditore dal titolo di una pagina di pagamento («Checkout – Acme Pro» → «Acme Pro»); null se non c'è. */
+/** The seller from a payment page title ("Checkout – Acme Pro" → "Acme Pro"); null if absent. */
 export function merchantFromTitle(title = '') {
   const parts = String(title).split(/\s+[-–—|·:]\s+|\s*\|\s*/).map((p) => p.replace(CHECKOUT_WORDS, '').replace(/\s{2,}/g, ' ').trim())
     .filter((p) => p.length >= 2 && /\p{L}/u.test(p));
   return parts[0] ? parts[0].slice(0, 60) : null;
 }
 
-/** Nome leggibile del fornitore, ricavato da titolo o dominio. */
+/** A readable provider name, from the title or the domain. */
 export function providerName(verdict = {}) {
   const host = (verdict.host || '').replace(/^www\./, '');
-  // Senza sito né titolo il nome resta vuoto: lettera e pannello mettono il segnaposto nella loro lingua.
+  // Without site or title the name stays empty: letter and panel use the placeholder in their language.
   if (!host) return verdict.title || null;
-  // Una pagina di Paddle, Stripe…: il nome giusto è nel titolo; altrimenti vuoto, e si rinomina dal pannello.
+  // A Paddle, Stripe… page: the right name is in the title; otherwise empty, and it can be renamed in the panel.
   if (isPaymentHost(host)) return (verdict.merchant && merchantFromTitle(verdict.merchant)) || merchantFromTitle(verdict.title || '');
   const base = host.split('.')[0];
   return base ? base.charAt(0).toUpperCase() + base.slice(1) : host;
 }
 
 /**
- * Il piano dei promemoria: **dati, non allarmi**.
+ * The reminder plan: **data, not alarms**.
  *
- * La versione precedente programmava tre `chrome.alarms` a 690, 713 e 719
- * giorni di distanza. Un allarme così lontano è una scommessa: non sopravvive
- * in modo garantito a un aggiornamento dell'estensione, e se scatta a browser
- * chiuso è semplicemente perso — silenzio, nel momento in cui l'avviso serviva.
+ * The previous version scheduled three `chrome.alarms` 690, 713 and 719 days
+ * ahead. An alarm that far away is a gamble: it isn't guaranteed to survive an
+ * extension update, and if it fires with the browser closed it is simply lost —
+ * silence, at the very moment the warning mattered.
  *
- * Ora il piano è una lista salvata insieme all'impegno, e una passata
- * quotidiana decide cosa è dovuto. Se un giorno salta, il giorno dopo recupera.
+ * Now the plan is a list saved with the commitment, and a daily pass decides
+ * what is due. If a day is skipped, the next day catches up.
  */
 export function planReminders(commitment, now = Date.now()) {
   if (!commitment?.deadlineAt) return [];
@@ -130,16 +130,16 @@ export function planReminders(commitment, now = Date.now()) {
     return {
       days,
       at: new Date(at).toISOString(),
-      // Un promemoria la cui data è già passata nasce consumato: se registri
-      // l'impegno a dieci giorni dalla scadenza, l'avviso "mancano 30 giorni"
-      // non deve partire — sarebbe falso e distruggerebbe la fiducia
-      // nell'unica cosa che qui deve essere esatta, cioè la data.
+      // A reminder whose date has already passed is born used: if you record a
+      // commitment ten days before the deadline, the "30 days left" reminder
+      // must not fire — it would be false and would destroy trust in the one
+      // thing that must be exact here, the date.
       fired: at <= now,
     };
   });
 
-  // In compenso, chi scopre l'estensione a ridosso della scadenza va avvisato
-  // subito, con il numero di giorni reale.
+  // On the other hand, someone who discovers the extension close to the
+  // deadline must be warned at once, with the real number of days.
   const firstReminderAt = deadline - Math.max(...REMINDER_OFFSETS_DAYS) * DAY;
   if (firstReminderAt <= now && deadline > now) {
     out.push({
@@ -154,12 +154,11 @@ export function planReminders(commitment, now = Date.now()) {
 }
 
 /**
- * Quale promemoria è dovuto adesso.
+ * Which reminder is due now.
  *
- * Ne restituisce **uno solo**, il più urgente fra quelli scaduti e non ancora
- * inviati: dopo una pausa lunga del browser sarebbero dovuti tutti e tre, e
- * tre notifiche di fila sullo stesso contratto sono un modo sicuro per farsi
- * disattivare.
+ * It returns **only one**, the most urgent of those due and not yet sent: after
+ * a long browser pause all three would be due, and three notifications in a row
+ * about the same contract are a sure way to get switched off.
  */
 export function dueReminder(commitment, now = Date.now()) {
   if (!commitment?.reminders?.length) return null;
@@ -174,9 +173,9 @@ export function dueReminder(commitment, now = Date.now()) {
 }
 
 /**
- * La finestra di disdetta si è chiusa mentre nessuno guardava.
- * È sgradevole da leggere, ma il silenzio è peggio: senza questo avviso
- * l'utente scopre il rinnovo dall'estratto conto.
+ * The cancellation window closed while nobody was looking.
+ * It is unpleasant to read, but silence is worse: without this warning the
+ * user finds out about the renewal from their bank statement.
  */
 export function missedWindow(commitment, now = Date.now()) {
   if (!commitment?.deadlineAt) return false;
@@ -213,7 +212,7 @@ export function commitmentState(commitment, now = Date.now()) {
 }
 
 /**
- * Quanto ti costa non fare niente: è il numero che rende concreta la scadenza.
+ * What doing nothing costs you: the number that makes the deadline concrete.
  */
 export function costOfDoingNothing(commitment) {
   if (!commitment?.autoRenewal) return null;
@@ -248,7 +247,7 @@ export function portfolioSummary(commitments = [], now = Date.now()) {
   };
 }
 
-/** Deriva il canone unitario, se ricostruibile. */
+/** Derives the unit fee, if it can be reconstructed. */
 export function unitPrice(commitment) {
   if (commitment.recurringTotal == null || !commitment.horizonMonths) return null;
   const period = commitment.period || 'month';

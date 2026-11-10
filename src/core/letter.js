@@ -1,14 +1,14 @@
 /**
- * Lettera di uscita, precompilata.
+ * The exit letter, pre-filled.
  *
- * Sapere che devi disdire entro il 15 giugno non basta: il costo vero è
- * scrivere la lettera, trovare i riferimenti, capire se è recesso o disdetta.
- * Qui il documento esce già scritto, con la norma giusta in calce.
+ * Knowing you must cancel by 15 June is not enough: the real cost is writing the letter,
+ * finding the references, working out whether it is a withdrawal or a cancellation.
+ * Here the document comes out already written, with the right law at the bottom.
  *
- * Tre casi distinti, perché non sono la stessa cosa:
- *  - RECESSO       — i 14 giorni del contratto a distanza (ripensamento)
- *  - DISDETTA      — evitare il rinnovo tacito, rispettando il preavviso
- *  - RECESSO_MOD   — uscire perché il fornitore ha cambiato le condizioni
+ * Three distinct cases, because they are not the same thing:
+ *  - WITHDRAWAL    — the 14 days of a distance contract (change of mind)
+ *  - CANCELLATION  — stopping tacit renewal, respecting the notice period
+ *  - CHANGE        — leaving because the provider changed the terms
  */
 
 import { formatMoney as fm } from './text.js';
@@ -16,10 +16,10 @@ import { formatDate as fd } from './commitments.js';
 import { t, locale } from '../i18n/index.js';
 
 /**
- * La lingua della lettera è quella del fornitore, non quella dell'estensione:
- * in italiano per l'Italia, in spagnolo per la Spagna, in inglese altrove.
- * Ciascuna con le norme e le abitudini del suo paese (PEC e raccomandata,
- * burofax, recorded delivery). Date e importi seguono la lingua della lettera.
+ * The letter's language is the provider's, not the extension's: Italian for
+ * Italy, Spanish for Spain, English elsewhere. Each with its country's laws and
+ * habits (PEC and registered letter, burofax, recorded delivery). Dates and
+ * amounts follow the letter's language.
  */
 export const LETTER_LANGS = ['it', 'es', 'en'];
 const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB' };
@@ -32,10 +32,10 @@ export const LETTER_KINDS = {
 };
 
 /**
- * Il nome del file è rivolto all'utente, non al codice: lo salva sul disco e
- * magari lo allega a una PEC. «disdetta-streampro-2028-04-19.txt» gli dice cosa
- * ha in mano; «cancellation-…» no. Resta quindi in italiano anche se l'id
- * interno è inglese.
+ * The file name is for the user, not the code: they save it to disk and maybe
+ * attach it to a PEC. "disdetta-streampro-2028-04-19.txt" tells them what they
+ * have; "cancellation-…" doesn't. So it stays in the letter's language even
+ * though the internal id is English.
  */
 const FILE_SLUGS = {
   it: { withdrawal: 'recesso', cancellation: 'disdetta', change_withdrawal: 'recesso-modifica' },
@@ -50,7 +50,7 @@ export const LETTER_LABELS = {
 };
 
 /**
- * Sceglie da sé il tipo di lettera più adatto allo stato dell'impegno.
+ * Picks the letter type that best fits the commitment's state.
  */
 export function suggestKind(commitment, now = Date.now()) {
   const created = commitment?.createdAt ? new Date(commitment.createdAt).getTime() : null;
@@ -67,9 +67,9 @@ export function suggestKind(commitment, now = Date.now()) {
 /**
  * @param {object} commitment
  * @param {object} identity  { name, address, email, customerId }
- * @param {string} kind      uno dei LETTER_KINDS
+ * @param {string} kind      one of LETTER_KINDS
  * @param {number} now
- * @param {string} lang      'it' | 'es' | 'en': la lingua del fornitore
+ * @param {string} lang      'it' | 'es' | 'en': the provider's language
  */
 export function buildLetter(commitment = {}, identity = {}, kind = null, now = Date.now(), lang = 'it') {
   const L = TEXT[lang] ? lang : 'it';
@@ -82,7 +82,7 @@ export function buildLetter(commitment = {}, identity = {}, kind = null, now = D
     email: identity.email?.trim() || X.ph.email,
     customerId: identity.customerId?.trim() || '',
   };
-  // «Fornitore» era il nome di ripiego delle versioni precedenti: vale come nome mancante.
+  // "Fornitore" was the fallback name in earlier versions: it counts as a missing name.
   const named = commitment.provider && commitment.provider !== 'Fornitore' ? commitment.provider : null;
   const provider = named || commitment.host || X.ph.provider;
   const ctx = { c: commitment, you, provider, today: fmt.date(new Date(now)), fmt, X };
@@ -116,7 +116,7 @@ const noticeOf = (c) => (c.noticeMonths ? Math.round(c.noticeMonths * 30) : null
 const when = (iso, fmt) => (iso ? fmt.date(new Date(iso)) : null);
 
 const TEXT = {
-  // Ricalca il modulo di recesso tipo dell'Allegato I, parte B, del Codice del Consumo.
+  // Follows the model withdrawal form of Annex I, part B, of the Italian Consumer Code.
   it: {
     ph: { name: '[Nome e cognome]', address: '[Indirizzo]', email: '[Email]', provider: '[Fornitore]', service: '[descrizione del servizio]', date: '[data]' },
     estimated: (x) => `(impegno stimato ${x})`,
@@ -175,7 +175,7 @@ const TEXT = {
     },
   },
 
-  // Spagna: Real Decreto Legislativo 1/2007 (TRLGDCU); il burofax è la prova d'invio più usata.
+  // Spain: Royal Legislative Decree 1/2007 (TRLGDCU); burofax is the most used proof of sending.
   es: {
     ph: { name: '[Nombre y apellidos]', address: '[Dirección]', email: '[Email]', provider: '[Empresa]', service: '[descripción del servicio]', date: '[fecha]' },
     estimated: (x) => `(compromiso estimado ${x})`,
@@ -235,7 +235,7 @@ const TEXT = {
     },
   },
 
-  // Inglese: le direttive europee e, per il Regno Unito, le norme equivalenti.
+  // English: the European directives and, for the United Kingdom, the equivalent rules.
   en: {
     ph: { name: '[Full name]', address: '[Address]', email: '[Email]', provider: '[Provider]', service: '[description of the service]', date: '[date]' },
     estimated: (x) => `(estimated commitment ${x})`,
@@ -293,7 +293,7 @@ const TEXT = {
   },
 };
 
-/** I consigli accanto alla lettera: nella lingua di chi la usa, con il mezzo d'invio del paese della lettera. */
+/** The advice next to the letter: in the user's language, with the sending method of the letter's country. */
 function checklistFor(kind, c, lang) {
   const list = [
     t('Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).'),

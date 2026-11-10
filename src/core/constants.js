@@ -1,11 +1,11 @@
 /**
- * Vocabolario condiviso del motore: categorie di rischio, aree di protezione
- * del profilo personale, livelli di verdetto, tipi di azione intercettata.
+ * The engine's shared vocabulary: risk categories, protection areas of the
+ * personal profile, verdict levels, types of intercepted action.
  *
- * Tutto il resto del motore (analisi del server, scoring, UI) parla questa lingua.
+ * The rest of the engine (server analysis, scoring, UI) speaks this language.
  */
 
-/** Tipi di azione che il detector considera un "commitment". */
+/** Action types the detector treats as a "commitment". */
 export const ACTION_TYPES = {
   ACCEPT_TERMS: 'accept_terms',
   SUBSCRIBE: 'subscribe',
@@ -29,8 +29,8 @@ export const ACTION_LABELS = {
 };
 
 /**
- * Le aree che l'utente può dichiarare di voler proteggere.
- * Sono i "pesi" del Personal Risk Profile.
+ * The areas the user can declare they want to protect.
+ * They are the "weights" of the Personal Risk Profile.
  */
 export const PROTECTION_AREAS = {
   MONEY: 'money',
@@ -53,21 +53,21 @@ export const PROTECTION_LABELS = {
 };
 
 /**
- * Categorie di rischio. `base` è la severità di partenza (0-100) prima della
- * personalizzazione; `areas` indica quali aree del profilo la amplificano.
+ * Risk categories. `base` is the starting severity (0-100) before
+ * personalisation; `areas` says which profile areas amplify it.
  *
- * Come sono tarate le severità: il metro è il **danno atteso**, non quanto la
- * clausola suoni sgradevole. Una limitazione di responsabilità sta in ogni
- * contratto del mondo e vale 25; una cessione dei diritti d'autore è
- * irreversibile e vale 85. Se le clausole ordinarie partono alte, qualsiasi
- * contratto normale finisce in allarme rosso e l'utente impara a ignorare
- * l'avviso — che è il modo più rapido per rendere inutile un firewall.
+ * How severities are calibrated: the yardstick is **expected harm**, not how
+ * unpleasant the clause sounds. A liability limitation is in every contract in
+ * the world and is worth 25; an assignment of copyright is irreversible and is
+ * worth 85. If ordinary clauses start high, any normal contract ends up on red
+ * alert and the user learns to ignore the warning — the quickest way to make a
+ * firewall useless.
  *
- * Le fasce di riferimento:
- *   85-100  irreversibile o molto costoso da annullare
- *   60-84   conseguenza economica o giuridica seria
- *   40-59   impegno reale, da leggere prima di accettare
- *   20-39   condizione ordinaria, da sapere
+ * Reference bands:
+ *   85-100  irreversible or very costly to undo
+ *   60-84   serious economic or legal consequence
+ *   40-59   a real commitment, to read before accepting
+ *   20-39   an ordinary condition, worth knowing
  */
 export const RISK_CATEGORIES = {
   auto_renewal: {
@@ -169,10 +169,10 @@ export const RISK_CATEGORIES = {
   ai_training: {
     label: 'Uso dei contenuti per addestrare AI',
     base: 45,
-    // Non 'privacy': ciò che carichi è tuo prima ancora che personale, e per i
-    // dati personali ci sono già data_sharing e profiling. Con 'privacy' fra le
-    // aree, questa categoria diventava il rischio principale anche per chi non
-    // ha dichiarato di tenere ai propri contenuti.
+    // Not 'privacy': what you upload is yours before it is personal, and for
+    // personal data there are already data_sharing and profiling. With 'privacy'
+    // among the areas, this category became the main risk even for people who
+    // had not said they cared about their content.
     areas: ['ip', 'freelance', 'business'],
     why: 'Ciò che carichi può finire dentro modelli di intelligenza artificiale.',
   },
@@ -215,14 +215,14 @@ export const RISK_CATEGORIES = {
 };
 
 /**
- * Livelli di verdetto, dal più innocuo al più grave.
+ * Verdict levels, from the most harmless to the most serious.
  *
- * Le soglie non sono numeri tondi scelti a mente: vengono dall'insieme di
- * riferimento in `test/fixtures/corpus.mjs` e sono collocate nei *vuoti* della
- * distribuzione, cioè dove i casi etichettati si separano naturalmente.
+ * The thresholds are not round numbers picked by heart: they come from the
+ * reference set in `test/fixtures/corpus.mjs` and sit in the *gaps* of the
+ * distribution, where the labelled cases naturally separate.
  *
- * Vanno riviste quando arriveranno testi presi da siti veri: nove esempi
- * scritti a mano bastano a togliere la saturazione, non a dire l'ultima parola.
+ * They should be revised when texts from real sites arrive: nine hand-written
+ * examples are enough to remove saturation, not to have the last word.
  */
 export const LEVELS = [
   {
@@ -272,7 +272,7 @@ export const LEVELS = [
   },
 ];
 
-/** Restituisce il livello corrispondente a un punteggio 0-100. */
+/** Returns the level matching a 0-100 score. */
 export function levelForScore(score) {
   let match = LEVELS[0];
   for (const level of LEVELS) {
@@ -283,35 +283,35 @@ export function levelForScore(score) {
 
 export const DEFAULT_SETTINGS = {
   enabled: true,
-  /** Registro degli impegni e promemoria delle scadenze. */
+  /** Commitment register and deadline reminders. */
   trackCommitments: true,
   reminders: true,
-  /** Controllo periodico delle condizioni già accettate. */
+  /** Periodic check of terms already accepted. */
   watchChanges: true,
   /**
-   * Il controllo automatico può far rileggere al server le condizioni già
-   * accettate? Solo quando il loro testo pubblico è cambiato, e solo con il
-   * consenso all'analisi. Sì per difetto: senza, il controllo può dire soltanto
-   * «il testo è cambiato», che per un anno di copyright è un falso allarme.
+   * May the automatic check have the server re-read terms already accepted?
+   * Only when their public text changed, and only with consent to analysis.
+   * Yes by default: without it, the check can only say "the text changed",
+   * which for a copyright year is a false alarm.
    */
   watchUsesRemote: true,
   /**
-   * Istante del consenso esplicito all'invio del testo al server di AnteFirma.
+   * When explicit consent to send text to the AnteFirma server was given.
    *
-   * `null` significa «mai dato»: finché resta così nessun testo esce dal
-   * browser e l'avviso, alla prima analisi, chiede il permesso. La policy del Chrome Web
-   * Store non chiede solo di dichiarare il trasferimento nella privacy policy,
-   * chiede una disclosure *dentro l'interfaccia* e un atto esplicito di
-   * accettazione prima della raccolta. Registrare la data serve anche al
-   * secondo obbligo: avvisare se le pratiche cambiano dopo l'installazione.
+   * `null` means "never given": while it stays so no text leaves the browser,
+   * and the warning asks for permission at the first analysis. The Chrome Web
+   * Store policy requires not only declaring the transfer in the privacy policy
+   * but a disclosure *inside the interface* and an explicit act of acceptance
+   * before collection. Recording the date also serves the second duty: telling
+   * the user if practices change after installation.
    */
   remoteConsentAt: null,
-  /** Dati usati per precompilare le lettere di disdetta. Restano in locale. */
+  /** Data used to pre-fill cancellation letters. It stays local. */
   identity: { name: '', address: '', email: '', customerId: '' },
-  blockFrom: 'commitment', // livello minimo che blocca davvero il click
+  blockFrom: 'commitment', // minimum level that really blocks the click
   jurisdiction: 'IT', // IT | ES | EU | UK | US | OTHER
-  uiLang: 'auto', // auto (lingua del browser) | it | en | es
-  minBlockAmount: 0, // sotto questo impegno (€) non si blocca il click, salvo i casi critici
+  uiLang: 'auto', // auto (browser language) | it | en | es
+  minBlockAmount: 0, // below this commitment (€) the click is not blocked, except critical cases
   profile: {
     money: true,
     privacy: true,

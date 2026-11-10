@@ -1,23 +1,23 @@
 /**
  * Consequence Engine.
  *
- * Trasforma il linguaggio legale in due cose che una persona capisce senza
- * mediazione: **quanto mi può costare** e **cosa succede se clicco**.
+ * Turns legal language into two things a person understands directly: **what
+ * it can cost me** and **what happens if I click**.
  *
- * È la parte del prodotto che sostituisce il "Risk score 73/100" con
- * "impegno potenziale 479,76 €".
+ * It is the part of the product that replaces "Risk score 73/100" with
+ * "potential commitment €479.76".
  */
 
 import { formatMoney, PERIOD_MONTHS } from './text.js';
 import { t, tn, locale } from '../i18n/index.js';
 
 /**
- * Le condizioni economiche lette dal server.
+ * Economic terms read by the server.
  *
- * Il server le restituisce ciascuna con il passo da cui le ha ricavate, e
- * scarta quelle la cui cifra non compare in quel passo: qui si prendono così
- * come arrivano, senza cercare altri numeri nel testo. Una cifra che il server
- * non ha potuto verificare non entra nel totale.
+ * The server returns each of them with the passage it comes from, and drops
+ * those whose figure isn't in that passage: here they are taken as they come,
+ * without looking for other numbers in the text. A figure the server could not
+ * verify never enters the total.
  */
 export function termsFromServer(terms = {}) {
   const t = terms || {};
@@ -45,8 +45,8 @@ export function termsFromServer(terms = {}) {
 }
 
 /**
- * Unisce il prezzo letto nella pagina, vicino al pulsante, con quello letto dal
- * server nel testo. Vince la pagina: è il prezzo che la persona sta vedendo.
+ * Merges the price read on the page, near the button, with the one the server
+ * read in the text. The page wins: it is the price the person is looking at.
  */
 export function mergePricing(pricing = {}, server = {}) {
   const out = { ...(pricing || {}) };
@@ -64,14 +64,14 @@ export function mergePricing(pricing = {}, server = {}) {
   return out;
 }
 
-/** La penale come cifra: scritta nel contratto, o calcolata dalle mensilità. */
+/** The exit fee as a figure: written in the contract, or computed from monthly payments. */
 const penaltyOf = (cost) => cost.penalty?.amount ?? (cost.lines || []).find((l) => l.kind === 'penalty')?.amount ?? null;
 
 const NUMBER_WORDS = {
   un: 1, una: 1, uno: 1, one: 1, due: 2, two: 2, dos: 2, tre: 3, three: 3, tres: 3, quattro: 4, four: 4, cuatro: 4,
   cinque: 5, five: 5, cinco: 5, sei: 6, six: 6, seis: 6, dodici: 12, twelve: 12, doce: 12,
 };
-/** Le mensilità di penale scritte nella frase citata («tre mensilità», «2 monthly payments», «tres cuotas mensuales»). */
+/** Monthly payments of exit fee written in the quoted sentence ("tre mensilità", "2 monthly payments", "tres cuotas mensuales"). */
 export function penaltyFromFindings(findings = []) {
   const f = findings.find((x) => x.category === 'early_termination_penalty' && x.quote);
   if (!f) return null;
@@ -86,11 +86,11 @@ function fmtNum(n) {
 }
 
 /**
- * Calcola il costo potenziale dell'impegno.
+ * Computes the potential cost of the commitment.
  *
- * L'obiettivo non è la precisione contabile — impossibile da un testo legale —
- * ma dare all'utente l'ordine di grandezza corretto prima del click, con la
- * formula esplicita così può giudicare da sé.
+ * The goal is not accounting precision — impossible from a legal text — but
+ * giving the user the right order of magnitude before the click, with the
+ * formula spelled out so they can judge for themselves.
  */
 export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
   const pricing = ctx.pricing || {};
@@ -98,16 +98,16 @@ export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
 
   const minTerm = terms.minTerm || null;
   const notice = terms.notice || null;
-  // «Una penale pari a tre mensilità» non è una cifra: il server non la mette fra
-  // le condizioni economiche, ma nel totale deve entrare (prezzo al mese × mesi).
+  // "A penalty equal to three monthly payments" is not a figure: the server
+  // doesn't put it among the economic terms, but it must enter the total (monthly price × months).
   const penalty = terms.penalty || penaltyFromFindings(findings);
   const extras = terms.extras || [];
 
   const hasAutoRenewal = findings.some((f) => f.category === 'auto_renewal');
   const periodMonths = pricing.period ? PERIOD_MONTHS[pricing.period] || 1 : null;
 
-  // Orizzonte di impegno: durata minima dichiarata, altrimenti un ciclo di
-  // rinnovo (12 mesi se annuale/mensile con rinnovo automatico).
+  // Commitment horizon: the declared minimum term, otherwise one renewal cycle
+  // (12 months if yearly/monthly with automatic renewal).
   let horizonMonths = null;
   let horizonReason = null;
   if (minTerm) {
@@ -156,8 +156,8 @@ export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
 
   for (const e of extras) {
     if (e.amount == null) continue;
-    // Una spesa per rata va moltiplicata per i cicli: contarla una volta sola
-    // è l'errore che fa sparire due terzi del suo peso.
+    // A per-instalment fee must be multiplied by the cycles: counting it once
+    // is the mistake that makes two thirds of its weight disappear.
     const times = e.perCycle && cycles > 1 ? cycles : 1;
     const sub = round2(e.amount * times);
     total += sub;
@@ -190,7 +190,7 @@ export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
     hasRecurring,
     hasAutoRenewal,
     uncertain,
-    /** Vero quando il prezzo mostrato sottostima nettamente l'impegno reale. */
+    /** True when the price shown clearly underestimates the real commitment. */
     understated:
       worstCase != null &&
       pricing.amount != null &&
@@ -199,8 +199,8 @@ export function computeCost({ ctx = {}, findings = [], terms = {} } = {}) {
 }
 
 /**
- * Costruisce la timeline "cosa succede se clicco".
- * @param {Date|number} now - istante di riferimento (iniettabile per i test).
+ * Builds the "what happens if I click" timeline.
+ * @param {Date|number} now - reference time (injectable for tests).
  */
 export function buildTimeline({ ctx = {}, cost = {}, findings = [], actionType = 'accept_terms', now = Date.now() } = {}) {
   const start = new Date(now);
@@ -306,7 +306,7 @@ function periodLabel(period) {
   return w ? t(w) : period;
 }
 
-/** «× 12 mesi» si legge al volo, «× 12 cicli» no. */
+/** "× 12 months" reads at a glance, "× 12 cycles" doesn't. */
 function cycleWord(period, n) {
   const words = {
     month: ['mese', 'mesi'], year: ['anno', 'anni'], week: ['settimana', 'settimane'],

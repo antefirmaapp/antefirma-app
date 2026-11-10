@@ -1,16 +1,15 @@
 /**
  * Decision Risk Score.
  *
- * Non è il punteggio del *documento*: è il punteggio della *decisione* che
- * l'utente sta per prendere. Entrano quindi tre ingredienti che un semplice
- * analizzatore di Terms non ha: il tipo di azione, l'esposizione economica
- * concreta e il profilo personale.
+ * Not the score of the *document*: the score of the *decision* the user is
+ * about to make. So three ingredients a plain Terms analyser lacks come in: the
+ * type of action, the concrete economic exposure and the personal profile.
  */
 
 import { levelForScore, ACTION_TYPES } from './constants.js';
 import { t, tn } from '../i18n/index.js';
 
-/** Quanto il tipo di azione alza il pavimento del rischio. */
+/** How much the type of action raises the risk floor. */
 const ACTION_FLOOR = {
   [ACTION_TYPES.PURCHASE]: 12,
   [ACTION_TYPES.SUBSCRIBE]: 18,
@@ -23,14 +22,13 @@ const ACTION_FLOOR = {
 };
 
 /**
- * Contributo dell'esposizione economica, su scala logaritmica:
- * 50 € pesano poco, 500 € pesano, 5.000 € pesano molto ma non infinitamente.
+ * Contribution of economic exposure, on a logarithmic scale: €50 weighs
+ * little, €500 weighs, €5,000 weighs a lot but not infinitely.
  *
- * Il tetto è a 42, e la pendenza è tarata perché ci si arrivi verso i
- * 130.000 €. Con la pendenza precedente la saturazione cadeva a 14.400 €: un
- * finanziamento da 15.000 € e un mutuo da 200.000 € davano lo stesso identico
- * contributo, cioè la scala smetteva di misurare proprio sugli importi in cui
- * sbagliare costa di più.
+ * The cap is 42, and the slope is tuned so it is reached around €130,000. With
+ * the previous slope saturation came at €14,400: a €15,000 loan and a €200,000
+ * mortgage gave exactly the same contribution, i.e. the scale stopped measuring
+ * exactly on the amounts where mistakes cost most.
  */
 export function moneyPressure(worstCase) {
   if (!worstCase || worstCase <= 0) return 0;
@@ -39,27 +37,26 @@ export function moneyPressure(worstCase) {
 }
 
 /**
- * Quanto possono aggiungere, tutte insieme, le clausole diverse dalla peggiore.
+ * How much all clauses other than the worst can add, together.
  *
- * Il tetto è la parte importante: senza, un contratto con otto condizioni
- * ordinarie superava uno con una sola clausola devastante. Ma il rischio di una
- * decisione lo determina la conseguenza peggiore, non il numero di righe.
+ * The cap is the important part: without it, a contract with eight ordinary
+ * conditions outranked one with a single devastating clause. But a decision's
+ * risk is set by its worst consequence, not by the number of lines.
  *
- * Tetto e decadimento vanno però tarati insieme. Con tetto 15 e decadimento
- * 0,35 il secondo finding a severità 45 valeva già 15,75, cioè il tetto: da lì
- * in poi la terza, la quarta e l'ottava clausola non cambiavano più niente. Il
- * «rendimento decrescente» era di fatto un gradino binario, e un contratto con
- * sette condizioni pesava quanto uno con due.
+ * Cap and decay must be tuned together, though. With cap 15 and decay 0.35 the
+ * second finding at severity 45 was already worth 15.75, i.e. the cap: from
+ * there on the third, fourth and eighth clause changed nothing. "Diminishing
+ * returns" was in fact a binary step, and a contract with seven conditions
+ * weighed as much as one with two.
  */
 const RESIDUAL_CAP = 30;
 
 /**
- * Aggrega le severità: **la peggiore determina il livello**, le altre
- * aggiungono con rendimento decrescente e con un tetto complessivo.
+ * Aggregates severities: **the worst sets the level**, the others add with
+ * diminishing returns and an overall cap.
  *
- * Restituisce un valore non limitato a 100: è una somma grezza che serve anche
- * a distinguere fra un contratto brutto e uno bruttissimo. È `compressSeverity`
- * a riportarla sulla scala.
+ * Returns a value not limited to 100: a raw sum that also tells a bad contract
+ * from a very bad one. `compressSeverity` brings it back onto the scale.
  */
 export function aggregateSeverity(findings = []) {
   if (!findings.length) return 0;
@@ -71,32 +68,31 @@ export function aggregateSeverity(findings = []) {
   return Math.round(sorted[0] + Math.min(RESIDUAL_CAP, residual));
 }
 
-/** Sotto questa soglia il punteggio resta lineare: è la zona in cui serve precisione. */
+/** Below this threshold the score stays linear: the zone where precision matters. */
 const KNEE = 50;
-/** Quanto in fretta si comprime sopra il ginocchio. Più alto = compressione più dolce. */
+/** How fast it compresses above the knee. Higher = gentler compression. */
 const SPAN = 45;
 /**
- * Le sole clausole non possono arrivare a 100: il vertice va guadagnato.
+ * Clauses alone cannot reach 100: the top must be earned.
  *
- * Il valore va tenuto d'occhio insieme al massimo grezzo raggiungibile
- * (severità massima 95 dopo la personalizzazione, più RESIDUAL_CAP): se il
- * grezzo massimo si comprime molto sotto questo tetto, le fasce alte diventano
- * irraggiungibili per le sole clausole. Era il caso di prima: il massimo
- * comprimeva a 75, quindi HIGH RISK (76) e CRITICAL (87) erano strutturalmente
- * fuori portata per un contratto senza prezzo estraibile — per esempio una
- * cessione totale dei diritti d'autore letta da un utente fuori dall'UE.
- * `test/calibration.test.mjs` lo verifica con un'asserzione apposita.
+ * Keep an eye on this value together with the highest reachable raw value
+ * (maximum severity 95 after personalisation, plus RESIDUAL_CAP): if the raw
+ * maximum compresses well below this cap, the high bands become unreachable for
+ * clauses alone. That used to be the case: the maximum compressed to 75, so HIGH
+ * RISK (76) and CRITICAL (87) were structurally out of reach for a contract
+ * without an extractable price — for example a full assignment of copyright
+ * read by a user outside the EU. `test/calibration.test.mjs` checks it with a
+ * dedicated assertion.
  */
 const CLAUSE_CEILING = 95;
 
 /**
- * Comprime la somma grezza sulla scala 0-100 in modo monotono e asintotico.
+ * Compresses the raw sum onto the 0-100 scale, monotonically and asymptotically.
  *
- * Senza questo passaggio bastano quattro clausole ordinarie per toccare il
- * tetto, e da lì in poi il punteggio smette di distinguere: un abbonamento
- * annuale onesto e un finanziamento predatorio danno entrambi 100, l'utente
- * vede sempre rosso e impara a non guardare. La compressione restituisce
- * risoluzione proprio dove serve, cioè in alto.
+ * Without this step four ordinary clauses are enough to hit the cap, and from
+ * there on the score stops distinguishing: an honest yearly subscription and a
+ * predatory loan both give 100, the user always sees red and learns not to look.
+ * Compression gives back resolution exactly where it is needed, at the top.
  */
 export function compressSeverity(raw) {
   if (raw <= KNEE) return Math.round(raw);
@@ -105,7 +101,7 @@ export function compressSeverity(raw) {
 }
 
 /**
- * Calcola il punteggio finale e il livello.
+ * Computes the final score and level.
  *
  * @returns {{score:number, level:object, components:object, drivers:Array}}
  */
@@ -115,22 +111,22 @@ export function computeScore({ findings = [], cost = {}, consumer = {}, actionTy
 
   const money = moneyPressure(cost.worstCase);
   const euBoost = consumer.boost || 0;
-  // Se il prezzo mostrato sottostima l'impegno, è esattamente il caso che
-  // questo prodotto esiste per intercettare.
+  // If the price shown underestimates the commitment, that is exactly the case
+  // this product exists to catch.
   const understatedBoost = cost.understated ? 10 : 0;
 
   /**
-   * Le pressioni non si sommano al punteggio: si applicano allo **spazio che
-   * resta**. Un'esposizione economica di 26 punti su una base di 85 aggiunge il
-   * 26% dei 15 punti rimasti, non 26 punti pieni.
+   * Pressures don't add to the score: they apply to the **remaining room**. An
+   * economic exposure of 26 points on a base of 85 adds 26% of the 15 points
+   * left, not 26 full points.
    *
-   * È la differenza fra un indicatore che ordina e uno che satura: sommando,
-   * qualsiasi contratto con due clausole e un prezzo finiva a 100.
+   * That is the difference between an indicator that orders and one that
+   * saturates: by adding, any contract with two clauses and a price ended at 100.
    */
   const pressure = Math.min(70, money + euBoost + understatedBoost);
   let score = base + (100 - base) * (pressure / 100);
 
-  // Un solo indizio debole non deve far scattare un allarme rosso.
+  // A single weak clue must not trigger a red alert.
   if (findings.length === 1 && findings[0].confidence < 0.8 && !cost.worstCase) {
     score = Math.min(score, 44);
   }
@@ -191,8 +187,8 @@ function buildDrivers({ findings, cost, consumer, money, euBoost, understatedBoo
 }
 
 /**
- * Decide se l'azione va effettivamente bloccata, in base alla soglia scelta
- * dall'utente nelle impostazioni.
+ * Decides whether the action must actually be blocked, based on the threshold
+ * the user chose in settings.
  */
 export function shouldBlock(levelId, blockFrom = 'commitment') {
   const order = ['safe', 'review', 'commitment', 'high_risk', 'critical'];
