@@ -145,6 +145,18 @@ condizioni.
 
 ---
 
+## Pacchetto per sviluppatori e tester
+
+```bash
+node tools/dev-zip.mjs     # → dist/antefirma-dev-<versione>.zip
+```
+
+Il pacchetto ha nel manifest una chiave pubblica fissa, quindi l'ID è sempre
+`alfaikbfkaimaejlhghbjffihjgoigoh`, autorizzato nel server (`ALLOWED_ORIGINS`).
+Lo ZIP si carica nel bucket R2 `antefirma-backup` (giurisdizione UE) sotto
+`dev/` e si scarica dal pannello, **Strumenti → Estensione per sviluppatori**.
+Il manifest del repository resta senza chiave: lo store assegna il suo ID.
+
 ## Test
 
 ```bash
