@@ -440,3 +440,6 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
   .verdict h2 { font-size: 17px; }
   .summary, .finding .plain { font-size: 13px; }
 }
+
+/* Stato vuoto: un impegno d'esempio, attenuato. */
+.empty .example { opacity: .6; text-align: left; margin: 10px 0 6px; pointer-events: none; }

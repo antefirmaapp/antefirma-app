@@ -248,6 +248,10 @@
    */
   async function finalize(decision, verdict, via = 'blocked') {
     let how = via;
+    // «Continua e ricordami la disdetta»: si prosegue e l'impegno si registra
+    // anche se nelle impostazioni la registrazione automatica è spenta.
+    let track = false;
+    if (decision === 'track') { decision = 'proceed'; track = true; }
 
     if (decision === 'allowlist') {
       const host = location.hostname.replace(/^www\./, '');
@@ -259,7 +263,7 @@
     }
 
     if (verdict?.historyId && (decision === 'proceed' || decision === 'cancel')) {
-      CF.bridge.send('RECORD_DECISION', { id: verdict.historyId, decision, via: how }).catch(() => {});
+      CF.bridge.send('RECORD_DECISION', { id: verdict.historyId, decision, via: how, track }).catch(() => {});
     }
     return decision;
   }
@@ -285,16 +289,27 @@
     return res?.needsConsent ? { skip: true, reason: 'no_consent' } : res;
   }
 
+  /** Ciò che si può mostrare subito, prima della risposta del server. */
+  function previewOf(ctx) {
+    const p = ctx?.pricing;
+    let price = null;
+    if (p?.amount != null) {
+      try { price = new Intl.NumberFormat(globalThis.AF_I18N.locale, { style: 'currency', currency: p.currency || 'EUR' }).format(p.amount); } catch { price = String(p.amount); }
+      const per = { month: t('al mese'), year: t('all\'anno'), week: t('a settimana'), quarter: t('al trimestre') }[p.period];
+      if (per) price += ` ${per}`;
+    }
+    return { price, host: location.hostname.replace(/^www\./, '') };
+  }
+
   async function handleAction(found, event) {
     const overlay = new CF.overlay.Overlay();
     const waiting = overlay.wait();
-    overlay.showLoading(t(ACTION_LABELS[found.type]));
-
     let decision = 'cancel';
     let current = null;
     let via = 'blocked';
     try {
       const { ctx, text } = CF.context.build(found.el, found.type);
+      overlay.showLoading(t(ACTION_LABELS[found.type]), previewOf(ctx));
       const res = await requestAnalysis(overlay, waiting, { actionType: found.type, ctx, text }, t(ACTION_LABELS[found.type]));
 
       if (res?.__userAborted) {
@@ -406,13 +421,12 @@
   async function handleSubmit(form, submitter, type) {
     const overlay = new CF.overlay.Overlay();
     const waiting = overlay.wait();
-    overlay.showLoading(t(ACTION_LABELS[type]));
-
     let decision = 'cancel';
     let current = null;
     let via = 'blocked';
     try {
       const { ctx, text } = CF.context.build(submitter || form, type);
+      overlay.showLoading(t(ACTION_LABELS[type]), previewOf(ctx));
       const res = await requestAnalysis(overlay, waiting, { actionType: type, ctx, text }, t(ACTION_LABELS[type]));
       if (res?.__userAborted) decision = res.__userAborted;
       else if (res?.error) { overlay.showError(res.error.message, res.error.code); decision = await waiting; }

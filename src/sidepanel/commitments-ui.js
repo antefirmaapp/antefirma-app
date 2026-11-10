@@ -151,10 +151,15 @@ function render(list) {
   paintChips(alive);
 
   if (!list.length) {
+    // Lo stato vuoto mostra come apparirà un impegno, con la strada per provarlo.
     $('#commitments-list').innerHTML = `<div class="empty">
-      Nessun impegno registrato.<br>
-      Quando prosegui su un contratto o un abbonamento, la scadenza di disdetta finisce qui —
-      con la lettera già pronta e la prova di cosa avevi accettato.
+      <p>${esc(t('Quando prosegui su un contratto o un abbonamento, la scadenza di disdetta finisce qui, con la lettera già pronta e la prova di cosa avevi accettato.'))}</p>
+      <div class="c-item example" aria-hidden="true">
+        <div class="c-top"><span class="c-name">StreamPro</span><span class="c-amount">599,76 €</span></div>
+        <span class="c-state" data-urgency="later">${esc(t('Disdetta entro il {d}', { d: '9/9/2028' }))}</span>
+        <div class="c-nothing">${esc(t('Se non disdici, parte un nuovo periodo da {x}.', { x: '479,76 €' }))}</div>
+      </div>
+      <p class="muted small">${esc(t('Esempio'))} · <a href="https://antefirma.app/demo/" target="_blank" rel="noopener">${esc(t('Provalo su una pagina dimostrativa'))}</a></p>
     </div>`;
     return;
   }
@@ -437,7 +442,7 @@ async function finalizeDelete() {
 
 // ── le quattro azioni ───────────────────────────────────────────────────────
 
-async function showLetter(id, kind = null) {
+export async function showLetter(id, kind = null) {
   const letter = await send('BUILD_LETTER', { id, kind });
 
   const options = Object.entries(LETTER_LABELS)

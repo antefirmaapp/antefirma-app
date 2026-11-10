@@ -348,7 +348,7 @@ async function loadHistory() {
   const list = await send('GET_HISTORY');
   const el = $('#history-list');
   if (!list.length) {
-    el.innerHTML = `<div class="empty">${esc(t('Nessun impegno registrato.'))}<br>${esc(t('Lo storico si riempie quando il firewall interviene su un pulsante di accettazione, acquisto o firma.'))}</div>`;
+    el.innerHTML = `<div class="empty">${esc(t('Nessun impegno registrato.'))}<br>${esc(t('Lo storico si riempie quando il firewall interviene su un pulsante di accettazione, acquisto o firma.'))}<p class="muted small"><a href="https://antefirma.app/demo/" target="_blank" rel="noopener">${esc(t('Provalo su una pagina dimostrativa'))}</a></p></div>`;
     return;
   }
 
@@ -435,6 +435,8 @@ async function handlePanelRequest(req) {
   if (params.get('tab') === 'commitments') {
     selectTab('commitments');
     await commitments.load({ focusId: params.get('id') });
+    // Dal promemoria «Scrivi la lettera»: si apre già la lettera.
+    if (params.get('letter') === '1' && params.get('id')) commitments.showLetter(params.get('id')).catch(() => {});
   }
 
   const pending = await send('GET_PENDING_PANEL_REQUEST').catch(() => null);

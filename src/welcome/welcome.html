@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benvenuto in AnteFirma</title>
+  <link rel="stylesheet" href="welcome.css">
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <img src="../icons/icon48.png" alt="" width="40" height="40">
+      <div>
+        <h1>Benvenuto in AnteFirma</h1>
+        <p>Prima di firmare, sai a che cosa ti impegni.</p>
+      </div>
+    </header>
+
+    <ol class="steps">
+      <li class="step" id="s1">
+        <h2><span class="n">1</span>Che cosa fa</h2>
+        <p>Quando stai per premere <b>Accetta</b>, <b>Abbonati</b>, <b>Acquista</b> o <b>Firma</b>, AnteFirma ferma il click per qualche secondo e ti dice tre cose:</p>
+        <div class="mock" aria-hidden="true">
+          <div class="mtile strong"><span>Quanto paghi davvero</span><b>599,76 €</b><em>in 24 mesi</em></div>
+          <div class="mtile"><span>Fino a quando</span><b>9 settembre 2028</b><em>ultimo giorno per disdire</em></div>
+          <div class="mtile"><span>Se esci prima</span><b>120,00 €</b><em>penale di recesso</em></div>
+        </div>
+        <p class="muted">Ogni avviso cita la frase esatta della pagina da cui nasce. Poi decidi tu: tornare indietro o continuare, con un promemoria per la disdetta.</p>
+      </li>
+
+      <li class="step" id="s2">
+        <h2><span class="n">2</span>Il tuo permesso</h2>
+        <p>Per leggere le condizioni, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic). Il server non conserva il testo né l'indirizzo. Nessun account, nessun dato che ti identifichi.</p>
+        <div class="row">
+          <button class="primary" id="grant" type="button">Acconsento all'analisi</button>
+          <span class="ok" id="granted" hidden>✓ Fatto: la prima analisi partirà subito, senza altre domande.</span>
+        </div>
+        <p class="muted">Puoi ritirare il consenso quando vuoi dalle impostazioni. Se non acconsenti ora, te lo chiederò alla prima analisi.</p>
+      </li>
+
+      <li class="step" id="s3">
+        <h2><span class="n">3</span>Provalo adesso</h2>
+        <p>Apri un finto abbonamento e premi «Conferma abbonamento»: vedrai l'avviso dal vivo. Non si paga niente.</p>
+        <div class="row">
+          <a class="primary" id="demo" href="https://antefirma.app/demo/" target="_blank" rel="noopener">Apri la pagina di prova</a>
+          <a class="secondary" href="../options/options.html">Impostazioni</a>
+        </div>
+        <p class="muted">Analisi gratuite rimaste questo mese: <span id="left" data-no-i18n>5</span>. La prova ne usa una.</p>
+      </li>
+    </ol>
+  </main>
+  <script type="module" src="welcome.js"></script>
+</body>
+</html>

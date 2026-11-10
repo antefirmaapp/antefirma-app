@@ -238,6 +238,32 @@
     .finding .wrong:disabled { text-decoration: none; cursor: default; }
     .notice { background: #eef3ff; border: 1px solid #c9d7fb; color: #1d3a8a; border-radius: 9px; padding: 9px 12px; font-size: 12.5px; margin-bottom: 12px; }
     .notice.warn { background: #fff7e0; border-color: #f0d78a; color: #6b4e00; }
+    .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 12px; }
+    .tile { border: 1px solid #e3e6eb; border-radius: 10px; padding: 10px 11px; background: #f7f8fa; min-width: 0; }
+    .tile.strong { border-color: var(--level-color, #b8860b); }
+    .tlabel { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; font-weight: 650; }
+    .tvalue { font-size: 18px; font-weight: 720; letter-spacing: -.01em; color: #15203a; margin-top: 3px; line-height: 1.2; overflow-wrap: anywhere; }
+    .tile.strong .tvalue { color: var(--level-ink, #15203a); font-size: 22px; }
+    .tsub { font-size: 11.5px; color: #6b7280; margin-top: 2px; }
+    .displayed-note { font-size: 12.5px; color: #6b7280; margin: -4px 0 10px; }
+    .chips { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips li { font-size: 12px; padding: 4px 9px; border-radius: 999px; background: #eef0f4; color: #2b3240; }
+    .chips li.more { background: none; border: 1px dashed #c9ced8; }
+    details.why { border: 1px solid #e3e6eb; border-radius: 10px; padding: 8px 12px; }
+    details.why > summary { cursor: pointer; font-weight: 650; font-size: 13px; color: #15203a; }
+    details.why[open] > summary { margin-bottom: 10px; }
+    .skel { height: 18px; margin-top: 6px; border-radius: 6px; background: linear-gradient(90deg, #eceef2 25%, #f6f7f9 50%, #eceef2 75%); background-size: 200% 100%; animation: af-shimmer 1.2s linear infinite; }
+    .skel.line { height: 12px; margin: 8px 0; }
+    .skel.line.short { width: 60%; }
+    @keyframes af-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+    .proceed.main { background: #15203a; color: #fff; border-color: #15203a; font-weight: 650; }
+    .proceed.main:hover { background: #0d1424; color: #fff; }
+    .proceed.main[aria-disabled='true']:hover { background: #15203a; color: #fff; }
+    .cancel.alt { background: #fff; color: #15203a; border-color: #c9ced8; }
+    .link.hint { color: #15203a; font-weight: 650; }
+    .upsell.soft { border: 1px solid #f0d78a; background: #fffbea; border-radius: 10px; padding: 10px 12px; }
+    .upsell.soft p { margin: 0 0 8px; font-size: 13px; }
+    @media (max-width: 520px) { .tiles { grid-template-columns: 1fr; } }
     .upsell { margin: 0 0 12px; }
     .upgrade { all: unset; box-sizing: border-box; display: block; width: 100%; text-align: center; cursor: pointer; font: 700 14px/1.2 inherit; padding: 11px 14px; border-radius: 10px; background: #ffe04a; color: #15203a; }
     .upgrade:focus-visible { outline: 3px solid #2f5bd3; outline-offset: 2px; }
@@ -275,6 +301,12 @@
       .badge { background: var(--level-ink-dark, var(--level-color, #888)); color: #15203a; }
       .cost .amount { color: var(--level-ink-dark, #f2f4f8); }
       .cancel { background: #f2f4f8; color: #15203a; }
+      .tile { background: #12151a; border-color: #2a2f38; } .tvalue { color: #f2f4f8; } .tlabel, .tsub, .displayed-note { color: #9aa2ae; }
+      .tile.strong .tvalue { color: var(--level-ink-dark, #f2f4f8); }
+      .chips li { background: #232830; color: #d6dae1; } details.why { border-color: #2a2f38; } details.why > summary { color: #f2f4f8; }
+      .skel { background: linear-gradient(90deg, #232830 25%, #2c323b 50%, #232830 75%); background-size: 200% 100%; }
+      .proceed.main { background: #f2f4f8; color: #15203a; border-color: #f2f4f8; } .cancel.alt { background: transparent; color: #f2f4f8; border-color: #3a414d; }
+      .link.hint { color: #f2f4f8; } .upsell.soft { background: #2a2312; border-color: #4a3d18; }
       .proceed { background: transparent; border-color: #3a414d; color: #9aa2ae; }
       .proceed:hover { color: #f2f4f8; border-color: #5a6472; }
       .proceed[aria-disabled='true']:hover { color: #9aa2ae; border-color: #3a414d; }
@@ -457,19 +489,40 @@
       return dlg;
     }
 
-    showLoading(actionLabel) {
+    /**
+     * L'attesa. Il server impiega qualche secondo: intanto si mostra subito
+     * ciò che l'estensione sa già (azione, sito, prezzo letto nella pagina) e i
+     * riquadri che si riempiranno, e «Continua senza aspettare» è disponibile
+     * da subito: l'attesa è una scelta, non una trappola.
+     *
+     * @param {string} actionLabel
+     * @param {{ price?: string|null, host?: string|null }} [preview]
+     */
+    showLoading(actionLabel, preview = {}) {
+      const tile = (label, value) => `<div class="tile"><div class="tlabel">${esc(label)}</div>${value ? `<div class="tvalue">${esc(value)}</div>` : '<div class="skel"></div>'}</div>`;
       this.render(
         `
-        <div class="card">
-          <div class="bar" style="--level-color:#6b7280"></div>
-          <div class="loading">
-            <div class="spinner"></div>
-            <p role="status">${esc(t('Sto verificando a cosa ti stai impegnando…'))}</p>
-            <small>${esc(actionLabel || t('Azione in sospeso'))} · ${esc(t('il click è momentaneamente sospeso'))}</small>
+        <div class="card" style="--level-color:#6b7280">
+          <div class="bar"></div>
+          <header>
+            <div class="eyebrow"><span>${esc(actionLabel || t('Azione in sospeso'))}</span></div>
+            <h1 id="v-title" role="status">${esc(t('Sto leggendo le condizioni…'))}</h1>
+            ${preview.host ? `<p class="action">${esc(preview.host)}</p>` : ''}
+          </header>
+          <div class="body">
+            <div class="tiles">
+              ${tile(t('Quanto paghi davvero'), null)}
+              ${tile(t('Fino a quando'), null)}
+              ${tile(t('Se esci prima'), null)}
+            </div>
+            ${preview.price ? `<p class="summary">${esc(t('Prezzo mostrato in pagina: {x}', { x: preview.price }))}</p>` : ''}
+            <div class="skel line"></div><div class="skel line short"></div>
+            <p class="armhint">${esc(t('Il click è in pausa per qualche secondo: puoi anche continuare senza aspettare.'))}</p>
           </div>
           <footer>
+            <button class="link" data-act="cancel">${esc(t('Annulla'))}</button>
             <span class="spacer"></span>
-            <button class="link" data-act="cancel">Annulla</button>
+            <button class="proceed" data-act="proceed">${esc(t('Continua senza aspettare'))}</button>
           </footer>
         </div>
       `,
@@ -544,8 +597,32 @@
       const consumer = verdict.consumer || {};
       const ink = paletteFor(level.id);
 
-      const remember = verdict.mustRemember
-        ? `<div class="remember"><span class="ico">📌</span><span>${esc(verdict.mustRemember)}</span></div>`
+      // Le tre risposte che la persona cerca: quanto pago davvero, fino a
+      // quando sono legato, come ne esco. Il resto sta dietro «Perché?».
+      const deadline = timeline.find((x) => x.kind === 'deadline');
+      const months = cost.horizonMonths ? Math.round(cost.horizonMonths) : null;
+      const tiles = [
+        {
+          label: t('Quanto paghi davvero'),
+          value: cost.worstCaseLabel || cost.displayed || t('nessun costo trovato'),
+          sub: cost.worstCaseLabel && months ? tn(months, 'in {n} mese', 'in {n} mesi') : (cost.displayed && !cost.worstCaseLabel ? t('prezzo in pagina') : ''),
+          strong: !!cost.worstCaseLabel,
+        },
+        {
+          label: t('Fino a quando'),
+          value: deadline ? deadline.when : cost.hasAutoRenewal ? t('si rinnova da solo') : months ? tn(months, '{n} mese', '{n} mesi') : t('nessun vincolo trovato'),
+          sub: deadline ? t('ultimo giorno per disdire') : cost.hasAutoRenewal ? t('segna la scadenza') : '',
+        },
+        {
+          label: t('Se esci prima'),
+          value: cost.penalty?.amount != null ? money(cost.penalty.amount, cost.currency) : cost.penalty ? t('penale non quantificata') : findings.some((f) => f.category === 'no_refund') ? t('nessun rimborso') : t('nessuna penale trovata'),
+          sub: cost.penalty ? t('penale di recesso') : '',
+        },
+      ];
+      const tilesBlock = `<div class="tiles">${tiles.map((x) => `<div class="tile${x.strong ? ' strong' : ''}"><div class="tlabel">${esc(x.label)}</div><div class="tvalue">${esc(x.value)}</div>${x.sub ? `<div class="tsub">${esc(x.sub)}</div>` : ''}</div>`).join('')}</div>
+        ${cost.displayed && cost.worstCaseLabel && cost.understated ? `<p class="displayed-note">${esc(t('In pagina vedi {x}.', { x: cost.displayed }))}</p>` : ''}`;
+      const chips = findings.length
+        ? `<ul class="chips" aria-label="${esc(t('Cosa stai accettando'))}">${findings.slice(0, 4).map((f) => `<li>${esc(f.title || f.label)}</li>`).join('')}${findings.length > 4 ? `<li class="more">+${findings.length - 4}</li>` : ''}</ul>`
         : '';
 
       const formula = cost.lines?.length
@@ -562,23 +639,7 @@
            </ul>
            ${cost.horizonReason ? `<p class="horizon">${esc(cost.horizonReason)}</p>` : ''}`
         : '';
-
-      // La scadenza entra dentro il blocco del costo: sono le due cose che il
-      // prodotto promette, e devono stare nello stesso sguardo. Se non c'è un
-      // costo da mostrare, la scadenza resta comunque, da sola.
-      const costBlock = cost.worstCaseLabel
-        ? `<div class="cost">
-             <div class="head">
-               <div>
-                 <div class="amount">${esc(cost.worstCaseLabel)}</div>
-                 <div class="caption">${esc(t('impegno economico potenziale stimato'))}</div>
-               </div>
-               ${cost.displayed ? `<div class="displayed">${esc(t('prezzo mostrato in pagina'))}<br><b>${esc(cost.displayed)}</b></div>` : ''}
-             </div>
-             ${remember}
-             ${formula}
-           </div>`
-        : remember;
+      const costBlock = formula ? `<section><h2>${esc(t('Come si arriva alla cifra'))}</h2><div class="cost">${formula}</div></section>` : '';
 
       const head = findings.slice(0, FINDINGS_HEAD);
       const rest = findings.slice(FINDINGS_HEAD);
@@ -637,6 +698,19 @@
            </details>`
         : '';
 
+      // Un impegno con una scadenza o un costo ricorrente: il pulsante principale
+      // diventa «Continua e ricordami la disdetta» (prosegue e registra l'impegno).
+      const trackable = blocking && !!(deadline || cost.hasRecurring || cost.hasAutoRenewal);
+      const arm = blocking ? ' data-arm="1" aria-disabled="true" aria-describedby="v-arm-why"' : '';
+      // Il piano a pagamento si propone quando il valore si vede, non solo al limite.
+      const q = verdict.engine?.quota;
+      const free = !q?.plan || q.plan === 'free';
+      const left = q?.month?.remaining;
+      const bigFind = cost.understated && (cost.worstCase || 0) >= 100;
+      const upsellBlock = free && !verdict.cached && (left === 0 || left === 1 || bigFind)
+        ? `<div class="upsell soft"><p>${esc(left === 0 ? t('Era la tua ultima analisi gratuita del mese.') : left === 1 ? t('Ti resta un’analisi gratuita questo mese.') : t('AnteFirma ti ha appena mostrato {x} di impegno che in pagina non si vedeva.', { x: cost.worstCaseLabel }))}</p>
+             <button class="upgrade" type="button" data-upgrade>${esc(t('Passa a Pro · 50 analisi al mese'))}</button><p class="upsell-note" aria-live="polite"></p></div>`
+        : '';
       this.model = verdict.engine?.model || null;
       const n = verdict.engine?.notice;
       const noticeBlock = n ? `<div class="notice ${n.level === 'warn' ? 'warn' : ''}" role="note">${esc(n[I.lang] || n.it)}</div>` : '';
@@ -660,27 +734,39 @@
           <div class="body">
             ${noticeBlock}
             ${errorBlock}
-            ${costBlock}
-            ${verdict.summary ? `<p class="summary">${esc(verdict.summary)}</p>` : ''}
-            ${findingsBlock}
-            ${timelineBlock}
-            ${lawBlock}
+            ${tilesBlock}
+            ${chips}
+            ${upsellBlock}
+            <details class="why">
+              <summary>${esc(t('Perché? Clausole, frasi esatte e calcolo'))}</summary>
+              ${verdict.summary ? `<p class="summary">${esc(verdict.summary)}</p>` : ''}
+              ${findingsBlock}
+              ${costBlock}
+              ${timelineBlock}
+              ${lawBlock}
+            </details>
           </div>
           <footer>
-            <button class="cancel" data-act="cancel">${esc(blocking ? t('Torna indietro') : t('Annulla'))}</button>
-            <button class="proceed" data-act="proceed"${blocking ? ' data-arm="1" aria-disabled="true" aria-describedby="v-arm-why"' : ''}>${esc(t('Continua comunque'))}</button>
+            ${trackable
+              ? `<button class="cancel alt" data-act="cancel">${esc(t('Torna indietro'))}</button>
+                 <button class="proceed main" data-act="track"${arm}>${esc(t('Continua e ricordami la disdetta'))}</button>`
+              : `<button class="cancel" data-act="cancel">${esc(blocking ? t('Torna indietro') : t('Annulla'))}</button>
+                 <button class="proceed" data-act="proceed"${arm}>${esc(t('Continua comunque'))}</button>`}
             <span class="spacer"></span>
-            <button class="link" data-act="allowlist">${esc(t('Non avvisarmi su {x}', { x: verdict.host || t('questo sito') }))}</button>
+            ${trackable ? `<button class="link" data-act="proceed">${esc(t('Continua senza promemoria'))}</button>` : ''}
+            <button class="link${(verdict.proceedCount || 0) >= 3 ? ' hint' : ''}" data-act="allowlist">${esc((verdict.proceedCount || 0) >= 3
+              ? t('Hai proseguito {n} volte qui: non avvisarmi più su {x}', { n: verdict.proceedCount, x: verdict.host || t('questo sito') })
+              : t('Non avvisarmi su {x}', { x: verdict.host || t('questo sito') }))}</button>
           </footer>
           ${
             blocking
               ? `<p class="armhint">
-                   <span id="v-arm-why">${esc(t('«Continua comunque» si attiva fra un istante: il click che hai appena fatto è ancora in corso.'))}</span>
+                   <span id="v-arm-why">${esc(t('Il pulsante per continuare si attiva fra un istante: il click che hai appena fatto è ancora in corso.'))}</span>
                    <span class="v-arm-live" role="status"></span>
                  </p>`
               : ''
           }
-          <div class="provenance">${esc(t('Verdetto da {x} · rischio della decisione {n}/100', { x: engineLabel(verdict.engine), n: verdict.score }))}${esc(quotaNote(verdict))}</div>
+          <div class="provenance">${esc((verdict.engine?.cached ? t('Analisi già fatta per questo testo') : t('Analisi automatica di AnteFirma')) + quotaNote(verdict))}</div>
           <div class="disclaimer">${esc(consumer.disclaimer || t('Analisi automatica a scopo informativo. Non è un parere legale.'))}</div>
         </div>
       `,
@@ -769,7 +855,7 @@
       // lascia un vuoto sotto ai pulsanti (`.armhint:empty`).
       // Un annuncio solo, allo sblocco. Un tick al secondo riempirebbe di
       // numeri lo spazio sonoro proprio mentre c'è un contratto da ascoltare.
-      if (live) live.textContent = announce ? t('Ora puoi premere «Continua comunque».') : '';
+      if (live) live.textContent = announce ? t('Ora puoi continuare.') : '';
     }
 
     bind() {
@@ -870,7 +956,7 @@
     return `<li class="finding" style="--sev-color:${ink.light};--sev-color-dark:${ink.dark}">
       <div class="top">
         <span class="name">${esc(f.title || f.label)}</span>
-        <span class="sev">${esc(String(f.severity))}/100</span>
+        <span class="sev">${esc(f.severity >= 65 ? t('pesa molto') : f.severity >= 40 ? t('da sapere') : t('minore'))}</span>
       </div>
       <div class="plain">${esc(f.plain || f.why || '')}</div>
       ${f.quote ? `<div class="quote">“${esc(f.quote)}”</div>` : ''}

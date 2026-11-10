@@ -51,6 +51,7 @@ async function load() {
   $('#enabled').checked = s.enabled;
   $('#blockFrom').value = s.blockFrom;
   $('#jurisdiction').value = s.jurisdiction;
+  $('#minBlockAmount').value = s.minBlockAmount || '';
   $('#uiLang').value = s.uiLang || 'auto';
   $('#trackCommitments').checked = s.trackCommitments;
   $('#reminders').checked = s.reminders;
@@ -103,6 +104,7 @@ async function save() {
       enabled: $('#enabled').checked,
       blockFrom: $('#blockFrom').value,
       jurisdiction: $('#jurisdiction').value,
+      minBlockAmount: Math.max(0, Number($('#minBlockAmount').value) || 0),
       uiLang: $('#uiLang').value,
       trackCommitments: $('#trackCommitments').checked,
       reminders: $('#reminders').checked,

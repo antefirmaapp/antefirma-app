@@ -42,7 +42,7 @@ await new Promise((r) => site.listen(0, '127.0.0.1', r));
 const BASE = `http://127.0.0.1:${site.address().port}/`;
 
 // Il server finto: risposte come quelle vere, con le frasi della pagina demo.
-const fake = { mode: 'ok', analyzeCalls: 0, lastLang: null, feedback: [], notice: null };
+const fake = { mode: 'ok', analyzeCalls: 0, lastLang: null, feedback: [], notice: null, delay: 0 };
 const VERDICT = {
   findings: [
     { category: 'auto_renewal', quote: 'Alla scadenza il contratto si rinnova automaticamente per un uguale', why: 'x', confidence: 0.9 },
@@ -65,6 +65,7 @@ async function api(route) {
   if (path === '/v1/analyze') {
     fake.analyzeCalls += 1;
     fake.lastLang = JSON.parse(req.postData() || '{}').uiLang;
+    if (fake.delay) await new Promise((r) => setTimeout(r, fake.delay)); // per vedere l'attesa
     if (fake.mode === 'quota') return json(429, { error: 'quota_month', message: 'server' });
     return json(200, { ...VERDICT, notice: fake.notice, findings: VERDICT.findings.map((f) => ({ ...f, why: fake.lastLang === 'en' ? 'English reason.' : 'Motivo.' })) });
   }
@@ -116,20 +117,23 @@ try {
   check('alla prima analisi chiede il consenso', (await shadow('h1')).includes('Posso leggere'));
   // Il consenso accetta solo click veri: si clicca come la persona.
   await alert(page).locator('[data-consent="accept"]').click();
-  await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.cost .amount'), null, { timeout: 10000 });
-  const cost = await shadow('.cost .amount');
+  await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.tile.strong .tvalue'), null, { timeout: 10000 });
+  const cost = await shadow('.tile.strong .tvalue');
   check('il costo potenziale è calcolato', /599,76|599.76/.test(cost.replace(/\s/g, '')), cost);
   check('l’avviso dice quante analisi gratuite restano', (await shadow('.provenance')).includes('ti restano 4 analisi gratuite'));
   const box = await page.evaluate(() => { const r = document.querySelector('antefirma-alert').getBoundingClientRect(); return { w: r.width, h: r.height }; });
   check('l’avviso copre la pagina', box.w > 300 && box.h > 300);
   check('le impostazioni mostrano il codice dell’installazione', /^[0-9a-f-]{36}$/.test(await opt.textContent('#install-id')));
+  await alert(page).locator('details.why > summary').click(); // «Perché?»: clausole e frasi esatte
   await alert(page).locator('[data-feedback]').first().click();
   await page.waitForTimeout(500);
   check('«Avviso sbagliato?» manda solo la categoria', fake.feedback.length === 1 && /^[a-z_]+$/.test(fake.feedback[0]) && (await shadow('[data-feedback]')).includes('Grazie'), fake.feedback.join(','));
-  await page.waitForTimeout(3200); // «Continua comunque» si arma dopo un attimo
-  await alert(page).locator('[data-act="proceed"]').click();
+  check('le tre risposte: costo, scadenza, uscita', (await shadow('.tiles')).includes('2028') && (await shadow('.tiles')).includes('120'));
+  check('niente punteggi tecnici nell’avviso', !/\/100|Verdetto da/.test(await shadow('.card')));
+  await page.waitForTimeout(3200); // il pulsante si arma dopo un attimo
+  await alert(page).locator('[data-act="track"]').click();
   await page.waitForTimeout(500);
-  check('«Continua comunque» esegue l’azione sospesa', await page.evaluate(() => window.__demoSubmitted === true));
+  check('«Continua e ricordami la disdetta» esegue l’azione sospesa', await page.evaluate(() => window.__demoSubmitted === true));
   check('l’avviso si chiude dopo la decisione', (await alert(page).count()) === 0);
 
   // Analisi del mese finite: il pulsante per passare a Pro apre il pagamento.
@@ -166,16 +170,20 @@ try {
   await opt.click('#save');
   await opt.waitForTimeout(1500);
   fake.mode = 'ok';
+  fake.delay = 2500;
   fake.notice = { it: 'Manutenzione stasera', en: 'Maintenance tonight', es: 'Mantenimiento esta noche', level: 'warn' };
   await opt.click('#clear-cache');
   await page.bringToFront();
   await page.reload();
   await page.waitForTimeout(1000);
   await page.click('button.cta');
-  await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.cost'), null, { timeout: 10000 });
+  await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.skel'), null, { timeout: 5000 });
+  check('durante l’attesa: prezzo in pagina e «Continue without waiting»', (await shadow('.body')).includes('€') && (await shadow('footer')).includes('Continue without waiting'));
+  await shot(page, 'attesa-en');
+  await page.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.tiles .tvalue'), null, { timeout: 10000 });
   await page.waitForTimeout(600);
   await shot(page, 'avviso-en');
-  check('l’avviso è in inglese', (await shadow('.cancel')) === 'Go back' && (await shadow('.cost .caption')).includes('estimated potential'));
+  check('l’avviso è in inglese', (await shadow('.cancel')) === 'Go back' && (await shadow('.tlabel')).includes('What you really pay'));
   check('al server si chiede l’analisi in inglese', fake.lastLang === 'en');
   check('il messaggio agli utenti compare nella lingua giusta', (await shadow('.notice')) === 'Maintenance tonight');
   check('la cronologia del verdetto è in inglese', (await shadow('.timeline')).includes('Now'));
@@ -187,6 +195,16 @@ try {
   await panel.goto(`chrome-extension://${extId}/src/sidepanel/sidepanel.html`);
   await panel.waitForTimeout(800);
   check('il pannello laterale è in inglese', (await panel.textContent('#tab-btn-commitments')).trim() === 'Commitments');
+  await panel.click('#tab-btn-commitments');
+  await panel.waitForTimeout(800);
+  check('l’impegno è registrato con la sua scadenza', (await panel.locator('.c-item:not(.example)').count()) === 1);
+  // La pagina di benvenuto
+  const wel = await context.newPage();
+  wel.on('pageerror', (e) => errors.push(`benvenuto: ${e.message}`));
+  await wel.goto(`chrome-extension://${extId}/src/welcome/welcome.html`);
+  await wel.waitForTimeout(800);
+  check('la pagina di benvenuto si apre tradotta e con il consenso già dato', (await wel.textContent('h1')) === 'Welcome to AnteFirma' && await wel.isVisible('#granted'));
+  await shot(wel, 'benvenuto-en');
 } catch (err) {
   check('la prova arriva in fondo', false, err.message);
 } finally {

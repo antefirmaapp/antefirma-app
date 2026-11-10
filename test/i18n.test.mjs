@@ -83,7 +83,7 @@ test('etichette e testi dei vocabolari hanno la traduzione', async () => {
 test('i testi delle pagine HTML hanno la traduzione', () => {
   const missing = [];
   const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|https?:\/\/\S+)$/;
-  for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html']) {
+  for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html']) {
     const html = readFileSync(f, 'utf8').replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style|textarea)[\s\S]*?<\/\1>/g, '');
     const texts = [
       ...[...html.matchAll(/>([^<>]+)</g)].map((m) => m[1]),

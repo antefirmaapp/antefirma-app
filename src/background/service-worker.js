@@ -75,7 +75,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   // Se il server non risponde si riproverà alla prima analisi.
   register().catch(() => {});
   if (details.reason === 'install') {
-    chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html?welcome=1') });
+    chrome.tabs.create({ url: chrome.runtime.getURL('src/welcome/welcome.html') });
   }
 });
 
@@ -223,7 +223,7 @@ async function handle(msg, sender) {
       return withCode(getLicense());
     case 'START_CHECKOUT':
       return withCode(startCheckout(['pro', 'max', 'team'].includes(msg.payload?.plan) ? msg.payload.plan : 'pro')
-        .then(async (r) => { await chrome.tabs.create({ url: r.url }); return { opened: true }; }));
+        .then(async (r) => { await chrome.tabs.create({ url: r.url }); await watchCheckout(); return { opened: true }; }));
     case 'ACTIVATE_LICENSE':
       return withCode(activateLicense(msg.payload?.key));
     case 'GET_INSTALL_ID':
@@ -342,7 +342,10 @@ async function analyzeAction(payload = {}, sender) {
   }
 
   verdict = { ...verdict, cached, termsSource };
-  const blocking = shouldBlock(verdict.level.id, settings.blockFrom);
+  let blocking = shouldBlock(verdict.level.id, settings.blockFrom);
+  // «Blocca solo sopra … €»: un impegno piccolo non interrompe, salvo i casi critici.
+  const minAmount = Number(settings.minBlockAmount) || 0;
+  if (blocking && minAmount > 0 && verdict.level.id !== 'critical' && verdict.cost?.worstCase != null && verdict.cost.worstCase < minAmount) blocking = false;
 
   const id = `${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6).toString(36)}`;
   await pushHistory(
@@ -370,8 +373,10 @@ async function analyzeAction(payload = {}, sender) {
   await chrome.storage.session.set({ [`verdict:${id}`]: { verdict, text } });
 
   await updateBadge(sender?.tab?.id, verdict.level);
+  await showQuotaBadge(verdict.engine?.quota);
 
-  return { skip: false, blocking, verdict: { ...verdict, historyId: id } };
+  const proceedCount = verdict.host ? ((await chrome.storage.local.get('proceedByHost')).proceedByHost?.[verdict.host] || 0) : 0;
+  return { skip: false, blocking, verdict: { ...verdict, historyId: id, proceedCount } };
 }
 
 /** Analisi lanciata dal side panel (incolla, PDF, pagina, URL). */
@@ -408,6 +413,7 @@ async function analyzeText(payload = {}) {
   // Anche le analisi manuali possono diventare impegni da sorvegliare.
   const id = `manual-${Date.now().toString(36)}`;
   await chrome.storage.session.set({ [`verdict:${id}`]: { verdict, text } });
+  await showQuotaBadge(verdict.engine?.quota);
   return { ...verdict, historyId: id };
 }
 
@@ -419,17 +425,34 @@ async function analyzeText(payload = {}) {
  * uno storico veritiero — prima ogni intercettazione non bloccante restava
  * con `decision: null` — e sarà la base per misurare i falsi positivi.
  */
-async function recordDecision({ id, decision, via = null } = {}) {
+async function recordDecision({ id, decision, via = null, track = false } = {}) {
   await updateHistoryEntry(id, { decision, via, decidedAt: new Date().toISOString() });
   if (decision !== 'proceed') return { recorded: true, commitment: null };
 
-  const settings = await getSettings();
-  if (!settings.trackCommitments) return { recorded: true, commitment: null };
-
   const stored = (await chrome.storage.session.get(`verdict:${id}`))[`verdict:${id}`];
+  // Quante volte si è proseguito su questo sito dopo un blocco: alla terza
+  // l'avviso propone di non avvisare più.
+  if (via === 'blocked' && stored?.verdict?.host) {
+    const { proceedByHost = {} } = await chrome.storage.local.get('proceedByHost');
+    proceedByHost[stored.verdict.host] = (proceedByHost[stored.verdict.host] || 0) + 1;
+    await chrome.storage.local.set({ proceedByHost });
+  }
+
+  const settings = await getSettings();
+  if (!settings.trackCommitments && !track) return { recorded: true, commitment: null };
   if (!stored) return { recorded: true, commitment: null };
 
   const commitment = await commitmentFromVerdict({ verdict: stored.verdict, text: stored.text, decision });
+  // Conferma: chi ha chiesto il promemoria deve sapere che c'è.
+  if (track && commitment?.deadlineAt) {
+    const when = new Date(commitment.deadlineAt).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+    await notify({
+      id: `tracked-${commitment.id}`,
+      title: t('Promemoria impostato: {x}', { x: commitment.provider || commitment.host || '' }),
+      message: t('Ti avviso prima del {d}, l’ultimo giorno per disdire. Trovi l’impegno nel pannello di AnteFirma.', { d: when }),
+      commitmentId: commitment.id, sticky: false,
+    });
+  }
   return { recorded: true, commitment };
 }
 
@@ -554,6 +577,7 @@ async function sweep(now = Date.now()) {
         ? `${t('Se non disdici entro il termine, parte un nuovo periodo da {x}.', { x: formatMoney(renewalAmount, c.currency) })} ${state.label}.`
         : `${state.label}. ${t('Apri per generare la lettera di disdetta.')}`,
       commitmentId: c.id,
+      kind: 'reminder',
     });
 
     // Tutti i promemoria più lontani di questo si considerano consumati:
@@ -567,13 +591,14 @@ async function sweep(now = Date.now()) {
 }
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
+  if (alarm.name === CHECKOUT_ALARM) return void (await checkCheckout());
   if (alarm.name === SWEEP_ALARM) return void (await sweep());
   if (alarm.name === WATCH_ALARM) return void (await watchAllCommitments());
 });
 
 // ── notifiche ───────────────────────────────────────────────────────────────
 
-async function notify({ id, title, message, commitmentId }) {
+async function notify({ id, title, message, commitmentId, kind = 'open', sticky = true }) {
   try {
     await chrome.notifications.create(id, {
       type: 'basic',
@@ -581,10 +606,13 @@ async function notify({ id, title, message, commitmentId }) {
       title,
       message,
       priority: 2,
-      requireInteraction: true,
-      buttons: [{ title: t('Apri il kit di uscita') }],
+      requireInteraction: sticky,
+      // I promemoria di disdetta portano direttamente all'azione.
+      buttons: kind === 'reminder'
+        ? [{ title: t('Scrivi la lettera') }, { title: t('Ho già disdetto') }]
+        : [{ title: t('Apri il kit di uscita') }],
     });
-    await chrome.storage.session.set({ [`notif:${id}`]: commitmentId });
+    await chrome.storage.session.set({ [`notif:${id}`]: { commitmentId, kind } });
   } catch (err) {
     // Le notifiche possono essere negate dal sistema operativo: è un peccato,
     // non un errore fatale. La scadenza resta nel pannello e nel calendario.
@@ -592,18 +620,31 @@ async function notify({ id, title, message, commitmentId }) {
   }
 }
 
-async function openCommitment(notificationId) {
+async function notifTarget(notificationId) {
   const map = await chrome.storage.session.get(`notif:${notificationId}`);
-  const commitmentId = map[`notif:${notificationId}`];
+  const v = map[`notif:${notificationId}`];
+  return typeof v === 'string' ? { commitmentId: v, kind: 'open' } : v || {};
+}
+
+async function openCommitment(notificationId, { letter = false } = {}) {
+  const { commitmentId } = await notifTarget(notificationId);
   const url = chrome.runtime.getURL(
-    `src/sidepanel/sidepanel.html?tab=commitments${commitmentId ? `&id=${commitmentId}` : ''}`
+    `src/sidepanel/sidepanel.html?tab=commitments${commitmentId ? `&id=${commitmentId}` : ''}${letter ? '&letter=1' : ''}`
   );
   chrome.tabs.create({ url });
   chrome.notifications.clear(notificationId);
 }
 
-chrome.notifications?.onClicked.addListener(openCommitment);
-chrome.notifications?.onButtonClicked.addListener((id) => openCommitment(id));
+chrome.notifications?.onClicked.addListener((id) => openCommitment(id));
+chrome.notifications?.onButtonClicked.addListener(async (id, index) => {
+  const { commitmentId, kind } = await notifTarget(id);
+  if (kind === 'reminder' && index === 1 && commitmentId) {
+    await updateAndReschedule(commitmentId, { status: COMMITMENT_STATUS.CANCELLED });
+    chrome.notifications.clear(id);
+    return;
+  }
+  openCommitment(id, { letter: kind === 'reminder' && index === 0 });
+});
 
 // ── controllo delle modifiche ───────────────────────────────────────────────
 
@@ -834,6 +875,44 @@ async function fetchDocument(url, validators = {}, { signal } = {}) {
 // ── varie ───────────────────────────────────────────────────────────────────
 
 /** Il server risponde? Serve alle impostazioni, non costa analisi. */
+// ── dopo il pagamento ───────────────────────────────────────────────────────
+
+/**
+ * Dopo l'apertura del pagamento si controlla il piano ogni minuto per mezz'ora:
+ * appena è attivo, una notifica lo conferma. Chi ha pagato non deve chiedersi
+ * se deve fare qualcos'altro.
+ */
+const CHECKOUT_ALARM = 'antefirma-attesa-pagamento';
+async function watchCheckout() {
+  await chrome.storage.local.set({ checkoutUntil: Date.now() + 30 * 60_000 });
+  await chrome.alarms.create(CHECKOUT_ALARM, { periodInMinutes: 1 });
+}
+async function checkCheckout() {
+  const { checkoutUntil = 0 } = await chrome.storage.local.get('checkoutUntil');
+  const done = async () => { await chrome.alarms.clear(CHECKOUT_ALARM); await chrome.storage.local.remove('checkoutUntil'); };
+  if (Date.now() > checkoutUntil) return done();
+  const lic = await getLicense().catch(() => null);
+  if (lic && lic.plan && lic.plan !== 'free') {
+    await done();
+    await showQuotaBadge(null);
+    const name = { pro: 'Pro', max: 'Max', team: 'Team' }[lic.plan] || lic.plan;
+    await notify({ id: `plan-${Date.now()}`, title: t('{x} attivo su questo browser ✓', { x: name }), message: t('Grazie! Puoi chiudere la pagina del pagamento e tornare dove stavi: AnteFirma continua da solo.'), commitmentId: null, sticky: false });
+  }
+}
+
+/**
+ * Le analisi gratuite rimaste sull'icona, sempre in vista. Le schede con un
+ * verdetto mostrano il loro livello: quello vale solo per quella scheda.
+ */
+async function showQuotaBadge(quota) {
+  if (!chrome.action?.setBadgeText) return;
+  try {
+    const left = quota?.plan === 'free' ? quota.month?.remaining : null;
+    await chrome.action.setBadgeText({ text: left != null ? String(left) : '' });
+    if (left != null) await chrome.action.setBadgeBackgroundColor({ color: left <= 1 ? '#b3261e' : '#6b7280' });
+  } catch { /* nessuna icona da aggiornare */ }
+}
+
 async function upgrade() {
   const lic = await withCode(getLicense());
   if (lic?.plan && lic.plan !== 'free') {
@@ -843,6 +922,7 @@ async function upgrade() {
   const r = await withCode(startCheckout('pro'));
   if (r.error) return r;
   await chrome.tabs.create({ url: r.url });
+  await watchCheckout();
   return { where: 'checkout' };
 }
 

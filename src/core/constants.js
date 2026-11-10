@@ -311,6 +311,7 @@ export const DEFAULT_SETTINGS = {
   blockFrom: 'commitment', // livello minimo che blocca davvero il click
   jurisdiction: 'IT', // IT | ES | EU | UK | US | OTHER
   uiLang: 'auto', // auto (lingua del browser) | it | en | es
+  minBlockAmount: 0, // sotto questo impegno (€) non si blocca il click, salvo i casi critici
   profile: {
     money: true,
     privacy: true,
