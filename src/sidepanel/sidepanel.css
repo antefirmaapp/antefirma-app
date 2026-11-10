@@ -56,6 +56,8 @@ body {
 .icon-btn {
   background: none; border: 1px solid var(--line); border-radius: 8px;
   width: 30px; height: 30px; cursor: pointer; color: var(--muted); font-size: 15px;
+  /* The glyph stays inside: with some fonts ⚙ is wider than the button and pushed the page sideways on phones. */
+  display: inline-grid; place-items: center; padding: 0; line-height: 1; overflow: hidden; text-decoration: none;
 }
 .icon-btn:hover { color: var(--fg); }
 
@@ -456,6 +458,8 @@ button.flash-failed { color: #a4262c; border-color: #f0c4c4; }
 .examples .chip[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: transparent; }
 .quota { margin-inline-start: auto; font: inherit; font-size: 11.5px; font-weight: 600; color: var(--muted); background: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; cursor: pointer; white-space: nowrap; }
 .quota:hover { color: var(--fg); }
+.quota .q-short { display: none; }
+@media (max-width: 420px) { .quota .q-long { display: none; } .quota .q-short { display: inline; } }
 .quota.low { color: #b3261e; border-color: currentColor; }
 .cal-offer { margin-top: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); }
 .cal-offer p { margin: 0 0 8px; font-size: 12.5px; }

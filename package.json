@@ -14,7 +14,8 @@
     "check": "npm run lint && npm test",
     "check:english": "node tools/no-italian.mjs",
     "i18n": "node tools/i18n-build.mjs",
-    "test:web": "node tools/web-build.mjs && node test/web.mjs"
+    "test:web": "node tools/web-build.mjs && node test/web.mjs",
+    "test:visual": "node tools/web-build.mjs && node test/visual.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",

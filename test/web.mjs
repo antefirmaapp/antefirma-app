@@ -9,63 +9,19 @@
  * accessibility with axe-core at each step; a 375 px phone with no sideways
  * scrolling; no JavaScript errors.
  */
-import { createServer } from 'node:http';
-import { readFileSync, existsSync, statSync } from 'node:fs';
-import { join, dirname, extname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { server, BASE, TEXT, calls, api } from './web-harness.mjs';
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const DIST = join(ROOT, 'dist', 'web');
 const AXE = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
-if (!existsSync(join(DIST, 'index.html'))) throw new Error('dist/web is missing: run node tools/web-build.mjs first');
 
 const results = [];
 const check = (name, ok, detail = '') => {
   results.push(ok);
   console.log(`${ok ? '  ok  ' : 'NOT OK'}  ${name}${detail ? ` — ${detail}` : ''}`);
 };
-
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.png': 'image/png', '.svg': 'image/svg+xml' };
-const server = createServer((req, res) => {
-  let p = join(DIST, decodeURIComponent(new URL(req.url, 'http://x').pathname));
-  if (existsSync(p) && statSync(p).isDirectory()) p = join(p, 'index.html');
-  if (!existsSync(p)) { res.writeHead(404); return res.end(); }
-  res.writeHead(200, { 'content-type': TYPES[extname(p)] || 'application/octet-stream' });
-  res.end(readFileSync(p));
-}).listen(0);
-const BASE = `http://127.0.0.1:${server.address().port}/`;
-
-const TEXT = `Abbonamento Premium a € 19,99 al mese. Il contratto ha una durata minima di 24 mesi.
-Alla scadenza il contratto si rinnova automaticamente per un uguale periodo, salvo disdetta con preavviso di almeno 60 giorni.
-In caso di recesso anticipato è dovuta una penale di € 120,00.`;
-const VERDICT = {
-  findings: [
-    { category: 'auto_renewal', quote: 'Alla scadenza il contratto si rinnova automaticamente per un uguale', why: 'Another 24 months.', confidence: 0.9 },
-    { category: 'early_termination_penalty', quote: 'In caso di recesso anticipato è dovuta una penale di € 120,00', why: 'Leaving early costs.', confidence: 0.9 },
-  ],
-  terms: {
-    price: { value: 19.99, quote: '€ 19,99' }, currency: { value: 'EUR' }, billing_period: { value: 'month' },
-    minimum_term_months: { value: 24, quote: 'durata minima di 24 mesi' }, notice_days: { value: 60, quote: 'preavviso di almeno 60 giorni' },
-    exit_fee: { value: 120, quote: 'penale di € 120,00' }, extra_fees: [],
-  },
-  summary: '', dropped: 0, truncated: false, model: 'fake', cached: false,
-  quota: { plan: 'free', remaining: 4, month: { limit: 5, remaining: 4 } },
-};
-const calls = [];
-async function api(route) {
-  const req = route.request();
-  const path = new URL(req.url()).pathname;
-  calls.push(path);
-  const json = (status, body) => route.fulfill({ status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) });
-  if (path === '/v1/health') return json(200, { ok: true });
-  if (path === '/v1/register') return json(200, { token: 'v1.fake' });
-  if (path === '/v1/analyze') return json(200, VERDICT);
-  if (path === '/v1/license') return json(200, { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 4 } } });
-  return json(404, { error: 'not_found' });
-}
 
 const a11y = async (pg, name) => {
   if (!(await pg.evaluate(() => Boolean(window.axe)))) await pg.evaluate(AXE);
@@ -76,7 +32,20 @@ const a11y = async (pg, name) => {
   });
   check(`${name}: no serious accessibility problems`, found.length === 0, found.join('; '));
 };
-const tooWide = (pg) => pg.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+/** null if the page fits the screen, otherwise the innermost element (or text) that sticks out. */
+const tooWide = (pg) => pg.evaluate(() => {
+  const w = document.documentElement.clientWidth;
+  if (document.documentElement.scrollWidth <= w + 1) return null;
+  const name = (n) => `${n.tagName.toLowerCase()}${n.id ? `#${n.id}` : ''}${n.className && typeof n.className === 'string' ? `.${n.className.split(' ')[0]}` : ''}`;
+  const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let t = tw.nextNode(); t; t = tw.nextNode()) {
+    const r = document.createRange(); r.selectNodeContents(t);
+    if (r.getBoundingClientRect().right > w + 1) return `text "${t.textContent.trim().slice(0, 40)}" in ${name(t.parentElement)}`;
+  }
+  const el = [...document.querySelectorAll('body *')].filter((n) => n.getBoundingClientRect().right > w + 1)
+    .find((n) => ![...n.children].some((c) => c.getBoundingClientRect().right > w + 1));
+  return el ? name(el) : `page (${document.documentElement.scrollWidth} px)`;
+});
 
 const browser = await chromium.launch();
 const errors = [];
@@ -123,10 +92,14 @@ try {
 
   // ── phone ──
   const phone = await open({ viewport: { width: 375, height: 740 }, isMobile: true, hasTouch: true });
+  // FONT=… imitates another system's fonts (CI runs on Ubuntu, with wider DejaVu).
+  if (process.env.FONT) await phone.page.addStyleTag({ content: `*{font-family:${process.env.FONT} !important}` });
   await phone.page.waitForSelector('.web-welcome', { timeout: 5000 });
-  check('phone: the welcome fits the screen', !(await tooWide(phone.page)));
+  let wide = await tooWide(phone.page);
+  check('phone: the welcome fits the screen', !wide, wide || '');
   await phone.page.click('.web-welcome [data-w="paste"]');
-  check('phone: the panel fits the screen', !(await tooWide(phone.page)));
+  wide = await tooWide(phone.page);
+  check('phone: the panel fits the screen', !wide, wide || '');
   await phone.ctx.close();
 } catch (err) {
   check('the run reaches the end', false, err.message);

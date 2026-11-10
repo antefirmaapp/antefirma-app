@@ -129,7 +129,11 @@ function paintQuota(q) {
     el.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#piano') }));
     $('#open-help').before(el);
   }
-  el.textContent = t('nMAnalysesLeftMonth', { n: m.remaining, m: m.limit });
+  // On a narrow screen only "4/5" fits next to ? and ⚙: the full sentence stays in the label.
+  const full = t('nMAnalysesLeftMonth', { n: m.remaining, m: m.limit });
+  el.innerHTML = `<span class="q-long">${esc(full)}</span><span class="q-short" aria-hidden="true">${m.remaining}/${m.limit}</span>`;
+  el.title = full;
+  el.setAttribute('aria-label', full);
   el.dataset.limit = m.limit;
   el.classList.toggle('low', m.remaining <= 1);
 }

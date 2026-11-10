@@ -92,6 +92,8 @@ https://antefirma.app/demo/.
 npm ci                 # dev dependencies: ESLint, fast-check, axe-core
 npm test               # unit, golden and contract tests
 npm run test:e2e       # the extension in a real Chromium (needs Playwright)
+npm run test:web       # the web app in a real Chromium
+npm run test:visual    # screenshots compared with test/visual/
 npm run lint
 npm run check:english
 ```
@@ -223,12 +225,16 @@ worker needs Safari 16.4 or later.
 | `golden.test.mjs` | verdicts, panel HTML (it/en/es), letters (3 × 3) and `.ics` compared with approved copies in `test/golden/` (`UPDATE_GOLDEN=1` to accept a deliberate change) |
 | `contract.test.mjs` | test fixtures and the demo mock match the API contract shared with the server (`test/contract/`) |
 | `help.test.mjs`, `names.test.mjs` | help links; seller name on payment pages |
-| `smoke.mjs` | the extension in a real Chromium with a fake server: interception, consent, verdict and cost, "Continue and remind me", "Upgrade to Pro", Spanish settings, English warning and panel (`SHOTS=folder` saves screenshots) |
+| `properties.test.mjs` | property-based tests (fast-check): amounts, cost, reminders, score, seller names, `.ics` hold for hundreds of random inputs |
+| `web.mjs` | the web app in a real Chromium: first visit, consent, verdict, settings, phone width, axe-core accessibility |
+| `visual.mjs` | visual regression: ten web app screens (desktop and phone) against the approved images in `test/visual/` (`UPDATE_VISUAL=1` to approve a deliberate change) |
+| `smoke.mjs` | the extension in a real Chromium with a fake server: interception, consent, verdict and cost, "Continue and remind me", "Upgrade to Pro", Spanish settings, English warning and panel, axe-core accessibility of warning, panel, settings and welcome (`SHOTS=folder` saves screenshots) |
 
 The server is replaced by hand-written or recorded answers
 (`fixtures/responses.mjs`). The model's quality is measured on the server with
 `npm run eval`. GitHub Actions runs lint, the English check, tests with coverage
-thresholds, the web build and the end-to-end check on every push.
+thresholds, the web build, the extension and web app in Chromium and the visual
+check on every push.
 
 ---
 
@@ -236,7 +242,8 @@ thresholds, the web build and the end-to-end check on every push.
 
 ```
 manifest.json, _locales/{it,en,es}   name and description in three languages
-src/background/service-worker.js     messages, consent, analysis, commitments, alarms
+src/background/service-worker.js     listeners and message router
+src/background/{settings,analysis,commitments,changes,exit-kit,plan}.js  the work behind each message
 src/content/                         detector, page context, warning
 src/core/config.js                   server address
 src/core/server.js                   server client: token, analysis, errors

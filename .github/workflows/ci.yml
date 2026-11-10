@@ -29,3 +29,12 @@ jobs:
         run: xvfb-run -a npm run test:e2e
       - name: Web app in a real browser (first visit, consent, verdict, accessibility, phone)
         run: node test/web.mjs
+      - name: Visual regression of the web app screens (same CSS as the extension)
+        run: node test/visual.mjs
+      - name: Keep the new screenshots and diffs when the visual check fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: test/visual/*.png
+          if-no-files-found: ignore
