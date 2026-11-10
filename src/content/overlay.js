@@ -236,6 +236,8 @@
     .finding .wrong { all: unset; cursor: pointer; display: inline-block; margin-top: 6px; font-size: 11.5px; text-decoration: underline; opacity: .7; }
     .finding .wrong:hover, .finding .wrong:focus-visible { opacity: 1; }
     .finding .wrong:disabled { text-decoration: none; cursor: default; }
+    .notice { background: #eef3ff; border: 1px solid #c9d7fb; color: #1d3a8a; border-radius: 9px; padding: 9px 12px; font-size: 12.5px; margin-bottom: 12px; }
+    .notice.warn { background: #fff7e0; border-color: #f0d78a; color: #6b4e00; }
     .upsell { margin: 0 0 12px; }
     .upgrade { all: unset; box-sizing: border-box; display: block; width: 100%; text-align: center; cursor: pointer; font: 700 14px/1.2 inherit; padding: 11px 14px; border-radius: 10px; background: #ffe04a; color: #15203a; }
     .upgrade:focus-visible { outline: 3px solid #2f5bd3; outline-offset: 2px; }
@@ -635,6 +637,9 @@
            </details>`
         : '';
 
+      this.model = verdict.engine?.model || null;
+      const n = verdict.engine?.notice;
+      const noticeBlock = n ? `<div class="notice ${n.level === 'warn' ? 'warn' : ''}" role="note">${esc(n[I.lang] || n.it)}</div>` : '';
       const errorBlock = verdict.engine?.truncated
         ? `<div class="error">${esc(t('La pagina era molto lunga: è stata analizzata solo in parte.'))}</div>`
         : '';
@@ -653,6 +658,7 @@
             ${verdict.host ? `<p class="action">${esc(verdict.host)}</p>` : ''}
           </header>
           <div class="body">
+            ${noticeBlock}
             ${errorBlock}
             ${costBlock}
             ${verdict.summary ? `<p class="summary">${esc(verdict.summary)}</p>` : ''}
@@ -784,7 +790,7 @@
           e.stopPropagation();
           if (!e.isTrusted || b.disabled) return;
           b.disabled = true;
-          try { await CF.bridge.send('FEEDBACK', { category: b.dataset.feedback }); b.textContent = t('Grazie, segnalato'); } catch { b.disabled = false; }
+          try { await CF.bridge.send('FEEDBACK', { category: b.dataset.feedback, model: this.model }); b.textContent = t('Grazie, segnalato'); } catch { b.disabled = false; }
         });
       }
       const up = this.root.querySelector('[data-upgrade]');

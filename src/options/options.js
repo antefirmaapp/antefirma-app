@@ -3,7 +3,7 @@
  */
 
 import { PROTECTION_LABELS } from '../core/constants.js';
-import { t, setLang, resolveLang, locale } from '../i18n/index.js';
+import { t, setLang, resolveLang, locale, getLang } from '../i18n/index.js';
 import { translateDom } from '../i18n/dom.js';
 
 const $ = (s) => document.querySelector(s);
@@ -156,6 +156,7 @@ function planStatus(text, ok) {
 async function showPlan() {
   let lic;
   try { lic = await send('GET_LICENSE'); } catch (err) { $('#plan-summary').textContent = t('Piano non verificabile: {x}', { x: err.message }); return; }
+  if (lic.notice) showNotice(lic.notice);
   if (lic.error) { $('#plan-summary').textContent = lic.message; $('#plan-buy').hidden = lic.error === 'billing_off'; return; }
   const m = lic.quota?.month;
   const left = m ? ' ' + t('Restano {a} analisi su {b} questo mese.', { a: m.remaining, b: m.limit }) : '';
@@ -204,6 +205,27 @@ $('#plan-remove').addEventListener('click', async () => {
   } catch (err) { planStatus(err.message, false); }
 });
 
+/** Il messaggio di AnteFirma agli utenti, se ce n'è uno in vigore. */
+function showNotice(n) {
+  let el = document.getElementById('af-notice');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'af-notice';
+    el.setAttribute('role', 'note');
+    document.querySelector('.wrap, main, body > div')?.prepend(el);
+  }
+  el.className = `key-status ${n.level === 'warn' ? 'err' : 'ok'}`;
+  el.textContent = n[getLang()] || n.it;
+}
+
+async function showInstallId() {
+  try {
+    const { installId } = await send('GET_INSTALL_ID');
+    $('#install-id').textContent = installId;
+    $('#copy-install-id').addEventListener('click', () => navigator.clipboard?.writeText(installId).then(() => flash(t('Codice copiato.'))));
+  } catch { $('#install-id').textContent = '—'; }
+}
+
 // Di ritorno dalla pagina di pagamento, il piano si aggiorna da solo.
 document.addEventListener('visibilitychange', () => { if (!document.hidden) showPlan(); });
 
@@ -247,4 +269,5 @@ let initialLang = 'auto';
   load();
   showServerStatus();
   showPlan();
+  showInstallId();
 })();

@@ -166,7 +166,7 @@ export const startCheckout = (plan, o) => authed('/v1/pro/checkout', { plan }, o
 export const activateLicense = (key, o) => authed('/v1/license/activate', { key: String(key || '').trim() }, o);
 export const deactivateLicense = (o) => authed('/v1/license/deactivate', {}, o);
 /** «Avviso sbagliato»: solo la categoria, per migliorare l'analisi. */
-export const sendFeedback = (category, o) => authed('/v1/feedback', { category: String(category || '').slice(0, 40) }, o);
+export const sendFeedback = (category, model, o) => authed('/v1/feedback', { category: String(category || '').slice(0, 40), model: model ? String(model).slice(0, 60) : undefined }, o);
 
 async function call(fetchImpl, url, payload, { bearer = null, signal, method = 'POST' } = {}) {
   const headers = method === 'GET' ? {} : { 'content-type': 'application/json' };

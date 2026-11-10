@@ -107,6 +107,7 @@ export async function analyze({ text = '', ctx = {}, actionType = ACTION_TYPES.M
       source: 'server',
       model: response?.model || null,
       cached: Boolean(response?.cached),
+      notice: response?.notice || null,
       dropped: Number(response?.dropped) || 0,
       truncated: Boolean(response?.truncated),
       quota: response?.quota ?? null,

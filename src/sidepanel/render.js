@@ -4,7 +4,7 @@
  */
 
 import { formatMoney } from '../core/text.js';
-import { t, tn } from '../i18n/index.js';
+import { t, tn, getLang } from '../i18n/index.js';
 
 export function esc(s) {
   return String(s ?? '')
@@ -46,6 +46,7 @@ export function renderVerdict(v) {
         </div>
       </div>
       <div class="content">
+        ${v.engine?.notice ? `<div class="status" style="margin-bottom:10px">${esc(v.engine.notice[getLang()] || v.engine.notice.it)}</div>` : ''}
         ${v.engine?.truncated ? `<div class="status error" style="margin-bottom:10px">${esc(t('La pagina era molto lunga: è stata analizzata solo in parte.'))}</div>` : ''}
         ${renderCost(cost)}
         ${v.mustRemember ? `<div class="remember">📌 ${esc(v.mustRemember)}</div>` : ''}

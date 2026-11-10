@@ -19,7 +19,7 @@ import { createSnapshot, compareSnapshot, sha256, attestation } from '../core/pr
 import { buildCommitment, planReminders, dueReminder, missedWindow, commitmentState, COMMITMENT_STATUS } from '../core/commitments.js';
 import { buildIcs } from '../core/ics.js';
 import { buildLetter, suggestKind } from '../core/letter.js';
-import { register, ServerError, getLicense, startCheckout, activateLicense, deactivateLicense, sendFeedback } from '../core/server.js';
+import { register, installId, ServerError, getLicense, startCheckout, activateLicense, deactivateLicense, sendFeedback } from '../core/server.js';
 import { API_BASE } from '../core/config.js';
 import { t, setLang, resolveLang } from '../i18n/index.js';
 import {
@@ -216,7 +216,7 @@ async function handle(msg, sender) {
     case 'UPGRADE':
       return upgrade();
     case 'FEEDBACK':
-      return withCode(sendFeedback(msg.payload?.category));
+      return withCode(sendFeedback(msg.payload?.category, msg.payload?.model));
 
     // ── piano (solo dalle pagine dell'estensione) ─────────────────────────
     case 'GET_LICENSE':
@@ -226,6 +226,8 @@ async function handle(msg, sender) {
         .then(async (r) => { await chrome.tabs.create({ url: r.url }); return { opened: true }; }));
     case 'ACTIVATE_LICENSE':
       return withCode(activateLicense(msg.payload?.key));
+    case 'GET_INSTALL_ID':
+      return { installId: await installId() };
     case 'DEACTIVATE_LICENSE':
       return withCode(deactivateLicense());
 

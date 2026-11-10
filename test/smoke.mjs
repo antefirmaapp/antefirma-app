@@ -42,7 +42,7 @@ await new Promise((r) => site.listen(0, '127.0.0.1', r));
 const BASE = `http://127.0.0.1:${site.address().port}/`;
 
 // Il server finto: risposte come quelle vere, con le frasi della pagina demo.
-const fake = { mode: 'ok', analyzeCalls: 0, lastLang: null, feedback: [] };
+const fake = { mode: 'ok', analyzeCalls: 0, lastLang: null, feedback: [], notice: null };
 const VERDICT = {
   findings: [
     { category: 'auto_renewal', quote: 'Alla scadenza il contratto si rinnova automaticamente per un uguale', why: 'x', confidence: 0.9 },
@@ -66,7 +66,7 @@ async function api(route) {
     fake.analyzeCalls += 1;
     fake.lastLang = JSON.parse(req.postData() || '{}').uiLang;
     if (fake.mode === 'quota') return json(429, { error: 'quota_month', message: 'server' });
-    return json(200, { ...VERDICT, findings: VERDICT.findings.map((f) => ({ ...f, why: fake.lastLang === 'en' ? 'English reason.' : 'Motivo.' })) });
+    return json(200, { ...VERDICT, notice: fake.notice, findings: VERDICT.findings.map((f) => ({ ...f, why: fake.lastLang === 'en' ? 'English reason.' : 'Motivo.' })) });
   }
   if (path === '/v1/feedback') { fake.feedback.push(JSON.parse(req.postData() || '{}').category); return json(200, { ok: true }); }
   if (path === '/v1/license') return json(200, { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 3 } } });
@@ -122,6 +122,7 @@ try {
   check('l’avviso dice quante analisi gratuite restano', (await shadow('.provenance')).includes('ti restano 4 analisi gratuite'));
   const box = await page.evaluate(() => { const r = document.querySelector('antefirma-alert').getBoundingClientRect(); return { w: r.width, h: r.height }; });
   check('l’avviso copre la pagina', box.w > 300 && box.h > 300);
+  check('le impostazioni mostrano il codice dell’installazione', /^[0-9a-f-]{36}$/.test(await opt.textContent('#install-id')));
   await alert(page).locator('[data-feedback]').first().click();
   await page.waitForTimeout(500);
   check('«Avviso sbagliato?» manda solo la categoria', fake.feedback.length === 1 && /^[a-z_]+$/.test(fake.feedback[0]) && (await shadow('[data-feedback]')).includes('Grazie'), fake.feedback.join(','));
@@ -165,6 +166,7 @@ try {
   await opt.click('#save');
   await opt.waitForTimeout(1500);
   fake.mode = 'ok';
+  fake.notice = { it: 'Manutenzione stasera', en: 'Maintenance tonight', es: 'Mantenimiento esta noche', level: 'warn' };
   await opt.click('#clear-cache');
   await page.bringToFront();
   await page.reload();
@@ -175,6 +177,7 @@ try {
   await shot(page, 'avviso-en');
   check('l’avviso è in inglese', (await shadow('.cancel')) === 'Go back' && (await shadow('.cost .caption')).includes('estimated potential'));
   check('al server si chiede l’analisi in inglese', fake.lastLang === 'en');
+  check('il messaggio agli utenti compare nella lingua giusta', (await shadow('.notice')) === 'Maintenance tonight');
   check('la cronologia del verdetto è in inglese', (await shadow('.timeline')).includes('Now'));
   await alert(page).locator('[data-act="cancel"]').click();
 

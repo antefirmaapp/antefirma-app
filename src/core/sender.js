@@ -23,6 +23,7 @@ export const PRIVILEGED_MESSAGES = new Set([
   'START_CHECKOUT',
   'ACTIVATE_LICENSE',
   'DEACTIVATE_LICENSE',
+  'GET_INSTALL_ID',
 ]);
 
 /**
