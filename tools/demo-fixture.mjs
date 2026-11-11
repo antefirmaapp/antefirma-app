@@ -45,6 +45,21 @@ export const PAGE = {
     q: ['fidelização de 12 meses', 'renova-se automaticamente por mais um ano', 'pelo menos 30 dias de antecedência', 'penalização de 120 €'],
     why: ['Durante um ano tem de pagar.', 'Se não cancelar a tempo, paga mais um ano.', 'O cancelamento tem de chegar um mês antes.', 'Sair antes custa 120 €.'],
     summary: 'Compromete-se por um ano: renova-se sozinho e sair antes custa 120 €.', you: { name: 'Ana Silva', address: 'Rua Augusta 1, 1100-053 Lisboa', email: 'ana.silva@exemplo.pt' } },
+  sv: { title: 'Gym Horisont — Medlemskap Plus', name: 'Medlemskap Plus', per: 'i månaden', btn: 'Prenumerera nu', feats: ['Gym och pass utan gräns', 'Öppet 7 dagar i veckan', 'App med träningsprogram'],
+    terms: 'Medlemskapet har en bindningstid på 12 månader från aktivering. Avtalet förlängs automatiskt med ett år till om det inte sägs upp minst 30 dagar i förväg. Förtida uppsägning kostar en avgift på 120 €. Startavgiften återbetalas inte.',
+    q: ['en bindningstid på 12 månader', 'förlängs automatiskt med ett år till', 'minst 30 dagar i förväg', 'en avgift på 120 €'],
+    why: ['Under ett år måste du betala.', 'Säger du inte upp i tid betalar du ett år till.', 'Uppsägningen måste komma fram en månad innan.', 'Att lämna tidigare kostar 120 €.'],
+    summary: 'Du binder dig ett år: det förlängs av sig självt och att lämna tidigare kostar 120 €.', you: { name: 'Anna Svensson', address: 'Storgatan 1, 111 22 Stockholm', email: 'anna.svensson@exempel.se' } },
+  ro: { title: 'Sala Orizont — Abonament Plus', name: 'Abonament Plus', per: 'pe lună', btn: 'Abonează-te acum', feats: ['Sală și cursuri nelimitate', 'Deschis 7 zile pe săptămână', 'Aplicație cu planuri de antrenament'],
+    terms: 'Abonamentul are o perioadă minimă de 12 luni de la activare. Contractul se reînnoiește automat pentru încă un an dacă nu este reziliat cu cel puțin 30 de zile înainte. Rezilierea anticipată costă o taxă de 120 €. Taxa de înscriere nu se returnează.',
+    q: ['o perioadă minimă de 12 luni', 'se reînnoiește automat pentru încă un an', 'cu cel puțin 30 de zile înainte', 'o taxă de 120 €'],
+    why: ['Timp de un an trebuie să plătești.', 'Dacă nu reziliezi la timp, plătești încă un an.', 'Rezilierea trebuie să ajungă cu o lună înainte.', 'Plecarea mai devreme costă 120 €.'],
+    summary: 'Te angajezi pentru un an: se reînnoiește singur, iar plecarea mai devreme costă 120 €.', you: { name: 'Ana Popescu', address: 'Str. Lipscani 1, 030031 București', email: 'ana.popescu@exemplu.ro' } },
+  cs: { title: 'Posilovna Horizont — Členství Plus', name: 'Členství Plus', per: 'měsíčně', btn: 'Předplatit', feats: ['Posilovna a lekce bez omezení', 'Otevřeno 7 dní v týdnu', 'Aplikace s tréninkovými plány'],
+    terms: 'Členství má minimální dobu 12 měsíců od aktivace. Smlouva se automaticky prodlužuje o další rok, pokud není vypovězena nejméně 30 dní předem. Předčasné ukončení stojí poplatek 120 €. Zápisné se nevrací.',
+    q: ['minimální dobu 12 měsíců', 'automaticky prodlužuje o další rok', 'nejméně 30 dní předem', 'poplatek 120 €'],
+    why: ['Rok musíte platit.', 'Pokud nevypovíte včas, platíte další rok.', 'Výpověď musí dorazit měsíc předem.', 'Dřívější odchod stojí 120 €.'],
+    summary: 'Zavazujete se na rok: prodlužuje se samo a dřívější odchod stojí 120 €.', you: { name: 'Jana Nováková', address: 'Václavské náměstí 1, 110 00 Praha 1', email: 'jana.novakova@priklad.cz' } },
 };
 export const page = (l) => {
   const p = PAGE[l];
@@ -65,7 +80,7 @@ document.getElementById('f').addEventListener('submit',(e)=>{e.preventDefault();
 };
 
 // An invented domain (.example doesn't exist): the warning and the letter show the site's name, not 127.0.0.1.
-export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example' };
+export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example', sv: 'gym-horisont.example', ro: 'sala-orizont.example', cs: 'posilovna-horizont.example' };
 
 export const verdict = (l) => {
   const p = PAGE[l];

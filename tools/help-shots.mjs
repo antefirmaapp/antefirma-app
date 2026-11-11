@@ -27,7 +27,7 @@ const { chromium } = createRequire(import.meta.url)('playwright');
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const VIDEO = !args.includes('--no-video');
-const LANGS = args.find((a) => a.startsWith('--lang='))?.slice(7).split(',') || ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt'];
+const LANGS = args.find((a) => a.startsWith('--lang='))?.slice(7).split(',') || ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs'];
 const OUT = resolve(args.find((a) => !a.startsWith('--')) || join(ROOT, '..', 'antefirma-site', 'assets', 'help'));
 const PANEL = { width: 420, height: 760 };
 const SITE = { width: 1180, height: 760 };
@@ -50,7 +50,7 @@ async function setup(context, extId, l, { consent = false } = {}) {
   await opt.goto(`chrome-extension://${extId}/src/options/options.html`);
   await opt.waitForTimeout(700);
   await opt.selectOption('#uiLang', l);
-  await opt.selectOption('#jurisdiction', { it: 'IT', en: 'EU', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL', pl: 'PL', pt: 'PT' }[l]);
+  await opt.selectOption('#jurisdiction', { it: 'IT', en: 'EU', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL', pl: 'PL', pt: 'PT', sv: 'SE', ro: 'RO', cs: 'CZ' }[l]);
   const you = PAGE[l].you;
   await opt.fill('#id-name', you.name); await opt.fill('#id-address', you.address); await opt.fill('#id-email', you.email);
   await opt.click('#save');
@@ -194,7 +194,7 @@ async function videos(l, dir) {
     await p.waitForSelector('#track', { timeout: 15000 }); await p.click('#track'); await p.waitForTimeout(500);
     await press(p, '#tab-btn-commitments', 1500);
     await press(p, '[data-act="letter"]', 2500);
-    const other = { it: 'en', en: 'es', es: 'it', de: 'en', fr: 'en', nl: 'en', pl: 'en', pt: 'en' }[l];
+    const other = { it: 'en', en: 'es', es: 'it', de: 'en', fr: 'en', nl: 'en', pl: 'en', pt: 'en', sv: 'en', ro: 'en', cs: 'en' }[l];
     await p.locator('#letter-lang').scrollIntoViewIfNeeded();
     const bb = await p.locator('#letter-lang').boundingBox();
     if (bb) await p.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2, { steps: 15 });
