@@ -82,6 +82,16 @@ try {
   check('only the analysis went to the server, after the yes', calls.includes('/v1/analyze'));
   await a11y(page, 'the verdict');
 
+  // Recorded as a commitment: it appears in the Commitments tab with its deadline.
+  await page.click('#track');
+  await page.waitForTimeout(600);
+  await page.click('#tab-btn-commitments');
+  await page.waitForTimeout(600);
+  const items = await page.locator('.c-item:not(.example)').count();
+  check('the commitment is recorded and listed in the Commitments tab', items === 1, `${items} commitments`);
+  check('…with its cancellation deadline', /2028/.test(await page.locator('.c-item:not(.example)').first().textContent()));
+  await a11y(page, 'the Commitments tab');
+
   await page.reload();
   check('the welcome does not come back', (await page.locator('.web-welcome').count()) === 0);
   await page.goto(`${BASE}settings/`);

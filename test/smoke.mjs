@@ -1,8 +1,9 @@
 /**
  * End-to-end check: really loads the extension in Chromium, opens the demo page
- * and follows the flow with the server. The AnteFirma server is fake (requests
- * to api.antefirma.app are intercepted), so the check spends no analyses and
- * doesn't depend on the network.
+ * and follows the main path with the server. The AnteFirma server is fake
+ * (test/e2e/harness.mjs), so the check spends no analyses and doesn't depend on
+ * the network. The other paths (every demo page, server failures, tokens, SPA,
+ * iframes, synthetic clicks, the web app) are in test/e2e/.
  *
  *     node test/smoke.mjs
  *
@@ -12,96 +13,31 @@
  *
  * Requires Playwright with Chromium (`require('playwright')`).
  */
-import { createServer } from 'node:http';
-import { readFileSync, existsSync, mkdtempSync } from 'node:fs';
-import { join, dirname, extname } from 'node:path';
-import { tmpdir } from 'node:os';
-import { fileURLToPath } from 'node:url';
-import { createRequire } from 'node:module';
+import { join } from 'node:path';
+import { startStack } from './e2e/harness.mjs';
 
-const require = createRequire(import.meta.url);
-const { chromium } = require('playwright');
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const results = [];
 /** With SHOTS=folder it also saves screenshots of the main steps. */
-const alert = (pg) => pg.locator('antefirma-alert');
 const shot = (pg, name) => (process.env.SHOTS ? pg.screenshot({ path: join(process.env.SHOTS, `${name}.png`) }) : null);
-const check = (name, ok, detail = '') => {
-  results.push(ok);
-  console.log(`${ok ? '  ok  ' : 'NOT OK'}  ${name}${detail ? ` — ${detail}` : ''}`);
-};
-/**
- * Accessibility with axe-core: no "serious" or "critical" violation. Injected
- * through the DevTools protocol, so the extension pages' CSP doesn't stop it;
- * axe also looks inside the warning's open shadow root.
- */
-const AXE = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
-const a11y = async (pg, name, context = 'document') => {
-  if (!(await pg.evaluate(() => Boolean(window.axe)))) await pg.evaluate(AXE);
-  const found = await pg.evaluate(async (sel) => {
-    const r = await window.axe.run(sel === 'document' ? document : sel, { resultTypes: ['violations'] });
-    return r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')
-      .map((v) => `${v.id} (${v.nodes.slice(0, 2).map((n) => n.target.flat().join(' ')).join(' | ')})`);
-  }, context);
-  check(`${name}: no serious accessibility problems`, found.length === 0, found.join('; '));
-};
 
-// The demo page, served locally.
-const TYPES = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript', '.pdf': 'application/pdf' };
-const site = createServer((req, res) => {
-  const f = join(ROOT, 'demo', req.url === '/' ? 'checkout.html' : req.url.split('?')[0]);
-  if (!existsSync(f)) { res.writeHead(404).end(); return; }
-  res.writeHead(200, { 'content-type': TYPES[extname(f)] || 'text/plain' }).end(readFileSync(f));
-});
-await new Promise((r) => site.listen(0, '127.0.0.1', r));
-const BASE = `http://127.0.0.1:${site.address().port}/`;
-
-// The fake server: answers like the real ones, with the demo page's sentences.
-const fake = { mode: 'ok', analyzeCalls: 0, lastLang: null, feedback: [], notice: null, delay: 0 };
-const VERDICT = {
+const h = await startStack();
+const { context, extId, fake, check, a11y, alert, errors } = h;
+const BASE = h.BASE;
+// A fixed answer with the demo page's sentences, so the cost is known: €19.99 × 24 + €120.
+fake.fixed = {
   findings: [
-    { category: 'auto_renewal', quote: 'Alla scadenza il contratto si rinnova automaticamente per un uguale', why: 'x', confidence: 0.9 },
-    { category: 'early_termination_penalty', quote: 'In caso di recesso anticipato è dovuta una penale di € 120,00', why: 'x', confidence: 0.9 },
+    { category: 'auto_renewal', quote: 'Alla scadenza il contratto si rinnova automaticamente per un uguale', why: 'Motivo.', confidence: 0.9 },
+    { category: 'early_termination_penalty', quote: 'In caso di recesso anticipato è dovuta una penale di € 120,00', why: 'Motivo.', confidence: 0.9 },
   ],
   terms: {
     price: { value: 19.99, quote: '€ 19,99' }, currency: { value: 'EUR' }, billing_period: { value: 'month' },
     minimum_term_months: { value: 24, quote: 'durata minima di 24 mesi' }, notice_days: { value: 60, quote: 'preavviso di almeno 60 giorni' },
     exit_fee: { value: 120, quote: 'penale di € 120,00' }, extra_fees: [],
   },
-  summary: '', dropped: 0, truncated: false, model: 'finto', cached: false,
-  quota: { plan: 'free', remaining: 4, month: { limit: 5, remaining: 4 } },
+  summary: '',
 };
-async function api(route) {
-  const req = route.request();
-  const path = new URL(req.url()).pathname;
-  const json = (status, body) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
-  if (path === '/v1/health') return json(200, { ok: true });
-  if (path === '/v1/register') return json(200, { token: 'v1.finto' });
-  if (path === '/v1/analyze') {
-    fake.analyzeCalls += 1;
-    fake.lastLang = JSON.parse(req.postData() || '{}').uiLang;
-    if (fake.delay) await new Promise((r) => setTimeout(r, fake.delay)); // to see the waiting state
-    if (fake.mode === 'quota') return json(429, { error: 'quota_month', message: 'server' });
-    return json(200, { ...VERDICT, notice: fake.notice, findings: VERDICT.findings.map((f) => ({ ...f, why: fake.lastLang === 'en' ? 'English reason.' : 'Motivo.' })) });
-  }
-  if (path === '/v1/feedback') { fake.feedback.push(JSON.parse(req.postData() || '{}').category); return json(200, { ok: true }); }
-  if (path === '/v1/license') return json(200, { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 3 } } });
-  if (path === '/v1/pro/checkout') return json(200, { claim: 'c'.repeat(32), url: `https://antefirma.app/pro/#c=${'c'.repeat(32)}&p=pro` });
-  return json(404, { error: 'not_found' });
-}
-
-const errors = [];
-const context = await chromium.launchPersistentContext(mkdtempSync(join(tmpdir(), 'af-profile-')), {
-  headless: false,
-  args: [`--disable-extensions-except=${ROOT}`, `--load-extension=${ROOT}`, '--headless=new', '--no-sandbox', '--lang=it-IT'],
-});
-await context.route('https://api.antefirma.app/**', api);
-await context.route('https://antefirma.app/**', (r) => r.fulfill({ contentType: 'text/html', body: '<title>Pro</title>' }));
 
 try {
-  const sw = context.serviceWorkers()[0] || await context.waitForEvent('serviceworker', { timeout: 20000 });
-  check('the service worker starts', Boolean(sw));
-  const extId = new URL(sw.url()).host;
+  check('the service worker starts', Boolean(h.sw));
 
   // Start from Italian, whatever the test browser's language.
   const opt = await context.newPage();
@@ -226,12 +162,7 @@ try {
   await a11y(wel, 'the welcome page');
 } catch (err) {
   check('the run reaches the end', false, err.message);
-} finally {
-  check('no JavaScript errors', errors.length === 0, errors.slice(0, 3).join(' | '));
-  await context.close();
-  site.close();
 }
 
-const failed = results.filter((r) => !r).length;
-console.log(`\n${results.length - failed}/${results.length} checks passed`);
-process.exit(failed ? 1 : 0);
+const failed = await h.close();
+process.exit(failed.length ? 1 : 0);

@@ -92,6 +92,7 @@ https://antefirma.app/demo/.
 npm ci                 # dev dependencies: ESLint, fast-check, axe-core
 npm test               # unit, golden and contract tests
 npm run test:e2e       # the extension in a real Chromium (needs Playwright)
+npm run test:e2e:all   # smoke, every e2e scenario and the web app (about 2 minutes)
 npm run test:web       # the web app in a real Chromium
 npm run test:visual    # screenshots compared with test/visual/
 npm run lint
@@ -226,6 +227,8 @@ worker needs Safari 16.4 or later.
 | `contract.test.mjs` | test fixtures and the demo mock match the API contract shared with the server (`test/contract/`) |
 | `help.test.mjs`, `names.test.mjs` | help links; seller name on payment pages |
 | `properties.test.mjs` | property-based tests (fast-check): amounts, cost, reminders, score, seller names, `.ics` hold for hundreds of random inputs |
+| `e2e/all.mjs` | end-to-end scenarios on fresh profiles (`e2e/harness.mjs`, shared with `smoke.mjs`): every demo page as `demo/index.html` declares, slow server and "Continue without waiting", timeout / network / 500 / malformed answers never shown as "all fine", 401 retry without loops, quota and active licence, SPA, double click, iframe, Enter, "Go back" / "Continue", synthetic clicks on "Yes, analyse" (`ONLY=failures` for one) |
+| `detector.test.mjs` | which buttons are held on 30 realistic pages in `test/fixtures/pages/` (each with its expected `.json`): precision, recall, content-script coverage |
 | `web.mjs` | the web app in a real Chromium: first visit, consent, verdict, settings, phone width, axe-core accessibility |
 | `visual.mjs` | visual regression: ten web app screens (desktop and phone) against the approved images in `test/visual/` (`UPDATE_VISUAL=1` to approve a deliberate change) |
 | `smoke.mjs` | the extension in a real Chromium with a fake server: interception, consent, verdict and cost, "Continue and remind me", "Upgrade to Pro", Spanish settings, English warning and panel, axe-core accessibility of warning, panel, settings and welcome (`SHOTS=folder` saves screenshots) |

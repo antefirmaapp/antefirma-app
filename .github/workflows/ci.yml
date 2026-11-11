@@ -29,6 +29,9 @@ jobs:
         run: node --test test/detector.test.mjs
       - name: Extension end-to-end check
         run: xvfb-run -a npm run test:e2e
+      - name: End-to-end scenarios (demo pages, server failures, tokens, plans, SPA, iframe, decisions, synthetic clicks)
+        timeout-minutes: 5
+        run: xvfb-run -a node test/e2e/all.mjs
       - name: Web app in a real browser (first visit, consent, verdict, accessibility, phone)
         run: node test/web.mjs
       - name: Visual regression of the web app screens (same CSS as the extension)

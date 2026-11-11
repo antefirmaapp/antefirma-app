@@ -15,7 +15,8 @@
     "check:english": "node tools/no-italian.mjs",
     "i18n": "node tools/i18n-build.mjs",
     "test:web": "node tools/web-build.mjs && node test/web.mjs",
-    "test:visual": "node tools/web-build.mjs && node test/visual.mjs"
+    "test:visual": "node tools/web-build.mjs && node test/visual.mjs",
+    "test:e2e:all": "node test/smoke.mjs && node test/e2e/all.mjs && node tools/web-build.mjs && node test/web.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
