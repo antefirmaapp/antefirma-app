@@ -14,6 +14,8 @@
  *                 checkout inside an iframe; form sent with Enter
  *  6. decisions   "Go back" does not perform the action; "Continue" performs it once
  *  7. synthetic   a page script cannot press "Yes, analyse" (isTrusted)
+ *  8. a11y        axe-core on warning, panel, settings and welcome in it/en/es, light and
+ *                 dark; the warning by keyboard: it takes focus, Tab stays inside, Esc = "Go back"
  * The web app has its own check (test/web.mjs).
  */
 import { startStack, ROOT } from './harness.mjs';
@@ -236,6 +238,54 @@ const SCENARIOS = {
     await h.alert(pg).locator('[data-consent="accept"]').click();
     h.check('a real click on "Yes, analyse" does work', await verdictShown(pg));
   },
+};
+
+SCENARIOS.a11y = async (h) => {
+  for (const lang of ['it', 'en', 'es']) {
+    await h.settings({ uiLang: lang, consent: true });
+    for (const scheme of ['light', 'dark']) {
+      const tag = `${lang} ${scheme}`;
+      const pg = await h.open('checkout.html', `a11y ${tag}`);
+      await pg.emulateMedia({ colorScheme: scheme });
+      await pg.waitForTimeout(500);
+      await countClicks(pg, 'button.cta');
+      await h.clearCache();
+      await pg.bringToFront();
+      await pg.click('button.cta');
+      await verdictShown(pg);
+      await h.a11y(pg, `${tag} · the warning`, 'antefirma-alert');
+      if (scheme === 'light') {
+        // By keyboard: focus moves into the warning and stays there; Esc means "Go back".
+        const inside = () => pg.evaluate(() => document.activeElement?.tagName === 'ANTEFIRMA-ALERT' && Boolean(document.querySelector('antefirma-alert').shadowRoot.activeElement));
+        // A modal dialog lets Tab pass through the browser's own interface (focus
+        // on <body> for a moment) before coming back: what must never happen is
+        // focus on an element of the page underneath.
+        const onPage = () => pg.evaluate(() => { const a = document.activeElement; return Boolean(a) && a !== document.body && a.tagName !== 'ANTEFIRMA-ALERT'; });
+        h.check(`${tag} · the warning takes the focus`, await inside());
+        let leaked = 0, back = 0;
+        for (const key of [...Array(14).fill('Tab'), ...Array(6).fill('Shift+Tab')]) {
+          await pg.keyboard.press(key);
+          if (await onPage()) leaked++;
+          if (await inside()) back++;
+        }
+        h.check(`${tag} · Tab and Shift+Tab never reach the page underneath`, leaked === 0 && back >= 16, `${leaked} times on the page, ${back}/20 inside`);
+        const names = await pg.evaluate(() => [...document.querySelector('antefirma-alert').shadowRoot.querySelectorAll('button, a[href], summary')]
+          .filter((b) => b.getClientRects().length).filter((b) => !(b.getAttribute('aria-label') || b.textContent).trim()).length);
+        h.check(`${tag} · every control has a name`, names === 0, `${names} without a name`);
+        await pg.keyboard.press('Escape');
+        await pg.waitForTimeout(500);
+        h.check(`${tag} · Esc closes the warning as "Go back": the action is not performed`, !(await h.alertOpen(pg)) && (await clicks(pg)) === 0);
+      }
+      await pg.close();
+      for (const [page, name] of [['src/sidepanel/sidepanel.html', 'side panel'], ['src/options/options.html', 'settings'], ['src/welcome/welcome.html', 'welcome page']]) {
+        const ext = await h.open(h.extUrl(page), name);
+        await ext.emulateMedia({ colorScheme: scheme });
+        await ext.waitForTimeout(700);
+        await h.a11y(ext, `${tag} · the ${name}`);
+        await ext.close();
+      }
+    }
+  }
 };
 
 const only = process.env.ONLY;

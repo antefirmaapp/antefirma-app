@@ -91,6 +91,13 @@ try {
   check('the commitment is recorded and listed in the Commitments tab', items === 1, `${items} commitments`);
   check('…with its cancellation deadline', /2028/.test(await page.locator('.c-item:not(.example)').first().textContent()));
   await a11y(page, 'the Commitments tab');
+  // The same screens in the dark theme.
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await a11y(page, 'dark theme: the Commitments tab');
+  await page.click('#tab-btn-analyze');
+  await page.waitForTimeout(300);
+  await a11y(page, 'dark theme: the verdict');
+  await page.emulateMedia({ colorScheme: 'light' });
 
   await page.reload();
   check('the welcome does not come back', (await page.locator('.web-welcome').count()) === 0);
