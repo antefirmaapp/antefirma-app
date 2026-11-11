@@ -23,30 +23,13 @@ import { join, dirname, extname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { keywordFindings, EMPTY_TERMS } from '../../tools/fake-model.mjs';
 
 const require = createRequire(import.meta.url);
 export const { chromium } = require('playwright');
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const AXE = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
 
-/** Risk sentences of the demo pages, as the model would quote them. */
-const RULES = [
-  ['auto_renewal', /(?:si rinnova (?:automaticamente|tacitamente)|renews automatically|se renueva autom[áa]ticamente)[^.\n]{0,60}|rinnovo automatico ogni \d+ mesi/i],
-  ['minimum_term', /(?:durata minima (?:di )?\d+ mesi|minimum term of \d+ months|permanencia m[íi]nima de [a-zñ]+ meses)/i],
-  ['early_termination_penalty', /(?:(?:è dovuta una )?penal(?:e|ità) (?:di|pari a|di recesso) (?:€ ?)?\d[\d.,]*(?: ?(?:€|euro))?|penalizaci[óo]n de \d[\d.,]* euros|fee of £\d[\d.,]*)/i],
-  ['no_refund', /(?:non sono rimborsabili|nessun rimborso degli importi versati|non-refundable|no son reembolsables)[^.\n]{0,30}/i],
-  ['arbitration', /devoluta ad arbitrato[^.\n]{0,20}/i],
-];
-export function keywordFindings(text, lang) {
-  const out = [];
-  for (const [category, re] of RULES) {
-    const m = re.exec(text || '');
-    if (m && m[0].trim().length >= 12) out.push({ category, quote: m[0].trim(), why: lang === 'en' ? 'English reason.' : lang === 'es' ? 'Motivo.' : 'Motivo.', confidence: 0.9 });
-  }
-  return out;
-}
-
-const EMPTY_TERMS = { price: null, currency: null, billing_period: null, minimum_term_months: null, notice_days: null, exit_fee: null, extra_fees: [] };
 
 export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
   const results = [];

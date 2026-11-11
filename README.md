@@ -99,6 +99,26 @@ npm run lint
 npm run check:english
 ```
 
+### Against the real server, locally (before every release)
+
+```bash
+node tools/local-stack.mjs                         # try the demo pages by hand
+node tools/local-stack.mjs --auto                  # every demo scenario, with a report
+node tools/local-stack.mjs --auto --json report.json
+```
+
+It starts `antefirma-server` from the sibling folder (or `ANTEFIRMA_SERVER_DIR`)
+with secrets made up for the run and an in-memory store, builds a copy of the
+extension pointed at it (temp folder, developer key, repository untouched),
+opens Chromium on the demo pages and, with `--auto`, prints for each scenario of
+`demo/index.html`: blocked or not as declared, risks found, cost, deadline,
+quotes dropped by the server, time and estimated cost of the call. With
+`ANTHROPIC_API_KEY` set the real model answers (and it costs money); without it
+a local stand-in (`tools/fake-model.mjs`) does — that is how the server's CI runs
+it on every push, as a real integration check with nothing mocked on the
+extension's side. Production (`api.antefirma.app`) is blocked during the run.
+`python3 demo/verify.py` is a short alias.
+
 ### Against a local server
 
 The server address lives in one place, `src/core/config.js`
