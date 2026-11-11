@@ -16,10 +16,12 @@
     "i18n": "node tools/i18n-build.mjs",
     "test:web": "node tools/web-build.mjs && node test/web.mjs",
     "test:visual": "node tools/web-build.mjs && node test/visual.mjs",
-    "test:e2e:all": "node test/smoke.mjs && node test/e2e/all.mjs && node tools/web-build.mjs && node test/web.mjs"
+    "test:e2e:all": "node test/smoke.mjs && node test/e2e/all.mjs && node tools/web-build.mjs && node test/web.mjs",
+    "test:mutation": "stryker run"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
+    "@stryker-mutator/core": "8.7.1",
     "axe-core": "4.10.3",
     "eslint": "9.39.1",
     "fast-check": "4.3.0",

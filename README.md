@@ -275,6 +275,16 @@ applies to the server's answers. `test/i18n.test.mjs` fails if an id is missing
 in any language, if placeholders differ, if `messages.js` is stale, or if an id
 is unused.
 
+### Mutation testing
+
+Coverage says which lines run, not whether the tests would notice a mistake.
+`npm run test:mutation` (Stryker, config in `stryker.config.json`) changes
+src/core/consequence.js, scoring.js, ics.js and commitments.js one small piece at a time and checks that some test fails. Slow (tens of
+minutes): it runs weekly in GitHub Actions and on demand (*Mutation testing*
+workflow), not on every push; the HTML report is kept as an artifact.
+Last run: consequence.js 82%, ics.js 81%, scoring.js 60%, commitments.js 60% (overall 72%, was 67%). Most survivors left are equivalent changes (the same
+behaviour written differently) or texts.
+
 ## Known limits
 
 - **The model can stay silent about a risk**: quote verification stops it from

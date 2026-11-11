@@ -4,3 +4,5 @@ __pycache__/
 dist/
 test/visual/*.new.png
 test/visual/*.diff.png
+.stryker-tmp/
+reports/

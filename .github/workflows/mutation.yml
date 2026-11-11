@@ -1,0 +1,27 @@
+# Mutation testing (Stryker) of the analysis core: slow, so weekly and on demand,
+# not on every push. The HTML report is kept as an artifact for 30 days.
+name: Mutation testing
+on:
+  schedule:
+    - cron: '23 3 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mutation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:mutation
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-report
+          path: reports/mutation/
+          retention-days: 30
