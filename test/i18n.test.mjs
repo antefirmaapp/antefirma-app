@@ -14,7 +14,7 @@ import { join } from 'node:path';
 import { t, tn, tIn, setLang, resolveLang } from '../src/i18n/index.js';
 import { buildMessages } from '../tools/i18n-build.mjs';
 
-const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl'];
+const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt'];
 const L = Object.fromEntries(LANGS.map((l) => [l, JSON.parse(readFileSync(`src/i18n/locales/${l}.json`, 'utf8'))]));
 const ids = Object.keys(L.it);
 
@@ -81,7 +81,9 @@ test('t(), tn(), tIn(): language, placeholders, fallbacks', () => {
   assert.equal(resolveLang('auto', 'es-ES'), 'es');
   assert.equal(resolveLang('auto', 'de-DE'), 'de');
   assert.equal(resolveLang('auto', 'nl-BE'), 'nl');
-  assert.equal(resolveLang('auto', 'pt-BR'), 'en');
+  assert.equal(resolveLang('auto', 'pt-BR'), 'pt');
+  assert.equal(resolveLang('auto', 'pl-PL'), 'pl');
+  assert.equal(resolveLang('auto', 'sv-SE'), 'en');
   setLang('fr');
   assert.equal(t('goBack'), tIn('fr', 'goBack'));
   assert.notEqual(tIn('fr', 'goBack'), tIn('en', 'goBack'));
@@ -110,7 +112,7 @@ test('labels and texts of the vocabularies are ids with translations', async () 
 
 test('the HTML pages\' texts all have an id', () => {
   const missing = [];
-  const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|Deutsch|Français|Nederlands|https?:\/\/\S+)$/;
+  const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|Deutsch|Français|Nederlands|Polski|Português|https?:\/\/\S+)$/;
   for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html']) {
     const html = readFileSync(f, 'utf8').replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style|textarea)[\s\S]*?<\/\1>/g, '');
     const texts = [

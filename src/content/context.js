@@ -33,6 +33,12 @@
     [/\/\s*(?:wk|week|sett|semana|woche|semaine)\b|\ba\s*settimana\b|\bsettimanal\w*|\bweekly\b|\ba\s+la\s+semana\b|\bsemanal\w*|\bpro\s+woche\b|(?<![\wÀ-ÿ])wöchentlich\w*|\bpar\s+semaine\b|\bhebdomadaire\w*|\bper\s+week\b|\bwekelijks\b/i, 'week'],
     [/\bal\s*giorno\b|\bdaily\b|\bper\s+(?:day|dag)\b|\bal\s+d[ií]a(?![\wÀ-ÿ])|\bpro\s+tag\b|(?<![\wÀ-ÿ])täglich\w*|\bpar\s+jour\b|\bdagelijks\b/i, 'day'],
     [/\btrimestral\w*|\bquarterly\b|\btrimestriel\w*|(?<![\wÀ-ÿ])vierteljährlich\w*|\bpro\s+quartal\b|\bper\s+kwartaal\b/i, 'quarter'],
+    // Polish and Portuguese, after the others so the older rules keep their order.
+    [/\/\s*(?:mies\.?|miesi(?:ą|a)c|m(?:ê|e)s)(?![\wÀ-ɏ])|(?<![\wÀ-ɏ])(?:miesi(?:ę|e)cznie|na\s+miesi(?:ą|a)c|za\s+miesi(?:ą|a)c|por\s+m(?:ê|e)s|ao\s+m(?:ê|e)s|mensal(?:mente)?)(?![\wÀ-ɏ])/i, 'month'],
+    [/\/\s*(?:rok|ano)(?![\wÀ-ɏ])|(?<![\wÀ-ɏ])(?:rocznie|na\s+rok|za\s+rok|por\s+ano|ao\s+ano)(?![\wÀ-ɏ])/i, 'year'],
+    [/\/\s*(?:tydz\.?|tydzie(?:ń|n))(?![\wÀ-ɏ])|(?<![\wÀ-ɏ])(?:tygodniowo|na\s+tydzie(?:ń|n)|por\s+semana)(?![\wÀ-ɏ])/i, 'week'],
+    [/(?<![\wÀ-ɏ])(?:dziennie|na\s+dzie(?:ń|n)|por\s+dia|ao\s+dia)(?![\wÀ-ɏ])/i, 'day'],
+    [/(?<![\wÀ-ɏ])(?:kwartalnie|na\s+kwarta(?:ł|l)|por\s+trimestre)(?![\wÀ-ɏ])/i, 'quarter'],
   ];
 
   /**
@@ -54,6 +60,11 @@
     /\b(?<n>\d{1,2})\s*(?<u>dagen|maanden|weken|dag|maand|week)\s+gratis/i,
     /\bgratis\s+proefperiode\s+(?:van\s+)?(?<n>\d{1,2})\s*(?<u>dagen|maanden|weken)/i,
     /\b(?:primo\s+mese\s+gratis|first\s+month\s+free|primer\s+mes\s+gratis|erster\s+monat\s+(?:gratis|kostenlos)|premier\s+mois\s+(?:gratuit|offert)|eerste\s+maand\s+gratis)\b/i,
+    /(?<![\wÀ-ɏ])(?<n>\d{1,2})\s*(?<u>dni|dzie(?:ń|n)|miesi(?:ą|ę|e|a)c\w*|tygodni\w*)\s+(?:za\s+darmo|gratis|bezp(?:ł|l)atn\w*|okresu\s+pr(?:ó|o)bnego)/i,
+    /(?<![\wÀ-ɏ])(?:darmowy|bezp(?:ł|l)atny)\s+okres\s+pr(?:ó|o)bny\s+(?:przez\s+)?(?<n>\d{1,2})\s*(?<u>dni|miesi(?:ą|ę|e|a)c\w*|tygodni\w*)/i,
+    /(?<![\wÀ-ɏ])(?<n>\d{1,2})\s*(?<u>dias?|meses|m(?:ê|e)s|semanas?)\s+(?:gr(?:á|a)tis|gratuitos?|de\s+experi(?:ê|e)ncia|de\s+teste)/i,
+    /(?<![\wÀ-ɏ])per(?:í|i)odo\s+(?:experimental|de\s+teste)\s+(?:gratuito\s+)?(?:de\s+)?(?<n>\d{1,2})\s*(?<u>dias?|meses|m(?:ê|e)s|semanas?)/i,
+    /(?<![\wÀ-ɏ])(?:pierwszy\s+miesi(?:ą|a)c\s+(?:za\s+darmo|gratis)|primeiro\s+m(?:ê|e)s\s+(?:gr(?:á|a)tis|gratuito|oferta))(?![\wÀ-ɏ])/i,
   ];
 
   /** The first free trial in a text: { raw, months } or null. */
@@ -63,7 +74,7 @@
       if (!m) continue;
       const n = Number(m.groups?.n || 1);
       const u = (m.groups?.u || 'month').toLowerCase();
-      const months = /^(giorn|day|d[ií]a|tag|jour|dag)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek)/.test(u) ? n / 4.345 : n;
+      const months = /^(giorn|day|d[ií]a|tag|jour|dag|dni|dzie)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek|tydz|tygod)/.test(u) ? n / 4.345 : n;
       return { raw: m[0].replace(/\s+/g, ' ').trim(), months };
     }
     return null;

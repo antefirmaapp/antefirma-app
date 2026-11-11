@@ -1,0 +1,59 @@
+Wypowiedzenie po zmianie warunków — Saas_fair
+wypowiedzenie-po-zmianie-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Do: Saas_fair
+[Adres dostawcy / e-mail wskazany w regulaminie]
+
+Miejscowość i data: ______________, 15 sierpnia 2026
+
+Wysłano: ☐ listem poleconym za potwierdzeniem odbioru   ☐ formularzem online   ☐ e-mailem
+
+Dotyczy: wypowiedzenie umowy w związku z jednostronną zmianą warunków
+
+Szanowni Państwo,
+
+zauważyłem zmianę warunków umowy dotyczącej "SaaS mensile senza vincoli" (szacowane zobowiązanie 12,00 €)
+w stosunku do warunków zaakceptowanych przeze mnie dnia 15 sierpnia 2026.
+
+Zmiana dotyczy ceny lub warunków świadczenia usługi.
+
+Nie akceptując nowych warunków, wypowiadam umowę ze skutkiem natychmiastowym,
+bez kar i opłat, ponieważ zmiana została wprowadzona jednostronnie,
+a nie na moją prośbę.
+
+W związku z tym proszę o:
+  1. pisemne potwierdzenie rozwiązania umowy i daty jego skuteczności;
+  2. zaprzestanie wszelkich obciążeń;
+  3. zwrot kwot zapłaconych za okres po rozwiązaniu umowy.
+
+Strona umowy: Mario Rossi
+Adres: Via Roma 1, 20100 Milano
+E-mail kontaktowy: mario.rossi@example.com
+Numer klienta / umowy: C-42
+Zawarta przez: https://saas_fair.test/checkout
+
+Z poważaniem
+
+Mario Rossi
+
+Podpis _______________________
+Data 15 sierpnia 2026
+
+—
+Przydatne podstawy prawne:
+  · Kodeks cywilny, art. 385³ pkt 19 i 20 — jednostronna zmiana umowy lub ceny
+  · Dyrektywa 93/13/EWG, załącznik, pkt 1 lit. j) i l)
+
+Dokument wygenerowany automatycznie przez AnteFirma na podstawie przeanalizowanych warunków.
+Sprawdź dane w nawiasach kwadratowych przed wysłaniem. To nie jest porada prawna.
+
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: list polecony za potwierdzeniem odbioru (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Kodeks cywilny, art. 385³ pkt 19 i 20 — jednostronna zmiana umowy lub ceny
+Dyrektywa 93/13/EWG, załącznik, pkt 1 lit. j) i l)

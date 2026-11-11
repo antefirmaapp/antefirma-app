@@ -427,5 +427,17 @@ test('the letter in German, French and Dutch, with each country\'s laws', async 
   assert.ok(nl.text.includes('6:230o') && nl.text.includes('Met vriendelijke groet'));
   const vl = buildLetter(c, {}, LETTER_KINDS.WITHDRAWAL, T0, 'nl-BE');
   assert.ok(vl.text.includes('Wetboek van economisch recht'));
-  assert.equal(buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'pt').lang, 'it');
+  assert.equal(buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'sv').lang, 'it');
+});
+
+test('the letter in Polish and Portuguese, with each country\'s laws', async () => {
+  const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
+  const pl = buildLetter(c, { name: 'Anna Kowalska' }, LETTER_KINDS.WITHDRAWAL, T0, 'pl');
+  assert.ok(pl.text.includes('ustawa o prawach konsumenta') || pl.text.includes('o prawach konsumenta'));
+  assert.ok(pl.text.includes('Z poważaniem') && pl.filename.startsWith('odstapienie-'));
+  const pt = buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'pt');
+  assert.ok(pt.text.includes('Decreto-Lei n.º 446/85') && pt.text.includes('[Nome completo]'));
+  assert.match(pt.filename, /^denuncia-/);
+  const { letterLangFor } = await import('../src/core/letter.js');
+  assert.deepEqual(['PL', 'PT'].map((j) => letterLangFor(j)), ['pl', 'pt']);
 });

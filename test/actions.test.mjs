@@ -627,3 +627,25 @@ test('a trailing German, French or Dutch reassurance doesn\'t cancel the action'
   assert.equal(classifyText('Abonneren, altijd opzeggen'), 'subscribe');
   assert.equal(classifyText('Newsletter abonnieren — 4,99 € im Monat'), 'subscribe');
 });
+
+// ── Polish, Portuguese ──────────────────────────────────────────────────────
+
+test('recognises commitment buttons in Polish and Portuguese', () => {
+  const cases = {
+    'Kupuję i płacę': 'purchase', 'Zamawiam z obowiązkiem zapłaty': 'purchase', 'Złóż zamówienie': 'purchase', 'Przejdź do kasy': 'purchase',
+    'Subskrybuj': 'subscribe', 'Rozpocznij darmowy okres próbny': 'subscribe', 'Wypróbuj za darmo': 'subscribe', 'Podpisz umowę': 'sign',
+    'Kontynuuj z Google': 'oauth', 'Akceptuj wszystkie': 'consent', 'Zgadzam się': 'accept_terms', 'Załóż konto': 'signup',
+    'Comprar agora': 'purchase', 'Finalizar encomenda': 'purchase', 'Pagar': 'purchase', 'Subscrever': 'subscribe', 'Aderir já': 'subscribe',
+    'Iniciar período experimental': 'subscribe', 'Assinar contrato': 'sign', 'Continuar com o Google': 'oauth', 'Aceitar todos': 'consent',
+    'Aceito': 'accept_terms', 'Criar conta': 'signup', 'Registar-se': 'signup',
+  };
+  for (const [text, wanted] of Object.entries(cases)) assert.equal(classifyText(text), wanted, `"${text}"`);
+});
+
+test('Polish and Portuguese refusals and harmless buttons stay out', () => {
+  for (const text of ['Odrzuć wszystkie', 'Tylko niezbędne', 'Anuluj', 'Wróć', 'Zamknij', 'Zapisz się do newslettera', 'Dodaj do koszyka', 'Więcej informacji',
+    'Rejeitar tudo', 'Apenas necessários', 'Cancelar', 'Voltar', 'Fechar', 'Saber mais', 'Adicionar ao carrinho', 'Subscrever a newsletter', 'Continuar sem pagar']) {
+    assert.equal(classifyText(text), null, `"${text}"`);
+  }
+  assert.equal(classifyText('Subscrever — cancele quando quiser'), 'subscribe');
+});

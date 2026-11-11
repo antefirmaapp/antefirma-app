@@ -1,0 +1,60 @@
+Odstąpienie od umowy — Saas_fair
+odstapienie-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Do: Saas_fair
+[Adres dostawcy / e-mail wskazany w regulaminie]
+
+Miejscowość i data: ______________, 15 sierpnia 2026
+
+Wysłano: ☐ listem poleconym za potwierdzeniem odbioru   ☐ formularzem online   ☐ e-mailem
+
+Dotyczy: odstąpienie od umowy
+
+Szanowni Państwo,
+
+niniejszym informuję o odstąpieniu od umowy o świadczenie
+usługi "SaaS mensile senza vincoli" (szacowane zobowiązanie 12,00 €), zawartej dnia 15 sierpnia 2026.
+
+Korzystam z prawa odstąpienia od umowy zawartej na odległość, w terminie czternastu dni
+od jej zawarcia, bez podawania przyczyny i bez ponoszenia kosztów.
+
+W związku z tym proszę o:
+  1. natychmiastowe zaprzestanie świadczenia usługi i wszelkich związanych z nią obciążeń;
+  2. zwrot wszystkich dokonanych płatności w terminie czternastu dni od otrzymania
+     niniejszego pisma, przy użyciu tego samego sposobu płatności;
+  3. pisemne potwierdzenie otrzymania niniejszego oświadczenia.
+
+Strona umowy: Mario Rossi
+Adres: Via Roma 1, 20100 Milano
+E-mail kontaktowy: mario.rossi@example.com
+Numer klienta / umowy: C-42
+Zawarta przez: https://saas_fair.test/checkout
+
+Z poważaniem
+
+Mario Rossi
+
+Podpis _______________________
+Data 15 sierpnia 2026
+
+—
+Przydatne podstawy prawne:
+  · Ustawa z dnia 30 maja 2014 r. o prawach konsumenta, art. 27–38 — prawo odstąpienia od umowy zawartej na odległość
+  · Załącznik nr 2 do ustawy o prawach konsumenta — wzór formularza odstąpienia od umowy
+  · Dyrektywa 2011/83/UE
+
+Dokument wygenerowany automatycznie przez AnteFirma na podstawie przeanalizowanych warunków.
+Sprawdź dane w nawiasach kwadratowych przed wysłaniem. To nie jest porada prawna.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: list polecony za potwierdzeniem odbioru (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Ustawa z dnia 30 maja 2014 r. o prawach konsumenta, art. 27–38 — prawo odstąpienia od umowy zawartej na odległość
+Załącznik nr 2 do ustawy o prawach konsumenta — wzór formularza odstąpienia od umowy
+Dyrektywa 2011/83/UE

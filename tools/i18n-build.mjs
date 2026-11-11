@@ -13,7 +13,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl'];
+const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt'];
 const OUT = join(ROOT, 'src/i18n/messages.js');
 
 export function buildMessages() {

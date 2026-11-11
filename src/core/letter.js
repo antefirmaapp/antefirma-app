@@ -19,15 +19,15 @@ import { t, locale } from '../i18n/index.js';
  * The letter's language is the provider's, not the extension's: Italian for
  * Italy, Spanish for Spain, German for Germany and Austria, French for France,
  * Dutch for the Netherlands, French or Dutch for Belgium (the user's language
- * decides), English elsewhere. Each with its country's laws and habits (PEC,
+ * decides), Polish for Poland, Portuguese for Portugal, English elsewhere. Each with its country's laws and habits (PEC,
  * burofax, Einschreiben, lettre recommandée, aangetekende brief). A variant
  * such as 'de-AT' is the same text with the other country's laws. Dates and
  * amounts follow the variant's locale.
  */
-export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl'];
+export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt'];
 export const LETTER_VARIANTS = [...LETTER_LANGS, 'de-AT', 'fr-BE', 'nl-BE'];
-const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE' };
-const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl' };
+const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', pl: 'pl-PL', pt: 'pt-PT' };
+const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt' };
 export const letterLangFor = (jurisdiction, uiLang = '') => (jurisdiction === 'BE' ? (uiLang === 'nl' ? 'nl-BE' : 'fr-BE') : BY_COUNTRY[jurisdiction] || 'en');
 
 export const LETTER_KINDS = {
@@ -49,6 +49,8 @@ const FILE_SLUGS = {
   de: { withdrawal: 'widerruf', cancellation: 'kuendigung', change_withdrawal: 'kuendigung-nach-aenderung' },
   fr: { withdrawal: 'retractation', cancellation: 'resiliation', change_withdrawal: 'resiliation-apres-modification' },
   nl: { withdrawal: 'herroeping', cancellation: 'opzegging', change_withdrawal: 'opzegging-na-wijziging' },
+  pl: { withdrawal: 'odstapienie', cancellation: 'wypowiedzenie', change_withdrawal: 'wypowiedzenie-po-zmianie' },
+  pt: { withdrawal: 'livre-resolucao', cancellation: 'denuncia', change_withdrawal: 'resolucao-por-alteracao' },
 };
 
 export const LETTER_LABELS = {
@@ -473,6 +475,120 @@ const TEXT = {
         'Richtlijn 93/13/EEG, bijlage, punt 1 j) en l)'],
     },
   },
+  // Poland: Ustawa o prawach konsumenta (2014) and the Civil Code on unfair terms.
+  pl: {
+    ph: { name: '[Imię i nazwisko]', address: '[Adres]', email: '[E-mail]', provider: '[Dostawca]', service: '[opis usługi]', date: '[data]' },
+    estimated: (x) => `(szacowane zobowiązanie ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Do: ${provider}`,
+      '[Adres dostawcy / e-mail wskazany w regulaminie]', '', `Miejscowość i data: ______________, ${today}`, '',
+      'Wysłano: ☐ listem poleconym za potwierdzeniem odbioru   ☐ formularzem online   ☐ e-mailem'].join('\n'),
+    withdrawal: (k) => ['Dotyczy: odstąpienie od umowy', '', 'Szanowni Państwo,', '',
+      'niniejszym informuję o odstąpieniu od umowy o świadczenie',
+      `usługi ${service(k)}, zawartej dnia ${orderDate(k)}.`, '',
+      'Korzystam z prawa odstąpienia od umowy zawartej na odległość, w terminie czternastu dni',
+      'od jej zawarcia, bez podawania przyczyny i bez ponoszenia kosztów.', '', 'W związku z tym proszę o:',
+      '  1. natychmiastowe zaprzestanie świadczenia usługi i wszelkich związanych z nią obciążeń;',
+      '  2. zwrot wszystkich dokonanych płatności w terminie czternastu dni od otrzymania',
+      '     niniejszego pisma, przy użyciu tego samego sposobu płatności;', '  3. pisemne potwierdzenie otrzymania niniejszego oświadczenia.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Dotyczy: wypowiedzenie umowy — brak automatycznego przedłużenia', '', 'Szanowni Państwo,', '',
+        `niniejszym wypowiadam umowę dotyczącą ${service(k)},`, `zawartą dnia ${orderDate(k)}.`, '',
+        renewal ? `Wypowiedzenie składam, aby umowa nie przedłużyła się z dniem ${renewal},`
+          : 'Wypowiedzenie składam, aby umowa nie przedłużyła się automatycznie z końcem okresu,',
+        notice ? `z zachowaniem przewidzianego w regulaminie ${notice}-dniowego okresu wypowiedzenia${deadline ? ` (ostatni dzień: ${deadline})` : ''}.`
+          : 'z zachowaniem okresu wypowiedzenia przewidzianego w regulaminie.', '',
+        'W związku z tym proszę o:', '  1. pisemne potwierdzenie otrzymania wypowiedzenia i daty jego skuteczności;',
+        '  2. zaprzestanie wszelkich obciążeń od wskazanej daty;',
+        '  3. wskazanie ewentualnych kwot uznanych za należne, wraz z postanowieniem umowy, z którego wynikają.', '',
+        'Nie zaakceptuję żadnych obciążeń za okres po wskazanej dacie zakończenia umowy.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Dotyczy: wypowiedzenie umowy w związku z jednostronną zmianą warunków', '', 'Szanowni Państwo,', '',
+        `zauważyłem zmianę warunków umowy dotyczącej ${service(k)}`, `w stosunku do warunków zaakceptowanych przeze mnie dnia ${orderDate(k)}.`, '',
+        ch?.summary ? `W szczególności: ${ch.summary}` : 'Zmiana dotyczy ceny lub warunków świadczenia usługi.', '',
+        'Nie akceptując nowych warunków, wypowiadam umowę ze skutkiem natychmiastowym,',
+        'bez kar i opłat, ponieważ zmiana została wprowadzona jednostronnie,', 'a nie na moją prośbę.', '',
+        'W związku z tym proszę o:', '  1. pisemne potwierdzenie rozwiązania umowy i daty jego skuteczności;', '  2. zaprzestanie wszelkich obciążeń;',
+        '  3. zwrot kwot zapłaconych za okres po rozwiązaniu umowy.'];
+    },
+    identity: ({ you, c }) => [`Strona umowy: ${you.name}`, `Adres: ${you.address}`, `E-mail kontaktowy: ${you.email}`,
+      `Numer klienta / umowy: ${you.customerId || '[do uzupełnienia]'}`,
+      ...(c.url ? [`Zawarta przez: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Odcisk zaakceptowanych warunków (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Z poważaniem', '', you.name, '', 'Podpis _______________________', `Data ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Przydatne podstawy prawne:', ...refs.map((r) => `  · ${r}`), '',
+      'Dokument wygenerowany automatycznie przez AnteFirma na podstawie przeanalizowanych warunków.',
+      'Sprawdź dane w nawiasach kwadratowych przed wysłaniem. To nie jest porada prawna.'].join('\n'),
+    subject: { withdrawal: (p) => `Odstąpienie od umowy — ${p}`, cancellation: (p) => `Wypowiedzenie umowy — ${p}`, change_withdrawal: (p) => `Wypowiedzenie po zmianie warunków — ${p}` },
+    refs: {
+      withdrawal: ['Ustawa z dnia 30 maja 2014 r. o prawach konsumenta, art. 27–38 — prawo odstąpienia od umowy zawartej na odległość',
+        'Załącznik nr 2 do ustawy o prawach konsumenta — wzór formularza odstąpienia od umowy', 'Dyrektywa 2011/83/UE'],
+      cancellation: ['Kodeks cywilny, art. 385¹–385³ — niedozwolone postanowienia umowne',
+        'Dyrektywa 93/13/EWG, załącznik, pkt 1 lit. h) — automatyczne przedłużenie z nadmiernie wczesnym terminem'],
+      change_withdrawal: ['Kodeks cywilny, art. 385³ pkt 19 i 20 — jednostronna zmiana umowy lub ceny',
+        'Dyrektywa 93/13/EWG, załącznik, pkt 1 lit. j) i l)'],
+    },
+  },
+
+  // Portugal: Decreto-Lei 24/2014 (distance contracts) and the general contract terms law.
+  pt: {
+    ph: { name: '[Nome completo]', address: '[Morada]', email: '[E-mail]', provider: '[Fornecedor]', service: '[descrição do serviço]', date: '[data]' },
+    estimated: (x) => `(compromisso estimado ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Ao cuidado de ${provider}`,
+      '[Morada do fornecedor / e-mail indicado nas condições]', '', `Local e data: ______________, ${today}`, '',
+      'Enviada por: ☐ carta registada com aviso de receção   ☐ formulário online   ☐ e-mail'].join('\n'),
+    withdrawal: (k) => ['Assunto: exercício do direito de livre resolução', '', 'Exmos. Senhores,', '',
+      'Venho por este meio comunicar que resolvo o contrato de prestação',
+      `do serviço ${service(k)}, celebrado em ${orderDate(k)}.`, '',
+      'Exerço o direito de livre resolução previsto para os contratos celebrados à distância, no prazo',
+      'de catorze dias a contar da celebração do contrato, sem necessidade de indicar o motivo e sem custos.', '',
+      'Solicito, por isso:', '  1. a cessação imediata do serviço e de qualquer cobrança associada;',
+      '  2. o reembolso de todos os pagamentos recebidos no prazo de catorze dias a contar da receção',
+      '     desta comunicação, pelo mesmo meio de pagamento;', '  3. a confirmação por escrito da receção desta comunicação.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Assunto: denúncia do contrato — oposição à renovação automática', '', 'Exmos. Senhores,', '',
+        `Venho por este meio denunciar o contrato relativo a ${service(k)},`, `celebrado em ${orderDate(k)}.`, '',
+        renewal ? `Esta comunicação destina-se a impedir a renovação do contrato em ${renewal},`
+          : 'Esta comunicação destina-se a impedir a renovação automática do contrato no seu termo,',
+        notice ? `respeitando o pré-aviso de ${notice} dias previsto nas condições${deadline ? ` (data limite: ${deadline})` : ''}.`
+          : 'respeitando o pré-aviso previsto nas condições do contrato.', '',
+        'Solicito, por isso:', '  1. a confirmação por escrito da receção desta comunicação e da data em que produz efeitos;',
+        '  2. a cessação de qualquer cobrança a partir dessa data;',
+        '  3. o detalhe dos montantes que considerem ainda devidos, com indicação da cláusula de que resultam.', '',
+        'Não aceitarei qualquer cobrança relativa a períodos posteriores à data indicada.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Assunto: resolução do contrato por alteração unilateral das condições', '', 'Exmos. Senhores,', '',
+        `Verifiquei uma alteração das condições do contrato relativo a ${service(k)},`, `face às que aceitei em ${orderDate(k)}.`, '',
+        ch?.summary ? `Em particular: ${ch.summary}` : 'A alteração incide sobre o preço ou as condições do serviço.', '',
+        'Não aceitando as novas condições, resolvo o contrato com efeitos imediatos,',
+        'sem penalizações nem encargos, por se tratar de uma alteração unilateral', 'que não solicitei.', '',
+        'Solicito, por isso:', '  1. a confirmação por escrito da cessação do contrato e da respetiva data;', '  2. a cessação de qualquer cobrança;',
+        '  3. o reembolso dos montantes pagos por períodos posteriores à cessação.'];
+    },
+    identity: ({ you, c }) => [`Titular do contrato: ${you.name}`, `Morada: ${you.address}`, `E-mail de contacto: ${you.email}`,
+      `Número de cliente / contrato: ${you.customerId || '[a preencher]'}`,
+      ...(c.url ? [`Contratado em: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Impressão digital das condições aceites (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Com os melhores cumprimentos,', '', you.name, '', 'Assinatura _______________________', `Data ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Referências legais úteis:', ...refs.map((r) => `  · ${r}`), '',
+      'Documento gerado automaticamente pelo AnteFirma a partir das condições analisadas.',
+      'Verifique os dados entre parênteses retos antes de enviar. Não constitui aconselhamento jurídico.'].join('\n'),
+    subject: { withdrawal: (p) => `Exercício do direito de livre resolução — ${p}`, cancellation: (p) => `Denúncia do contrato — ${p}`, change_withdrawal: (p) => `Resolução por alteração unilateral — ${p}` },
+    refs: {
+      withdrawal: ['Decreto-Lei n.º 24/2014, arts. 10.º a 17.º — direito de livre resolução nos contratos à distância',
+        'Decreto-Lei n.º 24/2014, Anexo, parte B — formulário de livre resolução', 'Diretiva 2011/83/UE'],
+      cancellation: ['Decreto-Lei n.º 446/85 (cláusulas contratuais gerais), arts. 21.º e 22.º — cláusulas proibidas',
+        'Lei n.º 24/96 (Lei de Defesa do Consumidor), art. 9.º — proteção dos interesses económicos'],
+      change_withdrawal: ['Decreto-Lei n.º 446/85, art. 22.º, n.º 1, alíneas c) e d) — alteração unilateral das condições ou do preço',
+        'Diretiva 93/13/CEE, anexo, ponto 1, alíneas j) e l)'],
+    },
+  },
+
 };
 
 /**
@@ -510,6 +626,7 @@ const COUNTRY_REFS = {
 const SENDING = {
   it: 'sendWayProvesDateCertifiedEmail', es: 'sendWayProvesDateBurofaxRegistered', en: 'sendWayProvesDateRecordedDelivery',
   de: 'sendWayProvesDateEinschreiben', fr: 'sendWayProvesDateLettreRecommandee', nl: 'sendWayProvesDateAangetekend',
+  pl: 'sendWayProvesDateListPolecony', pt: 'sendWayProvesDateCartaRegistada',
 };
 
 /** The advice next to the letter: in the user's language, with the sending method of the letter's country. */

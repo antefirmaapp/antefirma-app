@@ -17,8 +17,8 @@
 (() => {
   const g = globalThis;
   if (g.AF_I18N) return;
-  const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl'];
-  const LOCALES = { it: 'it-IT', en: 'en-GB', es: 'es-ES', de: 'de-DE', fr: 'fr-FR', nl: 'nl-NL' };
+  const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt'];
+  const LOCALES = { it: 'it-IT', en: 'en-GB', es: 'es-ES', de: 'de-DE', fr: 'fr-FR', nl: 'nl-NL', pl: 'pl-PL', pt: 'pt-PT' };
   let lang = 'it';
   let byItalian = null;
 

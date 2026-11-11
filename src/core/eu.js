@@ -31,8 +31,7 @@ const CHECKS = [
     refs: ['Codice del Consumo, art. 33 c. 2 lett. t)', 'Direttiva 93/13/CEE'],
     national: {
       DE: ['BGB § 309 Nr. 14 (Schiedsklauseln in AGB)'], AT: ['KSchG § 6 Abs. 2 Z 7'],
-      FR: ['Code de la consommation, art. R212-2, 10°'], BE: ['Code de droit économique, art. VI.83, 23°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub n'],
-    },
+      FR: ['Code de la consommation, art. R212-2, 10°'], BE: ['Code de droit économique, art. VI.83, 23°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub n'], PL: ['Kodeks cywilny, art. 385³ pkt 23'], PT: ['Decreto-Lei n.º 446/85, art. 21.º, alínea h)'] },
     boost: 12,
   },
   {
@@ -42,7 +41,7 @@ const CHECKS = [
     title: 'courtOtherThanConsumerSOwn',
     note: 'ruleConsumersCanSueSuedCourts',
     refs: ['Codice del Consumo, art. 33 c. 2 lett. u)', 'Reg. UE 1215/2012, artt. 17-19'],
-    national: { AT: ['KSchG § 14'], FR: ['Code de la consommation, art. R212-2, 10°'], BE: ['Code de droit économique, art. VI.83, 23°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub n'] },
+    national: { AT: ['KSchG § 14'], FR: ['Code de la consommation, art. R212-2, 10°'], BE: ['Code de droit économique, art. VI.83, 23°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub n'], PL: ['Kodeks cywilny, art. 385³ pkt 23'], PT: ['Decreto-Lei n.º 446/85, art. 19.º, alínea g)'] },
     boost: 12,
   },
   {
@@ -63,8 +62,7 @@ const CHECKS = [
     refs: ['Codice del Consumo, art. 33 c. 2 lett. m) e o)', 'Direttiva 93/13/CEE, allegato punto 1 lett. j) e l)'],
     national: {
       DE: ['BGB § 308 Nr. 4 und § 307'], AT: ['KSchG § 6 Abs. 1 Z 5 und Abs. 2 Z 3'],
-      FR: ['Code de la consommation, art. R212-1, 3° et 4°'], BE: ['Code de droit économique, art. VI.83, 1° et 3°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub i en 6:237 sub c'],
-    },
+      FR: ['Code de la consommation, art. R212-1, 3° et 4°'], BE: ['Code de droit économique, art. VI.83, 1° et 3°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub i en 6:237 sub c'], PL: ['Kodeks cywilny, art. 385³ pkt 19 i 20'], PT: ['Decreto-Lei n.º 446/85, art. 22.º, n.º 1, alíneas c) e d)'] },
     boost: 12,
   },
   {
@@ -76,8 +74,7 @@ const CHECKS = [
     refs: ['Codice del Consumo, artt. 33 c. 2 lett. a)-b) e 36 c. 2', 'Codice civile, art. 1229'],
     national: {
       DE: ['BGB § 309 Nr. 7'], AT: ['KSchG § 6 Abs. 1 Z 9'],
-      FR: ['Code de la consommation, art. R212-1, 6°'], BE: ['Code de droit économique, art. VI.83, 13°'], NL: ['Burgerlijk Wetboek, art. 6:237 sub f'],
-    },
+      FR: ['Code de la consommation, art. R212-1, 6°'], BE: ['Code de droit économique, art. VI.83, 13°'], NL: ['Burgerlijk Wetboek, art. 6:237 sub f'], PL: ['Kodeks cywilny, art. 385³ pkt 2'], PT: ['Decreto-Lei n.º 446/85, art. 18.º, alíneas a) a d)'] },
     boost: 10,
   },
   {
@@ -89,8 +86,7 @@ const CHECKS = [
     refs: ['Codice del Consumo, artt. 52-59', 'Direttiva 2011/83/UE'],
     national: {
       DE: ['BGB §§ 312g, 355, 356'], AT: ['FAGG §§ 11-16'],
-      FR: ['Code de la consommation, art. L221-18 à L221-28'], BE: ['Code de droit économique, art. VI.47 à VI.53'], NL: ['Burgerlijk Wetboek, art. 6:230o-6:230s'],
-    },
+      FR: ['Code de la consommation, art. L221-18 à L221-28'], BE: ['Code de droit économique, art. VI.47 à VI.53'], NL: ['Burgerlijk Wetboek, art. 6:230o-6:230s'], PL: ['Ustawa o prawach konsumenta, art. 27–38'], PT: ['Decreto-Lei n.º 24/2014, arts. 10.º a 17.º'] },
     boost: 10,
     test: ({ text, actionType, findings }) => {
       const isCommerce = ['purchase', 'subscribe'].includes(actionType) || findings.some((f) => ['auto_renewal', 'no_refund'].includes(f.category));
@@ -99,7 +95,7 @@ const CHECKS = [
       // your mind, with its deadline, is needed. A contract can talk at length
       // about early termination and say nothing about the 14 days.
       return !/\bdiritto\s+di\s+recesso\b|\bripensamento\b|\bright\s+(?:of|to)\s+withdraw\w*|\b14\s*(?:giorni|days)\b|\bcooling.?off\b|\brecesso\s+entro\b/i.test(text)
-        && !/(?<![\wÀ-ÿ])(?:desistimiento|widerrufsrecht|widerrufsbelehrung|r(?:ü|ue)cktrittsrecht|droit\s+de\s+r(?:é|e)tractation|herroepingsrecht|bedenktijd|14\s*(?:d[ií]as|tage|tagen|jours|dagen))(?![\wÀ-ÿ])/i.test(text);
+        && !/(?<![\wÀ-ÿ])(?:desistimiento|widerrufsrecht|widerrufsbelehrung|r(?:ü|ue)cktrittsrecht|droit\s+de\s+r(?:é|e)tractation|herroepingsrecht|bedenktijd|odst(?:ą|a)pi(?:enia|ć)\s+od\s+umowy|livre\s+resolu(?:ç|c)(?:ã|a)o|direito\s+de\s+arrependimento|14\s*(?:d[ií]as|tage|tagen|jours|dagen|dni))(?![\wÀ-ÿ])/i.test(text);
     },
   },
   {
@@ -120,8 +116,7 @@ const CHECKS = [
     refs: ['Codice del Consumo, art. 33 c. 2 lett. i)'],
     national: {
       DE: ['BGB § 309 Nr. 9'], AT: ['KSchG § 6 Abs. 1 Z 2'],
-      FR: ['Code de la consommation, art. L215-1'], BE: ['Code de droit économique, art. VI.83, 8°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub j'],
-    },
+      FR: ['Code de la consommation, art. L215-1'], BE: ['Code de droit économique, art. VI.83, 8°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub j'], PL: ['Kodeks cywilny, art. 385³ pkt 18'], PT: ['Decreto-Lei n.º 446/85, art. 22.º, n.º 1, alínea a)'] },
     boost: 10,
     test: ({ cost }) => Boolean(cost?.notice && cost.notice.months >= 1),
   },
@@ -224,7 +219,7 @@ const CHECKS = [
   },
 ];
 
-const NATIONAL = ['DE', 'AT', 'FR', 'BE', 'NL'];
+const NATIONAL = ['DE', 'AT', 'FR', 'BE', 'NL', 'PL', 'PT'];
 /** References to Italian law, left out where it doesn't apply. */
 const ITALIAN_SOURCE = /^(?:Codice|D\.Lgs)/;
 

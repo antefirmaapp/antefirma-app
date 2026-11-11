@@ -491,3 +491,14 @@ test('the 14-day right counts as mentioned in German, French, Dutch and Spanish 
     assert.equal(run(text), false, text);
   }
 });
+
+test('Poland and Portugal: EU checks with national references', () => {
+  const findings = [{ category: 'unilateral_change', severity: 60 }];
+  for (const [j, ref] of [['PL', /Kodeks cywilny/], ['PT', /Decreto-Lei/]]) {
+    const r = runConsumerChecks({ text: 'x', findings, jurisdiction: j });
+    assert.match(r.flags.find((f) => f.id === 'eu.unilateral').refs[0], ref, j);
+  }
+  const w = (text) => runConsumerChecks({ text, findings: [], actionType: 'purchase', jurisdiction: 'PL' }).flags.some((f) => f.id === 'eu.withdrawal');
+  assert.equal(w('Prawo odstąpienia od umowy w ciągu 14 dni.'), false);
+  assert.equal(w('Direito de livre resolução.'), false);
+});

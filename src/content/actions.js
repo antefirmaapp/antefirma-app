@@ -33,13 +33,13 @@
    */
 
   /**
-   * German, French and Dutch are a third branch appended to each table, for
+   * German, French, Dutch, Polish and Portuguese are a third branch appended to each table, for
    * the same hygiene reason as Spanish: the older branches stay identical
    * character for character, so a wrong new rule can only add matches. Every
    * alternative is delimited by the accent-aware lookarounds ("Kauf
    * abschließen", "Accéder", "Tout accepter"), never by \b.
    */
-  const W = '[\\wÀ-ÿ]';
+  const W = '[\\wÀ-ɏ]'; // Latin-1 and Latin Extended-A: ą, ę, ł, ś, ż count as letters too
   const more = (re, alts, anchored = '') => new RegExp(
     `${re.source}|(?<!${W})(?:${alts.join('|')})(?!${W})${anchored ? `|${anchored}` : ''}`, re.flags);
   const AP = "['’]";
@@ -56,6 +56,7 @@
         'unterschreiben', 'unterzeichnen', '(?:vertrag|dokument)\\s+(?:jetzt\\s+)?(?:unterschreiben|unterzeichnen|signieren)', 'signieren',
         'signer(?:\\s+(?:le\\s+|ce\\s+)?(?:contrat|document|bon\\s+de\\s+commande))?', 'je\\s+signe', 'accepter\\s+et\\s+signer',
         'onderteken(?:en)?', 'teken\\s+(?:het\\s+)?(?:contract|document|overeenkomst)', 'akkoord\\s+en\\s+ondertekenen',
+        'podpisz(?:\\s+(?:umow(?:ę|e)|dokument))?', 'podpisuj(?:ę|e)', 'assinar(?:\\s+(?:o\\s+)?(?:contrato|documento))?', 'aceitar\\s+e\\s+assinar',
       ]),
     },
     {
@@ -65,6 +66,8 @@
         '(?:jetzt\\s+)?abonnieren', 'abo\\s+(?:abschlie(?:ß|ss)en|starten|buchen)', 'abonnement\\s+(?:abschlie(?:ß|ss)en|starten|buchen|aktivieren)', 'kostenlos\\s+(?:testen|ausprobieren)', '(?:probeabo|testphase|probemonat|gratismonat)\\s+(?:starten|beginnen|aktivieren)', '(?:jetzt\\s+)?mitglied\\s+werden', 'upgrade\\s+auf\\s+(?:premium|pro|plus)', 'tarif\\s+(?:w(?:ä|ae)hlen|buchen)', 'kostenpflichtig\\s+abonnieren',
         `s${AP}abonner`, `je\\s+m${AP}abonne`, 'abonnez-vous', `(?:commencer|d(?:é|e)marrer|activer)\\s+(?:l${AP}|mon\\s+|votre\\s+)?(?:essai|abonnement|offre)(?:\\s+gratuit)?`, 'essayer\\s+gratuitement', 'essai\\s+gratuit', `passer\\s+(?:à|a)\\s+(?:premium|pro|plus|l${AP}offre)`, `choisir\\s+(?:ce\\s+|cette\\s+|l${AP}|le\\s+|la\\s+)?(?:forfait|offre|formule|abonnement)`, 'devenir\\s+membre',
         'abonneren', 'abonnement\\s+(?:afsluiten|nemen|starten|activeren)', 'neem\\s+(?:een\\s+)?abonnement', 'gratis\\s+(?:proberen|uitproberen)', 'probeer\\s+(?:het\\s+)?gratis', 'start\\s+(?:je\\s+|uw\\s+)?(?:gratis\\s+)?proefperiode', 'proefperiode\\s+starten', 'word\\s+lid', 'lid\\s+worden', 'upgraden(?:\\s+naar\\s+(?:premium|pro|plus))?', 'kies\\s+(?:dit\\s+|het\\s+)?(?:abonnement|pakket)',
+        'subskrybuj', 'zasubskrybuj', 'wykup\\s+(?:subskrypcj(?:ę|e)|abonament|pakiet)', '(?:rozpocznij|zacznij|aktywuj)\\s+(?:darmowy\\s+)?(?:okres\\s+próbny|okres\\s+probny|subskrypcj(?:ę|e)|abonament)', 'wypróbuj\\s+za\\s+darmo', 'wyprobuj\\s+za\\s+darmo', 'przejd(?:ź|z)\\s+na\\s+(?:premium|pro|plus)', 'wybierz\\s+(?:ten\\s+)?(?:plan|pakiet|abonament)', 'zosta(?:ń|n)\\s+(?:członkiem|czlonkiem)',
+        'subscrever', 'subscreva(?:\\s+j(?:á|a))?', 'aderir(?:\\s+(?:j(?:á|a)|ao\\s+plano|à\\s+oferta))?', 'adira\\s+j(?:á|a)', '(?:iniciar|come(?:ç|c)ar|ativar)\\s+(?:o\\s+|a\\s+)?(?:per(?:í|i)odo\\s+experimental|experi(?:ê|e)ncia\\s+gr(?:á|a)tis|subscri(?:ç|c)(?:ã|a)o|ades(?:ã|a)o|plano)', 'experimentar\\s+gr(?:á|a)tis', 'experimente\\s+gr(?:á|a)tis', 'escolher\\s+(?:este\\s+|o\\s+)?(?:plano|tarif(?:á|a)rio)', 'passar\\s+a\\s+(?:premium|pro|plus)',
       ]),
     },
     {
@@ -83,6 +86,8 @@
         '(?:jetzt\\s+)?kaufen', '(?:zahlungs|kosten)pflichtig\\s+(?:bestellen|buchen|abschlie(?:ß|ss)en)', 'kauf\\s+abschlie(?:ß|ss)en', 'bestellung\\s+(?:abschlie(?:ß|ss)en|absenden|aufgeben)', '(?:jetzt\\s+)?bestellen', '(?:jetzt\\s+)?bezahlen', 'jetzt\\s+zahlen', 'zur\\s+kasse', 'weiter\\s+zur\\s+(?:kasse|zahlung)', 'zahlung\\s+(?:abschlie(?:ß|ss)en|best(?:ä|ae)tigen)', 'jetzt\\s+buchen',
         'acheter(?:\\s+maintenant)?', 'commander', `(?:valider|confirmer|finaliser|passer)\\s+(?:la\\s+|ma\\s+|votre\\s+)?commande`, `finaliser\\s+(?:l${AP}|mon\\s+)achat`, '(?<!sans\\s)payer(?:\\s+maintenant)?', 'confirmer\\s+et\\s+payer', `proc(?:é|e)der\\s+au\\s+paiement`, `(?:aller|passer)\\s+(?:à|a)\\s+la\\s+caisse`, `continuer\\s+vers\\s+le\\s+paiement`, 'je\\s+commande',
         '(?:nu\\s+)?kopen', '(?:nu\\s+)?bestellen', 'bestelling\\s+(?:plaatsen|afronden|bevestigen)', 'afrekenen', '(?:nu\\s+)?betalen', 'bestellen\\s+en\\s+betalen', 'naar\\s+(?:de\\s+)?kassa', 'doorgaan\\s+naar\\s+(?:betalen|afrekenen)', 'bevestigen\\s+en\\s+betalen', 'aankoop\\s+afronden',
+        'kup(?:uj(?:ę|e))?(?:\\s+teraz)?', 'zamawiam(?:\\s+i\\s+płacę|\\s+i\\s+placę|\\s+z\\s+obowiązkiem\\s+zapłaty|\\s+z\\s+obowiazkiem\\s+zaplaty)?', 'zamów(?:\\s+(?:i\\s+zapłać|teraz))?', 'zamow(?:\\s+(?:i\\s+zaplac|teraz))?', 'złóż\\s+zamówienie', 'zloz\\s+zamowienie', 'zapłać(?:\\s+teraz)?', 'zaplac(?:\\s+teraz)?', 'przejd(?:ź|z)\\s+do\\s+(?:kasy|płatności|platnosci)', '(?:potwierdź|potwierdz)\\s+(?:i\\s+zapłać|zakup|zamówienie|zamowienie)',
+        'comprar(?:\\s+agora|\\s+j(?:á|a))?', 'finalizar\\s+(?:a\\s+)?(?:compra|encomenda)', 'concluir\\s+(?:a\\s+)?(?:compra|encomenda)', 'confirmar\\s+(?:a\\s+)?(?:compra|encomenda|e\\s+pagar)', '(?<!(?:sem|sin)\\s)(?<!(?:formas|m(?:é|e)todos|meios|op(?:ç|c)(?:õ|o)es)\\s+de\\s)pagar(?:\\s+agora)?', 'encomendar(?:\\s+agora)?', 'efetuar\\s+(?:o\\s+)?pagamento', 'avan(?:ç|c)ar\\s+para\\s+(?:o\\s+)?(?:pagamento|checkout)', 'ir\\s+para\\s+(?:o\\s+)?(?:pagamento|checkout)',
       ]),
     },
     {
@@ -92,6 +97,8 @@
         'autorisieren', 'zugriff\\s+(?:erlauben|gew(?:ä|ae)hren|zulassen)', `(?:weiter|anmelden|fortfahren|einloggen|registrieren)\\s+mit\\s+${OAUTH}`, `mit\\s+${OAUTH}\\s+(?:anmelden|fortfahren|einloggen|registrieren)`,
         'autoriser(?:\\s+l' + AP + 'acc(?:è|e)s)?', `(?:continuer|se\\s+connecter|s${AP}inscrire|connexion)\\s+avec\\s+${OAUTH}`,
         'autoriseren', 'toegang\\s+(?:toestaan|verlenen)', `(?:doorgaan|inloggen|aanmelden|registreren)\\s+met\\s+${OAUTH}`,
+        'autoryzuj', 'zezw(?:ó|o)l\\s+na\\s+dost(?:ę|e)p', `(?:kontynuuj|zaloguj\\s+si(?:ę|e)|zarejestruj\\s+si(?:ę|e))\\s+(?:przez|z)\\s+${OAUTH}`,
+        'autorizar(?:\\s+(?:o\\s+)?acesso)?', 'permitir\\s+(?:o\\s+)?acesso', `(?:continuar|iniciar\\s+sess(?:ã|a)o|entrar|registar-se|inscrever-se)\\s+com\\s+(?:o\\s+|a\\s+)?${OAUTH}`,
       ]),
     },
     {
@@ -108,6 +115,8 @@
         'alle\\s+(?:cookies\\s+)?(?:akzeptieren|zulassen|erlauben|annehmen)', '(?:akzeptieren|zulassen)\\s+und\\s+(?:schlie(?:ß|ss)en|weiter)',
         'tout\\s+(?:accepter|autoriser)', 'accepter\\s+(?:tout|les\\s+cookies|tous\\s+les\\s+cookies)', `j${AP}accepte\\s+(?:tout|les\\s+cookies)`,
         'alles?\\s+(?:cookies\\s+)?(?:accepteren|toestaan)', 'alle\\s+cookies\\s+(?:accepteren|toestaan)', 'cookies\\s+accepteren',
+        '(?:akceptuj|zaakceptuj|zezw(?:ó|o)l\\s+na)\\s+wszystk(?:ie|o)', 'akceptuj(?:ę|e)\\s+wszystk(?:ie|o)', 'zgadzam\\s+si(?:ę|e)\\s+na\\s+wszystk(?:ie|o)',
+        'aceitar\\s+tod(?:o|os|as)(?:\\s+os\\s+cookies)?', 'aceitar\\s+(?:os\\s+)?cookies', 'permitir\\s+tod(?:o|os|as)', 'aceito\\s+tud(?:o)',
       ], /^[\s"'«(]*(?:einverstanden|j['’]ai\s+compris|akkoord|oké)[\s!.…»)]*$/i.source),
     },
     {
@@ -117,6 +126,8 @@
         'akzeptieren', 'ich\\s+(?:stimme\\s+zu|akzeptiere|bin\\s+einverstanden)', 'zustimmen(?:\\s+und\\s+(?:fortfahren|weiter))?', '(?:agb|bedingungen)\\s+(?:akzeptieren|annehmen)', 'akzeptieren\\s+und\\s+(?:fortfahren|weiter)',
         `j${AP}accepte`, 'accepter(?:\\s+et\\s+continuer)?', `je\\s+suis\\s+d${AP}accord`, `accepter\\s+les\\s+(?:conditions|cgu|cgv)`,
         'accepteren', 'ik\\s+(?:ga\\s+akkoord|accepteer)', 'akkoord\\s+(?:gaan|en\\s+doorgaan)', 'ga\\s+akkoord', 'voorwaarden\\s+accepteren',
+        'akceptuj(?:ę|e)?', 'zaakceptuj', 'zgadzam\\s+si(?:ę|e)', 'akceptuj(?:ę|e)\\s+regulamin', 'akceptuj\\s+i\\s+kontynuuj',
+        'aceito', 'aceitar(?:\\s+e\\s+continuar)?', 'concordo', 'aceitar\\s+(?:os\\s+)?(?:termos|condi(?:ç|c)(?:õ|o)es)',
       ]),
     },
     {
@@ -126,6 +137,8 @@
         'konto\\s+(?:erstellen|anlegen|er(?:ö|oe)ffnen)', '(?:jetzt\\s+)?registrieren', 'kostenlos\\s+registrieren',
         'cr(?:é|e)er\\s+(?:un\\s+|mon\\s+|votre\\s+)?compte', `s${AP}inscrire`, 'inscrivez-vous', `je\\s+m${AP}inscris`, 'ouvrir\\s+(?:un\\s+)?compte',
         'account\\s+(?:aanmaken|maken)', 'maak\\s+(?:een\\s+)?account(?:\\s+aan)?', 'registreren', 'registreer(?:\\s+nu)?',
+        'za(?:ł|l)(?:ó|o)(?:ż|z)\\s+konto', 'utw(?:ó|o)rz\\s+konto', 'zarejestruj(?:\\s+si(?:ę|e))?', 'rejestracja',
+        'criar\\s+(?:uma\\s+)?conta', 'registar(?:-se)?', 'registe-se', 'inscrever(?:-se)?', 'inscreva-se', 'abrir\\s+(?:uma\\s+)?conta',
       ]),
     },
   ];
@@ -163,6 +176,10 @@
     '(?:tout\\s+)?refuser', 'continuer\\s+sans\\s+accepter', `je\\s+refuse`, 'annuler', 'retour', 'fermer', `(?:se\\s+)?d(?:é|e)sabonner`, `(?:se\\s+)?d(?:é|e)sinscrire`, 'r(?:é|e)silier', 'personnaliser', `(?:g(?:é|e)rer|param(?:é|e)trer)\\s+(?:mes\\s+|les\\s+)?(?:pr(?:é|e)f(?:é|e)rences|cookies|choix)`, 'uniquement\\s+(?:les\\s+)?(?:cookies\\s+)?(?:n(?:é|e)cessaires|essentiels)',
     // Dutch.
     '(?:alles\\s+)?weigeren', 'alleen\\s+(?:noodzakelijke|functionele|essenti(?:ë|e)le)(?:\\s+cookies)?', 'niet\\s+(?:akkoord|accepteren)', 'annuleren', 'terug', 'sluiten', 'opzeggen', 'afmelden', 'uitschrijven', '(?:voorkeuren|instellingen|cookies)\\s+(?:beheren|aanpassen)', 'doorgaan\\s+zonder\\s+(?:accepteren|akkoord)',
+    // Polish.
+    '(?:odrzu(?:ć|c)|odrzucam)(?:\\s+wszystk(?:ie|o))?', 'tylko\\s+(?:niezb(?:ę|e)dne|wymagane)(?:\\s+(?:pliki\\s+)?cookies)?', 'nie\\s+(?:akceptuj(?:ę|e)?|zgadzam\\s+si(?:ę|e))', 'anuluj', 'wr(?:ó|o)(?:ć|c)', 'zamknij', 'wypowiedz(?:\\s+umow(?:ę|e))?', 'wyloguj', 'wypisz\\s+si(?:ę|e)', '(?:ustawienia|zarz(?:ą|a)dzaj)\\s+(?:cookies|plikami\\s+cookies|preferencjami)', 'dostosuj',
+    // Portuguese.
+    'rejeitar(?:\\s+tud(?:o)|\\s+todos)?', 'recusar(?:\\s+tud(?:o))?', 'apenas\\s+(?:os\\s+)?(?:necess(?:á|a)rios|essenciais)', 'continuar\\s+sem\\s+(?:aceitar|pagar)', 'n(?:ã|a)o\\s+(?:aceito|aceitar|concordo)', 'cancelar', 'voltar(?!\\s+a\\s+(?:comprar|pagar|subscrever))', 'fechar', 'sair', 'anular\\s+(?:a\\s+)?subscri(?:ç|c)(?:ã|a)o', '(?:gerir|configurar|personalizar)\\s+(?:as\\s+)?(?:prefer(?:ê|e)ncias|cookies|op(?:ç|c)(?:õ|o)es)',
   ]);
 
   /**
@@ -175,6 +192,7 @@
    */
   const FREE_ONLY = more(/\b(newsletter|notify\s+me|avvisami|notifiche|alerts?)\b|(?<![\wÀ-ÿ])(bolet[ií]n|av[ií]same|notificaciones)(?![\wÀ-ÿ])/i, [
     'benachrichtig\\w*', 'newsletter', `lettre\\s+d${AP}information`, 'alertes?', `m${AP}avertir`, 'nieuwsbrief', 'meldingen', 'houd\\s+me\\s+op\\s+de\\s+hoogte',
+    'newsletter(?:a|y|ze)?', 'powiadomie(?:ń|n)', 'alert(?:y|ów)', 'boletim\\s+informativo', 'notifica(?:ç|c)(?:õ|o)es', 'alertas',
   ]);
 
   const PRICED = /[€$£]|\d/;
