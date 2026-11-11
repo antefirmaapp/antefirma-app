@@ -170,7 +170,7 @@ async function handle(msg, sender) {
     case 'GET_LICENSE':
       return withCode(getLicense());
     case 'START_CHECKOUT':
-      return withCode(startCheckout(['pro', 'max', 'team'].includes(msg.payload?.plan) ? msg.payload.plan : 'pro')
+      return withCode(getSettings().then((s) => startCheckout(['pro', 'max', 'team'].includes(msg.payload?.plan) ? msg.payload.plan : 'pro', undefined, s.uiLang))
         .then(async (r) => { await chrome.tabs.create({ url: r.url }); await watchCheckout(); return { opened: true }; }));
     case 'ACTIVATE_LICENSE':
       return withCode(activateLicense(msg.payload?.key));

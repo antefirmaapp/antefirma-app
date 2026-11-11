@@ -2,7 +2,7 @@
 import { getLicense, startCheckout } from '../core/server.js';
 import { t } from '../i18n/index.js';
 import { notify } from './commitments.js';
-import { showQuotaBadge, withCode } from './settings.js';
+import { showQuotaBadge, withCode, getSettings } from './settings.js';
 
 /**
  * After the payment opens, the plan is checked every minute for half an hour:
@@ -35,7 +35,7 @@ export async function upgrade() {
     await chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#piano') });
     return { where: 'options' };
   }
-  const r = await withCode(startCheckout('pro'));
+  const r = await withCode(startCheckout('pro', undefined, (await getSettings()).uiLang));
   if (r.error) return r;
   await chrome.tabs.create({ url: r.url });
   await watchCheckout();
