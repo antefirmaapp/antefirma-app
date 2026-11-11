@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SETTINGS } from './constants.js';
+import { jurisdictionFor } from './jurisdiction.js';
 
 const SETTINGS_KEY = 'settings';
 const CACHE_KEY = 'analysisCache';
@@ -15,6 +16,10 @@ export async function getSettings() {
   const { [SETTINGS_KEY]: stored } = await chrome.storage.local.get(SETTINGS_KEY);
   return {
     ...DEFAULT_SETTINGS,
+    // Until the user picks one, the country follows the browser: reading it here
+    // rather than only at install means no analysis can run with the wrong one
+    // while the install handler is still saving it.
+    jurisdiction: jurisdictionFor(chrome.i18n?.getUILanguage?.()),
     ...(stored || {}),
     profile: { ...DEFAULT_SETTINGS.profile, ...(stored?.profile || {}) },
     identity: { ...DEFAULT_SETTINGS.identity, ...(stored?.identity || {}) },
