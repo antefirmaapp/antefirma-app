@@ -1,9 +1,9 @@
 /**
  * Test material shared by tools/media.mjs (website) and tools/help-shots.mjs (help):
- * an invented gym in six languages, on a domain that doesn't exist, and a fake
+ * an invented gym in eight languages, on a domain that doesn't exist, and a fake
  * AnteFirma server, so no analysis is spent and no network is needed.
  */
-/** The example page, in six languages: invented site, price and terms. */
+/** The example page, in eight languages: invented site, price and terms. */
 export const PAGE = {
   it: { title: 'Palestra Orizzonte — Abbonamento Plus', name: 'Abbonamento Plus', per: 'al mese', btn: 'Abbonati ora', feats: ['Sala pesi e corsi illimitati', 'Accesso 7 giorni su 7', 'App con le schede di allenamento'],
     terms: 'L’abbonamento ha una durata minima di 12 mesi dalla data di attivazione. Il contratto si rinnova automaticamente per un ulteriore anno salvo disdetta inviata con almeno 30 giorni di preavviso. In caso di recesso anticipato è dovuta una penale di 120 €. La quota di iscrizione non è rimborsabile.',
@@ -35,6 +35,16 @@ export const PAGE = {
     q: ['minimale looptijd van 12 maanden', 'automatisch met een jaar verlengd', 'ten minste 30 dagen van tevoren', '120 € afkoopsom'],
     why: ['Een jaar lang moet je betalen.', 'Zeg je niet op tijd op, dan betaal je nog een jaar.', 'De opzegging moet een maand van tevoren binnen zijn.', 'Eerder stoppen kost 120 €.'],
     summary: 'Je verplicht je een jaar: het verlengt zichzelf en eerder stoppen kost 120 €.', you: { name: 'Sanne de Vries', address: 'Dorpsstraat 1, 3511 AB Utrecht', email: 'sanne.devries@voorbeeld.nl' } },
+  pl: { title: 'Siłownia Horyzont — Karnet Plus', name: 'Karnet Plus', per: 'miesięcznie', btn: 'Kupuję i płacę', feats: ['Siłownia i zajęcia bez limitu', 'Otwarte 7 dni w tygodniu', 'Aplikacja z planami treningowymi'],
+    terms: 'Karnet ma minimalny okres 12 miesięcy od aktywacji. Umowa przedłuża się automatycznie na kolejny rok, jeżeli nie zostanie wypowiedziana co najmniej 30 dni wcześniej. Wcześniejsze rozwiązanie umowy kosztuje 120 €. Opłata wpisowa nie podlega zwrotowi.',
+    q: ['minimalny okres 12 miesięcy', 'przedłuża się automatycznie na kolejny rok', 'co najmniej 30 dni wcześniej', 'kosztuje 120 €'],
+    why: ['Przez rok musisz płacić.', 'Jeśli nie wypowiesz na czas, płacisz za kolejny rok.', 'Wypowiedzenie musi dotrzeć miesiąc wcześniej.', 'Wcześniejsze odejście kosztuje 120 €.'],
+    summary: 'Zobowiązujesz się na rok: karnet przedłuża się sam, a wcześniejsze odejście kosztuje 120 €.', you: { name: 'Anna Kowalska', address: 'ul. Marszałkowska 1, 00-001 Warszawa', email: 'anna.kowalska@przyklad.pl' } },
+  pt: { title: 'Ginásio Horizonte — Assinatura Plus', name: 'Assinatura Plus', per: 'por mês', btn: 'Aderir já', feats: ['Musculação e aulas ilimitadas', 'Aberto 7 dias por semana', 'App com planos de treino'],
+    terms: 'A assinatura tem uma fidelização de 12 meses a contar da ativação. O contrato renova-se automaticamente por mais um ano, salvo denúncia com pelo menos 30 dias de antecedência. A rescisão antecipada implica uma penalização de 120 €. A taxa de inscrição não é reembolsável.',
+    q: ['fidelização de 12 meses', 'renova-se automaticamente por mais um ano', 'pelo menos 30 dias de antecedência', 'penalização de 120 €'],
+    why: ['Durante um ano tem de pagar.', 'Se não cancelar a tempo, paga mais um ano.', 'O cancelamento tem de chegar um mês antes.', 'Sair antes custa 120 €.'],
+    summary: 'Compromete-se por um ano: renova-se sozinho e sair antes custa 120 €.', you: { name: 'Ana Silva', address: 'Rua Augusta 1, 1100-053 Lisboa', email: 'ana.silva@exemplo.pt' } },
 };
 export const page = (l) => {
   const p = PAGE[l];
@@ -55,7 +65,7 @@ document.getElementById('f').addEventListener('submit',(e)=>{e.preventDefault();
 };
 
 // An invented domain (.example doesn't exist): the warning and the letter show the site's name, not 127.0.0.1.
-export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example' };
+export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example' };
 
 export const verdict = (l) => {
   const p = PAGE[l];

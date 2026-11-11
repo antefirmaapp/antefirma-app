@@ -49,7 +49,7 @@ async function record(l) {
   await opt.goto(`chrome-extension://${extId}/src/options/options.html`);
   await opt.waitForTimeout(800);
   await opt.selectOption('#uiLang', l);
-  await opt.selectOption('#jurisdiction', { it: 'IT', en: 'EU', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL' }[l]);
+  await opt.selectOption('#jurisdiction', { it: 'IT', en: 'EU', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL', pl: 'PL', pt: 'PT' }[l]);
   const you = PAGE[l].you;
   await opt.fill('#id-name', you.name); await opt.fill('#id-address', you.address); await opt.fill('#id-email', you.email);
   await opt.click('#save');
