@@ -113,3 +113,13 @@ code { font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; backgroun
 }
 html { scroll-padding-top: 20px; scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+.srv-ok { color: #14603c; }
+.srv-bad { color: #a12a1a; }
+
+/* Dark theme: the light theme's dark red and green are unreadable on the dark card. */
+@media (prefers-color-scheme: dark) {
+  button.secondary.danger { color: #ff8a80; border-color: #6b2a2a; }
+  .srv-ok { color: #7fe0a8; }
+  .srv-bad { color: #ff8a80; }
+}

@@ -91,7 +91,7 @@ async function showServerStatus() {
   try {
     const st = await send('SERVER_STATUS');
     el.textContent = st.ok ? t('reachable') : t('notReachableRightNow');
-    el.style.color = st.ok ? '#14603c' : '#a12a1a';
+    el.className = st.ok ? 'srv-ok' : 'srv-bad'; // colours in options.css, light and dark
   } catch (err) {
     el.textContent = t('canTCheckX', { x: err.message });
   }

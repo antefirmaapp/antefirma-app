@@ -29,3 +29,9 @@ header p { margin: 2px 0 0; color: var(--muted); }
 .primary:focus-visible, .secondary:focus-visible { outline: 3px solid #2f5bd3; outline-offset: 2px; }
 .ok { color: #1f7a4d; font-weight: 650; }
 @media (max-width: 560px) { .mock { grid-template-columns: 1fr; } }
+
+/* Dark theme: the light theme's red and green are unreadable on the dark card. */
+@media (prefers-color-scheme: dark) {
+  .mtile.strong b { color: #ff8a80; }
+  .ok { color: #7fe0a8; }
+}
