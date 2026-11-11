@@ -20,20 +20,21 @@ import { t, tn, locale } from '../i18n/index.js';
  * verify never enters the total.
  */
 export function termsFromServer(terms = {}) {
-  const t = terms || {};
+  // Not `t`: that name is the translation function, needed below for unlabelled extras.
+  const src = terms || {};
   const num = (x) => (x && typeof x.value === 'number' && Number.isFinite(x.value) && x.value >= 0 ? x.value : null);
-  const minMonths = num(t.minimum_term_months);
-  const noticeDays = num(t.notice_days);
-  const fee = num(t.exit_fee);
+  const minMonths = num(src.minimum_term_months);
+  const noticeDays = num(src.notice_days);
+  const fee = num(src.exit_fee);
   return {
-    price: num(t.price),
-    priceQuote: t.price?.quote || null,
-    currency: typeof t.currency?.value === 'string' ? t.currency.value.toUpperCase().slice(0, 3) : null,
-    period: typeof t.billing_period?.value === 'string' ? t.billing_period.value : null,
-    minTerm: minMonths ? { months: minMonths, raw: tn(minMonths, 'nMonth', 'nMonths', { n: fmtNum(minMonths) }), quote: t.minimum_term_months.quote || null } : null,
-    notice: noticeDays ? { months: noticeDays / 30, days: noticeDays, raw: tn(noticeDays, 'nDay', 'nDays2', { n: fmtNum(noticeDays) }), quote: t.notice_days.quote || null } : null,
-    penalty: fee != null ? { amount: fee, quote: t.exit_fee.quote || null } : null,
-    extras: (Array.isArray(t.extra_fees) ? t.extra_fees : [])
+    price: num(src.price),
+    priceQuote: src.price?.quote || null,
+    currency: typeof src.currency?.value === 'string' ? src.currency.value.toUpperCase().slice(0, 3) : null,
+    period: typeof src.billing_period?.value === 'string' ? src.billing_period.value : null,
+    minTerm: minMonths ? { months: minMonths, raw: tn(minMonths, 'nMonth', 'nMonths', { n: fmtNum(minMonths) }), quote: src.minimum_term_months.quote || null } : null,
+    notice: noticeDays ? { months: noticeDays / 30, days: noticeDays, raw: tn(noticeDays, 'nDay', 'nDays2', { n: fmtNum(noticeDays) }), quote: src.notice_days.quote || null } : null,
+    penalty: fee != null ? { amount: fee, quote: src.exit_fee.quote || null } : null,
+    extras: (Array.isArray(src.extra_fees) ? src.extra_fees : [])
       .filter((e) => e && typeof e.value === 'number' && Number.isFinite(e.value) && e.value > 0)
       .map((e) => ({
         amount: e.value,
