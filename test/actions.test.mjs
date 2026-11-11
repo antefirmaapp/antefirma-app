@@ -644,7 +644,7 @@ test('recognises commitment buttons in Polish and Portuguese', () => {
 
 test('Polish and Portuguese refusals and harmless buttons stay out', () => {
   for (const text of ['Odrzuć wszystkie', 'Tylko niezbędne', 'Anuluj', 'Wróć', 'Zamknij', 'Zapisz się do newslettera', 'Dodaj do koszyka', 'Więcej informacji',
-    'Rejeitar tudo', 'Apenas necessários', 'Cancelar', 'Voltar', 'Fechar', 'Saber mais', 'Adicionar ao carrinho', 'Subscrever a newsletter', 'Continuar sem pagar']) {
+    'Rejeitar tudo', 'Apenas necessários', 'Cancelar', 'Voltar', 'Fechar', 'Saber mais', 'Adicionar ao carrinho', 'Subscrever a newsletter', 'Continuar sem pagar', 'Continuar a comprar']) {
     assert.equal(classifyText(text), null, `"${text}"`);
   }
   assert.equal(classifyText('Subscrever — cancele quando quiser'), 'subscribe');
