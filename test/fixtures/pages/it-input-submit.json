@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#confirm",
+      "type": "purchase"
+    }
+  ],
+  "pass": [
+    "#edit"
+  ]
+}

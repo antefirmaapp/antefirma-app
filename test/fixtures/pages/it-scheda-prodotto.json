@@ -1,0 +1,12 @@
+{
+  "intercept": [
+    {
+      "selector": "#buy",
+      "type": "purchase"
+    }
+  ],
+  "pass": [
+    "#cart",
+    "#wish"
+  ]
+}

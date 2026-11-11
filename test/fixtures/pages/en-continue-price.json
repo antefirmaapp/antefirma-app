@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#continue-plan",
+      "type": "subscribe"
+    }
+  ],
+  "pass": [
+    "#continue-quiz"
+  ]
+}

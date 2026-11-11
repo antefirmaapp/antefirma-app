@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#trial",
+      "type": "subscribe"
+    }
+  ],
+  "pass": [
+    "#signin"
+  ]
+}

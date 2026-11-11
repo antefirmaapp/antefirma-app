@@ -37,7 +37,7 @@ test('recognises commitment buttons in Italian', () => {
     'Registrati': 'signup',
   };
   for (const [text, wanted] of Object.entries(cases)) {
-    assert.equal(classifyText(text), wanted, `"${text}" classificato male`);
+    assert.equal(classifyText(text), wanted, `"${text}" misclassified`);
   }
 });
 
@@ -55,7 +55,7 @@ test('recognises commitment buttons in English', () => {
     'Create an account': 'signup',
   };
   for (const [text, wanted] of Object.entries(cases)) {
-    assert.equal(classifyText(text), wanted, `"${text}" classificato male`);
+    assert.equal(classifyText(text), wanted, `"${text}" misclassified`);
   }
 });
 
@@ -77,7 +77,7 @@ test('doesn\'t block harmless buttons', () => {
     'Load more',
   ];
   for (const text of innocui) {
-    assert.equal(classifyText(text), null, `falso positivo su "${text}"`);
+    assert.equal(classifyText(text), null, `false positive on "${text}"`);
   }
 });
 
@@ -106,7 +106,7 @@ test('on equal matches the most binding action wins', () => {
 
 test('every recognised type has a readable label', () => {
   for (const p of ACTION_PATTERNS) {
-    assert.ok(ACTION_LABELS[p.type], `etichetta mancante per ${p.type}`);
+    assert.ok(ACTION_LABELS[p.type], `label missing for ${p.type}`);
   }
 });
 
@@ -133,7 +133,7 @@ test('recognises the payment wording found in real checkouts', () => {
     'Checkout': 'purchase',
   };
   for (const [text, wanted] of Object.entries(cases)) {
-    assert.equal(classifyText(text), wanted, `"${text}" non riconosciuto`);
+    assert.equal(classifyText(text), wanted, `"${text}" not recognised`);
   }
 });
 
@@ -150,7 +150,7 @@ test('recognises subscription activation wording', () => {
     'Upgrade': 'subscribe',
   };
   for (const [text, wanted] of Object.entries(cases)) {
-    assert.equal(classifyText(text), wanted, `"${text}" non riconosciuto`);
+    assert.equal(classifyText(text), wanted, `"${text}" not recognised`);
   }
 });
 
@@ -175,7 +175,7 @@ test('generic and harmless buttons stay out', () => {
     'Prova la ricerca', 'Aggiungi al carrello', 'Accedi', 'Login',
   ];
   for (const text of outside) {
-    assert.equal(classifyText(text), null, `falso positivo su "${text}"`);
+    assert.equal(classifyText(text), null, `false positive on "${text}"`);
   }
 });
 
@@ -209,7 +209,7 @@ test('a leading opt-out wins anyway', () => {
     'Torna indietro e paga più tardi',
   ];
   for (const text of cases) {
-    assert.equal(classifyText(text), null, `non ha vinto il rifiuto in testa: "${text}"`);
+    assert.equal(classifyText(text), null, `the refusal at the start did not win: "${text}"`);
   }
 });
 
@@ -230,11 +230,11 @@ test('in the nine historical refusal cases the match falls in the first third', 
     if (!m) {
       // "Gestisci preferenze" is not a recognised opt-out: it stays null because
       // no action catches it, which is the right result anyway.
-      assert.equal(classifyText(text), null, `"${text}" senza opt-out e senza azione`);
+      assert.equal(classifyText(text), null, `"${text}" has no opt-out and no action`);
       continue;
     }
     assert.ok(m.index < Math.ceil(text.length / 3), `"${text}": opt-out a ${m.index}, fuori dal primo terzo`);
-    assert.equal(classifyText(text), null, `"${text}" non più bloccato`);
+    assert.equal(classifyText(text), null, `"${text}" no longer held`);
   }
 });
 
@@ -300,7 +300,7 @@ test('recognises commitment buttons in Spanish', () => {
     'Darse de alta': 'signup',
   };
   for (const [text, wanted] of Object.entries(cases)) {
-    assert.equal(classifyText(text), wanted, `"${text}" classificato male`);
+    assert.equal(classifyText(text), wanted, `"${text}" misclassified`);
   }
 });
 
@@ -332,7 +332,7 @@ test('Spanish opt-outs are never intercepted', () => {
   ];
   for (const text of optOuts) {
     assert.equal(classifyText(text), null, `bloccato un opt-out: "${text}"`);
-    assert.equal(classifyDetail(text).vetoed, true, `"${text}" è null per caso, non per veto`);
+    assert.equal(classifyDetail(text).vetoed, true, `"${text}" is null by chance, not by veto`);
   }
 });
 
@@ -350,8 +350,8 @@ test('accented and unaccented forms count the same', () => {
     ['Acepto los términos', 'Acepto los terminos', 'accept_terms'],
   ];
   for (const [accented, unaccented, wanted] of pairs) {
-    assert.equal(classifyText(accented), wanted, `"${accented}" classificato male`);
-    assert.equal(classifyText(unaccented), wanted, `"${unaccented}" classificato male`);
+    assert.equal(classifyText(accented), wanted, `"${accented}" misclassified`);
+    assert.equal(classifyText(unaccented), wanted, `"${unaccented}" misclassified`);
   }
 });
 
@@ -364,8 +364,8 @@ test('accented and unaccented forms count the same', () => {
  */
 test('the Spanish word boundary doesn\'t rely on \\b', () => {
   assert.equal(/\bsuscr\w+\b/i.test('Suscríbete'), false, '\\w+ dovrebbe fermarsi davanti alla í');
-  assert.equal(/\b(únete)\b/i.test('Únete ahora'), false, '\\b prima di un’accentata non dovrebbe agganciare');
-  assert.equal(/(?<![\wÀ-ÿ])(únete)(?![\wÀ-ÿ])/i.test('Únete ahora'), true, 'il lookaround invece deve agganciare');
+  assert.equal(/\b(únete)\b/i.test('Únete ahora'), false, '\\b before an accented letter should not match');
+  assert.equal(/(?<![\wÀ-ÿ])(únete)(?![\wÀ-ÿ])/i.test('Únete ahora'), true, 'the lookaround must match instead');
 
   // The counter-check on what we actually ship: no \b borders an accented
   // letter, neither before nor after.
@@ -428,7 +428,7 @@ test('generic and harmless Spanish buttons stay out', () => {
     'Iniciar sesión', 'Formas de pagar', 'Continuar sin pagar',
   ];
   for (const text of outside) {
-    assert.equal(classifyText(text), null, `falso positivo su "${text}"`);
+    assert.equal(classifyText(text), null, `false positive on "${text}"`);
   }
 });
 
@@ -515,7 +515,7 @@ test('between promotional and regular price the regular price wins', () => {
   const p = loadContext(body).extractPricing(btn);
   assert.equal(p.amount, 19.99, 'ha scelto il prezzo promozionale invece di quello a regime');
   assert.equal(p.period, 'month');
-  assert.equal(p.introductory?.amount, 9.99, 'il prezzo promozionale va conservato, non buttato');
+  assert.equal(p.introductory?.amount, 9.99, 'the promotional price must be kept, not thrown away');
 });
 
 test('it holds for first-year offers too', () => {
@@ -538,8 +538,8 @@ test('a struck-through price is the list price, not the commitment', () => {
     ] })]
   );
   const p = loadContext(body).extractPricing(btn);
-  assert.equal(p.amount, 19.99, 'ha preso il prezzo barrato: sovrastima che l’utente smaschera subito');
-  assert.equal(p.introductory, null, 'un listino barrato non è una promozione da conservare');
+  assert.equal(p.amount, 19.99, 'it took the struck-through price: an overestimate the user spots at once');
+  assert.equal(p.introductory, null, 'a struck-through list price is not a promotion to keep');
 });
 
 test('a price struck through by an ancestor with a class counts as struck through', () => {
@@ -560,7 +560,7 @@ test('with the same period, when in doubt err on the expensive side', () => {
   ]);
   const p = loadContext(body).extractPricing(btn);
   assert.equal(p.amount, 24);
-  assert.equal(p.introductory, null, 'due piani alternativi non sono un’offerta a due tempi');
+  assert.equal(p.introductory, null, 'two alternative plans are not a two-stage offer');
 });
 
 test('a single price stays what it is', () => {
@@ -572,4 +572,19 @@ test('a single price stays what it is', () => {
   assert.equal(p.amount, 19.99);
   assert.equal(p.period, 'month');
   assert.equal(p.recurring, true);
+});
+
+test('found on realistic pages (test/fixtures/pages): membership, and newsletters that are not subscriptions', () => {
+  const { classifyDetail } = globalThis.__CF.actions;
+  assert.equal(classifyText('Start my membership'), 'subscribe');
+  assert.equal(classifyText('Start your membership'), 'subscribe');
+  assert.equal(classifyText('Become a member'), 'subscribe');
+  // The label speaks only of a newsletter: it vetoes, so an id like "subscribe-nl" cannot overrule it.
+  for (const label of ['Iscriviti alla newsletter', 'Sign up for our newsletter', 'Subscribe to our newsletter', 'Suscríbete al boletín', 'Notify me', 'Avvisami']) {
+    const d = classifyDetail(label);
+    assert.equal(d.type, null, label);
+    assert.equal(d.vetoed, true, label);
+  }
+  // A paid newsletter that says "Subscribe" is still a subscription.
+  assert.equal(classifyText('Subscribe to the newsletter — €5/month'), 'subscribe');
 });

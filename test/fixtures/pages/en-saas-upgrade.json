@@ -1,0 +1,12 @@
+{
+  "intercept": [
+    {
+      "selector": "#upgrade",
+      "type": "subscribe"
+    }
+  ],
+  "pass": [
+    "#compare",
+    "#dismiss"
+  ]
+}

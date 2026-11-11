@@ -1,0 +1,12 @@
+{
+  "intercept": [
+    {
+      "selector": "#google",
+      "type": "oauth"
+    }
+  ],
+  "pass": [
+    "#signin",
+    "#forgot"
+  ]
+}

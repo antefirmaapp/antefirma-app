@@ -1,0 +1,12 @@
+{
+  "intercept": [
+    {
+      "selector": "#finish",
+      "type": "purchase"
+    }
+  ],
+  "pass": [
+    "#payment-methods",
+    "#add-more"
+  ]
+}

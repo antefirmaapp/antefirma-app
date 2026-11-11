@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#join",
+      "type": "subscribe"
+    }
+  ],
+  "pass": [
+    "#visit"
+  ]
+}

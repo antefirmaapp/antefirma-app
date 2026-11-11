@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#hire",
+      "type": "subscribe"
+    }
+  ],
+  "pass": [
+    "#details"
+  ]
+}

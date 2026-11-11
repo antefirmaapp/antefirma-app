@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#start",
+      "type": "subscribe"
+    }
+  ],
+  "pass": [
+    "#tour"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#plan >> #go",
+      "type": "subscribe"
+    }
+  ],
+  "pass": [
+    "#plan >> #learn"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#pay",
+      "type": "purchase"
+    }
+  ],
+  "pass": [
+    "#help"
+  ]
+}

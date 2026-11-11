@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#activate",
+      "type": "subscribe"
+    }
+  ],
+  "pass": [
+    "#coverage"
+  ]
+}

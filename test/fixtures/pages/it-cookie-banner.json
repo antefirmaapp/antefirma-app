@@ -1,0 +1,12 @@
+{
+  "intercept": [
+    {
+      "selector": "#accept",
+      "type": "consent"
+    }
+  ],
+  "pass": [
+    "#reject",
+    "#customise"
+  ]
+}

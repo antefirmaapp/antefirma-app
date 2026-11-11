@@ -1,0 +1,12 @@
+{
+  "intercept": [
+    {
+      "selector": "#qty",
+      "type": "purchase",
+      "how": "enter"
+    }
+  ],
+  "pass": [
+    "#go"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "intercept": [
+    {
+      "selector": "#sign",
+      "type": "sign"
+    }
+  ],
+  "pass": [
+    "#pdf"
+  ]
+}

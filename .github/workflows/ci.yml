@@ -25,6 +25,8 @@ jobs:
         run: node tools/web-build.mjs
       - name: Install Chromium for the end-to-end check
         run: npm install --no-save playwright@1.63.0 && npx playwright install --with-deps chromium
+      - name: Which buttons are held, on 30 realistic pages
+        run: node --test test/detector.test.mjs
       - name: Extension end-to-end check
         run: xvfb-run -a npm run test:e2e
       - name: Web app in a real browser (first visit, consent, verdict, accessibility, phone)
