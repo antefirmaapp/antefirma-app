@@ -197,3 +197,15 @@ test('plan: purchase, activation and removal', async () => {
   assert.equal(calls.find((c) => c.path === '/v1/license/activate').body.key, 'AF-AAAA-BBBB-CCCC-DDDD');
   assert.equal((await deactivateLicense(o)).removed, true);
 });
+
+test('a 200 with an unreadable body is a failure, never an empty verdict', async () => {
+  // Read as "no findings" it would become "all fine", and be cached as such.
+  for (const body of ['{"findings": [ {"cat', '', 'null', '{"summary": "ok"}', '[]']) {
+    const { fetchImpl } = fakeServer({
+      '/v1/register': () => json(200, { token: 'tok' }),
+      '/v1/analyze': () => new Response(body, { status: 200, headers: { 'content-type': 'application/json' } }),
+    });
+    await assert.rejects(analyzeRemote({ text: 'x' }, { storage: memoryStorage(), fetchImpl, base: BASE }),
+      (e) => e instanceof ServerError && e.code === 'upstream', JSON.stringify(body));
+  }
+});

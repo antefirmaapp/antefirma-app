@@ -133,7 +133,10 @@ export async function analyzeRemote(
     const bearer = await token(opts);
     const res = await call(fetchImpl, `${base}/v1/analyze`, payload, { bearer, signal });
     const body = await readJson(res);
-    if (res.ok) return body;
+    // A 200 with an unreadable body is a failure, not an empty verdict: read as
+    // "no findings" it would become "all fine", and be cached as such.
+    if (res.ok && Array.isArray(body?.findings)) return body;
+    if (res.ok) throw new ServerError('upstream', { status: res.status, detail: 'unreadable answer' });
     if (res.status === 401 && attempt === 0) {
       await writeAuth(storage, { token: null });
       continue;
