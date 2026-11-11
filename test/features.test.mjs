@@ -234,12 +234,12 @@ test('whoever discovers the extension close to the deadline is warned at once, w
 
   // In its place there is an immediate one, with the real days.
   const urgente = plan.find((r) => r.kind === 'urgent');
-  assert.ok(urgente, 'manca il promemoria immediato');
+  assert.ok(urgente, 'the immediate reminder is missing');
   assert.equal(urgente.days, 10);
   assert.equal(urgente.fired, false);
 
   const c = { ...base, reminders: plan };
-  assert.equal(dueReminder(c, late).days, 10, 'è lui che deve partire per primo');
+  assert.equal(dueReminder(c, late).days, 10, 'this one must fire first');
 });
 
 test('the state says how long is left and what doing nothing costs', async () => {
@@ -262,7 +262,7 @@ test('the summary adds up exposure and finds the next deadline', async () => {
   const c = { ...a, id: 'c', status: 'cancelled', worstCase: 999 };
 
   const s = portfolioSummary([a, b, c], T0);
-  assert.equal(s.count, 2, 'gli impegni disdetti non contano nell’esposizione');
+  assert.equal(s.count, 2, 'cancelled commitments do not count in the exposure');
   assert.equal(s.totals[0].amount, 748.76);
   assert.equal(s.next.c.id, 'b');
   assert.equal(s.urgent, 1);
@@ -304,7 +304,7 @@ test('the cancellation letter is complete and quotes the right law', async () =>
   assert.ok(letter.text.includes('Mario Rossi'));
   assert.ok(letter.text.includes('AB-123'));
   assert.ok(letter.text.includes('Streampro'));
-  assert.ok(letter.text.includes('60 giorni'), 'deve riportare il preavviso reale');
+  assert.ok(letter.text.includes('60 giorni'), 'it must state the real notice period');
   assert.ok(letter.text.includes('art. 33 c. 2 lett. i)'));
   assert.ok(letter.text.includes('raccomandata A/R'));
   assert.ok(!letter.text.includes('[Nome e cognome]'), 'i dati forniti devono sostituire i segnaposto');
@@ -369,7 +369,7 @@ test('the fingerprint of the empty string must not pass for a successful verific
   const b = await createSnapshot({ text: '   ', verdict: {} });
   // The two fingerprints match: exactly why the flag is needed.
   assert.equal(a.hash, b.hash);
-  assert.ok(a.empty && b.empty, 'senza il flag, la verifica direbbe «✓ corrisponde»');
+  assert.ok(a.empty && b.empty, 'without the flag, the check would say "✓ matches"');
 });
 
 test('an exit fee in monthly payments enters the total, in three languages', async () => {

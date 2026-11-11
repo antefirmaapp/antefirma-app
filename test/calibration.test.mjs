@@ -74,7 +74,7 @@ test('compression is monotonic and never reaches 100', () => {
   let previous = -1;
   for (let raw = 0; raw <= 400; raw += 5) {
     const v = compressSeverity(raw);
-    assert.ok(v >= previous, `non monotona in ${raw}`);
+    assert.ok(v >= previous, `not monotonic at ${raw}`);
     assert.ok(v < 100, `compressSeverity(${raw}) = ${v}`);
     previous = v;
   }
@@ -86,7 +86,7 @@ test('compression is monotonic and never reaches 100', () => {
 test('a very serious clause weighs more than eight ordinary ones', () => {
   const severe = aggregateSeverity([{ severity: 90 }]);
   const many = aggregateSeverity(Array.from({ length: 8 }, () => ({ severity: 45 })));
-  assert.ok(severe > many, `${severe} non supera ${many}`);
+  assert.ok(severe > many, `${severe} does not exceed ${many}`);
 });
 
 test('economic pressure tells orders of magnitude apart', () => {
@@ -161,7 +161,7 @@ test('ogni caso cade nella fascia etichettata a mano', () => {
 
 test('the expected bands are legitimate values', () => {
   for (const c of CORPUS) {
-    assert.ok(BAND_ORDER.includes(c.band), `fascia inesistente nel corpus: ${c.band}`);
+    assert.ok(BAND_ORDER.includes(c.band), `band not in the corpus: ${c.band}`);
   }
 });
 
@@ -186,7 +186,7 @@ test('the creative profile raises the assignment contract, not the others', asyn
 
   const assignmentWithIp = await run('freelance_assignment', withIp);
   const assignmentWithoutIp = await run('freelance_assignment', withoutIp);
-  assert.ok(assignmentWithIp > assignmentWithoutIp, 'la cessione dei diritti deve pesare di più per chi vive del proprio lavoro');
+  assert.ok(assignmentWithIp > assignmentWithoutIp, 'assigning rights must weigh more for someone who lives off their work');
 
   // On a contract that doesn't touch content, the creative profile must shift
   // almost nothing: if it did, it wouldn't be personalising.
@@ -212,7 +212,7 @@ test('a serious contract without a price can reach HIGH RISK', async () => {
       settings: { ...DEFAULT_SETTINGS, jurisdiction, profile: c.profile },
       now: T0,
     });
-    assert.ok(verdict.cost?.worstCase == null, 'questo caso deve restare senza prezzo');
+    assert.ok(verdict.cost?.worstCase == null, 'this case must stay without a price');
     assert.ok(
       BAND_ORDER.indexOf(verdict.level.id) >= BAND_ORDER.indexOf('high_risk'),
       `con giurisdizione ${jurisdiction} esce ${verdict.level.id} (${verdict.score})`
@@ -225,7 +225,7 @@ test('the residual tells two clauses from seven', () => {
   const media = { severity: 45 };
   const due = aggregateSeverity([severe, media]);
   const four = aggregateSeverity([severe, media, media, media]);
-  assert.ok(four > due, `quattro clausole (${four}) non pesano più di due (${due})`);
+  assert.ok(four > due, `four clauses (${four}) do not weigh more than two (${due})`);
 });
 
 test('economic pressure still distinguishes above €15,000', () => {

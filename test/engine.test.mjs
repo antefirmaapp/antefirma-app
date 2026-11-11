@@ -205,7 +205,7 @@ test('a per-instalment charge is multiplied by the cycles', () => {
   const terms = termsFromServer({ ...RESPONSE().terms, exit_fee: null, extra_fees: [{ label: 'Incasso', value: 2, per_cycle: true, quote: 'x' }] });
   const cost = computeCost({ ctx: CTX_SUBSCRIPTION, findings: [], terms });
   const line = cost.lines.find((l) => l.kind === 'extra');
-  assert.equal(line.amount, 24, '2 € per 12 rate');
+  assert.equal(line.amount, 24, '€2 for 12 instalments');
   assert.match(line.label, /× 12/);
 });
 
@@ -230,8 +230,8 @@ test('the timeline puts the cancellation deadline before the renewal', () => {
 
   const deadline = timeline.find((s) => s.kind === 'deadline');
   const renewal = timeline.find((s) => s.kind === 'renewal');
-  assert.ok(deadline, 'manca la scadenza di disdetta');
-  assert.ok(renewal, 'manca il rinnovo');
+  assert.ok(deadline, 'the cancellation deadline is missing');
+  assert.ok(renewal, 'the renewal is missing');
   assert.ok(new Date(deadline.at) < new Date(renewal.at));
   // 12 months minus 30 days of notice → mid July 2027
   assert.match(deadline.when, /luglio 2027/);
@@ -246,7 +246,7 @@ test('the profile changes the severity of the same clause', () => {
   const ordinaryUser = personalize(findings, { money: true, privacy: true }).find((f) => f.category === 'ip_license');
   const photographer = personalize(findings, { money: true, privacy: true, ip: true, freelance: true }).find((f) => f.category === 'ip_license');
 
-  assert.ok(photographer.severity > ordinaryUser.severity, 'il fotografo deve vedere un rischio maggiore');
+  assert.ok(photographer.severity > ordinaryUser.severity, 'the photographer must see a higher risk');
   assert.ok(photographer.severity > base);
   assert.deepEqual(photographer.personalReasons, ['Proprietà intellettuale', 'Lavoro freelance / professionale']);
 });
@@ -262,7 +262,7 @@ test('the multiplier is capped, with diminishing returns', () => {
 test('aggregateSeverity lets the most serious risk dominate', () => {
   const one = aggregateSeverity([{ severity: 80 }]);
   const ten = aggregateSeverity(Array.from({ length: 10 }, () => ({ severity: 30 })));
-  assert.ok(one > ten, 'un rischio grave deve pesare più di dieci tiepidi');
+  assert.ok(one > ten, 'one serious risk must weigh more than ten mild ones');
 });
 
 test('economic pressure grows logarithmically and is capped', () => {
@@ -273,14 +273,14 @@ test('economic pressure grows logarithmically and is capped', () => {
   let previous = -1;
   for (const amount of [10, 50, 200, 900, 5000, 20000, 500000]) {
     const v = moneyPressure(amount);
-    assert.ok(v >= previous, `non monotona in ${amount}`);
-    assert.ok(v < 50, `contributo sproporzionato per ${amount} €: ${v}`);
+    assert.ok(v >= previous, `not monotonic at ${amount}`);
+    assert.ok(v < 50, `disproportionate contribution for €${amount}: ${v}`);
     previous = v;
   }
   // Growth must slow down: doubling the amount doesn't double the weight.
   const d1 = moneyPressure(200) - moneyPressure(100);
   const d2 = moneyPressure(20000) - moneyPressure(10000);
-  assert.ok(Math.abs(d1 - d2) <= 2, 'la scala non è logaritmica');
+  assert.ok(Math.abs(d1 - d2) <= 2, 'the scale is not logarithmic');
 });
 
 test('the levels cover the scale with no gaps and in order', () => {
@@ -295,12 +295,12 @@ test('the levels cover the scale with no gaps and in order', () => {
   const seen = new Set();
   for (let score = 0; score <= 100; score++) {
     const idx = order.indexOf(levelForScore(score).id);
-    assert.ok(idx >= 0, `livello sconosciuto per ${score}`);
-    assert.ok(idx >= last, `il livello scende passando da ${score - 1} a ${score}`);
+    assert.ok(idx >= 0, `unknown level for ${score}`);
+    assert.ok(idx >= last, `the level goes down from ${score - 1} to ${score}`);
     last = idx;
     seen.add(idx);
   }
-  assert.equal(seen.size, order.length, 'qualche livello è irraggiungibile');
+  assert.equal(seen.size, order.length, 'some level is unreachable');
 });
 
 test('shouldBlock respects the threshold chosen by the user', () => {
@@ -332,8 +332,8 @@ test('the Italian engine flags arbitration, court and unilateral changes', () =>
   assert.ok(ids.includes('eu.arbitration'));
   assert.ok(ids.includes('eu.jurisdiction'));
   assert.ok(ids.includes('eu.unilateral'));
-  assert.ok(ids.includes('eu.withdrawal'), 'manca il diritto di recesso non menzionato');
-  assert.ok(consumer.boost > 0 && consumer.boost <= 25, 'il contributo va smorzato');
+  assert.ok(ids.includes('eu.withdrawal'), 'the unmentioned right of withdrawal is missing');
+  assert.ok(consumer.boost > 0 && consumer.boost <= 25, 'the contribution must be damped');
   assert.ok(consumer.disclaimer.length > 0);
 });
 
@@ -358,7 +358,7 @@ test('end-to-end analysis: numbers, level and deadline', async () => {
   const v = await analyze({ text: CONTRACT, ctx: CTX_SUBSCRIPTION, actionType: 'subscribe', settings, now: T0, remote: remoteWith(RESPONSE()) });
 
   assert.equal(v.cost.worstCase, 367.88);
-  assert.ok(['high_risk', 'critical'].includes(v.level.id), `livello inatteso: ${v.level.id}`);
+  assert.ok(['high_risk', 'critical'].includes(v.level.id), `unexpected level: ${v.level.id}`);
   assert.match(v.mustRemember, /luglio 2027/);
   assert.ok(v.headline.includes('367'), `headline poco concreta: ${v.headline}`);
   assert.equal(v.summary, RESPONSE().summary);
@@ -388,7 +388,7 @@ test('the same contract weighs more for a creative freelancer', async () => {
   const run = (profile) => analyze({ text: CONTRACT, ctx: CTX_SUBSCRIPTION, actionType: 'subscribe', settings: { ...SETTINGS, profile }, remote: remoteWith(RESPONSE()) });
   const plain = await run({ money: true });
   const creative = await run({ money: true, ip: true, freelance: true });
-  assert.ok(creative.score >= plain.score, 'il profilo creativo non deve abbassare il rischio');
+  assert.ok(creative.score >= plain.score, 'the creative profile must not lower the risk');
   assert.ok(creative.findings.find((f) => f.category === 'ip_license').personalized);
 });
 
@@ -402,7 +402,7 @@ test('a page without risks stays green and doesn\'t block', async () => {
   });
   assert.equal(v.level.id, 'safe');
   assert.equal(shouldBlock(v.level.id, SETTINGS.blockFrom), false);
-  assert.ok(v.summary.length > 0, 'senza riassunto del server serve quello dell’estensione');
+  assert.ok(v.summary.length > 0, 'without the server summary the extension must write one');
 });
 
 test('if the server doesn\'t answer the analysis fails, it doesn\'t fake a verdict', async () => {
@@ -425,7 +425,7 @@ const BASE = `chrome-extension://${ID}/`;
 test('a web page cannot ask for the full settings', () => {
   const page = { id: ID, url: 'https://negozio.example/checkout', tab: { id: 7 } };
   for (const type of ['GET_SETTINGS', 'SET_SETTINGS', 'GET_PROOF', 'BUILD_LETTER']) {
-    assert.equal(isAllowed(type, page, ID, BASE), false, `${type} consentito a una pagina web`);
+    assert.equal(isAllowed(type, page, ID, BASE), false, `${type} allowed to a web page`);
   }
 });
 

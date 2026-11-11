@@ -41,7 +41,7 @@ const flat = (text) => text.replace(/\s+/g, ' ').replace(/e'/g, 'e\'');
 function assertClausesVisible(text, label) {
   const t = flat(text);
   for (const phrase of KEY_PHRASES) {
-    assert.ok(t.includes(phrase), `${label}: nel testo non si legge più «${phrase}» — ${JSON.stringify(text.slice(0, 120))}`);
+    assert.ok(t.includes(phrase), `${label}: "${phrase}" can no longer be read in the text — ${JSON.stringify(text.slice(0, 120))}`);
   }
 }
 
@@ -54,7 +54,7 @@ test('a compressed PDF with Tj and Td returns the text, line by line', async () 
   assert.equal(r.decoded, 1);
   assert.equal(r.pages, 1);
   assert.match(r.text, /durata minima e' di 24 mesi/);
-  assert.equal(r.text.split('\n').length, CONTRACT.length, 'ogni Td deve valere un a capo');
+  assert.equal(r.text.split('\n').length, CONTRACT.length, 'every Td must count as a line break');
   assertClausesVisible(r.text, 'Tj+Td');
 });
 
@@ -86,7 +86,7 @@ test('fine kerning stays kerning and doesn\'t become a space', async () => {
   // -40 thousandths of an em is kerning between letters, not a gap between words.
   const r = await extractPdfText(makePdf(kernedStream(['penale di 179,40 euro'], -40)));
 
-  assert.match(r.text, /penaledi179,40euro/, 'un offset minimo non deve generare spazi');
+  assert.match(r.text, /penaledi179,40euro/, 'a tiny offset must not produce spaces');
 });
 
 /**
@@ -110,7 +110,7 @@ test('the word endstream inside the text doesn\'t truncate the stream', async ()
   const lines = ['Nota tecnica: la parola endstream compare in questo paragrafo.', ...CONTRACT];
   const r = await extractPdfText(makePdf(tjStream(lines), { compress: false }));
 
-  assert.match(r.text, /penale di 179,40 euro/, 'il testo dopo "endstream" è stato buttato');
+  assert.match(r.text, /penale di 179,40 euro/, 'the text after "endstream" was thrown away');
   assertClausesVisible(r.text, 'endstream nel testo');
 });
 
@@ -153,7 +153,7 @@ test('text made only of raw glyphs declares itself unreliable', async () => {
   for (let i = 0; i < 400; i += 1) glifi += String.fromCharCode(1 + ((i * 37) % 160));
   const r = await extractPdfText(makePdf(tjStream([glifi])));
 
-  assert.equal(r.reliable, false, 'la spazzatura è passata per testo buono');
+  assert.equal(r.reliable, false, 'garbage passed for good text');
   assert.match(r.note, /verificalo/);
 });
 
@@ -163,7 +163,7 @@ test('a PDF laid out with Tm instead of Td doesn\'t end up on a single line', as
   const r = await extractPdfText(makePdf(tmStream(CONTRACT)));
 
   assert.match(r.text, /durata minima e' di 24 mesi/);
-  assert.ok(r.text.includes('\n'), 'ogni Tm riposiziona: deve valere un a capo');
+  assert.ok(r.text.includes('\n'), 'every Tm repositions: it must count as a line break');
   assertClausesVisible(r.text, 'Tm');
 });
 
@@ -210,5 +210,5 @@ test('embedded images don\'t end up in the text', async () => {
   const r = await extractPdfText(makePdf(tjStream(CONTRACT)));
 
   assert.ok(!/�/.test(r.text));
-  assert.ok(!r.text.includes('FlateDecode'), 'i dizionari degli oggetti non sono testo del contratto');
+  assert.ok(!r.text.includes('FlateDecode'), 'object dictionaries are not contract text');
 });
