@@ -21,7 +21,8 @@
 import { startStack, ROOT } from './harness.mjs';
 import { join } from 'node:path';
 
-const verdictShown = (pg) => pg.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.tiles'), null, { timeout: 12000 }).then(() => true, () => false);
+// .provenance exists only in a verdict: the waiting card also has .tiles.
+const verdictShown = (pg) => pg.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.provenance'), null, { timeout: 12000 }).then(() => true, () => false);
 const errorShown = (pg, timeout = 12000) => pg.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.error'), null, { timeout }).then(() => true, () => false);
 const alertGone = (pg, timeout = 12000) => pg.waitForFunction(() => !document.querySelector('antefirma-alert'), null, { timeout }).then(() => true, () => false);
 const act = (h, pg, what) => h.alert(pg).locator(`[data-act="${what}"]`).first().click();
@@ -102,7 +103,7 @@ const SCENARIOS = {
       await pg.waitForTimeout(500);
       await pg.click('button.cta');
       const err = await errorShown(pg, mode === 'timeout' ? 25000 : 12000);
-      const tiles = await pg.evaluate(() => Boolean(document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.tiles')));
+      const tiles = await pg.evaluate(() => Boolean(document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.provenance')));
       const toast = await pg.evaluate(() => Boolean(document.querySelector('vincolo-nota, antefirma-note')));
       h.check(`server ${mode}: says the check failed, never "all fine"`, err && !tiles && !toast, `error card ${err}, verdict ${tiles}, toast ${toast}`);
       await act(h, pg, 'cancel');
