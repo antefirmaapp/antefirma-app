@@ -14,6 +14,7 @@
  * changes.js (terms check), exit-kit.js and plan.js.
  */
 import { isAllowed } from '../core/sender.js';
+import { jurisdictionFor } from '../core/jurisdiction.js';
 import { COMMITMENT_STATUS } from '../core/commitments.js';
 import { register, installId, getLicense, startCheckout, activateLicense, deactivateLicense, sendFeedback } from '../core/server.js';
 import { t } from '../i18n/index.js';
@@ -37,6 +38,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   // If the server doesn't answer, it is retried at the first analysis.
   register().catch(() => {});
   if (details.reason === 'install') {
+    await setSettings({ jurisdiction: jurisdictionFor(chrome.i18n?.getUILanguage?.()) });
     chrome.tabs.create({ url: chrome.runtime.getURL('src/welcome/welcome.html') });
   }
 });

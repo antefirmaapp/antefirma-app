@@ -22,16 +22,52 @@
   const AMOUNT_RE =
     /(?:([€$£¥])|\b(EUR|USD|GBP|CHF)\b)\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)|(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*(?:([€$£¥])|\b(EUR|USD|GBP|CHF)\b|\b(euros?|dollari|sterline|franchi)\b)/gi;
 
+  /**
+   * Period words in the six languages. Accented words cannot use \b (it only
+   * knows [A-Za-z0-9_]), so those alternatives use lookarounds that count
+   * accented letters as letters.
+   */
   const PERIOD_RE = [
-    [/\/\s*(?:mo|mese|month|m)\b|\bal\s*mese\b|\bmensil\w*|\bper\s+month\b|\bmonthly\b/i, 'month'],
-    [/\/\s*(?:yr|anno|year|a)\b|\ball'?\s*anno\b|\bannual\w*|\bper\s+year\b|\byearly\b/i, 'year'],
-    [/\/\s*(?:wk|week|sett)\b|\ba\s*settimana\b|\bsettimanal\w*|\bweekly\b/i, 'week'],
-    [/\bal\s*giorno\b|\bdaily\b|\bper\s+day\b/i, 'day'],
-    [/\btrimestral\w*|\bquarterly\b/i, 'quarter'],
+    [/\/\s*(?:mo|mese|month|mes|monat|mon\.?|mois|maand|mnd|m)(?![\wÀ-ÿ])|\bal\s*mese\b|\bmensil\w*|\bper\s+(?:month|maand)\b|\bmonthly\b|\bal\s+mes\b|\bmensual\w*|\b(?:pro|im|je)\s+monat\b|\bmonatlich\w*|\bmtl\.|\bpar\s+mois\b|\bmensuel\w*|\bmaandelijks\b|\bp\/m\b/i, 'month'],
+    [/\/\s*(?:yr|anno|year|año|ano|jahr|an|jaar|a)(?![\wÀ-ÿ])|\ball'?\s*anno\b|\bannual\w*|\bper\s+(?:year|jaar)\b|\byearly\b|\bal\s+año(?![\wÀ-ÿ])|\banual\w*|\b(?:pro|im|je)\s+jahr\b|(?<![\wÀ-ÿ])jährlich\w*|\bpar\s+an\b|\bannuel\w*|\bjaarlijks\b/i, 'year'],
+    [/\/\s*(?:wk|week|sett|semana|woche|semaine)\b|\ba\s*settimana\b|\bsettimanal\w*|\bweekly\b|\ba\s+la\s+semana\b|\bsemanal\w*|\bpro\s+woche\b|(?<![\wÀ-ÿ])wöchentlich\w*|\bpar\s+semaine\b|\bhebdomadaire\w*|\bper\s+week\b|\bwekelijks\b/i, 'week'],
+    [/\bal\s*giorno\b|\bdaily\b|\bper\s+(?:day|dag)\b|\bal\s+d[ií]a(?![\wÀ-ÿ])|\bpro\s+tag\b|(?<![\wÀ-ÿ])täglich\w*|\bpar\s+jour\b|\bdagelijks\b/i, 'day'],
+    [/\btrimestral\w*|\bquarterly\b|\btrimestriel\w*|(?<![\wÀ-ÿ])vierteljährlich\w*|\bpro\s+quartal\b|\bper\s+kwartaal\b/i, 'quarter'],
   ];
 
-  const TRIAL_RE =
-    /\b(?:prova|periodo)\s+(?:gratuit\w+|di\s+prova)[^.]{0,40}?(\d{1,2})\s*(giorni|mesi|settimane)|\b(\d{1,2})\s*(?:giorni|days|mesi|months)\s+(?:di\s+prova|gratis|free\s+trial)|\bfree\s+trial\s+(?:for\s+)?(\d{1,2})\s*(days?|months?|weeks?)|\bprimo\s+mese\s+gratis|\bfree\s+for\s+(\d{1,2})\s*(days?|months?)/i;
+  /**
+   * Free trials: each rule gives the number (n) and the unit (u). "First month
+   * free" and the like have no number: one month.
+   */
+  const TRIAL_RES = [
+    /\b(?:prova|periodo)\s+(?:gratuit\w+|di\s+prova)[^.]{0,40}?(?<n>\d{1,2})\s*(?<u>giorni|mesi|settimane)/i,
+    /\b(?<n>\d{1,2})\s*(?<u>giorni|mesi|settimane)\s+(?:di\s+prova|gratis|gratuit\w+)/i,
+    /\bfree\s+trial\s+(?:for\s+|of\s+)?(?<n>\d{1,2})\s*(?<u>days?|months?|weeks?)/i,
+    /\b(?<n>\d{1,2})[-\s](?<u>day|month|week)s?\s+free(?:\s+trial)?\b/i,
+    /\bfree\s+for\s+(?<n>\d{1,2})\s*(?<u>days?|months?|weeks?)/i,
+    /\bprueba\s+gratuita\s+(?:de\s+)?(?<n>\d{1,2})\s*(?<u>d[ií]as|meses|semanas)/i,
+    /\b(?<n>\d{1,2})\s*(?<u>d[ií]as|meses|semanas)\s+(?:gratis|de\s+prueba)/i,
+    /\b(?<n>\d{1,2})\s*(?<u>tage?|monate?|wochen?)\s+(?:kostenlos|gratis|testen)/i,
+    /\b(?:kostenlose[rn]?\s+)?(?:test|probe)(?:zeitraum|phase|monat|abo)\w*\s+(?:von\s+)?(?<n>\d{1,2})\s*(?<u>tage?n?|monate?n?|wochen?)/i,
+    /\bessai\s+gratuit\s+(?:de\s+)?(?<n>\d{1,2})\s*(?<u>jours?|mois|semaines?)/i,
+    /\b(?<n>\d{1,2})\s*(?<u>jours?|mois|semaines?)\s+(?:gratuits?|offerts?|d'essai)/i,
+    /\b(?<n>\d{1,2})\s*(?<u>dagen|maanden|weken|dag|maand|week)\s+gratis/i,
+    /\bgratis\s+proefperiode\s+(?:van\s+)?(?<n>\d{1,2})\s*(?<u>dagen|maanden|weken)/i,
+    /\b(?:primo\s+mese\s+gratis|first\s+month\s+free|primer\s+mes\s+gratis|erster\s+monat\s+(?:gratis|kostenlos)|premier\s+mois\s+(?:gratuit|offert)|eerste\s+maand\s+gratis)\b/i,
+  ];
+
+  /** The first free trial in a text: { raw, months } or null. */
+  function trialOf(text) {
+    for (const re of TRIAL_RES) {
+      const m = re.exec(text);
+      if (!m) continue;
+      const n = Number(m.groups?.n || 1);
+      const u = (m.groups?.u || 'month').toLowerCase();
+      const months = /^(giorn|day|d[ií]a|tag|jour|dag)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek)/.test(u) ? n / 4.345 : n;
+      return { raw: m[0].replace(/\s+/g, ' ').trim(), months };
+    }
+    return null;
+  }
 
   const TERMS_LINK_RE =
     /termini|condizioni|contratt|informativa|privacy|terms|conditions|agreement|policy|eula|clausol/i;
@@ -113,11 +149,11 @@
    * alternative plans but two phases of the same commitment.
    */
   const REGIME_RE =
-    /\b(poi|successivamente|in\s+seguito|dal\s+secondo|dal\s+\d+°?\s*(?:mese|anno)|a\s+partire\s+dal|al\s+termine|alla\s+scadenza|then|thereafter|afterwards?|after\s+the\s+first|after\s+the\s+trial|renews\s+at)\b/i;
+    /(?<![\wÀ-ÿ])(poi|successivamente|in\s+seguito|dal\s+secondo|dal\s+\d+°?\s*(?:mese|anno)|a\s+partire\s+dal|al\s+termine|alla\s+scadenza|then|thereafter|afterwards?|after\s+the\s+first|after\s+the\s+trial|renews\s+at|luego|despu[ée]s|a\s+partir\s+del|danach|anschlie[ßs]end|ab\s+dem\s+\d+|puis|ensuite|[àa]\s+partir\s+du|daarna|vervolgens|na\s+de\s+eerste)(?![\wÀ-ÿ])/i;
 
   /** Markers of the **promotional** price: the short side of the offer. */
   const PROMO_RE =
-    /\b(prim[oiae]\s*\d*\s*(?:mese|mesi|anno|anni|settiman\w+|giorni)|per\s+i\s+primi|offert\w+|promo\w*|scont\w+|introduttiv\w+|di\s+lancio|solo\s+per\s+ora|first\s+\d*\s*(?:month|months|year|years)|for\s+the\s+first|intro(?:ductory)?|limited\s+time)\b/i;
+    /(?<![\wÀ-ÿ])(prim[oiae]\s*\d*\s*(?:mese|mesi|anno|anni|settiman\w+|giorni)|per\s+i\s+primi|offert\w+|promo\w*|scont\w+|introduttiv\w+|di\s+lancio|solo\s+per\s+ora|first\s+\d*\s*(?:month|months|year|years)|for\s+the\s+first|intro(?:ductory)?|limited\s+time|primer(?:os)?\s+\d*\s*(?:mes|meses|a[ñn]o)|oferta|descuento|ersten?\s+\d*\s*(?:monat|monate|jahr)|angebot|rabatt|aktion|premiers?\s+\d*\s*(?:mois|ans?)|offre|r[ée]duction|eerste\s+\d*\s*(?:maand|maanden|jaar)|aanbieding|korting|actie)(?![\wÀ-ÿ])/i;
 
   /**
    * A struck-through price = the list price, i.e. the one *not* being accepted.
@@ -125,7 +161,7 @@
    * through, now €19.99" estimated at 39.99): overestimating here is not
    * prudence, it is a warning the user finds false by looking at the page.
    *
-   * Computed CSS isn't inherited: a <span> inside a <del> reports
+   * Computed CSS isn't inherited: a <span> inside a struck-out element reports
    * `textDecorationLine: none` while being struck through on screen. That is why
    * we walk up three levels looking at tags and classes too.
    */
@@ -251,14 +287,7 @@
       primary = plausible.sort((a, b) => (b.near - a.near) || (b.amount - a.amount))[0] || null;
     }
 
-    const trialMatch = TRIAL_RE.exec(scopeText) || TRIAL_RE.exec(pageText);
-    let trial = null;
-    if (trialMatch) {
-      const value = Number(trialMatch[1] || trialMatch[3] || trialMatch[4] || trialMatch[6] || 1);
-      const unit = (trialMatch[2] || trialMatch[5] || 'mesi').toLowerCase(); // default unit: months
-      const months = /giorn|day/.test(unit) ? value / 30 : /settimana|week/.test(unit) ? value / 4.345 : value;
-      trial = { raw: trialMatch[0].replace(/\s+/g, ' ').trim(), months };
-    }
+    const trial = trialOf(scopeText) || trialOf(pageText);
 
     return {
       amount: primary?.amount ?? null,
@@ -351,7 +380,7 @@
     for (const el of nodes) {
       const text = (el.innerText || '').trim();
       if (text.length < 15 || text.length > 400) continue;
-      if (!/rinnov|auto-?renew|al\s*mese|per\s+month|penale|disdetta|preavviso/i.test(text)) continue;
+      if (!/rinnov|auto-?renew|al\s*mese|per\s+month|penale|disdetta|preavviso|renueva|permanencia|penalizaci|verl[äa]nger|k[üu]ndig|mindestlaufzeit|renouvel|reconduction|r[ée]siliation|verleng|opzeg|looptijd/i.test(text)) continue;
       const size = Number.parseFloat(getComputedStyle(el).fontSize) || baseSize;
       if (size <= baseSize * 0.75) return true;
     }

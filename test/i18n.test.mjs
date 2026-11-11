@@ -1,8 +1,8 @@
 /**
  * Languages. Code refers to texts by id (`t('goBack')`); the texts live in
- * src/i18n/locales/{it,en,es}.json. These tests make sure that:
- * - every id used in the code exists, in all three languages;
- * - the three files have exactly the same ids and the same placeholders;
+ * src/i18n/locales/{it,en,es,de,fr,nl}.json. These tests make sure that:
+ * - every id used in the code exists, in all six languages;
+ * - the six files have exactly the same ids and the same placeholders;
  * - messages.js is up to date with the JSON files;
  * - every text of the HTML pages (written in Italian) has an id;
  * - no id is left unused.
@@ -14,7 +14,7 @@ import { join } from 'node:path';
 import { t, tn, tIn, setLang, resolveLang } from '../src/i18n/index.js';
 import { buildMessages } from '../tools/i18n-build.mjs';
 
-const LANGS = ['it', 'en', 'es'];
+const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl'];
 const L = Object.fromEntries(LANGS.map((l) => [l, JSON.parse(readFileSync(`src/i18n/locales/${l}.json`, 'utf8'))]));
 const ids = Object.keys(L.it);
 
@@ -43,12 +43,12 @@ test('every id used in the code exists in the locale files', () => {
   assert.deepEqual(missing, []);
 });
 
-test('it, en and es have the same ids, non-empty texts and the same placeholders', () => {
-  for (const l of ['en', 'es']) assert.deepEqual(Object.keys(L[l]).sort(), [...ids].sort(), `${l}.json ids differ from it.json`);
+test('all locale files have the same ids, non-empty texts and the same placeholders', () => {
+  for (const l of LANGS.slice(1)) assert.deepEqual(Object.keys(L[l]).sort(), [...ids].sort(), `${l}.json ids differ from it.json`);
   const bad = [];
   for (const id of ids) {
     for (const l of LANGS) if (!String(L[l][id] || '').trim()) bad.push(`${l}: ${id} empty`);
-    if (vars(L.en[id]) !== vars(L.it[id]) || vars(L.es[id]) !== vars(L.it[id])) bad.push(`placeholders: ${id}`);
+    for (const l of LANGS.slice(1)) if (vars(L[l][id]) !== vars(L.it[id])) bad.push(`placeholders: ${l} ${id}`);
   }
   assert.deepEqual(bad, []);
 });
@@ -79,7 +79,12 @@ test('t(), tn(), tIn(): language, placeholders, fallbacks', () => {
   setLang('xx');
   assert.equal(t('goBack'), 'Torna indietro');
   assert.equal(resolveLang('auto', 'es-ES'), 'es');
-  assert.equal(resolveLang('auto', 'de-DE'), 'en');
+  assert.equal(resolveLang('auto', 'de-DE'), 'de');
+  assert.equal(resolveLang('auto', 'nl-BE'), 'nl');
+  assert.equal(resolveLang('auto', 'pt-BR'), 'en');
+  setLang('fr');
+  assert.equal(t('goBack'), tIn('fr', 'goBack'));
+  assert.notEqual(tIn('fr', 'goBack'), tIn('en', 'goBack'));
   assert.equal(resolveLang('it', 'en-US'), 'it');
   setLang('it');
 });
@@ -105,7 +110,7 @@ test('labels and texts of the vocabularies are ids with translations', async () 
 
 test('the HTML pages\' texts all have an id', () => {
   const missing = [];
-  const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|https?:\/\/\S+)$/;
+  const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|Deutsch|Français|Nederlands|https?:\/\/\S+)$/;
   for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html']) {
     const html = readFileSync(f, 'utf8').replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style|textarea)[\s\S]*?<\/\1>/g, '');
     const texts = [

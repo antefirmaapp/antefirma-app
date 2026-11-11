@@ -1,0 +1,5 @@
+{
+  "extName":        { "message": "AnteFirma", "description": "Extension name." },
+  "extDescription": { "message": "Bevor Sie zustimmen, wissen Sie, wozu Sie sich verpflichten: was es wirklich kostet, wie lange und wie Sie wieder herauskommen.", "description": "Short description, shown in the store and in chrome://extensions." },
+  "actionTitle":    { "message": "AnteFirma", "description": "Toolbar icon tooltip." }
+}

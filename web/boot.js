@@ -16,6 +16,7 @@ if ('serviceWorker' in navigator) {
 let deferred = null;
 const L = {
   it: ['Installa', 'Installa AnteFirma sul computer'], en: ['Install', 'Install AnteFirma on your computer'], es: ['Instalar', 'Instalar AnteFirma en el ordenador'],
+  de: ['Installieren', 'AnteFirma auf dem Computer installieren'], fr: ['Installer', 'Installer AnteFirma sur l’ordinateur'], nl: ['Installeren', 'AnteFirma op de computer installeren'],
 }[(navigator.language || 'it').slice(0, 2)] || ['Installa', 'Installa AnteFirma sul computer'];
 addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();

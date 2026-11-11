@@ -1,5 +1,5 @@
 /**
- * Builds src/i18n/messages.js from src/i18n/locales/{it,en,es}.json.
+ * Builds src/i18n/messages.js from src/i18n/locales/{it,en,es,de,fr,nl}.json.
  *
  *     node tools/i18n-build.mjs           write messages.js
  *     node tools/i18n-build.mjs --check   fail if messages.js is out of date (CI, tests)
@@ -13,7 +13,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const LANGS = ['it', 'en', 'es'];
+const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl'];
 const OUT = join(ROOT, 'src/i18n/messages.js');
 
 export function buildMessages() {

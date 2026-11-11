@@ -17,8 +17,8 @@
 (() => {
   const g = globalThis;
   if (g.AF_I18N) return;
-  const LANGS = ['it', 'en', 'es'];
-  const LOCALES = { it: 'it-IT', en: 'en-GB', es: 'es-ES' };
+  const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl'];
+  const LOCALES = { it: 'it-IT', en: 'en-GB', es: 'es-ES', de: 'de-DE', fr: 'fr-FR', nl: 'nl-NL' };
   let lang = 'it';
   let byItalian = null;
 
@@ -26,8 +26,8 @@
 
   g.AF_I18N = {
     LANGS,
-    /** { it: { id: text }, en: {…}, es: {…} }. Filled by messages.js. */
-    messages: { it: {}, en: {}, es: {} },
+    /** { it: { id: text }, en: {…}, … }. Filled by messages.js. */
+    messages: Object.fromEntries(LANGS.map((l) => [l, {}])),
     add(messages) {
       for (const l of LANGS) Object.assign(this.messages[l], messages[l] || {});
       byItalian = null;

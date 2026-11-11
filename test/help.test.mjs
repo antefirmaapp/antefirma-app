@@ -8,7 +8,7 @@ test('helpUrl: language, topic, index and unknown language', () => {
   assert.equal(helpUrl('letter', 'it'), 'https://antefirma.app/aiuto/lettera-di-disdetta/');
   assert.equal(helpUrl('letter', 'es'), 'https://antefirma.app/es/ayuda/carta-de-baja/');
   assert.equal(helpUrl('', 'en'), 'https://antefirma.app/en/help/');
-  assert.equal(helpUrl('plans', 'de'), 'https://antefirma.app/aiuto/piani-e-chiave/');
+  assert.equal(helpUrl('plans', 'pt'), 'https://antefirma.app/en/help/plans-and-keys/', 'a language without help pages reads the English ones');
 });
 
 const SITE = new URL('../../antefirma-site/help.mjs', import.meta.url);

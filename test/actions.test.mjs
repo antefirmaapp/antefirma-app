@@ -588,3 +588,42 @@ test('found on realistic pages (test/fixtures/pages): membership, and newsletter
   // A paid newsletter that says "Subscribe" is still a subscription.
   assert.equal(classifyText('Subscribe to the newsletter — €5/month'), 'subscribe');
 });
+
+// ── German, French, Dutch ───────────────────────────────────────────────────
+
+test('recognises commitment buttons in German, French and Dutch', () => {
+  const cases = {
+    'Zahlungspflichtig bestellen': 'purchase', 'Kostenpflichtig bestellen': 'purchase', 'Jetzt kaufen': 'purchase',
+    'Kauf abschließen': 'purchase', 'Zur Kasse': 'purchase', 'Jetzt bezahlen': 'purchase',
+    'Jetzt abonnieren': 'subscribe', 'Kostenlos testen': 'subscribe', 'Mitglied werden': 'subscribe',
+    'Vertrag unterschreiben': 'sign', 'Mit Google anmelden': 'oauth', 'Zugriff erlauben': 'oauth',
+    'Alle akzeptieren': 'consent', 'Einverstanden': 'consent', 'Ich stimme zu': 'accept_terms', 'Konto erstellen': 'signup',
+    "S'abonner": 'subscribe', 'Je m’abonne': 'subscribe', 'Essai gratuit': 'subscribe', 'Commencer l’essai gratuit': 'subscribe',
+    'Commander': 'purchase', 'Valider la commande': 'purchase', 'Payer maintenant': 'purchase', 'Procéder au paiement': 'purchase',
+    'Signer le contrat': 'sign', 'Continuer avec Google': 'oauth', 'Tout accepter': 'consent', 'J’ai compris': 'consent',
+    'J’accepte': 'accept_terms', 'Accepter et continuer': 'accept_terms', 'Créer un compte': 'signup', "S'inscrire": 'signup',
+    'Abonneren': 'subscribe', 'Gratis proberen': 'subscribe', 'Start je proefperiode': 'subscribe', 'Word lid': 'subscribe',
+    'Afrekenen': 'purchase', 'Nu kopen': 'purchase', 'Bestellen en betalen': 'purchase', 'Bestelling plaatsen': 'purchase',
+    'Ondertekenen': 'sign', 'Doorgaan met Google': 'oauth', 'Alles accepteren': 'consent', 'Akkoord': 'consent',
+    'Ik ga akkoord': 'accept_terms', 'Account aanmaken': 'signup', 'Registreren': 'signup',
+  };
+  for (const [text, wanted] of Object.entries(cases)) assert.equal(classifyText(text), wanted, `"${text}"`);
+});
+
+test('German, French and Dutch refusals and harmless buttons stay out', () => {
+  for (const text of [
+    'Alle ablehnen', 'Nur notwendige Cookies', 'Abbrechen', 'Zurück', 'Schließen', 'Einstellungen verwalten', 'Weiter einkaufen',
+    'In den Warenkorb', 'Mehr erfahren', 'Newsletter bestellen', 'Newsletter abonnieren',
+    'Tout refuser', 'Continuer sans accepter', 'Continuer sans payer', 'Annuler', 'Retour', 'Fermer', 'Recommander', 'En savoir plus',
+    'Gérer mes préférences', 'S’abonner à la newsletter',
+    'Weigeren', 'Alleen noodzakelijke cookies', 'Annuleren', 'Terug', 'Sluiten', 'Verkopen', 'Meer informatie', 'Inschrijven nieuwsbrief',
+    'Word document',
+  ]) assert.equal(classifyText(text), null, `"${text}"`);
+});
+
+test('a trailing German, French or Dutch reassurance doesn\'t cancel the action', () => {
+  assert.equal(classifyText('Abonnieren — jederzeit kündbar'), 'subscribe');
+  assert.equal(classifyText("S'abonner, résiliable à tout moment"), 'subscribe');
+  assert.equal(classifyText('Abonneren, altijd opzeggen'), 'subscribe');
+  assert.equal(classifyText('Newsletter abonnieren — 4,99 € im Monat'), 'subscribe');
+});

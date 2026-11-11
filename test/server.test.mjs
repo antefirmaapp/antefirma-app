@@ -209,3 +209,10 @@ test('a 200 with an unreadable body is a failure, never an empty verdict', async
       (e) => e instanceof ServerError && e.code === 'upstream', JSON.stringify(body));
   }
 });
+
+test('the starting protections come from the browser language', async () => {
+  const { jurisdictionFor } = await import('../src/core/jurisdiction.js');
+  const cases = { 'de-AT': 'AT', 'de-DE': 'DE', de: 'DE', 'de-CH': 'DE', 'fr-BE': 'BE', 'nl-BE': 'BE', nl: 'NL', 'fr-FR': 'FR', 'fr-CA': 'FR',
+    'en-US': 'US', 'en-GB': 'UK', en: 'UK', 'es-MX': 'ES', 'it-CH': 'IT', 'pt-BR': 'EU', '': 'EU', es_ES: 'ES' };
+  for (const [ui, want] of Object.entries(cases)) assert.equal(jurisdictionFor(ui), want, ui);
+});

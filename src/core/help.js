@@ -21,7 +21,8 @@ export const HELP_TOPICS = Object.keys(SLUGS);
 
 /** The address of the guide on `topic` (or the index), with a question's anchor if needed. */
 export function helpUrl(topic, lang = 'it', anchor = '') {
-  const l = ROOT[lang] ? lang : 'it';
+  // A language without its own help pages yet reads the English ones.
+  const l = ROOT[lang] ? lang : 'en';
   const slug = SLUGS[topic]?.[l];
   return `${SITE}${ROOT[l]}${slug ? `${slug}/` : ''}${anchor ? `#${anchor}` : ''}`;
 }
