@@ -11,7 +11,7 @@ export async function letterFor({ id, kind, lang } = {}) {
   if (!commitment) throw new Error(t('commitmentNotFound'));
   const settings = await getSettings();
   // The letter's language is the provider's: normally, that of the country chosen in settings.
-  return buildLetter(commitment, settings.identity || {}, kind || suggestKind(commitment), Date.now(), lang || letterLangFor(settings.jurisdiction));
+  return buildLetter(commitment, settings.identity || {}, kind || suggestKind(commitment), Date.now(), lang || letterLangFor(settings.jurisdiction, settings.uiLang));
 }
 
 export async function icsFor(id) {

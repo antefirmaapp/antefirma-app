@@ -15,7 +15,7 @@ import { RESPONSES } from './fixtures/responses.mjs';
 import { analyze } from '../src/core/analyzer.js';
 import { DEFAULT_SETTINGS } from '../src/core/constants.js';
 import { buildCommitment } from '../src/core/commitments.js';
-import { buildLetter, LETTER_KINDS, LETTER_LANGS } from '../src/core/letter.js';
+import { buildLetter, LETTER_KINDS, LETTER_VARIANTS } from '../src/core/letter.js';
 import { buildIcs } from '../src/core/ics.js';
 import { renderVerdict } from '../src/sidepanel/render.js';
 import { setLang } from '../src/i18n/index.js';
@@ -46,9 +46,9 @@ test('corpus verdicts are unchanged', async () => {
   golden('verdicts.json', out);
 });
 
-test('panel result HTML is unchanged in it, en, es', async () => {
+test('panel result HTML is unchanged in all six languages', async () => {
   const c = CORPUS.find((x) => x.pricing?.recurring) || CORPUS[0];
-  for (const lang of ['it', 'en', 'es']) {
+  for (const lang of ['it', 'en', 'es', 'de', 'fr', 'nl']) {
     const v = await verdictOf(c, lang);
     v.engine.durationMs = 0; // timing differs on every run
     golden(`render-${lang}.html`, renderVerdict(v) + '\n');
@@ -56,11 +56,11 @@ test('panel result HTML is unchanged in it, en, es', async () => {
   setLang('it');
 });
 
-test('letters are unchanged: 3 languages × 3 kinds', async () => {
+test('letters are unchanged: 9 language and country variants × 3 kinds', async () => {
   const c = CORPUS.find((x) => x.pricing?.recurring) || CORPUS[0];
   const commitment = buildCommitment({ verdict: await verdictOf(c), now: T0, id: 'golden-1' });
   const identity = { name: 'Mario Rossi', address: 'Via Roma 1, 20100 Milano', email: 'mario.rossi@example.com', customerId: 'C-42' };
-  for (const lang of LETTER_LANGS) {
+  for (const lang of LETTER_VARIANTS) {
     for (const kind of Object.values(LETTER_KINDS)) {
       const l = buildLetter(commitment, identity, kind, T0, lang);
       golden(`letter-${lang}-${kind}.txt`, [l.subject, l.filename, '', l.text, '', ...l.checklist, '', ...(l.references || [])].join('\n') + '\n');

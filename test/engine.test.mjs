@@ -451,3 +451,43 @@ test('a different extension doesn\'t pass the guard', () => {
   const other = { id: 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz', url: `${BASE}src/options/options.html` };
   assert.equal(isAllowed('GET_SETTINGS', other, ID, BASE), false);
 });
+
+// ── national protections: DE, AT, FR, BE, NL ────────────────────────────────
+
+test('the five new countries get the EU checks with national references, never the Italian codes', () => {
+  const findings = [{ category: 'unilateral_change', severity: 60 }, { category: 'arbitration', severity: 60 }];
+  for (const [j, ref] of [['DE', /BGB/], ['AT', /KSchG/], ['FR', /Code de la consommation/], ['BE', /Code de droit économique/], ['NL', /Burgerlijk Wetboek/]]) {
+    const r = runConsumerChecks({ text: 'x', findings, jurisdiction: j });
+    assert.equal(r.applicable, true, j);
+    const uni = r.flags.find((f) => f.id === 'eu.unilateral');
+    assert.ok(uni, `${j}: unilateral change flagged`);
+    assert.match(uni.refs[0], ref, j);
+    assert.ok(!r.flags.some((f) => f.refs.some((x) => /^(?:Codice|D\.Lgs)/.test(x))), `${j}: no Italian law`);
+    assert.ok(!r.flags.some((f) => f.id === 'eu.vexatious_form'), `${j}: art. 1341 is Italian only`);
+  }
+});
+
+test('Germany and the Netherlands: renewal notice over one month; Germany: initial term over two years', () => {
+  const findings = [{ category: 'auto_renewal', severity: 60 }];
+  const cost = { notice: { months: 3 }, minTerm: { months: 36 } };
+  const ids = (j) => runConsumerChecks({ text: 'x', findings, cost, jurisdiction: j }).flags.map((f) => f.id);
+  assert.ok(ids('DE').includes('national.monthly_after_term') && ids('DE').includes('national.max_initial_term'));
+  assert.ok(ids('NL').includes('national.monthly_after_term') && !ids('NL').includes('national.max_initial_term'));
+  assert.ok(!ids('IT').includes('national.monthly_after_term'));
+  const short = runConsumerChecks({ text: 'x', findings, cost: { notice: { months: 1 }, minTerm: { months: 24 } }, jurisdiction: 'DE' }).flags.map((f) => f.id);
+  assert.ok(!short.includes('national.monthly_after_term') && !short.includes('national.max_initial_term'));
+});
+
+test('France and Austria: the renewal reminder duty', () => {
+  const findings = [{ category: 'auto_renewal', severity: 60 }];
+  for (const j of ['FR', 'AT']) assert.ok(runConsumerChecks({ text: 'x', findings, jurisdiction: j }).flags.some((f) => f.id === 'national.renewal_reminder'), j);
+  assert.ok(!runConsumerChecks({ text: 'x', findings, jurisdiction: 'BE' }).flags.some((f) => f.id === 'national.renewal_reminder'));
+});
+
+test('the 14-day right counts as mentioned in German, French, Dutch and Spanish too', () => {
+  const run = (text) => runConsumerChecks({ text, findings: [], actionType: 'purchase', jurisdiction: 'DE' }).flags.some((f) => f.id === 'eu.withdrawal');
+  assert.equal(run('Allgemeine Geschäftsbedingungen ohne Hinweis.'), true);
+  for (const text of ['Sie haben ein Widerrufsrecht.', 'Vous disposez d’un droit de rétractation.', 'U hebt een herroepingsrecht.', 'Derecho de desistimiento.', 'Binnen 14 dagen.']) {
+    assert.equal(run(text), false, text);
+  }
+});

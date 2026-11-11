@@ -1,0 +1,60 @@
+Widerruf — Saas_fair
+widerruf-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+An Saas_fair
+[Anschrift des Anbieters / in den Bedingungen genannte E-Mail]
+
+Ort, Datum: ______________, 15. August 2026
+
+Versandart: ☐ Einschreiben mit Rückschein   ☐ Kündigungsbutton der Website   ☐ Online-Formular   ☐ E-Mail
+
+Betreff: Widerruf des Vertrags
+
+Sehr geehrte Damen und Herren,
+
+hiermit widerrufe ich den von mir abgeschlossenen Vertrag über die Erbringung
+der Dienstleistung "SaaS mensile senza vincoli" (geschätzte Verpflichtung 12,00 €), geschlossen am 15. August 2026.
+
+Ich übe das Widerrufsrecht für Fernabsatzverträge innerhalb von vierzehn Tagen nach
+Vertragsschluss aus, ohne Angabe von Gründen und ohne Kosten für mich.
+
+Ich bitte Sie daher:
+  1. die Leistung und alle damit verbundenen Abbuchungen sofort einzustellen;
+  2. bereits geleistete Zahlungen binnen vierzehn Tagen nach Eingang dieses Schreibens
+     über dasselbe Zahlungsmittel zu erstatten;
+  3. mir den Eingang dieses Widerrufs schriftlich zu bestätigen.
+
+Vertragsinhaber: Mario Rossi
+Anschrift: Via Roma 1, 20100 Milano
+Kontakt-E-Mail: mario.rossi@example.com
+Kunden- / Vertragsnummer: C-42
+Abgeschlossen über: https://saas_fair.test/checkout
+
+Mit freundlichen Grüßen
+
+Mario Rossi
+
+Unterschrift _______________________
+Datum 15. August 2026
+
+—
+Nützliche Rechtsgrundlagen:
+  · BGB §§ 312g, 355, 356 — Widerrufsrecht bei Fernabsatzverträgen
+  · EGBGB Anlage 2 — Muster-Widerrufsformular
+  · Richtlinie 2011/83/EU
+
+Von AnteFirma automatisch aus den analysierten Bedingungen erstelltes Dokument.
+Prüfen Sie die Angaben in eckigen Klammern vor dem Versand. Keine Rechtsberatung.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: Einschreiben mit Rückschein (raccomandata con ricevuta di ritorno) o il pulsante di disdetta del sito.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+BGB §§ 312g, 355, 356 — Widerrufsrecht bei Fernabsatzverträgen
+EGBGB Anlage 2 — Muster-Widerrufsformular
+Richtlinie 2011/83/EU

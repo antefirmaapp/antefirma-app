@@ -403,5 +403,29 @@ test('the letter in Spanish and English, with the country\'s laws and sending me
   assert.ok(en.text.includes('[Full name]') && en.text.includes('Directive 93/13/EEC') && en.text.includes('Yours faithfully'));
   assert.match(en.filename, /^cancellation-/);
   const { letterLangFor } = await import('../src/core/letter.js');
-  assert.deepEqual(['IT', 'ES', 'EU', 'UK'].map(letterLangFor), ['it', 'es', 'en', 'en']);
+  assert.deepEqual(['IT', 'ES', 'EU', 'UK'].map((j) => letterLangFor(j)), ['it', 'es', 'en', 'en']);
+  assert.deepEqual(['DE', 'AT', 'FR', 'NL'].map((j) => letterLangFor(j)), ['de', 'de-AT', 'fr', 'nl']);
+  assert.equal(letterLangFor('BE', 'nl'), 'nl-BE');
+  assert.equal(letterLangFor('BE', 'fr'), 'fr-BE');
+  assert.equal(letterLangFor('BE', 'it'), 'fr-BE');
+});
+
+test('the letter in German, French and Dutch, with each country\'s laws', async () => {
+  const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
+  const de = buildLetter(c, { name: 'Erika Mustermann' }, LETTER_KINDS.CANCELLATION, T0, 'de');
+  assert.equal(de.lang, 'de');
+  assert.ok(de.text.includes('fristgerecht') && de.text.includes('BGB § 309 Nr. 9') && de.text.includes('Mit freundlichen Grüßen'));
+  assert.match(de.filename, /^kuendigung-/);
+  const at = buildLetter(c, {}, LETTER_KINDS.WITHDRAWAL, T0, 'de-AT');
+  assert.equal(at.variant, 'de-AT');
+  assert.ok(at.text.includes('FAGG') && !at.text.includes('BGB'));
+  const fr = buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'fr');
+  assert.ok(fr.text.includes('L215-1') && fr.text.includes('[Prénom et nom]'));
+  const be = buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'fr-BE');
+  assert.ok(be.text.includes('Code de droit économique') && !be.text.includes('L215-1'));
+  const nl = buildLetter(c, {}, LETTER_KINDS.WITHDRAWAL, T0, 'nl');
+  assert.ok(nl.text.includes('6:230o') && nl.text.includes('Met vriendelijke groet'));
+  const vl = buildLetter(c, {}, LETTER_KINDS.WITHDRAWAL, T0, 'nl-BE');
+  assert.ok(vl.text.includes('Wetboek van economisch recht'));
+  assert.equal(buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'pt').lang, 'it');
 });

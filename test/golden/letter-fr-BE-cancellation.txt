@@ -1,0 +1,57 @@
+Résiliation du contrat — Saas_fair
+resiliation-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+À l’attention de Saas_fair
+[Adresse du fournisseur / e-mail indiqué dans les conditions]
+
+Lieu et date : ______________, 15 août 2026
+
+Envoyée par : ☐ lettre recommandée avec AR   ☐ fonction de résiliation en ligne   ☐ formulaire en ligne   ☐ e-mail
+
+Objet : résiliation du contrat — refus de la reconduction tacite
+
+Madame, Monsieur,
+
+Par la présente, je résilie le contrat relatif à "SaaS mensile senza vincoli" (engagement estimé 12,00 €),
+souscrit le 15 août 2026.
+
+Cette résiliation est adressée afin que le contrat ne soit pas reconduit à l’échéance du 15 septembre 2026,
+dans le respect du préavis prévu par les conditions du contrat.
+
+Je vous demande donc :
+  1. la confirmation écrite de la réception de ce courrier et de la date d’effet de la résiliation ;
+  2. l’arrêt de tout prélèvement à compter de l’échéance indiquée ;
+  3. le détail des sommes que vous estimeriez encore dues, avec la clause correspondante.
+
+Aucun prélèvement pour une période postérieure à l’échéance indiquée ne sera accepté.
+
+Titulaire du contrat : Mario Rossi
+Adresse : Via Roma 1, 20100 Milano
+E-mail de contact : mario.rossi@example.com
+Numéro client / contrat : C-42
+Souscrit sur : https://saas_fair.test/checkout
+
+Veuillez agréer, Madame, Monsieur, mes salutations distinguées.
+
+Mario Rossi
+
+Signature _______________________
+Date 15 août 2026
+
+—
+Références juridiques utiles :
+  · Code de droit économique, art. VI.82 et VI.83 — clauses abusives (durée et prorogation tacite)
+
+Document généré automatiquement par AnteFirma à partir des conditions analysées.
+Vérifiez les données entre crochets avant l’envoi. Ce n’est pas un conseil juridique.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: lettre recommandée avec accusé de réception (raccomandata A/R) o la funzione di disdetta online del sito.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Code de droit économique, art. VI.82 et VI.83 — clauses abusives (durée et prorogation tacite)

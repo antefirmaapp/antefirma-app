@@ -29,6 +29,10 @@ const CHECKS = [
     title: 'mandatoryArbitrationImposedConsumer',
     note: 'consumerContractsClausesForceArbitrationTake',
     refs: ['Codice del Consumo, art. 33 c. 2 lett. t)', 'Direttiva 93/13/CEE'],
+    national: {
+      DE: ['BGB § 309 Nr. 14 (Schiedsklauseln in AGB)'], AT: ['KSchG § 6 Abs. 2 Z 7'],
+      FR: ['Code de la consommation, art. R212-2, 10°'], BE: ['Code de droit économique, art. VI.83, 23°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub n'],
+    },
     boost: 12,
   },
   {
@@ -38,6 +42,7 @@ const CHECKS = [
     title: 'courtOtherThanConsumerSOwn',
     note: 'ruleConsumersCanSueSuedCourts',
     refs: ['Codice del Consumo, art. 33 c. 2 lett. u)', 'Reg. UE 1215/2012, artt. 17-19'],
+    national: { AT: ['KSchG § 14'], FR: ['Code de la consommation, art. R212-2, 10°'], BE: ['Code de droit économique, art. VI.83, 23°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub n'] },
     boost: 12,
   },
   {
@@ -56,6 +61,10 @@ const CHECKS = [
     title: 'unilateralChangeTermsPrice',
     note: 'clausesLettingTraderChangeContractPrice',
     refs: ['Codice del Consumo, art. 33 c. 2 lett. m) e o)', 'Direttiva 93/13/CEE, allegato punto 1 lett. j) e l)'],
+    national: {
+      DE: ['BGB § 308 Nr. 4 und § 307'], AT: ['KSchG § 6 Abs. 1 Z 5 und Abs. 2 Z 3'],
+      FR: ['Code de la consommation, art. R212-1, 3° et 4°'], BE: ['Code de droit économique, art. VI.83, 1° et 3°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub i en 6:237 sub c'],
+    },
     boost: 12,
   },
   {
@@ -65,6 +74,10 @@ const CHECKS = [
     title: 'exclusionLimitationLiability',
     note: 'excludingLimitingTraderSLiabilityPersonal',
     refs: ['Codice del Consumo, artt. 33 c. 2 lett. a)-b) e 36 c. 2', 'Codice civile, art. 1229'],
+    national: {
+      DE: ['BGB § 309 Nr. 7'], AT: ['KSchG § 6 Abs. 1 Z 9'],
+      FR: ['Code de la consommation, art. R212-1, 6°'], BE: ['Code de droit économique, art. VI.83, 13°'], NL: ['Burgerlijk Wetboek, art. 6:237 sub f'],
+    },
     boost: 10,
   },
   {
@@ -74,6 +87,10 @@ const CHECKS = [
     title: 'n14DayRightWithdrawalNotMentioned',
     note: 'distancePurchasesConsumersNormallyHave14',
     refs: ['Codice del Consumo, artt. 52-59', 'Direttiva 2011/83/UE'],
+    national: {
+      DE: ['BGB §§ 312g, 355, 356'], AT: ['FAGG §§ 11-16'],
+      FR: ['Code de la consommation, art. L221-18 à L221-28'], BE: ['Code de droit économique, art. VI.47 à VI.53'], NL: ['Burgerlijk Wetboek, art. 6:230o-6:230s'],
+    },
     boost: 10,
     test: ({ text, actionType, findings }) => {
       const isCommerce = ['purchase', 'subscribe'].includes(actionType) || findings.some((f) => ['auto_renewal', 'no_refund'].includes(f.category));
@@ -81,7 +98,8 @@ const CHECKS = [
       // The word "withdrawal" appearing is not enough: the *right* to change
       // your mind, with its deadline, is needed. A contract can talk at length
       // about early termination and say nothing about the 14 days.
-      return !/\bdiritto\s+di\s+recesso\b|\bripensamento\b|\bright\s+(?:of|to)\s+withdraw\w*|\b14\s*(?:giorni|days)\b|\bcooling.?off\b|\brecesso\s+entro\b/i.test(text);
+      return !/\bdiritto\s+di\s+recesso\b|\bripensamento\b|\bright\s+(?:of|to)\s+withdraw\w*|\b14\s*(?:giorni|days)\b|\bcooling.?off\b|\brecesso\s+entro\b/i.test(text)
+        && !/(?<![\wÀ-ÿ])(?:desistimiento|widerrufsrecht|widerrufsbelehrung|r(?:ü|ue)cktrittsrecht|droit\s+de\s+r(?:é|e)tractation|herroepingsrecht|bedenktijd|14\s*(?:d[ií]as|tage|tagen|jours|dagen))(?![\wÀ-ÿ])/i.test(text);
     },
   },
   {
@@ -100,6 +118,10 @@ const CHECKS = [
     title: 'tacitRenewalLongNotice',
     note: 'clausesProvidingTacitRenewalWhileRequiring',
     refs: ['Codice del Consumo, art. 33 c. 2 lett. i)'],
+    national: {
+      DE: ['BGB § 309 Nr. 9'], AT: ['KSchG § 6 Abs. 1 Z 2'],
+      FR: ['Code de la consommation, art. L215-1'], BE: ['Code de droit économique, art. VI.83, 8°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub j'],
+    },
     boost: 10,
     test: ({ cost }) => Boolean(cost?.notice && cost.notice.months >= 1),
   },
@@ -162,7 +184,49 @@ const CHECKS = [
     refs: ['Codice del Consumo, artt. 20-26', 'Reg. UE 2022/2065 (DSA), art. 25'],
     boost: 8,
   },
+  /**
+   * National rules that go beyond the directives. Germany and the Netherlands
+   * cap what a tacit renewal may do: after the first term the contract may only
+   * continue indefinitely, cancellable with at most one month's notice.
+   */
+  {
+    id: 'national.monthly_after_term',
+    categories: ['auto_renewal'],
+    scopes: ['DE', 'NL'],
+    title: 'renewsOnlyIndefinitelyMonthlyNotice',
+    note: 'afterFirstTermMonthlyNotice',
+    refs: [],
+    national: { DE: ['BGB § 309 Nr. 9 Buchst. b und c'], NL: ['Burgerlijk Wetboek, art. 6:236 sub j'] },
+    boost: 10,
+    test: ({ cost }) => Boolean(cost?.notice && cost.notice.months > 1),
+  },
+  {
+    id: 'national.max_initial_term',
+    categories: [],
+    scopes: ['DE'],
+    title: 'initialTermOverTwoYears',
+    note: 'germanyInitialTermMax24Months',
+    refs: [],
+    national: { DE: ['BGB § 309 Nr. 9 Buchst. a'] },
+    boost: 10,
+    test: ({ cost }) => Boolean(cost?.minTerm && cost.minTerm.months > 24),
+  },
+  /** France (loi Chatel) and Austria: the provider has to remind you before a tacit renewal. */
+  {
+    id: 'national.renewal_reminder',
+    categories: ['auto_renewal'],
+    scopes: ['FR', 'AT'],
+    title: 'providerMustRemindBeforeRenewal',
+    note: 'withoutReminderCanLeaveAnyTime',
+    refs: [],
+    national: { FR: ['Code de la consommation, art. L215-1'], AT: ['KSchG § 6 Abs. 1 Z 2'] },
+    boost: 4,
+  },
 ];
+
+const NATIONAL = ['DE', 'AT', 'FR', 'BE', 'NL'];
+/** References to Italian law, left out where it doesn't apply. */
+const ITALIAN_SOURCE = /^(?:Codice|D\.Lgs)/;
 
 /**
  * Runs the consumer checks.
@@ -173,7 +237,7 @@ const CHECKS = [
  * @param {object} p.ctx
  * @param {object} p.cost
  * @param {string} p.actionType
- * @param {string} p.jurisdiction  'IT' | 'EU' | 'UK' | 'US' | 'OTHER'
+ * @param {string} p.jurisdiction  'IT' | 'ES' | 'DE' | 'AT' | 'FR' | 'BE' | 'NL' | 'EU' | 'UK' | 'US' | 'OTHER'
  */
 export function runConsumerChecks({ text = '', findings = [], ctx = {}, cost = {}, actionType = 'accept_terms', jurisdiction = 'IT' } = {}) {
   /**
@@ -184,7 +248,14 @@ export function runConsumerChecks({ text = '', findings = [], ctx = {}, cost = {
    * stays out.
    */
   if (jurisdiction === 'ES') jurisdiction = 'EU';
-  const applicable = jurisdiction === 'IT' || jurisdiction === 'EU';
+  /**
+   * Germany, Austria, France, Belgium and the Netherlands get the EU checks
+   * plus their own: each reference list starts with the national article and
+   * keeps the directives, never the Italian codes. Every national reference is
+   * marked for review by a lawyer of that country (antefirma-content).
+   */
+  const national = NATIONAL.includes(jurisdiction) ? jurisdiction : null;
+  const applicable = jurisdiction === 'IT' || jurisdiction === 'EU' || Boolean(national);
   if (!applicable) {
     return { applicable: false, jurisdiction, flags: [], boost: 0, disclaimer: t(DISCLAIMER) };
   }
@@ -193,7 +264,7 @@ export function runConsumerChecks({ text = '', findings = [], ctx = {}, cost = {
   const flags = [];
 
   for (const check of CHECKS) {
-    if (!check.scopes.includes(jurisdiction)) continue;
+    if (!check.scopes.includes(jurisdiction) && !(national && check.scopes.includes('EU'))) continue;
 
     const categoryHit = check.categories.length > 0 && check.categories.some((c) => found.has(c));
     let customHit = true;
@@ -212,7 +283,7 @@ export function runConsumerChecks({ text = '', findings = [], ctx = {}, cost = {
       id: check.id,
       title: check.title,
       note: check.note,
-      refs: check.refs,
+      refs: national ? [...(check.national?.[national] || []), ...check.refs.filter((r) => !ITALIAN_SOURCE.test(r))] : check.refs,
       categories: check.categories,
       boost: check.boost,
     });

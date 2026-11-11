@@ -486,8 +486,10 @@ async function finalizeDelete() {
 
 export async function showLetter(id, kind = null, lang = null) {
   const letter = await send('BUILD_LETTER', { id, kind, lang });
-  const langs = [['it', 'Italiano'], ['es', 'Español'], ['en', 'English']]
-    .map(([k, label]) => `<option value="${k}" ${k === letter.lang ? 'selected' : ''}>${label}</option>`).join('');
+  // Names in their own language, like the language menu in settings; Belgium and Austria share a language, not the laws.
+  const langs = [['it', 'Italiano'], ['es', 'Español'], ['en', 'English'], ['de', 'Deutsch (Deutschland)'], ['de-AT', 'Deutsch (Österreich)'],
+    ['fr', 'Français (France)'], ['fr-BE', 'Français (Belgique)'], ['nl', 'Nederlands (Nederland)'], ['nl-BE', 'Nederlands (België)']]
+    .map(([k, label]) => `<option value="${k}" ${k === (letter.variant || letter.lang) ? 'selected' : ''}>${label}</option>`).join('');
 
   const options = Object.entries(LETTER_LABELS)
     .map(([k, label]) => `<option value="${k}" ${k === letter.kind ? 'selected' : ''}>${esc(t(label))}</option>`)
