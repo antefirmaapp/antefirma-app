@@ -1,9 +1,9 @@
 /**
  * Test material shared by tools/media.mjs (website) and tools/help-shots.mjs (help):
- * an invented gym in three languages, on a domain that doesn't exist, and a fake
+ * an invented gym in six languages, on a domain that doesn't exist, and a fake
  * AnteFirma server, so no analysis is spent and no network is needed.
  */
-/** The example page, in three languages: invented site, price and terms. */
+/** The example page, in six languages: invented site, price and terms. */
 export const PAGE = {
   it: { title: 'Palestra Orizzonte — Abbonamento Plus', name: 'Abbonamento Plus', per: 'al mese', btn: 'Abbonati ora', feats: ['Sala pesi e corsi illimitati', 'Accesso 7 giorni su 7', 'App con le schede di allenamento'],
     terms: 'L’abbonamento ha una durata minima di 12 mesi dalla data di attivazione. Il contratto si rinnova automaticamente per un ulteriore anno salvo disdetta inviata con almeno 30 giorni di preavviso. In caso di recesso anticipato è dovuta una penale di 120 €. La quota di iscrizione non è rimborsabile.',
@@ -20,6 +20,21 @@ export const PAGE = {
     q: ['permanencia mínima de 12 meses', 'se renovará automáticamente por un año más', 'al menos 30 días de antelación', 'penalización de 120 €'],
     why: ['Durante un año no puedes dejar de pagar.', 'Si no te das de baja a tiempo, pagas otro año.', 'La baja tiene que llegar un mes antes.', 'Irte antes cuesta 120 €.'],
     summary: 'Te comprometes un año: se renueva solo e irte antes cuesta 120 €.', you: { name: 'Lucía García', address: 'Calle Mayor 1, 28013 Madrid', email: 'lucia.garcia@ejemplo.es' } },
+  de: { title: 'Fitness Horizont — Mitgliedschaft Plus', name: 'Mitgliedschaft Plus', per: 'im Monat', btn: 'Jetzt abonnieren', feats: ['Unbegrenzt Geräte und Kurse', '7 Tage die Woche geöffnet', 'App mit Trainingsplänen'],
+    terms: 'Die Mitgliedschaft hat eine Mindestlaufzeit von 12 Monaten ab Aktivierung. Der Vertrag verlängert sich automatisch um ein weiteres Jahr, sofern nicht mindestens 30 Tage vorher gekündigt wird. Bei vorzeitiger Kündigung wird eine Gebühr von 120 € fällig. Die Aufnahmegebühr wird nicht erstattet.',
+    q: ['Mindestlaufzeit von 12 Monaten', 'verlängert sich automatisch um ein weiteres Jahr', 'mindestens 30 Tage vorher', 'Gebühr von 120 €'],
+    why: ['Ein Jahr lang müssen Sie zahlen.', 'Wenn Sie nicht rechtzeitig kündigen, zahlen Sie ein weiteres Jahr.', 'Die Kündigung muss einen Monat vorher ankommen.', 'Früher aussteigen kostet 120 €.'],
+    summary: 'Sie binden sich ein Jahr: Es verlängert sich von selbst, und früher aussteigen kostet 120 €.', you: { name: 'Erika Mustermann', address: 'Hauptstraße 1, 10115 Berlin', email: 'erika.mustermann@beispiel.de' } },
+  fr: { title: 'Salle Horizon — Abonnement Plus', name: 'Abonnement Plus', per: 'par mois', btn: 'Je m’abonne', feats: ['Musculation et cours illimités', 'Ouvert 7 jours sur 7', 'Appli avec programmes d’entraînement'],
+    terms: 'L’abonnement comporte une durée minimale de 12 mois à compter de l’activation. Le contrat est reconduit automatiquement pour une année supplémentaire sauf résiliation au moins 30 jours avant. Toute résiliation anticipée entraîne des frais de 120 €. Les frais d’inscription ne sont pas remboursables.',
+    q: ['durée minimale de 12 mois', 'reconduit automatiquement pour une année supplémentaire', 'au moins 30 jours avant', 'frais de 120 €'],
+    why: ['Pendant un an, vous ne pouvez pas arrêter de payer.', 'Si vous ne résiliez pas à temps, vous payez une année de plus.', 'La résiliation doit arriver un mois avant.', 'Partir plus tôt coûte 120 €.'],
+    summary: 'Vous vous engagez pour un an : il se reconduit tout seul et partir plus tôt coûte 120 €.', you: { name: 'Marie Dupont', address: '1 rue de la Paix, 75002 Paris', email: 'marie.dupont@exemple.fr' } },
+  nl: { title: 'Sportschool Horizon — Lidmaatschap Plus', name: 'Lidmaatschap Plus', per: 'per maand', btn: 'Word lid', feats: ['Onbeperkt fitness en lessen', '7 dagen per week open', 'App met trainingsschema’s'],
+    terms: 'Het lidmaatschap heeft een minimale looptijd van 12 maanden vanaf activering. De overeenkomst wordt automatisch met een jaar verlengd tenzij ten minste 30 dagen van tevoren wordt opgezegd. Bij voortijdige opzegging betaal je 120 € afkoopsom. Het inschrijfgeld wordt niet terugbetaald.',
+    q: ['minimale looptijd van 12 maanden', 'automatisch met een jaar verlengd', 'ten minste 30 dagen van tevoren', '120 € afkoopsom'],
+    why: ['Een jaar lang moet je betalen.', 'Zeg je niet op tijd op, dan betaal je nog een jaar.', 'De opzegging moet een maand van tevoren binnen zijn.', 'Eerder stoppen kost 120 €.'],
+    summary: 'Je verplicht je een jaar: het verlengt zichzelf en eerder stoppen kost 120 €.', you: { name: 'Sanne de Vries', address: 'Dorpsstraat 1, 3511 AB Utrecht', email: 'sanne.devries@voorbeeld.nl' } },
 };
 export const page = (l) => {
   const p = PAGE[l];
@@ -40,7 +55,7 @@ document.getElementById('f').addEventListener('submit',(e)=>{e.preventDefault();
 };
 
 // An invented domain (.example doesn't exist): the warning and the letter show the site's name, not 127.0.0.1.
-export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example' };
+export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example' };
 
 export const verdict = (l) => {
   const p = PAGE[l];
