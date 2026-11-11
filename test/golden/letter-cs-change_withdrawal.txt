@@ -1,0 +1,59 @@
+Výpověď po změně podmínek — Saas_fair
+vypoved-po-zmene-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Komu: Saas_fair
+[Adresa poskytovatele / e-mail uvedený v podmínkách]
+
+Místo a datum: ______________, 15. srpna 2026
+
+Odesláno: ☐ doporučeným dopisem s dodejkou   ☐ datovou schránkou   ☐ online formulářem   ☐ e-mailem
+
+Věc: výpověď smlouvy z důvodu jednostranné změny podmínek
+
+Vážení,
+
+zjistil(a) jsem změnu podmínek smlouvy týkající se "SaaS mensile senza vincoli" (odhadovaný závazek 12,00 €)
+oproti podmínkám, které jsem přijal(a) dne 15. srpna 2026.
+
+Změna se týká ceny nebo podmínek služby.
+
+Nové podmínky nepřijímám a smlouvu vypovídám s okamžitou účinností,
+bez sankcí a poplatků, protože změna byla provedena jednostranně
+a nikoli na mou žádost.
+
+Žádám proto o:
+  1. písemné potvrzení ukončení smlouvy a jeho data;
+  2. ukončení všech plateb;
+  3. vrácení částek zaplacených za období po ukončení smlouvy.
+
+Smluvní strana: Mario Rossi
+Adresa: Via Roma 1, 20100 Milano
+Kontaktní e-mail: mario.rossi@example.com
+Zákaznické číslo / číslo smlouvy: C-42
+Uzavřeno přes: https://saas_fair.test/checkout
+
+S pozdravem
+
+Mario Rossi
+
+Podpis _______________________
+Datum 15. srpna 2026
+
+—
+Užitečné právní odkazy:
+  · Zákon č. 89/2012 Sb., občanský zákoník, § 1752 — změna obchodních podmínek a právo smlouvu vypovědět
+  · Směrnice 93/13/EHS, příloha, bod 1 písm. j) a l)
+
+Dokument vytvořený automaticky službou AnteFirma na základě analyzovaných podmínek.
+Před odesláním zkontrolujte údaje v hranatých závorkách. Nejde o právní poradenství.
+
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: doporučený dopis s dodejkou (raccomandata con ricevuta di ritorno), datová schránka o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zákon č. 89/2012 Sb., občanský zákoník, § 1752 — změna obchodních podmínek a právo smlouvu vypovědět
+Směrnice 93/13/EHS, příloha, bod 1 písm. j) a l)

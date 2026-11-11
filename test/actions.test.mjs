@@ -649,3 +649,50 @@ test('Polish and Portuguese refusals and harmless buttons stay out', () => {
   }
   assert.equal(classifyText('Subscrever — cancele quando quiser'), 'subscribe');
 });
+
+// ── Swedish, Romanian, Czech ────────────────────────────────────────────────
+
+test('recognises commitment buttons in Swedish, Romanian and Czech', () => {
+  const cases = {
+    'Köp nu': 'purchase', 'Slutför köpet': 'purchase', 'Betala': 'purchase', 'Till kassan': 'purchase', 'Beställ': 'purchase',
+    'Prenumerera': 'subscribe', 'Starta din gratis provperiod': 'subscribe', 'Bli medlem': 'subscribe', 'Signera avtalet': 'sign',
+    'Fortsätt med Google': 'oauth', 'Acceptera alla': 'consent', 'Jag godkänner': 'accept_terms', 'Skapa konto': 'signup',
+    'Cumpără acum': 'purchase', 'Plasează comanda': 'purchase', 'Plătește': 'purchase', 'Finalizează comanda': 'purchase',
+    'Abonează-te': 'subscribe', 'Începe perioada de probă': 'subscribe', 'Semnează contractul': 'sign', 'Continuă cu Google': 'oauth',
+    'Acceptă tot': 'consent', 'Sunt de acord': 'accept_terms', 'Creează un cont': 'signup',
+    'Koupit nyní': 'purchase', 'Objednat s povinností platby': 'purchase', 'Zaplatit': 'purchase', 'Dokončit objednávku': 'purchase',
+    'Předplatit': 'subscribe', 'Vyzkoušet zdarma': 'subscribe', 'Podepsat smlouvu': 'sign', 'Pokračovat přes Google': 'oauth',
+    'Přijmout vše': 'consent', 'Souhlasím': 'accept_terms', 'Vytvořit účet': 'signup', 'Zaregistrovat se': 'signup',
+  };
+  for (const [text, wanted] of Object.entries(cases)) assert.equal(classifyText(text), wanted, `"${text}"`);
+});
+
+test('Swedish, Romanian and Czech refusals and harmless buttons stay out', () => {
+  for (const text of ['Avvisa alla', 'Endast nödvändiga', 'Avbryt', 'Tillbaka', 'Stäng', 'Prenumerera på nyhetsbrevet', 'Lägg i varukorgen', 'Läs mer',
+    'Fortsätt handla', 'Fortsätt utan att betala', 'Sätt att betala',
+    'Refuză tot', 'Doar cele necesare', 'Anulează', 'Înapoi', 'Închide', 'Abonează-te la newsletter', 'Adaugă în coș', 'Află mai multe', 'Continuă cumpărăturile',
+    'Odmítnout vše', 'Pouze nezbytné', 'Zrušit', 'Zpět', 'Zavřít', 'Odebírat novinky', 'Přidat do košíku', 'Více informací', 'Pokračovat v nákupu']) {
+    assert.equal(classifyText(text), null, `"${text}"`);
+  }
+  assert.equal(classifyText('Prenumerera — säg upp när du vill'), 'subscribe');
+  assert.equal(classifyText('Abonează-te, anulezi oricând'), 'subscribe');
+  assert.equal(classifyText('Předplatit — zrušit můžete kdykoli'), 'subscribe');
+});
+
+test('prices, periods and free trials in Swedish, Romanian, Czech and Polish currencies', () => {
+  const cases = [
+    ['Premium: hela katalogen utan reklam. Pris 129 kr/mån. 30 dagar gratis, säg upp när du vill.', 129, 'SEK', 'month', 1],
+    ['Abonament complet cu toate funcțiile incluse și asistență. 29,99 lei pe lună, cu 14 zile gratuit.', 29.99, 'RON', 'month', 14 / 30],
+    ['Kompletní předplatné se všemi funkcemi a podporou. Cena 199 Kč měsíčně, zkušební doba zdarma na 7 dní.', 199, 'CZK', 'month', 7 / 30],
+    ['Pełny pakiet ze wszystkimi funkcjami i wsparciem technicznym. 49 zł miesięcznie, 30 dni za darmo.', 49, 'PLN', 'month', 1],
+    ['Årsabonnemang med alla funktioner och support ingår. 990 kr per år, första månaden gratis.', 990, 'SEK', 'year', 1],
+  ];
+  for (const [text, amount, currency, period, months] of cases) {
+    const { body, btn } = page([text]);
+    const p = loadContext(body).extractPricing(btn);
+    assert.equal(p.amount, amount, text);
+    assert.equal(p.currency, currency, text);
+    assert.equal(p.period, period, text);
+    assert.ok(Math.abs((p.trial?.months ?? 0) - months) < 1e-9, `${text} → ${JSON.stringify(p.trial)}`);
+  }
+});

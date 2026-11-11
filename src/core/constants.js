@@ -309,7 +309,7 @@ export const DEFAULT_SETTINGS = {
   /** Data used to pre-fill cancellation letters. It stays local. */
   identity: { name: '', address: '', email: '', customerId: '' },
   blockFrom: 'commitment', // minimum level that really blocks the click
-  jurisdiction: 'IT', // IT | ES | DE | AT | FR | BE | NL | PL | PT | EU | UK | US | OTHER (set from the browser language at install)
+  jurisdiction: 'IT', // IT | ES | DE | AT | FR | BE | NL | PL | PT | SE | RO | CZ | EU | UK | US | OTHER (set from the browser language at install)
   uiLang: 'auto', // auto (browser language) | it | en | es
   minBlockAmount: 0, // below this commitment (€) the click is not blocked, except critical cases
   profile: {

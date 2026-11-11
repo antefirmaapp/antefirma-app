@@ -502,3 +502,19 @@ test('Poland and Portugal: EU checks with national references', () => {
   assert.equal(w('Prawo odstąpienia od umowy w ciągu 14 dni.'), false);
   assert.equal(w('Direito de livre resolução.'), false);
 });
+
+test('Sweden, Romania and the Czech Republic: EU checks with national references', () => {
+  const findings = [{ category: 'unilateral_change', severity: 60 }];
+  for (const [j, ref] of [['SE', /1994:1512/], ['RO', /193\/2000/], ['CZ', /89\/2012/]]) {
+    const r = runConsumerChecks({ text: 'x', findings, jurisdiction: j });
+    assert.ok(r.applicable, j);
+    const flag = r.flags.find((f) => f.id === 'eu.unilateral');
+    assert.match(flag.refs[0], ref, j);
+    assert.ok(!flag.refs.some((x) => /^Codice/.test(x)), j);
+  }
+  const w = (text) => runConsumerChecks({ text, findings: [], actionType: 'purchase', jurisdiction: 'SE' }).flags.some((f) => f.id === 'eu.withdrawal');
+  assert.equal(w('Ångerrätt i 14 dagar.'), false);
+  assert.equal(w('Aveți dreptul de retragere.'), false);
+  assert.equal(w('Máte právo odstoupit od smlouvy do 14 dnů.'), false);
+  assert.equal(w('Prenumerationen förlängs automatiskt.'), true);
+});

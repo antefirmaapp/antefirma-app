@@ -1,0 +1,59 @@
+Uppsägning av avtalet — Saas_fair
+uppsagning-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Till: Saas_fair
+[Leverantörens adress / e-post som anges i villkoren]
+
+Ort och datum: ______________, 15 augusti 2026
+
+Skickat med: ☐ rekommenderat brev med mottagningsbevis   ☐ onlineformulär   ☐ e-post
+
+Ärende: uppsägning av avtalet — ingen automatisk förlängning
+
+Hej,
+
+härmed säger jag upp avtalet om "SaaS mensile senza vincoli" (uppskattat åtagande 12,00 €),
+ingånget den 15 augusti 2026.
+
+Uppsägningen görs för att avtalet inte ska förlängas den 15 september 2026,
+med iakttagande av den uppsägningstid som anges i villkoren.
+
+Jag ber därför om:
+  1. skriftlig bekräftelse på att uppsägningen mottagits och från vilket datum den gäller;
+  2. att alla debiteringar upphör från det datumet;
+  3. en specifikation av eventuella belopp ni anser vara skyldiga, med det avtalsvillkor de grundar sig på.
+
+Jag godtar inga debiteringar för perioder efter det angivna slutdatumet.
+
+Avtalspart: Mario Rossi
+Adress: Via Roma 1, 20100 Milano
+Kontakt-e-post: mario.rossi@example.com
+Kund- / avtalsnummer: C-42
+Ingånget via: https://saas_fair.test/checkout
+
+Med vänlig hälsning
+
+Mario Rossi
+
+Underskrift _______________________
+Datum 15 augusti 2026
+
+—
+Användbara rättsliga hänvisningar:
+  · Lag (1994:1512) om avtalsvillkor i konsumentförhållanden, 11 § — oskäliga avtalsvillkor
+  · Direktiv 93/13/EEG, bilaga, punkt 1 h — automatisk förlängning med orimligt tidig uppsägningsfrist
+
+Dokument skapat automatiskt av AnteFirma utifrån de analyserade villkoren.
+Kontrollera uppgifterna inom hakparentes innan du skickar. Detta är inte juridisk rådgivning.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: rekommenderat brev med mottagningsbevis (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Lag (1994:1512) om avtalsvillkor i konsumentförhållanden, 11 § — oskäliga avtalsvillkor
+Direktiv 93/13/EEG, bilaga, punkt 1 h — automatisk förlängning med orimligt tidig uppsägningsfrist

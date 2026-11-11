@@ -427,7 +427,7 @@ test('the letter in German, French and Dutch, with each country\'s laws', async 
   assert.ok(nl.text.includes('6:230o') && nl.text.includes('Met vriendelijke groet'));
   const vl = buildLetter(c, {}, LETTER_KINDS.WITHDRAWAL, T0, 'nl-BE');
   assert.ok(vl.text.includes('Wetboek van economisch recht'));
-  assert.equal(buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'sv').lang, 'it');
+  assert.equal(buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'da').lang, 'it');
 });
 
 test('the letter in Polish and Portuguese, with each country\'s laws', async () => {
@@ -440,4 +440,18 @@ test('the letter in Polish and Portuguese, with each country\'s laws', async () 
   assert.match(pt.filename, /^denuncia-/);
   const { letterLangFor } = await import('../src/core/letter.js');
   assert.deepEqual(['PL', 'PT'].map((j) => letterLangFor(j)), ['pl', 'pt']);
+});
+
+test('the letter in Swedish, Romanian and Czech, with each country\'s laws', async () => {
+  const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
+  const sv = buildLetter(c, { name: 'Anna Svensson' }, LETTER_KINDS.WITHDRAWAL, T0, 'sv');
+  assert.ok(sv.text.includes('Lag (2005:59)') && sv.text.includes('Med vänlig hälsning') && sv.filename.startsWith('angerratt-'));
+  const ro = buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'ro');
+  assert.ok(ro.text.includes('Legea nr. 193/2000') && ro.text.includes('[Nume și prenume]'));
+  assert.match(ro.filename, /^denuntare-/);
+  const cs = buildLetter(c, {}, LETTER_KINDS.CHANGE, T0, 'cs');
+  assert.ok(cs.text.includes('§ 1752') && cs.text.includes('S pozdravem'));
+  assert.match(cs.filename, /^vypoved-po-zmene-/);
+  const { letterLangFor } = await import('../src/core/letter.js');
+  assert.deepEqual(['SE', 'RO', 'CZ'].map((j) => letterLangFor(j)), ['sv', 'ro', 'cs']);
 });

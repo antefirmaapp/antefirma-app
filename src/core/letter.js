@@ -19,15 +19,16 @@ import { t, locale } from '../i18n/index.js';
  * The letter's language is the provider's, not the extension's: Italian for
  * Italy, Spanish for Spain, German for Germany and Austria, French for France,
  * Dutch for the Netherlands, French or Dutch for Belgium (the user's language
- * decides), Polish for Poland, Portuguese for Portugal, English elsewhere. Each with its country's laws and habits (PEC,
+ * decides), Polish for Poland, Portuguese for Portugal, Swedish for Sweden,
+ * Romanian for Romania, Czech for the Czech Republic, English elsewhere. Each with its country's laws and habits (PEC,
  * burofax, Einschreiben, lettre recommandée, aangetekende brief). A variant
  * such as 'de-AT' is the same text with the other country's laws. Dates and
  * amounts follow the variant's locale.
  */
-export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt'];
+export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs'];
 export const LETTER_VARIANTS = [...LETTER_LANGS, 'de-AT', 'fr-BE', 'nl-BE'];
-const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', pl: 'pl-PL', pt: 'pt-PT' };
-const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt' };
+const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ' };
+const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs' };
 export const letterLangFor = (jurisdiction, uiLang = '') => (jurisdiction === 'BE' ? (uiLang === 'nl' ? 'nl-BE' : 'fr-BE') : BY_COUNTRY[jurisdiction] || 'en');
 
 export const LETTER_KINDS = {
@@ -51,6 +52,9 @@ const FILE_SLUGS = {
   nl: { withdrawal: 'herroeping', cancellation: 'opzegging', change_withdrawal: 'opzegging-na-wijziging' },
   pl: { withdrawal: 'odstapienie', cancellation: 'wypowiedzenie', change_withdrawal: 'wypowiedzenie-po-zmianie' },
   pt: { withdrawal: 'livre-resolucao', cancellation: 'denuncia', change_withdrawal: 'resolucao-por-alteracao' },
+  sv: { withdrawal: 'angerratt', cancellation: 'uppsagning', change_withdrawal: 'uppsagning-efter-andring' },
+  ro: { withdrawal: 'retragere', cancellation: 'denuntare', change_withdrawal: 'incetare-dupa-modificare' },
+  cs: { withdrawal: 'odstoupeni', cancellation: 'vypoved', change_withdrawal: 'vypoved-po-zmene' },
 };
 
 export const LETTER_LABELS = {
@@ -589,6 +593,177 @@ const TEXT = {
     },
   },
 
+  // Sweden: Distance Contracts Act (2005:59) and the Consumer Contract Terms Act (1994:1512).
+  sv: {
+    ph: { name: '[För- och efternamn]', address: '[Adress]', email: '[E-post]', provider: '[Leverantör]', service: '[beskrivning av tjänsten]', date: '[datum]' },
+    estimated: (x) => `(uppskattat åtagande ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Till: ${provider}`,
+      '[Leverantörens adress / e-post som anges i villkoren]', '', `Ort och datum: ______________, ${today}`, '',
+      'Skickat med: ☐ rekommenderat brev med mottagningsbevis   ☐ onlineformulär   ☐ e-post'].join('\n'),
+    withdrawal: (k) => ['Ärende: utövande av ångerrätt', '', 'Hej,', '',
+      'härmed meddelar jag att jag frånträder avtalet om',
+      `tjänsten ${service(k)}, ingånget den ${orderDate(k)}.`, '',
+      'Jag utövar ångerrätten för avtal som ingåtts på distans, inom fjorton dagar',
+      'från det att avtalet ingicks, utan att ange skäl och utan kostnad.', '', 'Jag ber därför om:',
+      '  1. att tjänsten och alla tillhörande debiteringar upphör omedelbart;',
+      '  2. återbetalning av alla mottagna betalningar inom fjorton dagar från det att',
+      '     detta meddelande mottagits, med samma betalningsmetod;', '  3. skriftlig bekräftelse på att detta meddelande har mottagits.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Ärende: uppsägning av avtalet — ingen automatisk förlängning', '', 'Hej,', '',
+        `härmed säger jag upp avtalet om ${service(k)},`, `ingånget den ${orderDate(k)}.`, '',
+        renewal ? `Uppsägningen görs för att avtalet inte ska förlängas den ${renewal},`
+          : 'Uppsägningen görs för att avtalet inte ska förlängas automatiskt när perioden löper ut,',
+        notice ? `med iakttagande av den uppsägningstid på ${notice} dagar som anges i villkoren${deadline ? ` (sista dag: ${deadline})` : ''}.`
+          : 'med iakttagande av den uppsägningstid som anges i villkoren.', '',
+        'Jag ber därför om:', '  1. skriftlig bekräftelse på att uppsägningen mottagits och från vilket datum den gäller;',
+        '  2. att alla debiteringar upphör från det datumet;',
+        '  3. en specifikation av eventuella belopp ni anser vara skyldiga, med det avtalsvillkor de grundar sig på.', '',
+        'Jag godtar inga debiteringar för perioder efter det angivna slutdatumet.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Ärende: frånträde av avtalet på grund av ensidig ändring av villkoren', '', 'Hej,', '',
+        `jag har noterat en ändring av villkoren i avtalet om ${service(k)}`, `jämfört med de villkor jag godkände den ${orderDate(k)}.`, '',
+        ch?.summary ? `Särskilt: ${ch.summary}` : 'Ändringen gäller priset eller villkoren för tjänsten.', '',
+        'Eftersom jag inte godtar de nya villkoren säger jag upp avtalet med omedelbar verkan,',
+        'utan avgifter eller kostnader, eftersom ändringen gjorts ensidigt', 'och inte på min begäran.', '',
+        'Jag ber därför om:', '  1. skriftlig bekräftelse på att avtalet upphört och från vilket datum;', '  2. att alla debiteringar upphör;',
+        '  3. återbetalning av belopp som betalats för perioder efter att avtalet upphört.'];
+    },
+    identity: ({ you, c }) => [`Avtalspart: ${you.name}`, `Adress: ${you.address}`, `Kontakt-e-post: ${you.email}`,
+      `Kund- / avtalsnummer: ${you.customerId || '[fyll i]'}`,
+      ...(c.url ? [`Ingånget via: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Fingeravtryck av godkända villkor (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Med vänlig hälsning', '', you.name, '', 'Underskrift _______________________', `Datum ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Användbara rättsliga hänvisningar:', ...refs.map((r) => `  · ${r}`), '',
+      'Dokument skapat automatiskt av AnteFirma utifrån de analyserade villkoren.',
+      'Kontrollera uppgifterna inom hakparentes innan du skickar. Detta är inte juridisk rådgivning.'].join('\n'),
+    subject: { withdrawal: (p) => `Utövande av ångerrätt — ${p}`, cancellation: (p) => `Uppsägning av avtalet — ${p}`, change_withdrawal: (p) => `Frånträde efter ändrade villkor — ${p}` },
+    refs: {
+      withdrawal: ['Lag (2005:59) om distansavtal och avtal utanför affärslokaler, 2 kap. 10–15 §§ — ångerrätt vid distansavtal',
+        'Direktiv 2011/83/EU, bilaga I del B — standardformulär för utövande av ångerrätt', 'Direktiv 2011/83/EU'],
+      cancellation: ['Lag (1994:1512) om avtalsvillkor i konsumentförhållanden, 11 § — oskäliga avtalsvillkor',
+        'Direktiv 93/13/EEG, bilaga, punkt 1 h — automatisk förlängning med orimligt tidig uppsägningsfrist'],
+      change_withdrawal: ['Lag (1994:1512) om avtalsvillkor i konsumentförhållanden, 11 § — ensidig ändring av pris eller villkor',
+        'Direktiv 93/13/EEG, bilaga, punkt 1 j och l'],
+    },
+  },
+
+  // Romania: GEO 34/2014 (distance contracts) and Law 193/2000 on unfair terms.
+  ro: {
+    ph: { name: '[Nume și prenume]', address: '[Adresă]', email: '[E-mail]', provider: '[Furnizor]', service: '[descrierea serviciului]', date: '[data]' },
+    estimated: (x) => `(angajament estimat ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Către: ${provider}`,
+      '[Adresa furnizorului / e-mailul indicat în condiții]', '', `Localitatea și data: ______________, ${today}`, '',
+      'Trimisă prin: ☐ scrisoare recomandată cu confirmare de primire   ☐ formular online   ☐ e-mail'].join('\n'),
+    withdrawal: (k) => ['Subiect: exercitarea dreptului de retragere', '', 'Stimate doamne și stimați domni,', '',
+      'prin prezenta vă notific retragerea din contractul de prestare',
+      `a serviciului ${service(k)}, încheiat la data de ${orderDate(k)}.`, '',
+      'Îmi exercit dreptul de retragere din contractele încheiate la distanță, în termen de paisprezece zile',
+      'de la încheierea contractului, fără a invoca vreun motiv și fără costuri.', '', 'Vă solicit, prin urmare:',
+      '  1. încetarea imediată a serviciului și a oricăror debitări aferente;',
+      '  2. rambursarea tuturor plăților primite în termen de paisprezece zile de la primirea',
+      '     prezentei notificări, prin aceeași metodă de plată;', '  3. confirmarea în scris a primirii prezentei notificări.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Subiect: denunțarea contractului — fără reînnoire automată', '', 'Stimate doamne și stimați domni,', '',
+        `prin prezenta denunț contractul privind ${service(k)},`, `încheiat la data de ${orderDate(k)}.`, '',
+        renewal ? `Denunțarea are scopul de a împiedica reînnoirea contractului la data de ${renewal},`
+          : 'Denunțarea are scopul de a împiedica reînnoirea automată a contractului la expirarea perioadei,',
+        notice ? `cu respectarea preavizului de ${notice} zile prevăzut în condiții${deadline ? ` (ultima zi: ${deadline})` : ''}.`
+          : 'cu respectarea preavizului prevăzut în condițiile contractului.', '',
+        'Vă solicit, prin urmare:', '  1. confirmarea în scris a primirii denunțării și a datei de la care produce efecte;',
+        '  2. încetarea oricăror debitări de la acea dată;',
+        '  3. detalierea eventualelor sume pe care le considerați datorate, cu clauza contractuală din care rezultă.', '',
+        'Nu voi accepta nicio debitare pentru perioade ulterioare datei de încetare indicate.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Subiect: încetarea contractului ca urmare a modificării unilaterale a condițiilor', '', 'Stimate doamne și stimați domni,', '',
+        `am constatat o modificare a condițiilor contractului privind ${service(k)},`, `față de cele acceptate de mine la data de ${orderDate(k)}.`, '',
+        ch?.summary ? `În special: ${ch.summary}` : 'Modificarea privește prețul sau condițiile serviciului.', '',
+        'Întrucât nu accept noile condiții, denunț contractul cu efect imediat,',
+        'fără penalități sau costuri, deoarece modificarea a fost făcută unilateral', 'și nu la cererea mea.', '',
+        'Vă solicit, prin urmare:', '  1. confirmarea în scris a încetării contractului și a datei acesteia;', '  2. încetarea oricăror debitări;',
+        '  3. rambursarea sumelor plătite pentru perioade ulterioare încetării.'];
+    },
+    identity: ({ you, c }) => [`Titularul contractului: ${you.name}`, `Adresă: ${you.address}`, `E-mail de contact: ${you.email}`,
+      `Număr de client / contract: ${you.customerId || '[de completat]'}`,
+      ...(c.url ? [`Încheiat prin: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Amprenta condițiilor acceptate (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Cu stimă,', '', you.name, '', 'Semnătura _______________________', `Data ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Referințe legale utile:', ...refs.map((r) => `  · ${r}`), '',
+      'Document generat automat de AnteFirma pe baza condițiilor analizate.',
+      'Verifică datele dintre parantezele drepte înainte de trimitere. Nu constituie consultanță juridică.'].join('\n'),
+    subject: { withdrawal: (p) => `Exercitarea dreptului de retragere — ${p}`, cancellation: (p) => `Denunțarea contractului — ${p}`, change_withdrawal: (p) => `Încetare după modificarea condițiilor — ${p}` },
+    refs: {
+      withdrawal: ['OUG nr. 34/2014, art. 9–16 — dreptul de retragere din contractele la distanță',
+        'OUG nr. 34/2014, anexa nr. 2 — formularul tip de retragere', 'Directiva 2011/83/UE'],
+      cancellation: ['Legea nr. 193/2000 privind clauzele abuzive, art. 4 și anexa — clauze abuzive',
+        'Codul civil, art. 1203 — clauzele neuzuale din condițiile generale trebuie acceptate expres în scris'],
+      change_withdrawal: ['Legea nr. 193/2000, anexa, lit. a) — modificarea unilaterală a clauzelor contractului',
+        'Directiva 93/13/CEE, anexa, punctul 1 literele (j) și (l)'],
+    },
+  },
+
+  // Czech Republic: the Civil Code (Act 89/2012) on distance contracts and consumer terms.
+  cs: {
+    ph: { name: '[Jméno a příjmení]', address: '[Adresa]', email: '[E-mail]', provider: '[Poskytovatel]', service: '[popis služby]', date: '[datum]' },
+    estimated: (x) => `(odhadovaný závazek ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Komu: ${provider}`,
+      '[Adresa poskytovatele / e-mail uvedený v podmínkách]', '', `Místo a datum: ______________, ${today}`, '',
+      'Odesláno: ☐ doporučeným dopisem s dodejkou   ☐ datovou schránkou   ☐ online formulářem   ☐ e-mailem'].join('\n'),
+    withdrawal: (k) => ['Věc: odstoupení od smlouvy', '', 'Vážení,', '',
+      'tímto oznamuji, že odstupuji od smlouvy o poskytování',
+      `služby ${service(k)}, uzavřené dne ${orderDate(k)}.`, '',
+      'Využívám práva odstoupit od smlouvy uzavřené distančním způsobem ve lhůtě čtrnácti dnů',
+      'od jejího uzavření, bez uvedení důvodu a bez nákladů.', '', 'Žádám proto o:',
+      '  1. okamžité ukončení služby a všech souvisejících plateb;',
+      '  2. vrácení všech přijatých plateb do čtrnácti dnů od doručení',
+      '     tohoto oznámení, stejným platebním prostředkem;', '  3. písemné potvrzení přijetí tohoto oznámení.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Věc: výpověď smlouvy — bez automatického prodloužení', '', 'Vážení,', '',
+        `tímto vypovídám smlouvu týkající se ${service(k)},`, `uzavřenou dne ${orderDate(k)}.`, '',
+        renewal ? `Výpověď podávám, aby se smlouva neprodloužila dne ${renewal},`
+          : 'Výpověď podávám, aby se smlouva po skončení období automaticky neprodloužila,',
+        notice ? `s dodržením výpovědní lhůty ${notice} dnů stanovené v podmínkách${deadline ? ` (poslední den: ${deadline})` : ''}.`
+          : 's dodržením výpovědní lhůty stanovené v podmínkách smlouvy.', '',
+        'Žádám proto o:', '  1. písemné potvrzení přijetí výpovědi a data její účinnosti;',
+        '  2. ukončení všech plateb od tohoto data;',
+        '  3. vyčíslení případných částek, které považujete za dlužné, s uvedením ujednání, z něhož vyplývají.', '',
+        'Nepřijmu žádné platby za období po uvedeném datu ukončení.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Věc: výpověď smlouvy z důvodu jednostranné změny podmínek', '', 'Vážení,', '',
+        `zjistil(a) jsem změnu podmínek smlouvy týkající se ${service(k)}`, `oproti podmínkám, které jsem přijal(a) dne ${orderDate(k)}.`, '',
+        ch?.summary ? `Konkrétně: ${ch.summary}` : 'Změna se týká ceny nebo podmínek služby.', '',
+        'Nové podmínky nepřijímám a smlouvu vypovídám s okamžitou účinností,',
+        'bez sankcí a poplatků, protože změna byla provedena jednostranně', 'a nikoli na mou žádost.', '',
+        'Žádám proto o:', '  1. písemné potvrzení ukončení smlouvy a jeho data;', '  2. ukončení všech plateb;',
+        '  3. vrácení částek zaplacených za období po ukončení smlouvy.'];
+    },
+    identity: ({ you, c }) => [`Smluvní strana: ${you.name}`, `Adresa: ${you.address}`, `Kontaktní e-mail: ${you.email}`,
+      `Zákaznické číslo / číslo smlouvy: ${you.customerId || '[doplňte]'}`,
+      ...(c.url ? [`Uzavřeno přes: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Otisk přijatých podmínek (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['S pozdravem', '', you.name, '', 'Podpis _______________________', `Datum ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Užitečné právní odkazy:', ...refs.map((r) => `  · ${r}`), '',
+      'Dokument vytvořený automaticky službou AnteFirma na základě analyzovaných podmínek.',
+      'Před odesláním zkontrolujte údaje v hranatých závorkách. Nejde o právní poradenství.'].join('\n'),
+    subject: { withdrawal: (p) => `Odstoupení od smlouvy — ${p}`, cancellation: (p) => `Výpověď smlouvy — ${p}`, change_withdrawal: (p) => `Výpověď po změně podmínek — ${p}` },
+    refs: {
+      withdrawal: ['Zákon č. 89/2012 Sb., občanský zákoník, § 1829–1837 — odstoupení od smlouvy uzavřené distančním způsobem',
+        'Nařízení vlády č. 363/2013 Sb. — vzorový formulář pro odstoupení od smlouvy', 'Směrnice 2011/83/EU'],
+      cancellation: ['Zákon č. 89/2012 Sb., občanský zákoník, § 1813–1815 — zakázaná ujednání ve spotřebitelských smlouvách',
+        'Směrnice 93/13/EHS, příloha, bod 1 písm. h) — automatické prodloužení s nepřiměřeně časnou lhůtou'],
+      change_withdrawal: ['Zákon č. 89/2012 Sb., občanský zákoník, § 1752 — změna obchodních podmínek a právo smlouvu vypovědět',
+        'Směrnice 93/13/EHS, příloha, bod 1 písm. j) a l)'],
+    },
+  },
+
 };
 
 /**
@@ -626,7 +801,8 @@ const COUNTRY_REFS = {
 const SENDING = {
   it: 'sendWayProvesDateCertifiedEmail', es: 'sendWayProvesDateBurofaxRegistered', en: 'sendWayProvesDateRecordedDelivery',
   de: 'sendWayProvesDateEinschreiben', fr: 'sendWayProvesDateLettreRecommandee', nl: 'sendWayProvesDateAangetekend',
-  pl: 'sendWayProvesDateListPolecony', pt: 'sendWayProvesDateCartaRegistada',
+  pl: 'sendWayProvesDateListPolecony', pt: 'sendWayProvesDateCartaRegistada', sv: 'sendWayProvesDateRekommenderat',
+  ro: 'sendWayProvesDateScrisoareRecomandata', cs: 'sendWayProvesDateDoporucenyDopis',
 };
 
 /** The advice next to the letter: in the user's language, with the sending method of the letter's country. */

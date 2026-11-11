@@ -1,0 +1,60 @@
+Odstoupení od smlouvy — Saas_fair
+odstoupeni-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Komu: Saas_fair
+[Adresa poskytovatele / e-mail uvedený v podmínkách]
+
+Místo a datum: ______________, 15. srpna 2026
+
+Odesláno: ☐ doporučeným dopisem s dodejkou   ☐ datovou schránkou   ☐ online formulářem   ☐ e-mailem
+
+Věc: odstoupení od smlouvy
+
+Vážení,
+
+tímto oznamuji, že odstupuji od smlouvy o poskytování
+služby "SaaS mensile senza vincoli" (odhadovaný závazek 12,00 €), uzavřené dne 15. srpna 2026.
+
+Využívám práva odstoupit od smlouvy uzavřené distančním způsobem ve lhůtě čtrnácti dnů
+od jejího uzavření, bez uvedení důvodu a bez nákladů.
+
+Žádám proto o:
+  1. okamžité ukončení služby a všech souvisejících plateb;
+  2. vrácení všech přijatých plateb do čtrnácti dnů od doručení
+     tohoto oznámení, stejným platebním prostředkem;
+  3. písemné potvrzení přijetí tohoto oznámení.
+
+Smluvní strana: Mario Rossi
+Adresa: Via Roma 1, 20100 Milano
+Kontaktní e-mail: mario.rossi@example.com
+Zákaznické číslo / číslo smlouvy: C-42
+Uzavřeno přes: https://saas_fair.test/checkout
+
+S pozdravem
+
+Mario Rossi
+
+Podpis _______________________
+Datum 15. srpna 2026
+
+—
+Užitečné právní odkazy:
+  · Zákon č. 89/2012 Sb., občanský zákoník, § 1829–1837 — odstoupení od smlouvy uzavřené distančním způsobem
+  · Nařízení vlády č. 363/2013 Sb. — vzorový formulář pro odstoupení od smlouvy
+  · Směrnice 2011/83/EU
+
+Dokument vytvořený automaticky službou AnteFirma na základě analyzovaných podmínek.
+Před odesláním zkontrolujte údaje v hranatých závorkách. Nejde o právní poradenství.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: doporučený dopis s dodejkou (raccomandata con ricevuta di ritorno), datová schránka o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zákon č. 89/2012 Sb., občanský zákoník, § 1829–1837 — odstoupení od smlouvy uzavřené distančním způsobem
+Nařízení vlády č. 363/2013 Sb. — vzorový formulář pro odstoupení od smlouvy
+Směrnice 2011/83/EU

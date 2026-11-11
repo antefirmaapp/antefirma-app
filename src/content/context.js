@@ -16,11 +16,13 @@
   /**
    * Word forms ("29,90 euro al mese") count as much as the symbol: without them,
    * the price of a page that doesn't use "€" was not seen at all. Postfix only,
-   * as in core/text.js: in Italian the unit follows the amount.
+   * as in core/text.js: in Italian the unit follows the amount. The same goes
+   * for the zloty, the Swedish and Czech crown and the Romanian leu
+   * ("49 zł", "99 kr/mån", "29,99 lei pe lună", "199 Kč měsíčně").
    */
-  const CURRENCY_WORD = { euro: 'EUR', euros: 'EUR', dollari: 'USD', sterline: 'GBP', franchi: 'CHF' };
+  const CURRENCY_WORD = { euro: 'EUR', euros: 'EUR', dollari: 'USD', sterline: 'GBP', franchi: 'CHF', 'zł': 'PLN', kr: 'SEK', lei: 'RON', 'kč': 'CZK' };
   const AMOUNT_RE =
-    /(?:([€$£¥])|\b(EUR|USD|GBP|CHF)\b)\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)|(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*(?:([€$£¥])|\b(EUR|USD|GBP|CHF)\b|\b(euros?|dollari|sterline|franchi)\b)/gi;
+    /(?:([€$£¥])|\b(EUR|USD|GBP|CHF|PLN|SEK|RON|CZK)\b)\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)|(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)\s*(?:([€$£¥])|\b(EUR|USD|GBP|CHF|PLN|SEK|RON|CZK)\b|\b(euros?|dollari|sterline|franchi|zł|kr|lei|kč)(?![\wÀ-ɏ]))/gi;
 
   /**
    * Period words in the six languages. Accented words cannot use \b (it only
@@ -39,6 +41,12 @@
     [/\/\s*(?:tydz\.?|tydzie(?:ń|n))(?![\wÀ-ɏ])|(?<![\wÀ-ɏ])(?:tygodniowo|na\s+tydzie(?:ń|n)|por\s+semana)(?![\wÀ-ɏ])/i, 'week'],
     [/(?<![\wÀ-ɏ])(?:dziennie|na\s+dzie(?:ń|n)|por\s+dia|ao\s+dia)(?![\wÀ-ɏ])/i, 'day'],
     [/(?<![\wÀ-ɏ])(?:kwartalnie|na\s+kwarta(?:ł|l)|por\s+trimestre)(?![\wÀ-ɏ])/i, 'quarter'],
+    // Swedish, Romanian and Czech, appended for the same reason.
+    [/\/\s*(?:m(?:å|a)n(?:ad)?|lun(?:ă|a)|m(?:ě|e)s(?:\.|(?:í|i)c)?)(?![\wÀ-ɏ])|(?<![\wÀ-ɏ])(?:per\s+m(?:å|a)nad|i\s+m(?:å|a)naden|m(?:å|a)nadsvis|pe\s+lun(?:ă|a)|lunar|m(?:ě|e)s(?:í|i)(?:č|c)n(?:ě|e)|za\s+m(?:ě|e)s(?:í|i)c|na\s+m(?:ě|e)s(?:í|i)c)(?![\wÀ-ɏ])/i, 'month'],
+    [/\/\s*(?:(?:å|a)r)(?![\wÀ-ɏ])|(?<![\wÀ-ɏ])(?:per\s+(?:å|a)r|om\s+(?:å|a)ret|(?:å|a)rligen|pe\s+an|ro(?:č|c)n(?:ě|e))(?![\wÀ-ɏ])/i, 'year'],
+    [/\/\s*(?:vecka|s(?:ă|a)pt(?:\.|(?:ă|a)m(?:â|a)n(?:ă|a))?|t(?:ý|y)den)(?![\wÀ-ɏ])|(?<![\wÀ-ɏ])(?:per\s+vecka|i\s+veckan|pe\s+s(?:ă|a)pt(?:ă|a)m(?:â|a)n(?:ă|a)|s(?:ă|a)pt(?:ă|a)m(?:â|a)nal|t(?:ý|y)dn(?:ě|e)|za\s+t(?:ý|y)den)(?![\wÀ-ɏ])/i, 'week'],
+    [/(?<![\wÀ-ɏ])(?:om\s+dagen|pe\s+zi|zilnic|denn(?:ě|e)|za\s+den)(?![\wÀ-ɏ])/i, 'day'],
+    [/(?<![\wÀ-ɏ])(?:per\s+kvartal|kvartalsvis|pe\s+trimestru|trimestrial|(?:č|c)tvrtletn(?:ě|e)|za\s+(?:č|c)tvrtlet(?:í|i))(?![\wÀ-ɏ])/i, 'quarter'],
   ];
 
   /**
@@ -65,6 +73,13 @@
     /(?<![\wÀ-ɏ])(?<n>\d{1,2})\s*(?<u>dias?|meses|m(?:ê|e)s|semanas?)\s+(?:gr(?:á|a)tis|gratuitos?|de\s+experi(?:ê|e)ncia|de\s+teste)/i,
     /(?<![\wÀ-ɏ])per(?:í|i)odo\s+(?:experimental|de\s+teste)\s+(?:gratuito\s+)?(?:de\s+)?(?<n>\d{1,2})\s*(?<u>dias?|meses|m(?:ê|e)s|semanas?)/i,
     /(?<![\wÀ-ɏ])(?:pierwszy\s+miesi(?:ą|a)c\s+(?:za\s+darmo|gratis)|primeiro\s+m(?:ê|e)s\s+(?:gr(?:á|a)tis|gratuito|oferta))(?![\wÀ-ɏ])/i,
+    /(?<![\wÀ-ɏ])(?<n>\d{1,2})\s*(?<u>dag(?:ar|ars)?|m(?:å|a)nad(?:er|ers)?|veck(?:a|or|ors))\s+(?:gratis|kostnadsfritt|(?:gratis\s+)?provperiod)/i,
+    /(?<![\wÀ-ɏ])(?:gratis\s+(?:i\s+)?|(?:gratis\s+)?provperiod\s+(?:p(?:å|a)\s+|i\s+)?)(?<n>\d{1,2})\s*(?<u>dag(?:ar|ars)?|m(?:å|a)nad(?:er|ers)?|veck(?:a|or|ors))/i,
+    /(?<![\wÀ-ɏ])(?<n>\d{1,2})\s*(?<u>zi(?:le)?|lun(?:ă|a|i)|s(?:ă|a)pt(?:ă|a)m(?:â|a)n(?:ă|a|i))\s+(?:gratuit(?:e|ă|a)?|gratis|de\s+prob(?:ă|a))/i,
+    /(?<![\wÀ-ɏ])(?:perioad(?:ă|a)\s+de\s+prob(?:ă|a)\s+(?:gratuit(?:ă|a)\s+)?(?:de\s+)?|gratuit\s+timp\s+de\s+)(?<n>\d{1,2})\s*(?<u>zi(?:le)?|lun(?:ă|a|i)|s(?:ă|a)pt(?:ă|a)m(?:â|a)n(?:ă|a|i))/i,
+    /(?<![\wÀ-ɏ])(?<n>\d{1,2})\s*(?<u>dn(?:í|ů|i|u|y)|den|m(?:ě|e)s(?:í|i)c(?:e|ů|u)?|t(?:ý|y)d(?:en|ny|nů|nu))\s+(?:zdarma|zku(?:š|s)ebn(?:ě|e))/i,
+    /(?<![\wÀ-ɏ])(?:zku(?:š|s)ebn(?:í|i)\s+(?:doba|obdob(?:í|i)|verze)\s+(?:zdarma\s+)?(?:na\s+)?|zdarma\s+na\s+)(?<n>\d{1,2})\s*(?<u>dn(?:í|ů|i|u|y)|den|m(?:ě|e)s(?:í|i)c(?:e|ů|u)?|t(?:ý|y)d(?:en|ny|nů|nu))/i,
+    /(?<![\wÀ-ɏ])(?:f(?:ö|o)rsta\s+m(?:å|a)naden\s+gratis|prima\s+lun(?:ă|a)\s+(?:gratuit(?:ă|a)?|gratis)|prvn(?:í|i)\s+m(?:ě|e)s(?:í|i)c\s+zdarma)(?![\wÀ-ɏ])/i,
   ];
 
   /** The first free trial in a text: { raw, months } or null. */
@@ -74,7 +89,7 @@
       if (!m) continue;
       const n = Number(m.groups?.n || 1);
       const u = (m.groups?.u || 'month').toLowerCase();
-      const months = /^(giorn|day|d[ií]a|tag|jour|dag|dni|dzie)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek|tydz|tygod)/.test(u) ? n / 4.345 : n;
+      const months = /^(giorn|day|d[ií]a|tag|jour|dag|dni|dzie|zi|dn|den)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek|tydz|tygod|veck|s[ăa]pt|t[ýy]d)/.test(u) ? n / 4.345 : n;
       return { raw: m[0].replace(/\s+/g, ' ').trim(), months };
     }
     return null;
@@ -178,7 +193,7 @@
    */
   const STRIKE_TAGS = new Set(['S', 'DEL', 'STRIKE']);
   const STRIKE_CLASS_RE = /strike|barrat|line-?through|original|list-?price|old-?price|prezzo-?pieno|full-?price|\bwas\b/i;
-  const PRICEY_RE = /[€$£¥]|\b(?:EUR|USD|GBP|CHF|euros?|dollari|sterline)\b/i;
+  const PRICEY_RE = /[€$£¥]|\b(?:EUR|USD|GBP|CHF|PLN|SEK|RON|CZK|euros?|dollari|sterline)\b|\d\s*(?:zł|kr|lei|kč)(?![\wÀ-ɏ])/i;
 
   function isStruck(el) {
     let node = el;

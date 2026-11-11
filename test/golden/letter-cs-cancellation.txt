@@ -1,0 +1,59 @@
+Výpověď smlouvy — Saas_fair
+vypoved-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Komu: Saas_fair
+[Adresa poskytovatele / e-mail uvedený v podmínkách]
+
+Místo a datum: ______________, 15. srpna 2026
+
+Odesláno: ☐ doporučeným dopisem s dodejkou   ☐ datovou schránkou   ☐ online formulářem   ☐ e-mailem
+
+Věc: výpověď smlouvy — bez automatického prodloužení
+
+Vážení,
+
+tímto vypovídám smlouvu týkající se "SaaS mensile senza vincoli" (odhadovaný závazek 12,00 €),
+uzavřenou dne 15. srpna 2026.
+
+Výpověď podávám, aby se smlouva neprodloužila dne 15. září 2026,
+s dodržením výpovědní lhůty stanovené v podmínkách smlouvy.
+
+Žádám proto o:
+  1. písemné potvrzení přijetí výpovědi a data její účinnosti;
+  2. ukončení všech plateb od tohoto data;
+  3. vyčíslení případných částek, které považujete za dlužné, s uvedením ujednání, z něhož vyplývají.
+
+Nepřijmu žádné platby za období po uvedeném datu ukončení.
+
+Smluvní strana: Mario Rossi
+Adresa: Via Roma 1, 20100 Milano
+Kontaktní e-mail: mario.rossi@example.com
+Zákaznické číslo / číslo smlouvy: C-42
+Uzavřeno přes: https://saas_fair.test/checkout
+
+S pozdravem
+
+Mario Rossi
+
+Podpis _______________________
+Datum 15. srpna 2026
+
+—
+Užitečné právní odkazy:
+  · Zákon č. 89/2012 Sb., občanský zákoník, § 1813–1815 — zakázaná ujednání ve spotřebitelských smlouvách
+  · Směrnice 93/13/EHS, příloha, bod 1 písm. h) — automatické prodloužení s nepřiměřeně časnou lhůtou
+
+Dokument vytvořený automaticky službou AnteFirma na základě analyzovaných podmínek.
+Před odesláním zkontrolujte údaje v hranatých závorkách. Nejde o právní poradenství.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: doporučený dopis s dodejkou (raccomandata con ricevuta di ritorno), datová schránka o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zákon č. 89/2012 Sb., občanský zákoník, § 1813–1815 — zakázaná ujednání ve spotřebitelských smlouvách
+Směrnice 93/13/EHS, příloha, bod 1 písm. h) — automatické prodloužení s nepřiměřeně časnou lhůtou
