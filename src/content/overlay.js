@@ -22,7 +22,7 @@
    * The help page on the warning, per interface language. A content script can't
    * import core/help.js: test/help.test.mjs checks these match helpUrl('warning').
    */
-  const WARNING_HELP = { it: '/aiuto/l-avviso/', en: '/en/help/the-warning/', es: '/es/ayuda/el-aviso/', de: '/de/hilfe/die-warnung/', fr: '/fr/aide/l-avertissement/', nl: '/nl/hulp/de-waarschuwing/', pl: '/pl/pomoc/ostrzezenie/', pt: '/pt/ajuda/o-aviso/', sv: '/sv/hjalp/varningen/', ro: '/ro/ajutor/avertismentul/', cs: '/cs/napoveda/upozorneni/', da: '/da/hjaelp/advarslen/', fi: '/fi/ohje/varoitus/', no: '/no/hjelp/advarselen/', sk: '/sk/pomocnik/upozornenie/', hu: '/hu/sugo/a-figyelmeztetes/', el: '/el/voitheia/i-proeidopoiisi/' };
+  const WARNING_HELP = { it: '/aiuto/l-avviso/', en: '/en/help/the-warning/', es: '/es/ayuda/el-aviso/', de: '/de/hilfe/die-warnung/', fr: '/fr/aide/l-avertissement/', nl: '/nl/hulp/de-waarschuwing/', pl: '/pl/pomoc/ostrzezenie/', pt: '/pt/ajuda/o-aviso/', sv: '/sv/hjalp/varningen/', ro: '/ro/ajutor/avertismentul/', cs: '/cs/napoveda/upozorneni/', da: '/da/hjaelp/advarslen/', fi: '/fi/ohje/varoitus/', no: '/no/hjelp/advarselen/', sk: '/sk/pomocnik/upozornenie/', hu: '/hu/sugo/a-figyelmeztetes/', el: '/el/voitheia/i-proeidopoiisi/', hr: '/hr/pomoc/upozorenje/', sl: '/sl/pomoc/opozorilo/', bg: '/bg/pomosht/preduprezhdenieto/' };
   const t = (s, v) => I.t(s, v);
   const tn = (n, one, many, v) => I.tn(n, one, many, v);
 

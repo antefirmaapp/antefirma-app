@@ -90,6 +90,21 @@ export const PAGE = {
     q: ['ελάχιστη διάρκεια 12 μηνών', 'ανανεώνεται αυτόματα για ακόμη ένα έτος', 'τουλάχιστον 30 ημέρες νωρίτερα', 'τέλος 120 €'],
     why: ['Για έναν χρόνο πρέπει να πληρώνετε.', 'Αν δεν καταγγείλετε εγκαίρως, πληρώνετε άλλον έναν χρόνο.', 'Η καταγγελία πρέπει να φτάσει έναν μήνα νωρίτερα.', 'Η πρόωρη αποχώρηση κοστίζει 120 €.'],
     summary: 'Δεσμεύεστε για έναν χρόνο: ανανεώνεται μόνη της και η πρόωρη αποχώρηση κοστίζει 120 €.', you: { name: 'Μαρία Παπαδοπούλου', address: 'Ερμού 1, 105 63 Αθήνα', email: 'maria.papadopoulou@paradeigma.gr' } },
+  hr: { title: 'Fitness Horizont — Članstvo Plus', name: 'Članstvo Plus', per: 'mjesečno', btn: 'Pretplati se', feats: ['Neograničena teretana i treninzi', 'Otvoreno 7 dana u tjednu', 'Aplikacija s planovima treninga'],
+    terms: 'Članstvo ima minimalno trajanje od 12 mjeseci od aktivacije. Ugovor se automatski produljuje za još godinu dana ako se ne otkaže najmanje 30 dana unaprijed. Prijevremeni raskid stoji naknadu od 120 €. Upisnina se ne vraća.',
+    q: ['minimalno trajanje od 12 mjeseci', 'automatski produljuje za još godinu dana', 'najmanje 30 dana unaprijed', 'naknadu od 120 €'],
+    why: ['Godinu dana morate plaćati.', 'Ako ne otkažete na vrijeme, plaćate još godinu.', 'Otkaz mora stići mjesec dana ranije.', 'Raniji izlazak stoji 120 €.'],
+    summary: 'Obvezujete se na godinu dana: sam se produljuje, a raniji izlazak stoji 120 €.', you: { name: 'Ana Horvat', address: 'Ilica 1, 10000 Zagreb', email: 'ana.horvat@primjer.hr' } },
+  sl: { title: 'Fitnes Horizont — Članstvo Plus', name: 'Članstvo Plus', per: 'na mesec', btn: 'Naroči se', feats: ['Neomejen fitnes in vadbe', 'Odprto 7 dni v tednu', 'Aplikacija z načrti vadbe'],
+    terms: 'Članstvo ima minimalno trajanje 12 mesecev od aktivacije. Pogodba se samodejno podaljša za še eno leto, če ni odpovedana vsaj 30 dni vnaprej. Predčasna prekinitev stane nadomestilo 120 €. Vpisnina se ne vrne.',
+    q: ['minimalno trajanje 12 mesecev', 'samodejno podaljša za še eno leto', 'vsaj 30 dni vnaprej', 'nadomestilo 120 €'],
+    why: ['Eno leto morate plačevati.', 'Če ne odpoveste pravočasno, plačate še eno leto.', 'Odpoved mora prispeti mesec prej.', 'Predčasni izstop stane 120 €.'],
+    summary: 'Zavežete se za eno leto: podaljša se samo, predčasni izstop pa stane 120 €.', you: { name: 'Ana Novak', address: 'Slovenska cesta 1, 1000 Ljubljana', email: 'ana.novak@primer.si' } },
+  bg: { title: 'Фитнес Хоризонт — Членство Plus', name: 'Членство Plus', per: 'на месец', btn: 'Абонирай се', feats: ['Неограничен фитнес и тренировки', 'Отворено 7 дни в седмицата', 'Приложение с тренировъчни планове'],
+    terms: 'Членството има минимален срок от 12 месеца от активирането. Договорът се подновява автоматично за още една година, ако не бъде прекратен поне 30 дни предварително. Предсрочното прекратяване струва такса от 120 €. Таксата за записване не се връща.',
+    q: ['минимален срок от 12 месеца', 'се подновява автоматично за още една година', 'поне 30 дни предварително', 'такса от 120 €'],
+    why: ['Една година трябва да плащате.', 'Ако не прекратите навреме, плащате още една година.', 'Прекратяването трябва да пристигне месец по-рано.', 'По-ранното излизане струва 120 €.'],
+    summary: 'Обвързвате се за година: подновява се сам, а по-ранното излизане струва 120 €.', you: { name: 'Мария Иванова', address: 'ул. „Витоша“ 1, 1000 София', email: 'maria.ivanova@primer.bg' } },
 };
 export const page = (l) => {
   const p = PAGE[l];
@@ -110,7 +125,7 @@ document.getElementById('f').addEventListener('submit',(e)=>{e.preventDefault();
 };
 
 // An invented domain (.example doesn't exist): the warning and the letter show the site's name, not 127.0.0.1.
-export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example', sv: 'gym-horisont.example', ro: 'sala-orizont.example', cs: 'posilovna-horizont.example', da: 'fitness-horisont.example', fi: 'kuntosali-horisontti.example', no: 'treningssenter-horisont.example', sk: 'fitnes-horizont.example', hu: 'horizont-fitnesz.example', el: 'gymnastirio-orizontas.example' };
+export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example', sv: 'gym-horisont.example', ro: 'sala-orizont.example', cs: 'posilovna-horizont.example', da: 'fitness-horisont.example', fi: 'kuntosali-horisontti.example', no: 'treningssenter-horisont.example', sk: 'fitnes-horizont.example', hu: 'horizont-fitnesz.example', el: 'gymnastirio-orizontas.example', hr: 'fitness-horizont.example.hr', sl: 'fitnes-horizont.example.si', bg: 'fitnes-horizont.example.bg' };
 
 export const verdict = (l) => {
   const p = PAGE[l];
