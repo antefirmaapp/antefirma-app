@@ -27,7 +27,7 @@ const { chromium } = createRequire(import.meta.url)('playwright');
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const VIDEO = !args.includes('--no-video');
-const LANGS = args.find((a) => a.startsWith('--lang='))?.slice(7).split(',') || ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg'];
+const LANGS = args.find((a) => a.startsWith('--lang='))?.slice(7).split(',') || ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et'];
 const OUT = resolve(args.find((a) => !a.startsWith('--')) || join(ROOT, '..', 'antefirma-site', 'assets', 'help'));
 const PANEL = { width: 420, height: 760 };
 const SITE = { width: 1180, height: 760 };

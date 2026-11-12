@@ -1,0 +1,59 @@
+Lõpetamine tingimuste muutmise tõttu — Saas_fair
+ulesutlemine-muudatuse-tottu-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Saaja: Saas_fair
+[Teenusepakkuja aadress / tingimustes märgitud e-post]
+
+Koht ja kuupäev: ______________, 15. august 2026
+
+Saadetud: ☐ tähitud kirjaga väljastusteatega   ☐ veebivormiga   ☐ e-postiga
+
+Teema: lepingu lõpetamine tingimuste ühepoolse muutmise tõttu
+
+Lugupeetud pakkuja
+
+Tuvastasin, et teenuse leping "SaaS mensile senza vincoli" (hinnanguline kohustus 12,00 €) on muutunud
+võrreldes tingimustega, millega nõustusin 15. august 2026.
+
+Muudatus puudutab teenuse hinda või tingimusi.
+
+Kuna ma uute tingimustega ei nõustu, lõpetan lepingu viivitamata,
+ilma leppetrahvi ja kuludeta, sest muudatus tehti ühepoolselt
+ja mitte minu soovil.
+
+Seetõttu palun:
+  1. kinnitada kirjalikult lepingu lõppemist ja selle kuupäeva;
+  2. lõpetada kõik maksed;
+  3. tagastada summad, mis on makstud lepingu lõppemise järgsete perioodide eest.
+
+Lepingupool: Mario Rossi
+Aadress: Via Roma 1, 20100 Milano
+Kontakt-e-post: mario.rossi@example.com
+Kliendi- / lepingunumber: C-42
+Sõlmitud kaudu: https://saas_fair.test/checkout
+
+Lugupidamisega
+
+Mario Rossi
+
+Allkiri _______________________
+Kuupäev: 15. august 2026
+
+—
+Kasulikud õigusaktid:
+  · Võlaõigusseadus, § 42 — hinna või tingimuste ühepoolne muutmine
+  · Direktiiv 93/13/EMÜ, lisa, punkt 1 alapunktid j ja l
+
+Dokumendi koostas automaatselt AnteFirma analüüsitud tingimuste põhjal.
+Enne saatmist kontrollige nurksulgudes andmeid. See ei ole õigusnõu.
+
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: tähitud kiri väljastusteatega (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Võlaõigusseadus, § 42 — hinna või tingimuste ühepoolne muutmine
+Direktiiv 93/13/EMÜ, lisa, punkt 1 alapunktid j ja l

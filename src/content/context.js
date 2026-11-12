@@ -79,6 +79,12 @@
     [/\/\s*(?:tjedan|teden|седмица)(?![\wÀ-ɏͰ-ϿЀ-ӿ])|(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:tjedno|na\s+tjedan|tedensko|na\s+teden|седмично|на\s+седмица)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'week'],
     [/(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:dnevno|na\s+dan|дневно|на\s+ден)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'day'],
     [/(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:tromjese(?:č|c)no|(?:č|c)etrtletno|тримесечно)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'quarter'],
+    // Lithuanian, Latvian and Estonian, appended for the same reason.
+    [/\/\s*(?:m(?:ė|e)n(?:\.|esį|esi)?|m(?:ē|e)n(?:\.|esī)?|kuu)(?![\wÀ-ɏͰ-ϿЀ-ӿ])|(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:per\s+m(?:ė|e)nes(?:į|i)|m(?:ė|e)nesiui|kas\s+m(?:ė|e)nes(?:į|i)|m(?:ē|e)nes(?:ī|i)|par\s+m(?:ē|e)nesi|katru\s+m(?:ē|e)nesi|kuus|kuu\s+kohta|igakuiselt)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'month'],
+    [/\/\s*(?:metus|m\.|gad(?:ā|a)|aasta|a\.)(?![\wÀ-ɏͰ-ϿЀ-ӿ])|(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:per\s+metus|metams|kasmet|gad(?:ā|a)|par\s+gadu|katru\s+gadu|aastas|aasta\s+kohta)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'year'],
+    [/\/\s*(?:sav\.?|ned\.?|n(?:ä|a)dal)(?![\wÀ-ɏͰ-ϿЀ-ӿ])|(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:per\s+savait(?:ę|e)|ned(?:ē|e)(?:ļ|l)(?:ā|a)|n(?:ä|a)dalas)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'week'],
+    [/(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:per\s+dien(?:ą|a)|dien(?:ā|a)|p(?:ä|a)evas)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'day'],
+    [/(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:per\s+ketvirt(?:į|i)|ceturksn(?:ī|i)|kvartalis)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'quarter'],
   ];
 
   /**
@@ -127,6 +133,9 @@
     /(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?<n>\d{1,2})\s*(?<u>dan(?:a)?|dni|dneh|mjesec(?:a|i)?|mesec(?:a|e|ev)?|tjed(?:an|na|ana)|ted(?:en|na|ne|nov)|дни|ден|месец(?:а)?|седмиц(?:а|и))\s+(?:besplatno|brezpla(?:č|c)no|безплатно)/i,
     /(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:besplatn\w*\s+(?:probn\w*\s+)?(?:razdoblje\s+)?(?:od\s+|na\s+)?|brezpla(?:č|c)n\w*\s+(?:preizkus\w*\s+)?(?:za\s+)?|безплат\S*\s+(?:пробен\s+)?(?:период\s+)?(?:от\s+|за\s+)?)(?<n>\d{1,2})\s*(?<u>dan(?:a)?|dni|dneh|mjesec(?:a|i)?|mesec(?:a|e|ev)?|tjed(?:an|na|ana)|ted(?:en|na|ne|nov)|дни|ден|месец(?:а)?|седмиц(?:а|и))/i,
     /(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:prvi\s+mjesec\s+besplatno|prvi\s+mesec\s+brezpla(?:č|c)no|първи(?:ят)?\s+месец\s+безплатно)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i,
+    /(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?<n>\d{1,2})\s*(?<u>dien(?:ų|os|a|as|u)|m(?:ė|e)n(?:esiai|esių|esį|uo)|m(?:ē|e)ne(?:š|s)(?:i|us|a)|savait(?:ės|ę|ės|ė)|ned(?:ē|e)(?:ļ|l)(?:as|u|a)|p(?:ä|a)ev(?:a|ad)?|kuu(?:d|ks)?|n(?:ä|a)dal(?:at|a)?)\s+(?:nemokamai|bez\s+maksas|tasuta)/i,
+    /(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:nemokam\w*\s+(?:bandom\w*\s+)?(?:laikotarp\w*\s+)?|bezmaksas\s+(?:izm(?:ē|e)(?:ģ|g)in(?:ā|a)jum\w*\s+)?(?:periods?\s+)?|tasuta\s+(?:prooviperiood\w*\s+)?)(?<n>\d{1,2})\s*(?<u>dien(?:ų|os|a|as|u)|m(?:ė|e)n(?:esiai|esių|esį|uo)|m(?:ē|e)ne(?:š|s)(?:i|us|a)|savait(?:ės|ę|ės|ė)|ned(?:ē|e)(?:ļ|l)(?:as|u|a)|p(?:ä|a)ev(?:a|ad)?|kuu(?:d|ks)?|n(?:ä|a)dal(?:at|a)?)/i,
+    /(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:pirmas\s+m(?:ė|e)nuo\s+nemokamai|pirmais\s+m(?:ē|e)nesis\s+bez\s+maksas|esimene\s+kuu\s+tasuta)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i,
   ];
 
   /** The first free trial in a text: { raw, months } or null. */
@@ -136,7 +145,7 @@
       if (!m) continue;
       const n = Number(m.groups?.n || 1);
       const u = (m.groups?.u || 'month').toLowerCase();
-      const months = /^(giorn|day|d[ií]a|tag|jour|dag|dni|dzie|zi|dn|den|de[ňn]|p[äa]iv|nap|ημ[έε]ρ|dan|дн|ден)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek|tydz|tygod|veck|s[ăa]pt|t[ýy]d|uge|uke|viik|t[ýy][žz]d|h[ée]t|εβδομ|tjed|ted|седм)/.test(u) ? n / 4.345 : n;
+      const months = /^(giorn|day|d[ií]a|tag|jour|dag|dni|dzie|zi|dn|den|de[ňn]|p[äa]iv|nap|ημ[έε]ρ|dan|дн|ден|dien|p[äa]ev)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek|tydz|tygod|veck|s[ăa]pt|t[ýy]d|uge|uke|viik|t[ýy][žz]d|h[ée]t|εβδομ|tjed|ted|седм|savait|ned[ēe]|n[äa]dal)/.test(u) ? n / 4.345 : n;
       return { raw: m[0].replace(/\s+/g, ' ').trim(), months };
     }
     return null;

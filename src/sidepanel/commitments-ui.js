@@ -488,7 +488,7 @@ export async function showLetter(id, kind = null, lang = null) {
   const letter = await send('BUILD_LETTER', { id, kind, lang });
   // Names in their own language, like the language menu in settings; countries that share a language keep their own laws.
   const langs = [['it', 'Italiano'], ['es', 'Español'], ['en', 'English (UK)'], ['en-IE', 'English (Ireland)'], ['en-MT', 'English (Malta)'], ['de', 'Deutsch (Deutschland)'], ['de-AT', 'Deutsch (Österreich)'], ['de-LU', 'Deutsch (Luxemburg)'],
-    ['fr', 'Français (France)'], ['fr-BE', 'Français (Belgique)'], ['fr-LU', 'Français (Luxembourg)'], ['nl', 'Nederlands (Nederland)'], ['nl-BE', 'Nederlands (België)'], ['pl', 'Polski'], ['pt', 'Português (Portugal)'], ['sv', 'Svenska'], ['ro', 'Română'], ['cs', 'Čeština'], ['da', 'Dansk'], ['fi', 'Suomi'], ['no', 'Norsk'], ['sk', 'Slovenčina'], ['hu', 'Magyar'], ['el', 'Ελληνικά (Ελλάδα)'], ['el-CY', 'Ελληνικά (Κύπρος)'], ['hr', 'Hrvatski'], ['sl', 'Slovenščina'], ['bg', 'Български']]
+    ['fr', 'Français (France)'], ['fr-BE', 'Français (Belgique)'], ['fr-LU', 'Français (Luxembourg)'], ['nl', 'Nederlands (Nederland)'], ['nl-BE', 'Nederlands (België)'], ['pl', 'Polski'], ['pt', 'Português (Portugal)'], ['sv', 'Svenska'], ['ro', 'Română'], ['cs', 'Čeština'], ['da', 'Dansk'], ['fi', 'Suomi'], ['no', 'Norsk'], ['sk', 'Slovenčina'], ['hu', 'Magyar'], ['el', 'Ελληνικά (Ελλάδα)'], ['el-CY', 'Ελληνικά (Κύπρος)'], ['hr', 'Hrvatski'], ['sl', 'Slovenščina'], ['bg', 'Български'], ['lt', 'Lietuvių'], ['lv', 'Latviešu'], ['et', 'Eesti']]
     .map(([k, label]) => `<option value="${k}" ${k === (letter.variant || letter.lang) ? 'selected' : ''}>${label}</option>`).join('');
 
   const options = Object.entries(LETTER_LABELS)

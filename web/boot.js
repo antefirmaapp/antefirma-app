@@ -22,6 +22,7 @@ const L = {
   da: ['Installér', 'Installér AnteFirma på computeren'], fi: ['Asenna', 'Asenna AnteFirma tietokoneelle'], no: ['Installer', 'Installer AnteFirma på datamaskinen'],
   sk: ['Inštalovať', 'Nainštalovať AnteFirma do počítača'], hu: ['Telepítés', 'Az AnteFirma telepítése a számítógépre'], el: ['Εγκατάσταση', 'Εγκατάσταση του AnteFirma στον υπολογιστή'],
   hr: ['Instaliraj', 'Instaliraj AnteFirmu na računalo'], sl: ['Namesti', 'Namesti AnteFirmo v računalnik'], bg: ['Инсталирай', 'Инсталирай AnteFirma на компютъра'],
+  lt: ['Įdiegti', 'Įdiegti AnteFirma kompiuteryje'], lv: ['Instalēt', 'Instalēt AnteFirma datorā'], et: ['Paigalda', 'Paigalda AnteFirma arvutisse'],
 }[(navigator.language || 'it').slice(0, 2)] || ['Installa', 'Installa AnteFirma sul computer'];
 addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();

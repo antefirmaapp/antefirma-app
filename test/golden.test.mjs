@@ -48,7 +48,7 @@ test('corpus verdicts are unchanged', async () => {
 
 test('panel result HTML is unchanged in every language', async () => {
   const c = CORPUS.find((x) => x.pricing?.recurring) || CORPUS[0];
-  for (const lang of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg']) {
+  for (const lang of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et']) {
     const v = await verdictOf(c, lang);
     v.engine.durationMs = 0; // timing differs on every run
     golden(`render-${lang}.html`, renderVerdict(v) + '\n');

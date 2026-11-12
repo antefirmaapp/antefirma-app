@@ -1,0 +1,59 @@
+Sutarties nutraukimas — Saas_fair
+nutraukimas-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Kam: Saas_fair
+[Paslaugų teikėjo adresas / sąlygose nurodytas el. paštas]
+
+Vieta ir data: ______________, 2026 m. rugpjūčio 15 d.
+
+Išsiųsta: ☐ registruotu laišku su įteikimo patvirtinimu   ☐ internetine forma   ☐ el. paštu
+
+Dėl: sutarties nutraukimo — be automatinio pratęsimo
+
+Gerbiamieji,
+
+šiuo nutraukiu paslaugos sutartį "SaaS mensile senza vincoli" (įvertintas įsipareigojimas 12,00 €)
+(sudaryta: 2026 m. rugpjūčio 15 d.).
+
+Nutraukiu ją, kad sutartis nebūtų automatiškai pratęsta (pratęsimo data: 2026 m. rugsėjo 15 d.),
+laikydamasis (-i) sutarties sąlygose nurodyto įspėjimo termino.
+
+Todėl prašau:
+  1. raštu patvirtinti nutraukimo gavimą ir datą, nuo kurios jis įsigalioja;
+  2. nuo tos datos nutraukti visus mokėjimus;
+  3. nurodyti sumas, kurias laikote mokėtinomis, ir sutarties sąlygą, kuria jos grindžiamos.
+
+Nesutinku su jokiais mokėjimais už laikotarpius po nurodytos pabaigos datos.
+
+Sutarties šalis: Mario Rossi
+Adresas: Via Roma 1, 20100 Milano
+Kontaktinis el. paštas: mario.rossi@example.com
+Kliento / sutarties numeris: C-42
+Sudaryta per: https://saas_fair.test/checkout
+
+Pagarbiai
+
+Mario Rossi
+
+Parašas _______________________
+Data: 2026 m. rugpjūčio 15 d.
+
+—
+Naudingi teisės aktai:
+  · Civilinis kodeksas, 6.188 str. — nesąžiningos vartojimo sutarčių sąlygos
+  · Direktyva 93/13/EEB, priedas, 1 punkto h papunktis — automatinis pratęsimas su nepagrįstai ankstyvu terminu
+
+Dokumentą automatiškai parengė AnteFirma pagal išanalizuotas sąlygas.
+Prieš siųsdami patikrinkite duomenis laužtiniuose skliaustuose. Tai ne teisinė konsultacija.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: registruotas laiškas su įteikimo patvirtinimu (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Civilinis kodeksas, 6.188 str. — nesąžiningos vartojimo sutarčių sąlygos
+Direktyva 93/13/EEB, priedas, 1 punkto h papunktis — automatinis pratęsimas su nepagrįstai ankstyvu terminu

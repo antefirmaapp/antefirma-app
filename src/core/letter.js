@@ -27,10 +27,10 @@ import { t, locale } from '../i18n/index.js';
  * such as 'de-AT' is the same text with the other country's laws. Dates and
  * amounts follow the variant's locale.
  */
-export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg'];
+export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et'];
 export const LETTER_VARIANTS = [...LETTER_LANGS, 'de-AT', 'fr-BE', 'nl-BE', 'en-IE', 'en-MT', 'el-CY', 'fr-LU', 'de-LU'];
-const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', 'en-IE': 'en-IE', 'en-MT': 'en-MT', 'el-CY': 'el-CY', 'fr-LU': 'fr-LU', 'de-LU': 'de-LU', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR', hr: 'hr-HR', sl: 'sl-SI', bg: 'bg-BG' };
-const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs', DK: 'da', FI: 'fi', NO: 'no', SK: 'sk', HU: 'hu', GR: 'el', IE: 'en-IE', MT: 'en-MT', CY: 'el-CY', HR: 'hr', SI: 'sl', BG: 'bg' };
+const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', 'en-IE': 'en-IE', 'en-MT': 'en-MT', 'el-CY': 'el-CY', 'fr-LU': 'fr-LU', 'de-LU': 'de-LU', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR', hr: 'hr-HR', sl: 'sl-SI', bg: 'bg-BG', lt: 'lt-LT', lv: 'lv-LV', et: 'et-EE' };
+const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs', DK: 'da', FI: 'fi', NO: 'no', SK: 'sk', HU: 'hu', GR: 'el', IE: 'en-IE', MT: 'en-MT', CY: 'el-CY', HR: 'hr', SI: 'sl', BG: 'bg', LT: 'lt', LV: 'lv', EE: 'et' };
 // Belgium and Luxembourg have more than one language: the letter follows the person's own.
 export const letterLangFor = (jurisdiction, uiLang = '') => {
   if (jurisdiction === 'BE') return uiLang === 'nl' ? 'nl-BE' : 'fr-BE';
@@ -71,6 +71,9 @@ const FILE_SLUGS = {
   hr: { withdrawal: 'jednostrani-raskid', cancellation: 'otkaz', change_withdrawal: 'raskid-zbog-promjene' },
   sl: { withdrawal: 'odstop', cancellation: 'odpoved', change_withdrawal: 'odpoved-po-spremembi' },
   bg: { withdrawal: 'otkaz', cancellation: 'prekratyavane', change_withdrawal: 'prekratyavane-sled-promyana' },
+  lt: { withdrawal: 'atsisakymas', cancellation: 'nutraukimas', change_withdrawal: 'nutraukimas-del-pakeitimu' },
+  lv: { withdrawal: 'atteikums', cancellation: 'uzteikums', change_withdrawal: 'uzteikums-pec-izmainam' },
+  et: { withdrawal: 'taganemine', cancellation: 'ulesutlemine', change_withdrawal: 'ulesutlemine-muudatuse-tottu' },
 };
 
 export const LETTER_LABELS = {
@@ -1295,6 +1298,178 @@ const TEXT = {
         'Директива 93/13/ЕИО, приложение, точка 1, букви й) и л)'],
     },
   },
+
+  // Lithuania: Civil Code (Civilinis kodeksas), art. 6.228¹⁰ (withdrawal) and 6.188 (unfair terms).
+  // Lithuanian long dates end with "d." ("2026 m. rugpjūčio 15 d."), so dates stay inside brackets.
+  lt: {
+    ph: { name: '[Vardas ir pavardė]', address: '[Adresas]', email: '[El. paštas]', provider: '[Paslaugų teikėjas]', service: '[paslaugos aprašymas]', date: '[data]' },
+    estimated: (x) => `(įvertintas įsipareigojimas ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Kam: ${provider}`,
+      '[Paslaugų teikėjo adresas / sąlygose nurodytas el. paštas]', '', `Vieta ir data: ______________, ${today}`, '',
+      'Išsiųsta: ☐ registruotu laišku su įteikimo patvirtinimu   ☐ internetine forma   ☐ el. paštu'].join('\n'),
+    withdrawal: (k) => ['Dėl: sutarties atsisakymo', '', 'Gerbiamieji,', '',
+      'šiuo pranešu, kad atsisakau paslaugos sutarties',
+      `${service(k)} (sudaryta: ${orderDate(k)}).`, '',
+      'Pasinaudoju teise atsisakyti nuotolinės sutarties per keturiolika dienų',
+      'nuo jos sudarymo, nenurodydamas (-a) priežasties ir be jokių išlaidų.', '', 'Todėl prašau:',
+      '  1. nedelsiant nutraukti paslaugos teikimą ir visus susijusius mokėjimus;',
+      '  2. grąžinti visas sumokėtas sumas ne vėliau kaip per keturiolika dienų nuo šio pranešimo',
+      '     gavimo, tuo pačiu mokėjimo būdu;', '  3. raštu patvirtinti, kad šį pranešimą gavote.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Dėl: sutarties nutraukimo — be automatinio pratęsimo', '', 'Gerbiamieji,', '',
+        `šiuo nutraukiu paslaugos sutartį ${service(k)}`, `(sudaryta: ${orderDate(k)}).`, '',
+        renewal ? `Nutraukiu ją, kad sutartis nebūtų automatiškai pratęsta (pratęsimo data: ${renewal}),`
+          : 'Nutraukiu ją, kad sutartis nebūtų automatiškai pratęsta pasibaigus laikotarpiui,',
+        notice ? `laikydamasis (-i) sąlygose nurodyto ${notice} d. įspėjimo termino${deadline ? ` (paskutinė diena: ${deadline})` : ''}.`
+          : 'laikydamasis (-i) sutarties sąlygose nurodyto įspėjimo termino.', '',
+        'Todėl prašau:', '  1. raštu patvirtinti nutraukimo gavimą ir datą, nuo kurios jis įsigalioja;',
+        '  2. nuo tos datos nutraukti visus mokėjimus;',
+        '  3. nurodyti sumas, kurias laikote mokėtinomis, ir sutarties sąlygą, kuria jos grindžiamos.', '',
+        'Nesutinku su jokiais mokėjimais už laikotarpius po nurodytos pabaigos datos.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Dėl: sutarties nutraukimo dėl vienašalio sąlygų pakeitimo', '', 'Gerbiamieji,', '',
+        `nustačiau, kad paslaugos sutartis ${service(k)} pasikeitė`, `palyginti su sąlygomis, su kuriomis sutikau (${orderDate(k)}).`, '',
+        ch?.summary ? `Konkrečiai: ${ch.summary}` : 'Pakeitimas susijęs su paslaugos kaina ar sąlygomis.', '',
+        'Kadangi nesutinku su naujomis sąlygomis, nutraukiu sutartį nedelsiant,',
+        'be netesybų ir išlaidų, nes pakeitimas padarytas vienašališkai', 'ir ne mano prašymu.', '',
+        'Todėl prašau:', '  1. raštu patvirtinti sutarties pabaigą ir jos datą;', '  2. nutraukti visus mokėjimus;',
+        '  3. grąžinti sumas, sumokėtas už laikotarpius po sutarties pabaigos.'];
+    },
+    identity: ({ you, c }) => [`Sutarties šalis: ${you.name}`, `Adresas: ${you.address}`, `Kontaktinis el. paštas: ${you.email}`,
+      `Kliento / sutarties numeris: ${you.customerId || '[įrašyti]'}`,
+      ...(c.url ? [`Sudaryta per: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Priimtų sąlygų atspaudas (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Pagarbiai', '', you.name, '', 'Parašas _______________________', `Data: ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Naudingi teisės aktai:', ...refs.map((r) => `  · ${r}`), '',
+      'Dokumentą automatiškai parengė AnteFirma pagal išanalizuotas sąlygas.',
+      'Prieš siųsdami patikrinkite duomenis laužtiniuose skliaustuose. Tai ne teisinė konsultacija.'].join('\n'),
+    subject: { withdrawal: (p) => `Sutarties atsisakymas — ${p}`, cancellation: (p) => `Sutarties nutraukimas — ${p}`, change_withdrawal: (p) => `Nutraukimas dėl sąlygų pakeitimo — ${p}` },
+    refs: {
+      withdrawal: ['Civilinis kodeksas, 6.228¹⁰ str. — teisė atsisakyti nuotolinės sutarties',
+        'Direktyva 2011/83/ES, I priedo B dalis — sutarties atsisakymo formos pavyzdys', 'Direktyva 2011/83/ES'],
+      cancellation: ['Civilinis kodeksas, 6.188 str. — nesąžiningos vartojimo sutarčių sąlygos',
+        'Direktyva 93/13/EEB, priedas, 1 punkto h papunktis — automatinis pratęsimas su nepagrįstai ankstyvu terminu'],
+      change_withdrawal: ['Civilinis kodeksas, 6.188 str. — vienašalis kainos ar sąlygų keitimas',
+        'Direktyva 93/13/EEB, priedas, 1 punkto j ir l papunkčiai'],
+    },
+  },
+
+  // Latvia: Consumer Rights Protection Law (Patērētāju tiesību aizsardzības likums) and Cabinet Regulation No. 255.
+  lv: {
+    ph: { name: '[Vārds un uzvārds]', address: '[Adrese]', email: '[E-pasts]', provider: '[Pakalpojuma sniedzējs]', service: '[pakalpojuma apraksts]', date: '[datums]' },
+    estimated: (x) => `(novērtētās saistības ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Adresāts: ${provider}`,
+      '[Pakalpojuma sniedzēja adrese / noteikumos norādītais e-pasts]', '', `Vieta un datums: ______________, ${today}`, '',
+      'Nosūtīts: ☐ ierakstītā vēstulē ar paziņojumu par saņemšanu   ☐ tiešsaistes veidlapā   ☐ pa e-pastu'].join('\n'),
+    withdrawal: (k) => ['Par: atteikumu no līguma', '', 'Godātie kungi un kundzes!', '',
+      'Ar šo paziņoju, ka atsakos no pakalpojuma līguma',
+      `${service(k)}, kas noslēgts ${orderDate(k)}.`, '',
+      'Izmantoju tiesības atteikties no distances līguma četrpadsmit dienu laikā',
+      'kopš tā noslēgšanas, nenorādot iemeslu un bez jebkādām izmaksām.', '', 'Tāpēc lūdzu:',
+      '  1. nekavējoties pārtraukt pakalpojuma sniegšanu un visus saistītos maksājumus;',
+      '  2. atmaksāt visas samaksātās summas ne vēlāk kā četrpadsmit dienu laikā pēc šī paziņojuma',
+      '     saņemšanas, izmantojot to pašu maksājuma veidu;', '  3. rakstiski apstiprināt šī paziņojuma saņemšanu.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Par: līguma uzteikumu — bez automātiskas pagarināšanas', '', 'Godātie kungi un kundzes!', '',
+        `Ar šo uzteicu pakalpojuma līgumu ${service(k)},`, `kas noslēgts ${orderDate(k)}.`, '',
+        renewal ? `Uzteicu to, lai līgums netiktu pagarināts ${renewal},`
+          : 'Uzteicu to, lai līgums netiktu automātiski pagarināts perioda beigās,',
+        notice ? `ievērojot noteikumos paredzēto ${notice} dienu uzteikuma termiņu${deadline ? ` (pēdējā diena: ${deadline})` : ''}.`
+          : 'ievērojot līguma noteikumos paredzēto uzteikuma termiņu.', '',
+        'Tāpēc lūdzu:', '  1. rakstiski apstiprināt uzteikuma saņemšanu un datumu, kad tas stājas spēkā;',
+        '  2. pārtraukt visus maksājumus no šī datuma;',
+        '  3. norādīt summas, kuras uzskatāt par maksājamām, un līguma noteikumu, uz kuru tās balstās.', '',
+        'Nepiekrītu nekādiem maksājumiem par periodiem pēc norādītā beigu datuma.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Par: līguma izbeigšanu vienpusēju noteikumu izmaiņu dēļ', '', 'Godātie kungi un kundzes!', '',
+        `Esmu konstatējis(-usi), ka pakalpojuma līgums ${service(k)} ir mainīts`, `salīdzinājumā ar noteikumiem, kurus pieņēmu ${orderDate(k)}.`, '',
+        ch?.summary ? `Konkrēti: ${ch.summary}` : 'Izmaiņas attiecas uz pakalpojuma cenu vai noteikumiem.', '',
+        'Tā kā jaunajiem noteikumiem nepiekrītu, izbeidzu līgumu ar tūlītēju spēku,',
+        'bez līgumsodiem un izmaksām, jo izmaiņas veiktas vienpusēji', 'un nevis pēc mana lūguma.', '',
+        'Tāpēc lūdzu:', '  1. rakstiski apstiprināt līguma izbeigšanu un tās datumu;', '  2. pārtraukt visus maksājumus;',
+        '  3. atmaksāt summas, kas samaksātas par periodiem pēc līguma izbeigšanas.'];
+    },
+    identity: ({ you, c }) => [`Līgumslēdzēja puse: ${you.name}`, `Adrese: ${you.address}`, `Kontaktu e-pasts: ${you.email}`,
+      `Klienta / līguma numurs: ${you.customerId || '[jāaizpilda]'}`,
+      ...(c.url ? [`Noslēgts, izmantojot: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Pieņemto noteikumu nospiedums (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Ar cieņu', '', you.name, '', 'Paraksts _______________________', `Datums: ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Noderīgi tiesību akti:', ...refs.map((r) => `  · ${r}`), '',
+      'Dokumentu automātiski sagatavoja AnteFirma, pamatojoties uz analizētajiem noteikumiem.',
+      'Pirms nosūtīšanas pārbaudiet datus kvadrātiekavās. Tas nav juridisks padoms.'].join('\n'),
+    subject: { withdrawal: (p) => `Atteikums no līguma — ${p}`, cancellation: (p) => `Līguma uzteikums — ${p}`, change_withdrawal: (p) => `Izbeigšana noteikumu izmaiņu dēļ — ${p}` },
+    refs: {
+      withdrawal: ['Patērētāju tiesību aizsardzības likums, 12. pants — atteikuma tiesības distances līgumos',
+        'MK noteikumi Nr. 255 «Noteikumi par distances līgumu» — atteikuma veidlapa', 'Direktīva 2011/83/ES'],
+      cancellation: ['Patērētāju tiesību aizsardzības likums, 6. pants — netaisnīgi līguma noteikumi',
+        'Direktīva 93/13/EEK, pielikums, 1. punkta h) apakšpunkts — automātiska pagarināšana ar nesamērīgi agru termiņu'],
+      change_withdrawal: ['Patērētāju tiesību aizsardzības likums, 6. pants — vienpusēja cenas vai noteikumu maiņa',
+        'Direktīva 93/13/EEK, pielikums, 1. punkta j) un l) apakšpunkts'],
+    },
+  },
+
+  // Estonia: Law of Obligations Act (võlaõigusseadus), §§ 53–56 (withdrawal) and §§ 42–44 (unfair standard terms).
+  et: {
+    ph: { name: '[Ees- ja perekonnanimi]', address: '[Aadress]', email: '[E-post]', provider: '[Teenusepakkuja]', service: '[teenuse kirjeldus]', date: '[kuupäev]' },
+    estimated: (x) => `(hinnanguline kohustus ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Saaja: ${provider}`,
+      '[Teenusepakkuja aadress / tingimustes märgitud e-post]', '', `Koht ja kuupäev: ______________, ${today}`, '',
+      'Saadetud: ☐ tähitud kirjaga väljastusteatega   ☐ veebivormiga   ☐ e-postiga'].join('\n'),
+    withdrawal: (k) => ['Teema: lepingust taganemine', '', 'Lugupeetud pakkuja', '',
+      'Käesolevaga teatan, et taganen teenuse lepingust',
+      `${service(k)}, mis on sõlmitud ${orderDate(k)}.`, '',
+      'Kasutan õigust taganeda kauglepingust neljateistkümne päeva jooksul',
+      'selle sõlmimisest, põhjust esitamata ja ilma kuludeta.', '', 'Seetõttu palun:',
+      '  1. lõpetada viivitamata teenuse osutamine ja kõik sellega seotud maksed;',
+      '  2. tagastada kõik makstud summad hiljemalt neljateistkümne päeva jooksul käesoleva teate',
+      '     kättesaamisest, sama makseviisiga;', '  3. kinnitada kirjalikult käesoleva teate kättesaamist.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Teema: lepingu ülesütlemine — ilma automaatse pikendamiseta', '', 'Lugupeetud pakkuja', '',
+        `Käesolevaga ütlen üles teenuse lepingu ${service(k)},`, `mis on sõlmitud ${orderDate(k)}.`, '',
+        renewal ? `Ütlen lepingu üles, et see ei pikeneks ${renewal},`
+          : 'Ütlen lepingu üles, et see ei pikeneks perioodi lõpus automaatselt,',
+        notice ? `järgides tingimustes ette nähtud ${notice}-päevast etteteatamistähtaega${deadline ? ` (viimane päev: ${deadline})` : ''}.`
+          : 'järgides lepingutingimustes ette nähtud etteteatamistähtaega.', '',
+        'Seetõttu palun:', '  1. kinnitada kirjalikult ülesütlemise kättesaamist ja selle jõustumise kuupäeva;',
+        '  2. lõpetada sellest kuupäevast kõik maksed;',
+        '  3. märkida summad, mida peate tasumisele kuuluvaks, koos lepingutingimusega, millel need põhinevad.', '',
+        'Ma ei nõustu ühegi maksega pärast märgitud lõppkuupäeva järgnevate perioodide eest.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Teema: lepingu lõpetamine tingimuste ühepoolse muutmise tõttu', '', 'Lugupeetud pakkuja', '',
+        `Tuvastasin, et teenuse leping ${service(k)} on muutunud`, `võrreldes tingimustega, millega nõustusin ${orderDate(k)}.`, '',
+        ch?.summary ? `Täpsemalt: ${ch.summary}` : 'Muudatus puudutab teenuse hinda või tingimusi.', '',
+        'Kuna ma uute tingimustega ei nõustu, lõpetan lepingu viivitamata,',
+        'ilma leppetrahvi ja kuludeta, sest muudatus tehti ühepoolselt', 'ja mitte minu soovil.', '',
+        'Seetõttu palun:', '  1. kinnitada kirjalikult lepingu lõppemist ja selle kuupäeva;', '  2. lõpetada kõik maksed;',
+        '  3. tagastada summad, mis on makstud lepingu lõppemise järgsete perioodide eest.'];
+    },
+    identity: ({ you, c }) => [`Lepingupool: ${you.name}`, `Aadress: ${you.address}`, `Kontakt-e-post: ${you.email}`,
+      `Kliendi- / lepingunumber: ${you.customerId || '[täita]'}`,
+      ...(c.url ? [`Sõlmitud kaudu: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Aktsepteeritud tingimuste sõrmejälg (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Lugupidamisega', '', you.name, '', 'Allkiri _______________________', `Kuupäev: ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Kasulikud õigusaktid:', ...refs.map((r) => `  · ${r}`), '',
+      'Dokumendi koostas automaatselt AnteFirma analüüsitud tingimuste põhjal.',
+      'Enne saatmist kontrollige nurksulgudes andmeid. See ei ole õigusnõu.'].join('\n'),
+    subject: { withdrawal: (p) => `Lepingust taganemine — ${p}`, cancellation: (p) => `Lepingu ülesütlemine — ${p}`, change_withdrawal: (p) => `Lõpetamine tingimuste muutmise tõttu — ${p}` },
+    refs: {
+      withdrawal: ['Võlaõigusseadus, §§ 53–56 — kauglepingust taganemise õigus',
+        'Direktiiv 2011/83/EL, I lisa B osa — taganemisavalduse näidisvorm', 'Direktiiv 2011/83/EL'],
+      cancellation: ['Võlaõigusseadus, §§ 42–44 — ebamõistlikult kahjustavad tüüptingimused',
+        'Direktiiv 93/13/EMÜ, lisa, punkt 1 alapunkt h — automaatne pikenemine ebamõistlikult varase tähtajaga'],
+      change_withdrawal: ['Võlaõigusseadus, § 42 — hinna või tingimuste ühepoolne muutmine',
+        'Direktiiv 93/13/EMÜ, lisa, punkt 1 alapunktid j ja l'],
+    },
+  },
 };
 
 /**
@@ -1371,6 +1546,7 @@ const SENDING = {
   fi: 'sendWayProvesDateKirjattuKirje', no: 'sendWayProvesDateRekommandertBrev',
   sk: 'sendWayProvesDateDoporucenyList', hu: 'sendWayProvesDateTertivevenyes', el: 'sendWayProvesDateSystimeni',
   hr: 'sendWayProvesDatePreporucenoPismo', sl: 'sendWayProvesDatePriporocenoPismo', bg: 'sendWayProvesDatePreporachanoPismo',
+  lt: 'sendWayProvesDateRegistruotasLaiskas', lv: 'sendWayProvesDateIerakstitaVestule', et: 'sendWayProvesDateTahitudKiri',
 };
 
 /** The advice next to the letter: in the user's language, with the sending method of the letter's country. */

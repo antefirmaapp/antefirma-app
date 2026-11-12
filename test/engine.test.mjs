@@ -578,3 +578,18 @@ test('Croatia, Slovenia and Bulgaria: EU checks with national references and the
   assert.equal(w('Имате право на отказ в 14-дневен срок.'), false);
   assert.equal(w('Pretplata se plaća mjesečno.'), true);
 });
+
+test('Lithuania, Latvia and Estonia: EU checks with national references and the 14 days in their words', () => {
+  const findings = [{ category: 'arbitration', severity: 60 }];
+  for (const [j, ref] of [['LT', /6\.188/], ['LV', /Patērētāju tiesību aizsardzības likums/], ['EE', /Võlaõigusseadus/]]) {
+    const r = runConsumerChecks({ text: 'x', findings, jurisdiction: j });
+    assert.ok(r.applicable, j);
+    const flag = r.flags.find((f) => f.id === 'eu.arbitration');
+    assert.match(flag.refs[0], ref, j);
+  }
+  const w = (text) => runConsumerChecks({ text, findings: [], actionType: 'purchase', jurisdiction: 'LT' }).flags.some((f) => f.id === 'eu.withdrawal');
+  assert.equal(w('Turite teisę atsisakyti sutarties per 14 dienų.'), false);
+  assert.equal(w('Patērētājam ir atteikuma tiesības.'), false);
+  assert.equal(w('Tarbijal on taganemisõigus 14 päeva jooksul.'), false);
+  assert.equal(w('Prenumerata mokama kas mėnesį.'), true);
+});

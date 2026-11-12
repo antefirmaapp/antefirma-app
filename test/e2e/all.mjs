@@ -242,7 +242,7 @@ const SCENARIOS = {
 };
 
 SCENARIOS.a11y = async (h) => {
-  for (const lang of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg']) {
+  for (const lang of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et']) {
     await h.settings({ uiLang: lang, consent: true });
     for (const scheme of ['light', 'dark']) {
       const tag = `${lang} ${scheme}`;

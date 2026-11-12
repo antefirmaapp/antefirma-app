@@ -841,3 +841,45 @@ test('prices, periods and free trials in Croatian, Slovenian and Bulgarian', () 
     assert.ok(Math.abs((p.trial?.months ?? 0) - months) < 1e-9, `${text} → ${JSON.stringify(p.trial)}`);
   }
 });
+
+// ── Lithuanian, Latvian, Estonian ───────────────────────────────────────────
+
+test('recognises commitment buttons in Lithuanian, Latvian and Estonian', () => {
+  const cases = {
+    'Pirkti dabar': 'purchase', 'Užsakymas su pareiga sumokėti': 'purchase', 'Pereiti prie apmokėjimo': 'purchase', 'Prenumeruoti': 'subscribe',
+    'Išbandyti nemokamai': 'subscribe', 'Pasirašyti sutartį': 'sign', 'Tęsti su Google': 'oauth', 'Priimti visus slapukus': 'consent',
+    'Sutinku su sąlygomis': 'accept_terms', 'Sukurti paskyrą': 'signup',
+    'Pirkt tagad': 'purchase', 'Pasūtījums ar maksāšanas pienākumu': 'purchase', 'Uz kasi': 'purchase', 'Abonēt': 'subscribe',
+    'Izmēģināt bez maksas': 'subscribe', 'Parakstīt līgumu': 'sign', 'Turpināt ar Google': 'oauth', 'Pieņemt visas sīkdatnes': 'consent',
+    'Piekrītu noteikumiem': 'accept_terms', 'Izveidot kontu': 'signup',
+    'Osta kohe': 'purchase', 'Tellimus maksekohustusega': 'purchase', 'Telli': 'purchase', 'Hakka tellijaks': 'subscribe', 'Proovi tasuta': 'subscribe',
+    'Allkirjasta leping': 'sign', "Jätka Google'iga": 'oauth', 'Nõustu kõigiga': 'consent', 'Nõustun tingimustega': 'accept_terms', 'Loo konto': 'signup',
+  };
+  for (const [text, wanted] of Object.entries(cases)) assert.equal(classifyText(text), wanted, `"${text}"`);
+});
+
+test('Lithuanian, Latvian and Estonian refusals, newsletters and harmless buttons stay out', () => {
+  for (const text of ['Atmesti visus', 'Tik būtini slapukai', 'Atšaukti', 'Atgal', 'Prenumeruoti naujienlaiškį', 'Tęsti apsipirkimą', 'Mokėjimo būdai', 'Pridėti į krepšelį',
+    'Noraidīt visas', 'Tikai nepieciešamās sīkdatnes', 'Atcelt', 'Pierakstīties jaunumiem', 'Turpināt iepirkties', 'Maksājuma veidi', 'Pievienot grozam',
+    'Keeldu kõigist', 'Ainult vajalikud küpsised', 'Tühista', 'Liitu uudiskirjaga', 'Jätka ostlemist', 'Makseviisid', 'Lisa ostukorvi']) {
+    assert.equal(classifyText(text), null, `"${text}"`);
+  }
+});
+
+test('prices, periods and free trials in Lithuanian, Latvian and Estonian', () => {
+  const cases = [
+    ['Pilna prenumerata su visomis funkcijomis ir pagalba. Kaina 9,99 € per mėnesį, 14 dienų nemokamai.', 9.99, 'EUR', 'month', 14 / 30],
+    ['Pilns abonements ar visām funkcijām un atbalstu. 12,99 € mēnesī, 7 dienas bez maksas.', 12.99, 'EUR', 'month', 7 / 30],
+    ['Täielik tellimus kõigi funktsioonide ja toega. 8,99 € kuus, esimene kuu tasuta.', 8.99, 'EUR', 'month', 1],
+    ['Metinė prenumerata su visomis funkcijomis ir pagalba. 99 € per metus.', 99, 'EUR', 'year', 0],
+    ['Aastane tellimus kõigi funktsioonide ja toega. 79 € aastas, 30 päeva tasuta.', 79, 'EUR', 'year', 1],
+  ];
+  for (const [text, amount, currency, period, months] of cases) {
+    const { body, btn } = page([text]);
+    const p = loadContext(body).extractPricing(btn);
+    assert.equal(p.amount, amount, text);
+    assert.equal(p.currency, currency, text);
+    assert.equal(p.period, period, text);
+    assert.ok(Math.abs((p.trial?.months ?? 0) - months) < 1e-9, `${text} → ${JSON.stringify(p.trial)}`);
+  }
+});

@@ -28,7 +28,7 @@ const ACTION_MAP = {
 };
 
 /** The country to send to the server, from the jurisdiction in settings. */
-const COUNTRY_MAP = { IT: 'IT', ES: 'ES', DE: 'DE', AT: 'AT', FR: 'FR', BE: 'BE', NL: 'NL', PL: 'PL', PT: 'PT', SE: 'SE', RO: 'RO', CZ: 'CZ', DK: 'DK', FI: 'FI', NO: 'NO', SK: 'SK', HU: 'HU', GR: 'GR', IE: 'IE', MT: 'MT', CY: 'CY', LU: 'LU', HR: 'HR', SI: 'SI', BG: 'BG', UK: 'GB', US: 'US' };
+const COUNTRY_MAP = { IT: 'IT', ES: 'ES', DE: 'DE', AT: 'AT', FR: 'FR', BE: 'BE', NL: 'NL', PL: 'PL', PT: 'PT', SE: 'SE', RO: 'RO', CZ: 'CZ', DK: 'DK', FI: 'FI', NO: 'NO', SK: 'SK', HU: 'HU', GR: 'GR', IE: 'IE', MT: 'MT', CY: 'CY', LU: 'LU', HR: 'HR', SI: 'SI', BG: 'BG', LT: 'LT', LV: 'LV', EE: 'EE', UK: 'GB', US: 'US' };
 
 /**
  * A server error with the code that decides what to do.
@@ -125,7 +125,7 @@ export async function analyzeRemote(
     url: url || undefined,
     action: ACTION_MAP[actionType] || 'other',
     button: button ? String(button).slice(0, 120) : undefined,
-    uiLang: ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg'].includes(uiLang) ? uiLang : 'it',
+    uiLang: ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et'].includes(uiLang) ? uiLang : 'it',
     userCountry: COUNTRY_MAP[jurisdiction] || 'IT',
   };
 

@@ -1,0 +1,5 @@
+{
+  "extName":        { "message": "AnteFirma", "description": "Extension name." },
+  "extDescription": { "message": "Pirms piekrītat, ziniet, ko apņematies: cik patiesībā maksāsiet, cik ilgi un kā aiziet.", "description": "Short description, shown in the store and in chrome://extensions." },
+  "actionTitle":    { "message": "AnteFirma", "description": "Toolbar icon tooltip." }
+}

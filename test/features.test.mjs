@@ -517,3 +517,18 @@ test('Croatian, Slovenian and Bulgarian letters: own laws, sending method and fi
     assert.ok(!/\.\./.test(letter.text.replace(/…/g, '')), l);
   }
 });
+
+test('Lithuanian, Latvian and Estonian letters: own laws, sending method and file names', async () => {
+  const { letterLangFor } = await import('../src/core/letter.js');
+  assert.deepEqual(['LT', 'LV', 'EE'].map((j) => letterLangFor(j)), ['lt', 'lv', 'et']);
+  const c = { provider: 'Example', url: 'https://example.com', createdAt: T0, renewalAt: T0 + 30 * 86400000, notice: { days: 30 } };
+  const cases = [['lt', '6.188', 'Pagarbiai', /^nutraukimas-/], ['lv', 'Patērētāju tiesību aizsardzības likums', 'Ar cieņu', /^uzteikums-/], ['et', 'Võlaõigusseadus', 'Lugupidamisega', /^ulesutlemine-/]];
+  for (const [l, ref, words, file] of cases) {
+    const letter = buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, l);
+    assert.ok(letter.text.includes(ref), l);
+    assert.ok(letter.text.includes(words), l);
+    assert.match(letter.filename, file);
+    // Lithuanian dates end with "d.": never a double full stop.
+    assert.ok(!/\.\./.test(letter.text.replace(/…/g, '')), l);
+  }
+});

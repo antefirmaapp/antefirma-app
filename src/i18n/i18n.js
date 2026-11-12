@@ -17,8 +17,8 @@
 (() => {
   const g = globalThis;
   if (g.AF_I18N) return;
-  const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg'];
-  const LOCALES = { it: 'it-IT', en: 'en-GB', es: 'es-ES', de: 'de-DE', fr: 'fr-FR', nl: 'nl-NL', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR', hr: 'hr-HR', sl: 'sl-SI', bg: 'bg-BG' };
+  const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et'];
+  const LOCALES = { it: 'it-IT', en: 'en-GB', es: 'es-ES', de: 'de-DE', fr: 'fr-FR', nl: 'nl-NL', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR', hr: 'hr-HR', sl: 'sl-SI', bg: 'bg-BG', lt: 'lt-LT', lv: 'lv-LV', et: 'et-EE' };
   let lang = 'it';
   let byItalian = null;
 
