@@ -164,14 +164,29 @@ settings: then it only says the text changed).
 ## Developer and tester package
 
 ```bash
-node tools/dev-zip.mjs     # → dist/antefirma-dev-<version>.zip
+node tools/dev-zip.mjs        # → dist/antefirma-dev-<version>.zip
+node tools/dev-site-build.mjs # → dist/dev-site: the download page dev.antefirma.app
 ```
 
 The package's manifest carries a fixed public key, so the ID is always
 `alfaikbfkaimaejlhghbjffihjgoigoh`, allowed on the server (`ALLOWED_ORIGINS`).
-The ZIP is uploaded to the R2 bucket `antefirma-backup` (EU jurisdiction) under
-`dev/` and downloaded from the admin panel, **Tools → Developer extension**. The
-repository's manifest stays without a key: the store assigns its own ID.
+The repository's manifest stays without a key: the store assigns its own ID.
+
+**dev.antefirma.app** (Italian at `/`, English at `/en/`) offers the Chrome and
+Edge ZIP, the Safari folder to convert with Xcode, the desktop app (a link to
+AnteFirma web) and the installation and developer guide. Texts are in
+`dev-site/text.mjs`, style and script in `dev-site/`. The build writes
+`files/antefirma-dev-<version>.zip`, `files/antefirma-safari-<version>.zip`,
+`-latest` copies of both and `versions.json` (version, sizes, SHA-256). ZIPs are
+made by `tools/zip.mjs`, with no external `zip` command and fixed timestamps: the
+same version always gives the same SHA-256. The pages are `noindex`, with a strict
+CSP (`_headers`).
+
+It publishes itself like AnteFirma web: the **antefirma-dev** Worker
+(`wrangler.dev.toml`) is linked to this repository with Workers Builds (build
+`node tools/dev-site-build.mjs`, deploy `npx wrangler deploy --config
+wrangler.dev.toml`). The ZIP is still uploaded to the R2 bucket `antefirma-backup`
+under `dev/` for the admin panel, **Tools → Developer extension**.
 
 ## AnteFirma web (installable on the desktop)
 
