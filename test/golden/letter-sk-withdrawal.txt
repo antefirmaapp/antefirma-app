@@ -1,0 +1,60 @@
+Odstúpenie od zmluvy — Saas_fair
+odstupenie-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Adresát: Saas_fair
+[Adresa / e-mail poskytovateľa uvedený v podmienkach]
+
+Miesto a dátum: ______________, 15. augusta 2026
+
+Odoslané: ☐ doporučeným listom s doručenkou   ☐ online formulárom   ☐ e-mailom
+
+Vec: odstúpenie od zmluvy
+
+Vážení,
+
+týmto oznamujem, že odstupujem od zmluvy, ktorej predmetom je
+služba "SaaS mensile senza vincoli" (odhadovaný záväzok 12,00 €), uzavretej 15. augusta 2026.
+
+Uplatňujem právo na odstúpenie od zmluvy uzavretej na diaľku v lehote štrnástich dní
+od jej uzavretia, bez uvedenia dôvodu a bez akýchkoľvek nákladov.
+
+Preto žiadam:
+  1. okamžité ukončenie služby a všetkých súvisiacich platieb;
+  2. vrátenie všetkých prijatých platieb najneskôr do štrnástich dní od doručenia
+     tohto oznámenia, rovnakým spôsobom, akým boli zaplatené;
+  3. písomné potvrdenie doručenia tohto oznámenia.
+
+Zmluvná strana: Mario Rossi
+Adresa: Via Roma 1, 20100 Milano
+Kontaktný e-mail: mario.rossi@example.com
+Zákaznícke číslo / číslo zmluvy: C-42
+Uzavretá prostredníctvom: https://saas_fair.test/checkout
+
+S pozdravom
+
+Mario Rossi
+
+Podpis _______________________
+Dátum 15. augusta 2026
+
+—
+Užitočné právne predpisy:
+  · Zákon č. 108/2024 Z. z. o ochrane spotrebiteľa — právo na odstúpenie od zmluvy uzavretej na diaľku
+  · Zákon č. 108/2024 Z. z., príloha — vzorový formulár na odstúpenie od zmluvy
+  · Smernica 2011/83/EÚ
+
+Dokument automaticky vytvorený aplikáciou AnteFirma na základe analyzovaných podmienok.
+Pred odoslaním skontrolujte údaje v hranatých zátvorkách. Nejde o právne poradenstvo.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: doporučený list s doručenkou (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zákon č. 108/2024 Z. z. o ochrane spotrebiteľa — právo na odstúpenie od zmluvy uzavretej na diaľku
+Zákon č. 108/2024 Z. z., príloha — vzorový formulár na odstúpenie od zmluvy
+Smernica 2011/83/EÚ

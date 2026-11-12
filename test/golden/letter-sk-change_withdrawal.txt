@@ -1,0 +1,59 @@
+Ukončenie pre zmenu podmienok — Saas_fair
+vypoved-po-zmene-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Adresát: Saas_fair
+[Adresa / e-mail poskytovateľa uvedený v podmienkach]
+
+Miesto a dátum: ______________, 15. augusta 2026
+
+Odoslané: ☐ doporučeným listom s doručenkou   ☐ online formulárom   ☐ e-mailom
+
+Vec: ukončenie zmluvy pre jednostrannú zmenu podmienok
+
+Vážení,
+
+zistil(a) som zmenu zmluvy, ktorej predmetom je "SaaS mensile senza vincoli" (odhadovaný záväzok 12,00 €),
+oproti podmienkam, ktoré som prijal(a) 15. augusta 2026.
+
+Zmena sa týka ceny alebo podmienok služby.
+
+Keďže s novými podmienkami nesúhlasím, zmluvu vypovedám s okamžitou účinnosťou,
+bez sankcií a nákladov, pretože zmena bola vykonaná jednostranne
+a nie na moju žiadosť.
+
+Preto žiadam:
+  1. písomné potvrdenie skončenia zmluvy a jeho dátumu;
+  2. ukončenie všetkých platieb;
+  3. vrátenie súm zaplatených za obdobia po skončení zmluvy.
+
+Zmluvná strana: Mario Rossi
+Adresa: Via Roma 1, 20100 Milano
+Kontaktný e-mail: mario.rossi@example.com
+Zákaznícke číslo / číslo zmluvy: C-42
+Uzavretá prostredníctvom: https://saas_fair.test/checkout
+
+S pozdravom
+
+Mario Rossi
+
+Podpis _______________________
+Dátum 15. augusta 2026
+
+—
+Užitočné právne predpisy:
+  · Občiansky zákonník, § 53 — jednostranná zmena ceny alebo podmienok
+  · Smernica 93/13/EHS, príloha, bod 1 písm. j a l
+
+Dokument automaticky vytvorený aplikáciou AnteFirma na základe analyzovaných podmienok.
+Pred odoslaním skontrolujte údaje v hranatých zátvorkách. Nejde o právne poradenstvo.
+
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: doporučený list s doručenkou (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Občiansky zákonník, § 53 — jednostranná zmena ceny alebo podmienok
+Smernica 93/13/EHS, príloha, bod 1 písm. j a l

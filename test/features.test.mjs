@@ -469,3 +469,17 @@ test('the letter in Danish, Finnish and Norwegian, with each country\'s laws', a
   const { letterLangFor } = await import('../src/core/letter.js');
   assert.deepEqual(['DK', 'FI', 'NO'].map((j) => letterLangFor(j)), ['da', 'fi', 'no']);
 });
+
+test('the letter in Slovak, Hungarian and Greek, with each country\'s laws', async () => {
+  const c = buildCommitment({ verdict: await verdictFor(), now: T0 });
+  const sk = buildLetter(c, { name: 'Jana Kováčová' }, LETTER_KINDS.WITHDRAWAL, T0, 'sk');
+  assert.ok(sk.text.includes('108/2024') && sk.text.includes('S pozdravom') && sk.filename.startsWith('odstupenie-'));
+  const hu = buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, 'hu');
+  assert.ok(hu.text.includes('Ptk.') && hu.text.includes('[Teljes név]') && !hu.text.includes('..'));
+  assert.match(hu.filename, /^felmondas-/);
+  const el = buildLetter(c, {}, LETTER_KINDS.CHANGE, T0, 'el');
+  assert.ok(el.text.includes('2251/1994') && el.text.includes('Με εκτίμηση'));
+  assert.match(el.filename, /^kataggelia-meta-allagi-/);
+  const { letterLangFor } = await import('../src/core/letter.js');
+  assert.deepEqual(['SK', 'HU', 'GR'].map((j) => letterLangFor(j)), ['sk', 'hu', 'el']);
+});

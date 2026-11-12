@@ -19,9 +19,10 @@
    * as in core/text.js: in Italian the unit follows the amount. The same goes
    * for the zloty, the Nordic and Czech crowns and the Romanian leu
    * ("49 zł", "99 kr/mån", "29,99 lei pe lună", "199 Kč měsíčně"); Danish and
-   * Norwegian prices also write "kr 99" and "99,-".
+   * Norwegian prices also write "kr 99" and "99,-". The forint is read only as
+   * "Ft" with a capital F, so that English feet ("6 ft") are not taken for a price.
    */
-  const CURRENCY_WORD = { euro: 'EUR', euros: 'EUR', dollari: 'USD', sterline: 'GBP', franchi: 'CHF', 'zł': 'PLN', kr: 'KR', lei: 'RON', 'kč': 'CZK' };
+  const CURRENCY_WORD = { euro: 'EUR', euros: 'EUR', dollari: 'USD', sterline: 'GBP', franchi: 'CHF', 'zł': 'PLN', kr: 'KR', lei: 'RON', 'kč': 'CZK', ft: 'HUF' };
   /**
    * "kr" is the Danish, Norwegian and Swedish crown alike: the page decides
    * which, by its language first and then by its domain. Unknown: Swedish,
@@ -35,7 +36,7 @@
     return 'SEK';
   }
   const AMOUNT_RE =
-    /(?:([€$£¥])|\b(EUR|USD|GBP|CHF|PLN|SEK|RON|CZK|DKK|NOK|kr)\b\.?)\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)(?:,-)?|(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)(?:,-)?\s*(?:([€$£¥])|\b(EUR|USD|GBP|CHF|PLN|SEK|RON|CZK|DKK|NOK)\b|\b(euros?|dollari|sterline|franchi|zł|kr|lei|kč)(?![\wÀ-ɏ]))/gi;
+    /(?:([€$£¥])|\b(EUR|USD|GBP|CHF|PLN|SEK|RON|CZK|DKK|NOK|HUF|kr)\b\.?)\s*(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)(?:,-)?|(\d{1,3}(?:[.,\s]\d{3})*(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)(?:,-)?\s*(?:([€$£¥])|\b(EUR|USD|GBP|CHF|PLN|SEK|RON|CZK|DKK|NOK|HUF)\b|\b(euros?|dollari|sterline|franchi|zł|kr|lei|kč|ft)(?![\wÀ-ɏ]))/gi;
 
   /**
    * Period words in the six languages. Accented words cannot use \b (it only
@@ -66,6 +67,12 @@
     [/\/\s*(?:uge|uke|vko|viikko)(?![\wÀ-ɏ])|(?<![\wÀ-ɏ])(?:pr\.?\s+uge|per\s+uke|om\s+ugen|i\s+uk(?:a|en)|ugentlig(?:t)?|ukentlig(?:t)?|viikossa|viikoittain)(?![\wÀ-ɏ])/i, 'week'],
     [/(?<![\wÀ-ɏ])(?:pr\.?\s+dag|daglig(?:t)?|p(?:ä|a)iv(?:ä|a)ss(?:ä|a)|p(?:ä|a)ivitt(?:ä|a)in)(?![\wÀ-ɏ])/i, 'day'],
     [/(?<![\wÀ-ɏ])(?:pr\.?\s+kvartal|neljännesvuosittain|vuosinelj(?:ä|a)nnekselt(?:ä|a)|vuosinelj(?:ä|a)nnekses(?:s(?:ä|a)))(?![\wÀ-ɏ])/i, 'quarter'],
+    // Slovak, Hungarian and Greek, appended for the same reason. Greek letters count as letters too.
+    [/\/\s*(?:mesiac|mes\.|h(?:ó|o)(?:nap)?|μήνα|μήνας|μην\.?)(?![\wÀ-ɏͰ-Ͽ])|(?<![\wÀ-ɏͰ-Ͽ])(?:mesa(?:č|c)ne|za\s+mesiac|na\s+mesiac|havonta|havi\s+d(?:í|i)j|egy\s+h(?:ó|o)napra|τον\s+μήνα|ανά\s+μήνα|μηνιαίως|μηνιαία|το\s+μήνα)(?![\wÀ-ɏͰ-Ͽ])/i, 'month'],
+    [/\/\s*(?:rok|(?:é|e)v|έτος|χρόνο|έτος)(?![\wÀ-ɏͰ-Ͽ])|(?<![\wÀ-ɏͰ-Ͽ])(?:ro(?:č|c)ne|za\s+rok|na\s+rok|(?:é|e)vente|egy\s+(?:é|e)vre|τον\s+χρόνο|το\s+χρόνο|ανά\s+έτος|ετησίως|ετήσια)(?![\wÀ-ɏͰ-Ͽ])/i, 'year'],
+    [/\/\s*(?:t(?:ý|y)(?:ž|z)de(?:ň|n)|h(?:é|e)t|εβδομάδα)(?![\wÀ-ɏͰ-Ͽ])|(?<![\wÀ-ɏͰ-Ͽ])(?:t(?:ý|y)(?:ž|z)denne|za\s+t(?:ý|y)(?:ž|z)de(?:ň|n)|hetente|την\s+εβδομάδα|ανά\s+εβδομάδα|εβδομαδιαίως)(?![\wÀ-ɏͰ-Ͽ])/i, 'week'],
+    [/(?<![\wÀ-ɏͰ-Ͽ])(?:denne|za\s+de(?:ň|n)|naponta|την\s+ημέρα|ανά\s+ημέρα|ημερησίως)(?![\wÀ-ɏͰ-Ͽ])/i, 'day'],
+    [/(?<![\wÀ-ɏͰ-Ͽ])(?:(?:š|s)tvr(?:ť|t)ro(?:č|c)ne|za\s+(?:š|s)tvr(?:ť|t)rok|negyed(?:é|e)vente|ανά\s+τρίμηνο|τριμηνιαίως)(?![\wÀ-ɏͰ-Ͽ])/i, 'quarter'],
   ];
 
   /**
@@ -104,6 +111,13 @@
     /(?<![\wÀ-ɏ])(?<n>\d{1,2})\s*(?<u>p(?:ä|a)iv(?:ä|a)(?:(?:ä|a)|n)?|kuukau(?:si|den|tta|deksi)|viik(?:ko|on|koa))\s+(?:ilmaiseksi|maksutta|ilmai\w*\s+kokeilu\w*|kokeilu\w*)/i,
     /(?<![\wÀ-ɏ])(?:ilmai\w*\s+kokeilu\w*\s+|kokeile\s+ilmaiseksi\s+)(?<n>\d{1,2})\s*(?<u>p(?:ä|a)iv(?:ä|a)(?:(?:ä|a)|n)?|kuukau(?:si|den|tta|deksi)|viik(?:ko|on|koa))/i,
     /(?<![\wÀ-ɏ])(?:f(?:ø|o)rste\s+m(?:å|a)ned\s+gratis|ensimm(?:ä|a)inen\s+kuukausi\s+(?:ilmaiseksi|maksutta|ilmainen))(?![\wÀ-ɏ])/i,
+    /(?<![\wÀ-ɏͰ-Ͽ])(?<n>\d{1,2})\s*(?<u>dn(?:í|i)|de(?:ň|n)|mesiac(?:e|ov)?|t(?:ý|y)(?:ž|z)d(?:e(?:ň|n)|ne|(?:ň|n)ov))\s+(?:zadarmo|zdarma|na\s+sk(?:ú|u)(?:š|s)ku)/i,
+    /(?<![\wÀ-ɏͰ-Ͽ])(?:sk(?:ú|u)(?:š|s)obn(?:á|a|é|e)\s+(?:doba|obdobie|verzia)\s+(?:zadarmo\s+)?(?:na\s+)?|zadarmo\s+na\s+)(?<n>\d{1,2})\s*(?<u>dn(?:í|i)|de(?:ň|n)|mesiac(?:e|ov)?|t(?:ý|y)(?:ž|z)d(?:e(?:ň|n)|ne|(?:ň|n)ov))/i,
+    /(?<![\wÀ-ɏͰ-Ͽ])(?<n>\d{1,2})\s*(?<u>nap(?:os|ig|ra)?|h(?:ó|o)nap(?:os|ig|ra)?|h(?:é|e)t(?:ig|re)?|hetes)\s+(?:ingyen(?:es)?|d(?:í|i)jmentes(?:en)?|pr(?:ó|o)ba(?:id(?:ő|o)\w*)?)/i,
+    /(?<![\wÀ-ɏͰ-Ͽ])(?:ingyenes\s+pr(?:ó|o)ba(?:id(?:ő|o)(?:szak)?)?\s+)(?<n>\d{1,2})\s*(?<u>nap(?:os|ig|ra)?|h(?:ó|o)nap(?:os|ig|ra)?|h(?:é|e)t(?:ig|re)?|hetes)/i,
+    /(?<![\wÀ-ɏͰ-Ͽ])(?:δωρεάν\s+(?:δοκιμ[Ͱ-Ͽ]*\s+(?:περίοδος\s+)?)?(?:για\s+)?)(?<n>\d{1,2})\s*(?<u>ημέρ[Ͱ-Ͽ]*|ημερ[Ͱ-Ͽ]*|μήν[Ͱ-Ͽ]*|μην[Ͱ-Ͽ]*|εβδομάδ[Ͱ-Ͽ]*|εβδομαδ[Ͱ-Ͽ]*)/i,
+    /(?<![\wÀ-ɏͰ-Ͽ])(?<n>\d{1,2})\s*(?<u>ημέρ[Ͱ-Ͽ]*|ημερ[Ͱ-Ͽ]*|μήν[Ͱ-Ͽ]*|μην[Ͱ-Ͽ]*|εβδομάδ[Ͱ-Ͽ]*|εβδομαδ[Ͱ-Ͽ]*)\s+(?:δωρεάν|δοκιμ[Ͱ-Ͽ]*)/i,
+    /(?<![\wÀ-ɏͰ-Ͽ])(?:prv(?:ý|y)\s+mesiac\s+zadarmo|els(?:ő|o)\s+h(?:ó|o)nap\s+ingyen(?:es)?|πρώτος\s+μήνας\s+δωρεάν|τον\s+πρώτο\s+μήνα\s+δωρεάν)(?![\wÀ-ɏͰ-Ͽ])/i,
   ];
 
   /** The first free trial in a text: { raw, months } or null. */
@@ -113,7 +127,7 @@
       if (!m) continue;
       const n = Number(m.groups?.n || 1);
       const u = (m.groups?.u || 'month').toLowerCase();
-      const months = /^(giorn|day|d[ií]a|tag|jour|dag|dni|dzie|zi|dn|den|p[äa]iv)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek|tydz|tygod|veck|s[ăa]pt|t[ýy]d|uge|uke|viik)/.test(u) ? n / 4.345 : n;
+      const months = /^(giorn|day|d[ií]a|tag|jour|dag|dni|dzie|zi|dn|den|de[ňn]|p[äa]iv|nap|ημ[έε]ρ)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek|tydz|tygod|veck|s[ăa]pt|t[ýy]d|uge|uke|viik|t[ýy][žz]d|h[ée]t|εβδομ)/.test(u) ? n / 4.345 : n;
       return { raw: m[0].replace(/\s+/g, ' ').trim(), months };
     }
     return null;
@@ -145,6 +159,7 @@
       const symbol = m[1] || m[5];
       const code = m[2] || m[6];
       const word = m[7];
+      if (word && word.toLowerCase() === 'ft' && word !== 'Ft') continue;
       const amount = parseAmount(m[3] || m[4]);
       if (amount == null || amount === 0) continue;
       const around = text.slice(Math.max(0, m.index - 50), m.index + m[0].length + 50);
@@ -216,7 +231,7 @@
    */
   const STRIKE_TAGS = new Set(['S', 'DEL', 'STRIKE']);
   const STRIKE_CLASS_RE = /strike|barrat|line-?through|original|list-?price|old-?price|prezzo-?pieno|full-?price|\bwas\b/i;
-  const PRICEY_RE = /[€$£¥]|\b(?:EUR|USD|GBP|CHF|PLN|SEK|RON|CZK|DKK|NOK|euros?|dollari|sterline)\b|\d\s*(?:zł|kr|lei|kč)(?![\wÀ-ɏ])/i;
+  const PRICEY_RE = /[€$£¥]|\b(?:EUR|USD|GBP|CHF|PLN|SEK|RON|CZK|DKK|NOK|HUF|euros?|dollari|sterline)\b|\d\s*(?:zł|kr|lei|kč|Ft)(?![\wÀ-ɏ])/i;
 
   function isStruck(el) {
     let node = el;

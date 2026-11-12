@@ -20,6 +20,7 @@ const L = {
   pl: ['Zainstaluj', 'Zainstaluj AnteFirma na komputerze'], pt: ['Instalar', 'Instalar o AnteFirma no computador'],
   sv: ['Installera', 'Installera AnteFirma på datorn'], ro: ['Instalează', 'Instalează AnteFirma pe calculator'], cs: ['Instalovat', 'Nainstalovat AnteFirma do počítače'],
   da: ['Installér', 'Installér AnteFirma på computeren'], fi: ['Asenna', 'Asenna AnteFirma tietokoneelle'], no: ['Installer', 'Installer AnteFirma på datamaskinen'],
+  sk: ['Inštalovať', 'Nainštalovať AnteFirma do počítača'], hu: ['Telepítés', 'Az AnteFirma telepítése a számítógépre'], el: ['Εγκατάσταση', 'Εγκατάσταση του AnteFirma στον υπολογιστή'],
 }[(navigator.language || 'it').slice(0, 2)] || ['Installa', 'Installa AnteFirma sul computer'];
 addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();

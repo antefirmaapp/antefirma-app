@@ -1,0 +1,5 @@
+{
+  "extName":        { "message": "AnteFirma", "description": "Extension name." },
+  "extDescription": { "message": "Πριν αποδεχτείτε, μάθετε σε τι δεσμεύεστε: πόσο πληρώνετε πραγματικά, για πόσο καιρό και πώς βγαίνετε.", "description": "Short description, shown in the store and in chrome://extensions." },
+  "actionTitle":    { "message": "AnteFirma", "description": "Toolbar icon tooltip." }
+}

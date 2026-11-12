@@ -1,0 +1,59 @@
+A szerződés felmondása — Saas_fair
+felmondas-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Címzett: Saas_fair
+[A szolgáltató címe / a feltételekben megadott e-mail-cím]
+
+Kelt: ______________, 2026. augusztus 15.
+
+Küldés módja: ☐ tértivevényes ajánlott levél   ☐ online űrlap   ☐ e-mail
+
+Tárgy: a szerződés felmondása — automatikus megújítás nélkül
+
+Tisztelt Hölgyem/Uram!
+
+Ezúton felmondom a következőre vonatkozó szerződést: "SaaS mensile senza vincoli" (becsült kötelezettség: 12,00 EUR)
+(megkötve: 2026. augusztus 15.).
+
+A felmondás célja, hogy a szerződés 2026. szeptember 15. napján ne újuljon meg,
+a szerződési feltételekben meghatározott felmondási idő betartásával.
+
+Ezért kérem:
+  1. a felmondás kézhezvételének és hatálybalépése napjának írásbeli visszaigazolását;
+  2. minden terhelés megszüntetését ettől a naptól;
+  3. az esetlegesen követelt összegek részletezését, annak a szerződési kikötésnek a megjelölésével, amelyen alapulnak.
+
+A megjelölt megszűnési időpontot követő időszakra semmilyen terhelést nem fogadok el.
+
+Szerződő fél: Mario Rossi
+Cím: Via Roma 1, 20100 Milano
+Kapcsolattartási e-mail: mario.rossi@example.com
+Ügyfél- / szerződésszám: C-42
+Megkötés helye: https://saas_fair.test/checkout
+
+Tisztelettel:
+
+Mario Rossi
+
+Aláírás _______________________
+Dátum: 2026. augusztus 15.
+
+—
+Hasznos jogszabályok:
+  · Ptk. 6:102–6:104. § — tisztességtelen általános szerződési feltételek
+  · 93/13/EGK irányelv, melléklet, 1. pont h) — automatikus megújítás ésszerűtlenül korai határidővel
+
+A dokumentumot az AnteFirma automatikusan készítette az elemzett feltételek alapján.
+Elküldés előtt ellenőrizd a szögletes zárójelben lévő adatokat. Ez nem jogi tanácsadás.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: tértivevényes ajánlott levél (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Ptk. 6:102–6:104. § — tisztességtelen általános szerződési feltételek
+93/13/EGK irányelv, melléklet, 1. pont h) — automatikus megújítás ésszerűtlenül korai határidővel

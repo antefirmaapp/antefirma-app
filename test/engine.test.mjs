@@ -534,3 +534,20 @@ test('Denmark, Finland and Norway: EU checks with national references', () => {
   assert.equal(w('Du har angrerett i 14 dager.'), false);
   assert.equal(w('Abonnementet fornyes automatisk.'), true);
 });
+
+test('Slovakia, Hungary and Greece: EU checks with national references', () => {
+  const findings = [{ category: 'arbitration', severity: 60 }];
+  for (const [j, ref] of [['SK', /Občiansky zákonník, § 53/], ['HU', /Ptk\. 6:102/], ['GR', /2251\/1994/]]) {
+    const r = runConsumerChecks({ text: 'x', findings, jurisdiction: j });
+    assert.ok(r.applicable, j);
+    const flag = r.flags.find((f) => f.id === 'eu.arbitration');
+    assert.match(flag.refs[0], ref, j);
+    assert.ok(!flag.refs.some((x) => /^Codice/.test(x)), j);
+  }
+  const w = (text) => runConsumerChecks({ text, findings: [], actionType: 'purchase', jurisdiction: 'HU' }).flags.some((f) => f.id === 'eu.withdrawal');
+  assert.equal(w('Máte právo odstúpiť od zmluvy do 14 dní.'), false);
+  assert.equal(w('A fogyasztót 14 napon belül elállási jog illeti meg.'), false);
+  assert.equal(w('Έχετε δικαίωμα υπαναχώρησης εντός 14 ημερών.'), false);
+  assert.equal(w('ΔΙΚΑΙΩΜΑ ΥΠΑΝΑΧΩΡΗΣΗΣ'), false);
+  assert.equal(w('Az előfizetés automatikusan megújul.'), true);
+});

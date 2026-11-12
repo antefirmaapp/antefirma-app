@@ -1,0 +1,59 @@
+Výpoveď zmluvy — Saas_fair
+vypoved-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Adresát: Saas_fair
+[Adresa / e-mail poskytovateľa uvedený v podmienkach]
+
+Miesto a dátum: ______________, 15. augusta 2026
+
+Odoslané: ☐ doporučeným listom s doručenkou   ☐ online formulárom   ☐ e-mailom
+
+Vec: výpoveď zmluvy — bez automatického predĺženia
+
+Vážení,
+
+týmto vypovedám zmluvu, ktorej predmetom je "SaaS mensile senza vincoli" (odhadovaný záväzok 12,00 €),
+uzavretú 15. augusta 2026.
+
+Výpoveď podávam, aby sa zmluva nepredĺžila 15. septembra 2026,
+s dodržaním výpovednej lehoty uvedenej v zmluvných podmienkach.
+
+Preto žiadam:
+  1. písomné potvrdenie doručenia výpovede a dátumu jej účinnosti;
+  2. ukončenie všetkých platieb od tohto dátumu;
+  3. vyčíslenie prípadných súm, ktoré považujete za dlžné, s uvedením ustanovenia zmluvy, z ktorého vyplývajú.
+
+Nesúhlasím so žiadnymi platbami za obdobia po uvedenom dátume skončenia.
+
+Zmluvná strana: Mario Rossi
+Adresa: Via Roma 1, 20100 Milano
+Kontaktný e-mail: mario.rossi@example.com
+Zákaznícke číslo / číslo zmluvy: C-42
+Uzavretá prostredníctvom: https://saas_fair.test/checkout
+
+S pozdravom
+
+Mario Rossi
+
+Podpis _______________________
+Dátum 15. augusta 2026
+
+—
+Užitočné právne predpisy:
+  · Občiansky zákonník, § 53 — neprijateľné podmienky v spotrebiteľských zmluvách
+  · Smernica 93/13/EHS, príloha, bod 1 písm. h — automatické predĺženie s neprimerane skorou lehotou
+
+Dokument automaticky vytvorený aplikáciou AnteFirma na základe analyzovaných podmienok.
+Pred odoslaním skontrolujte údaje v hranatých zátvorkách. Nejde o právne poradenstvo.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: doporučený list s doručenkou (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Občiansky zákonník, § 53 — neprijateľné podmienky v spotrebiteľských zmluvách
+Smernica 93/13/EHS, príloha, bod 1 písm. h — automatické predĺženie s neprimerane skorou lehotou

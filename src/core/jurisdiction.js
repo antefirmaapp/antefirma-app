@@ -8,10 +8,12 @@ export function jurisdictionFor(uiLanguage = '') {
   const [lang, region = ''] = String(uiLanguage).replace('_', '-').split('-');
   const r = region.toUpperCase();
   const l = lang.toLowerCase();
-  if (['IT', 'ES', 'DE', 'AT', 'FR', 'BE', 'NL', 'PL', 'PT', 'SE', 'RO', 'CZ', 'DK', 'FI', 'NO'].includes(r)) return r;
+  if (['IT', 'ES', 'DE', 'AT', 'FR', 'BE', 'NL', 'PL', 'PT', 'SE', 'RO', 'CZ', 'DK', 'FI', 'NO', 'SK', 'HU', 'GR'].includes(r)) return r;
   // Portuguese from Brazil: outside the EU, with its own consumer code that AnteFirma doesn't cover yet.
   if (r === 'BR') return 'OTHER';
+  // Greek from Cyprus: an EU country with its own laws, which AnteFirma doesn't cover yet.
+  if (r === 'CY') return 'EU';
   if (r === 'GB') return 'UK';
   if (r === 'US') return 'US';
-  return { it: 'IT', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL', pl: 'PL', pt: 'PT', sv: 'SE', ro: 'RO', cs: 'CZ', da: 'DK', fi: 'FI', no: 'NO', nb: 'NO', nn: 'NO', en: 'UK' }[l] || 'EU';
+  return { it: 'IT', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL', pl: 'PL', pt: 'PT', sv: 'SE', ro: 'RO', cs: 'CZ', da: 'DK', fi: 'FI', no: 'NO', nb: 'NO', nn: 'NO', sk: 'SK', hu: 'HU', el: 'GR', en: 'UK' }[l] || 'EU';
 }

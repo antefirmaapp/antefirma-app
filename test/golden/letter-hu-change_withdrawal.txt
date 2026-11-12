@@ -1,0 +1,59 @@
+Megszüntetés a feltételek módosítása miatt — Saas_fair
+felmondas-modositas-miatt-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Címzett: Saas_fair
+[A szolgáltató címe / a feltételekben megadott e-mail-cím]
+
+Kelt: ______________, 2026. augusztus 15.
+
+Küldés módja: ☐ tértivevényes ajánlott levél   ☐ online űrlap   ☐ e-mail
+
+Tárgy: a szerződés megszüntetése a feltételek egyoldalú módosítása miatt
+
+Tisztelt Hölgyem/Uram!
+
+Észleltem, hogy a következőre vonatkozó szerződés megváltozott: "SaaS mensile senza vincoli" (becsült kötelezettség: 12,00 EUR),
+a 2026. augusztus 15. napján elfogadott feltételekhez képest.
+
+A módosítás a szolgáltatás árát vagy feltételeit érinti.
+
+Mivel az új feltételeket nem fogadom el, a szerződést azonnali hatállyal felmondom,
+kötbér és költségek nélkül, mivel a módosítás egyoldalúan
+és nem az én kérésemre történt.
+
+Ezért kérem:
+  1. a szerződés megszűnésének és időpontjának írásbeli visszaigazolását;
+  2. minden terhelés megszüntetését;
+  3. a megszűnést követő időszakokra befizetett összegek visszatérítését.
+
+Szerződő fél: Mario Rossi
+Cím: Via Roma 1, 20100 Milano
+Kapcsolattartási e-mail: mario.rossi@example.com
+Ügyfél- / szerződésszám: C-42
+Megkötés helye: https://saas_fair.test/checkout
+
+Tisztelettel:
+
+Mario Rossi
+
+Aláírás _______________________
+Dátum: 2026. augusztus 15.
+
+—
+Hasznos jogszabályok:
+  · Ptk. 6:104. § — az ár vagy a feltételek egyoldalú módosítása
+  · 93/13/EGK irányelv, melléklet, 1. pont j) és l)
+
+A dokumentumot az AnteFirma automatikusan készítette az elemzett feltételek alapján.
+Elküldés előtt ellenőrizd a szögletes zárójelben lévő adatokat. Ez nem jogi tanácsadás.
+
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: tértivevényes ajánlott levél (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Ptk. 6:104. § — az ár vagy a feltételek egyoldalú módosítása
+93/13/EGK irányelv, melléklet, 1. pont j) és l)

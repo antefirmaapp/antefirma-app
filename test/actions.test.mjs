@@ -742,3 +742,54 @@ test('the Nordic crowns follow the page: Danish, Norwegian or Swedish', () => {
     assert.ok(Math.abs((p.trial?.months ?? 0) - months) < 1e-9, `${text} → ${JSON.stringify(p.trial)}`);
   }
 });
+
+// ── Slovak, Hungarian, Greek ────────────────────────────────────────────────
+
+test('recognises commitment buttons in Slovak, Hungarian and Greek', () => {
+  const cases = {
+    'Kúpiť teraz': 'purchase', 'Objednať s povinnosťou platby': 'purchase', 'Zaplatiť': 'purchase', 'Prejsť do pokladne': 'purchase', 'Dokončiť objednávku': 'purchase',
+    'Predplatiť': 'subscribe', 'Vyskúšať zadarmo': 'subscribe', 'Stať sa členom': 'subscribe', 'Podpísať zmluvu': 'sign', 'Pokračovať cez Google': 'oauth',
+    'Prijať všetko': 'consent', 'Súhlasím s obchodnými podmienkami': 'accept_terms', 'Vytvoriť účet': 'signup', 'Zaregistrovať sa': 'signup',
+    'Megvásárolom': 'purchase', 'Fizetési kötelezettséggel járó megrendelés': 'purchase', 'Tovább a fizetéshez': 'purchase', 'Rendelés véglegesítése': 'purchase',
+    'Előfizetek': 'subscribe', 'Ingyenes próbaidőszak indítása': 'subscribe', 'Aláírom': 'sign', 'Folytatás Google-fiókkal': 'oauth',
+    'Összes elfogadása': 'consent', 'Elfogadom a feltételeket': 'accept_terms', 'Fiók létrehozása': 'signup', 'Regisztráció': 'signup',
+    'Αγορά τώρα': 'purchase', 'Παραγγελία με υποχρέωση πληρωμής': 'purchase', 'Μετάβαση στο ταμείο': 'purchase', 'Γίνετε συνδρομητής': 'subscribe',
+    'Δοκιμάστε δωρεάν': 'subscribe', 'Υπογραφή σύμβασης': 'sign', 'Συνέχεια με Google': 'oauth', 'Αποδοχή όλων': 'consent', 'Αποδέχομαι': 'accept_terms',
+    'Δημιουργία λογαριασμού': 'signup',
+    // Uppercase text from CSS drops the Greek accents: it still counts.
+    'ΑΓΟΡΑ ΤΩΡΑ': 'purchase', 'ΞΕΚΙΝΗΣΤΕ ΤΗ ΔΩΡΕΑΝ ΔΟΚΙΜΗ': 'subscribe', 'ΑΠΟΔΟΧΗ ΟΛΩΝ': 'consent',
+  };
+  for (const [text, wanted] of Object.entries(cases)) assert.equal(classifyText(text), wanted, `"${text}"`);
+});
+
+test('Slovak, Hungarian and Greek refusals and harmless buttons stay out', () => {
+  for (const text of ['Odmietnuť všetko', 'Len nevyhnutné', 'Zrušiť', 'Späť', 'Zavrieť', 'Odoberať novinky', 'Pridať do košíka', 'Pokračovať v nákupe',
+    'Összes elutasítása', 'Csak a szükségesek', 'Mégse', 'Vissza', 'Bezárás', 'Feliratkozás a hírlevélre', 'Kosárba', 'Vásárlás folytatása',
+    'Απόρριψη όλων', 'Μόνο τα απαραίτητα', 'Ακύρωση', 'Πίσω', 'Κλείσιμο', 'Εγγραφή στο ενημερωτικό δελτίο', 'Προσθήκη στο καλάθι', 'Συνέχεια αγορών', 'ΣΥΝΕΧΕΙΑ ΑΓΟΡΩΝ']) {
+    assert.equal(classifyText(text), null, `"${text}"`);
+  }
+  assert.equal(classifyText('Predplatiť — zrušiť môžete kedykoľvek'), 'subscribe');
+  assert.equal(classifyText('Előfizetek — bármikor lemondhatod'), 'subscribe');
+  assert.equal(classifyText('Γίνετε συνδρομητής — ακύρωση οποτεδήποτε'), 'subscribe');
+});
+
+test('prices, periods and free trials in Slovak, Hungarian and Greek; forints only as "Ft"', () => {
+  const cases = [
+    ['Kompletné predplatné so všetkými funkciami a podporou. Cena 9,99 € mesačne, 14 dní zadarmo.', 9.99, 'EUR', 'month', 14 / 30],
+    ['Teljes előfizetés minden funkcióval és támogatással. 2 990 Ft/hó, 30 napos ingyenes próbaidő.', 2990, 'HUF', 'month', 1],
+    ['Πλήρης συνδρομή με όλες τις λειτουργίες και υποστήριξη. 12,99 € τον μήνα, δωρεάν δοκιμή 7 ημερών.', 12.99, 'EUR', 'month', 7 / 30],
+    ['Éves előfizetés minden funkcióval és támogatással. 29 900 Ft évente, első hónap ingyen.', 29900, 'HUF', 'year', 1],
+    ['Ετήσια συνδρομή με όλες τις λειτουργίες και υποστήριξη. 99 € ετησίως.', 99, 'EUR', 'year', 0],
+  ];
+  for (const [text, amount, currency, period, months] of cases) {
+    const { body, btn } = page([text]);
+    const p = loadContext(body).extractPricing(btn);
+    assert.equal(p.amount, amount, text);
+    assert.equal(p.currency, currency, text);
+    assert.equal(p.period, period, text);
+    assert.ok(Math.abs((p.trial?.months ?? 0) - months) < 1e-9, `${text} → ${JSON.stringify(p.trial)}`);
+  }
+  // English feet are not forints.
+  const { body, btn } = page(['A 6 ft folding table with a steel frame and a two-year warranty, delivered to your door. 49 € per month.']);
+  assert.equal(loadContext(body).extractPricing(btn).currency, 'EUR');
+});

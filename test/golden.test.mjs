@@ -48,7 +48,7 @@ test('corpus verdicts are unchanged', async () => {
 
 test('panel result HTML is unchanged in every language', async () => {
   const c = CORPUS.find((x) => x.pricing?.recurring) || CORPUS[0];
-  for (const lang of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no']) {
+  for (const lang of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el']) {
     const v = await verdictOf(c, lang);
     v.engine.durationMs = 0; // timing differs on every run
     golden(`render-${lang}.html`, renderVerdict(v) + '\n');
@@ -56,7 +56,7 @@ test('panel result HTML is unchanged in every language', async () => {
   setLang('it');
 });
 
-test('letters are unchanged: 17 language and country variants × 3 kinds', async () => {
+test('letters are unchanged: 20 language and country variants × 3 kinds', async () => {
   const c = CORPUS.find((x) => x.pricing?.recurring) || CORPUS[0];
   const commitment = buildCommitment({ verdict: await verdictOf(c), now: T0, id: 'golden-1' });
   const identity = { name: 'Mario Rossi', address: 'Via Roma 1, 20100 Milano', email: 'mario.rossi@example.com', customerId: 'C-42' };

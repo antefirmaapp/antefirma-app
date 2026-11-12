@@ -21,15 +21,16 @@ import { t, locale } from '../i18n/index.js';
  * Dutch for the Netherlands, French or Dutch for Belgium (the user's language
  * decides), Polish for Poland, Portuguese for Portugal, Swedish for Sweden,
  * Romanian for Romania, Czech for the Czech Republic, Danish for Denmark,
- * Finnish for Finland, Norwegian (Bokmål) for Norway, English elsewhere. Each with its country's laws and habits (PEC,
+ * Finnish for Finland, Norwegian (Bokmål) for Norway, Slovak for Slovakia,
+ * Hungarian for Hungary, Greek for Greece, English elsewhere. Each with its country's laws and habits (PEC,
  * burofax, Einschreiben, lettre recommandée, aangetekende brief). A variant
  * such as 'de-AT' is the same text with the other country's laws. Dates and
  * amounts follow the variant's locale.
  */
-export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no'];
+export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el'];
 export const LETTER_VARIANTS = [...LETTER_LANGS, 'de-AT', 'fr-BE', 'nl-BE'];
-const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO' };
-const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs', DK: 'da', FI: 'fi', NO: 'no' };
+const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR' };
+const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs', DK: 'da', FI: 'fi', NO: 'no', SK: 'sk', HU: 'hu', GR: 'el' };
 export const letterLangFor = (jurisdiction, uiLang = '') => (jurisdiction === 'BE' ? (uiLang === 'nl' ? 'nl-BE' : 'fr-BE') : BY_COUNTRY[jurisdiction] || 'en');
 
 export const LETTER_KINDS = {
@@ -59,6 +60,9 @@ const FILE_SLUGS = {
   da: { withdrawal: 'fortrydelse', cancellation: 'opsigelse', change_withdrawal: 'opsigelse-efter-aendring' },
   fi: { withdrawal: 'peruuttaminen', cancellation: 'irtisanominen', change_withdrawal: 'irtisanominen-muutoksen-vuoksi' },
   no: { withdrawal: 'angrerett', cancellation: 'oppsigelse', change_withdrawal: 'oppsigelse-etter-endring' },
+  sk: { withdrawal: 'odstupenie', cancellation: 'vypoved', change_withdrawal: 'vypoved-po-zmene' },
+  hu: { withdrawal: 'elallas', cancellation: 'felmondas', change_withdrawal: 'felmondas-modositas-miatt' },
+  el: { withdrawal: 'yparaxorisi', cancellation: 'kataggelia', change_withdrawal: 'kataggelia-meta-allagi' },
 };
 
 export const LETTER_LABELS = {
@@ -939,6 +943,177 @@ const TEXT = {
     },
   },
 
+  // Slovakia: Consumer Protection Act (zákon č. 108/2024 Z. z.) and Civil Code § 53.
+  sk: {
+    ph: { name: '[Meno a priezvisko]', address: '[Adresa]', email: '[E-mail]', provider: '[Poskytovateľ]', service: '[opis služby]', date: '[dátum]' },
+    estimated: (x) => `(odhadovaný záväzok ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Adresát: ${provider}`,
+      '[Adresa / e-mail poskytovateľa uvedený v podmienkach]', '', `Miesto a dátum: ______________, ${today}`, '',
+      'Odoslané: ☐ doporučeným listom s doručenkou   ☐ online formulárom   ☐ e-mailom'].join('\n'),
+    withdrawal: (k) => ['Vec: odstúpenie od zmluvy', '', 'Vážení,', '',
+      'týmto oznamujem, že odstupujem od zmluvy, ktorej predmetom je',
+      `služba ${service(k)}, uzavretej ${orderDate(k)}.`, '',
+      'Uplatňujem právo na odstúpenie od zmluvy uzavretej na diaľku v lehote štrnástich dní',
+      'od jej uzavretia, bez uvedenia dôvodu a bez akýchkoľvek nákladov.', '', 'Preto žiadam:',
+      '  1. okamžité ukončenie služby a všetkých súvisiacich platieb;',
+      '  2. vrátenie všetkých prijatých platieb najneskôr do štrnástich dní od doručenia',
+      '     tohto oznámenia, rovnakým spôsobom, akým boli zaplatené;', '  3. písomné potvrdenie doručenia tohto oznámenia.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Vec: výpoveď zmluvy — bez automatického predĺženia', '', 'Vážení,', '',
+        `týmto vypovedám zmluvu, ktorej predmetom je ${service(k)},`, `uzavretú ${orderDate(k)}.`, '',
+        renewal ? `Výpoveď podávam, aby sa zmluva nepredĺžila ${renewal},`
+          : 'Výpoveď podávam, aby sa zmluva po uplynutí obdobia automaticky nepredĺžila,',
+        notice ? `s dodržaním výpovednej lehoty ${notice} dní uvedenej v podmienkach${deadline ? ` (posledný deň: ${deadline})` : ''}.`
+          : 's dodržaním výpovednej lehoty uvedenej v zmluvných podmienkach.', '',
+        'Preto žiadam:', '  1. písomné potvrdenie doručenia výpovede a dátumu jej účinnosti;',
+        '  2. ukončenie všetkých platieb od tohto dátumu;',
+        '  3. vyčíslenie prípadných súm, ktoré považujete za dlžné, s uvedením ustanovenia zmluvy, z ktorého vyplývajú.', '',
+        'Nesúhlasím so žiadnymi platbami za obdobia po uvedenom dátume skončenia.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Vec: ukončenie zmluvy pre jednostrannú zmenu podmienok', '', 'Vážení,', '',
+        `zistil(a) som zmenu zmluvy, ktorej predmetom je ${service(k)},`, `oproti podmienkam, ktoré som prijal(a) ${orderDate(k)}.`, '',
+        ch?.summary ? `Konkrétne: ${ch.summary}` : 'Zmena sa týka ceny alebo podmienok služby.', '',
+        'Keďže s novými podmienkami nesúhlasím, zmluvu vypovedám s okamžitou účinnosťou,',
+        'bez sankcií a nákladov, pretože zmena bola vykonaná jednostranne', 'a nie na moju žiadosť.', '',
+        'Preto žiadam:', '  1. písomné potvrdenie skončenia zmluvy a jeho dátumu;', '  2. ukončenie všetkých platieb;',
+        '  3. vrátenie súm zaplatených za obdobia po skončení zmluvy.'];
+    },
+    identity: ({ you, c }) => [`Zmluvná strana: ${you.name}`, `Adresa: ${you.address}`, `Kontaktný e-mail: ${you.email}`,
+      `Zákaznícke číslo / číslo zmluvy: ${you.customerId || '[doplniť]'}`,
+      ...(c.url ? [`Uzavretá prostredníctvom: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Odtlačok prijatých podmienok (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['S pozdravom', '', you.name, '', 'Podpis _______________________', `Dátum ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Užitočné právne predpisy:', ...refs.map((r) => `  · ${r}`), '',
+      'Dokument automaticky vytvorený aplikáciou AnteFirma na základe analyzovaných podmienok.',
+      'Pred odoslaním skontrolujte údaje v hranatých zátvorkách. Nejde o právne poradenstvo.'].join('\n'),
+    subject: { withdrawal: (p) => `Odstúpenie od zmluvy — ${p}`, cancellation: (p) => `Výpoveď zmluvy — ${p}`, change_withdrawal: (p) => `Ukončenie pre zmenu podmienok — ${p}` },
+    refs: {
+      withdrawal: ['Zákon č. 108/2024 Z. z. o ochrane spotrebiteľa — právo na odstúpenie od zmluvy uzavretej na diaľku',
+        'Zákon č. 108/2024 Z. z., príloha — vzorový formulár na odstúpenie od zmluvy', 'Smernica 2011/83/EÚ'],
+      cancellation: ['Občiansky zákonník, § 53 — neprijateľné podmienky v spotrebiteľských zmluvách',
+        'Smernica 93/13/EHS, príloha, bod 1 písm. h — automatické predĺženie s neprimerane skorou lehotou'],
+      change_withdrawal: ['Občiansky zákonník, § 53 — jednostranná zmena ceny alebo podmienok',
+        'Smernica 93/13/EHS, príloha, bod 1 písm. j a l'],
+    },
+  },
+
+  // Hungary: Government Decree 45/2014 (II. 26.) and Civil Code (Ptk.) 6:102–6:104 §.
+  hu: {
+    ph: { name: '[Teljes név]', address: '[Cím]', email: '[E-mail]', provider: '[Szolgáltató]', service: '[a szolgáltatás leírása]', date: '[dátum]' },
+    estimated: (x) => `(becsült kötelezettség: ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Címzett: ${provider}`,
+      '[A szolgáltató címe / a feltételekben megadott e-mail-cím]', '', `Kelt: ______________, ${today}`, '',
+      'Küldés módja: ☐ tértivevényes ajánlott levél   ☐ online űrlap   ☐ e-mail'].join('\n'),
+    withdrawal: (k) => ['Tárgy: elállási jog gyakorlása', '', 'Tisztelt Hölgyem/Uram!', '',
+      'Ezúton bejelentem, hogy elállok a következő szolgáltatásra',
+      `vonatkozó szerződéstől: ${service(k)} (megkötve: ${orderDate(k)}).`, '',
+      'A távollévők között kötött szerződésekre vonatkozó elállási jogomat a szerződés',
+      'megkötésétől számított tizennégy napon belül, indoklás nélkül és költségmentesen gyakorlom.', '', 'Ezért kérem:',
+      '  1. a szolgáltatás és minden kapcsolódó terhelés azonnali megszüntetését;',
+      '  2. valamennyi befizetett összeg visszatérítését legkésőbb az e nyilatkozat',
+      '     kézhezvételétől számított tizennégy napon belül, az eredeti fizetési móddal;', '  3. e nyilatkozat kézhezvételének írásbeli visszaigazolását.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Tárgy: a szerződés felmondása — automatikus megújítás nélkül', '', 'Tisztelt Hölgyem/Uram!', '',
+        `Ezúton felmondom a következőre vonatkozó szerződést: ${service(k)}`, `(megkötve: ${orderDate(k)}).`, '',
+        renewal ? `A felmondás célja, hogy a szerződés ${renewal} napján ne újuljon meg,`
+          : 'A felmondás célja, hogy a szerződés az időszak végén ne újuljon meg automatikusan,',
+        notice ? `a feltételekben meghatározott ${notice} napos felmondási idő betartásával${deadline ? ` (utolsó nap: ${deadline})` : ''}.`
+          : 'a szerződési feltételekben meghatározott felmondási idő betartásával.', '',
+        'Ezért kérem:', '  1. a felmondás kézhezvételének és hatálybalépése napjának írásbeli visszaigazolását;',
+        '  2. minden terhelés megszüntetését ettől a naptól;',
+        '  3. az esetlegesen követelt összegek részletezését, annak a szerződési kikötésnek a megjelölésével, amelyen alapulnak.', '',
+        'A megjelölt megszűnési időpontot követő időszakra semmilyen terhelést nem fogadok el.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Tárgy: a szerződés megszüntetése a feltételek egyoldalú módosítása miatt', '', 'Tisztelt Hölgyem/Uram!', '',
+        `Észleltem, hogy a következőre vonatkozó szerződés megváltozott: ${service(k)},`, `a ${orderDate(k)} napján elfogadott feltételekhez képest.`, '',
+        ch?.summary ? `Konkrétan: ${ch.summary}` : 'A módosítás a szolgáltatás árát vagy feltételeit érinti.', '',
+        'Mivel az új feltételeket nem fogadom el, a szerződést azonnali hatállyal felmondom,',
+        'kötbér és költségek nélkül, mivel a módosítás egyoldalúan', 'és nem az én kérésemre történt.', '',
+        'Ezért kérem:', '  1. a szerződés megszűnésének és időpontjának írásbeli visszaigazolását;', '  2. minden terhelés megszüntetését;',
+        '  3. a megszűnést követő időszakokra befizetett összegek visszatérítését.'];
+    },
+    identity: ({ you, c }) => [`Szerződő fél: ${you.name}`, `Cím: ${you.address}`, `Kapcsolattartási e-mail: ${you.email}`,
+      `Ügyfél- / szerződésszám: ${you.customerId || '[kitöltendő]'}`,
+      ...(c.url ? [`Megkötés helye: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Az elfogadott feltételek ujjlenyomata (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Tisztelettel:', '', you.name, '', 'Aláírás _______________________', `Dátum: ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Hasznos jogszabályok:', ...refs.map((r) => `  · ${r}`), '',
+      'A dokumentumot az AnteFirma automatikusan készítette az elemzett feltételek alapján.',
+      'Elküldés előtt ellenőrizd a szögletes zárójelben lévő adatokat. Ez nem jogi tanácsadás.'].join('\n'),
+    subject: { withdrawal: (p) => `Elállási jog gyakorlása — ${p}`, cancellation: (p) => `A szerződés felmondása — ${p}`, change_withdrawal: (p) => `Megszüntetés a feltételek módosítása miatt — ${p}` },
+    refs: {
+      withdrawal: ['45/2014. (II. 26.) Korm. rendelet, 20–23. § — elállási jog távollévők között kötött szerződésnél',
+        '45/2014. (II. 26.) Korm. rendelet, 2. melléklet — elállási nyilatkozatminta', '2011/83/EU irányelv'],
+      cancellation: ['Ptk. 6:102–6:104. § — tisztességtelen általános szerződési feltételek',
+        '93/13/EGK irányelv, melléklet, 1. pont h) — automatikus megújítás ésszerűtlenül korai határidővel'],
+      change_withdrawal: ['Ptk. 6:104. § — az ár vagy a feltételek egyoldalú módosítása',
+        '93/13/EGK irányelv, melléklet, 1. pont j) és l)'],
+    },
+  },
+
+  // Greece: Consumer Protection Act (Law 2251/1994), art. 3ε (withdrawal) and art. 2 (unfair terms).
+  el: {
+    ph: { name: '[Ονοματεπώνυμο]', address: '[Διεύθυνση]', email: '[Email]', provider: '[Πάροχος]', service: '[περιγραφή της υπηρεσίας]', date: '[ημερομηνία]' },
+    estimated: (x) => `(εκτιμώμενη δέσμευση ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Προς: ${provider}`,
+      '[Διεύθυνση / email του παρόχου που αναφέρεται στους όρους]', '', `Τόπος και ημερομηνία: ______________, ${today}`, '',
+      'Αποστολή με: ☐ συστημένη επιστολή με απόδειξη παραλαβής   ☐ online φόρμα   ☐ email'].join('\n'),
+    withdrawal: (k) => ['Θέμα: άσκηση του δικαιώματος υπαναχώρησης', '', 'Αξιότιμοι κύριοι,', '',
+      'με την παρούσα σας γνωστοποιώ ότι υπαναχωρώ από τη σύμβαση που αφορά',
+      `την υπηρεσία ${service(k)}, η οποία συνάφθηκε στις ${orderDate(k)}.`, '',
+      'Ασκώ το δικαίωμα υπαναχώρησης από σύμβαση εξ αποστάσεως εντός δεκατεσσάρων ημερών',
+      'από τη σύναψή της, χωρίς αιτιολογία και χωρίς καμία επιβάρυνση.', '', 'Ως εκ τούτου ζητώ:',
+      '  1. την άμεση διακοπή της υπηρεσίας και κάθε σχετικής χρέωσης·',
+      '  2. την επιστροφή όλων των ποσών που καταβλήθηκαν το αργότερο εντός δεκατεσσάρων ημερών',
+      '     από την παραλαβή της παρούσας, με τον ίδιο τρόπο πληρωμής·', '  3. γραπτή επιβεβαίωση της παραλαβής της παρούσας.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Θέμα: καταγγελία της σύμβασης — χωρίς αυτόματη ανανέωση', '', 'Αξιότιμοι κύριοι,', '',
+        `με την παρούσα καταγγέλλω τη σύμβαση που αφορά ${service(k)},`, `η οποία συνάφθηκε στις ${orderDate(k)}.`, '',
+        renewal ? `Η καταγγελία γίνεται ώστε η σύμβαση να μην ανανεωθεί στις ${renewal},`
+          : 'Η καταγγελία γίνεται ώστε η σύμβαση να μην ανανεωθεί αυτόματα στη λήξη της περιόδου,',
+        notice ? `τηρώντας την προθεσμία προειδοποίησης ${notice} ημερών που προβλέπουν οι όροι${deadline ? ` (τελευταία ημέρα: ${deadline})` : ''}.`
+          : 'τηρώντας την προθεσμία προειδοποίησης που προβλέπουν οι όροι της σύμβασης.', '',
+        'Ως εκ τούτου ζητώ:', '  1. γραπτή επιβεβαίωση της παραλαβής της καταγγελίας και της ημερομηνίας από την οποία ισχύει·',
+        '  2. τη διακοπή κάθε χρέωσης από την ημερομηνία αυτή·',
+        '  3. ανάλυση τυχόν ποσών που θεωρείτε οφειλόμενα, με τον όρο της σύμβασης στον οποίο στηρίζονται.', '',
+        'Δεν αποδέχομαι καμία χρέωση για περιόδους μετά την αναφερόμενη ημερομηνία λήξης.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Θέμα: λύση της σύμβασης λόγω μονομερούς αλλαγής των όρων', '', 'Αξιότιμοι κύριοι,', '',
+        `διαπίστωσα αλλαγή στη σύμβαση που αφορά ${service(k)},`, `σε σχέση με τους όρους που αποδέχτηκα στις ${orderDate(k)}.`, '',
+        ch?.summary ? `Συγκεκριμένα: ${ch.summary}` : 'Η αλλαγή αφορά την τιμή ή τους όρους της υπηρεσίας.', '',
+        'Επειδή δεν αποδέχομαι τους νέους όρους, καταγγέλλω τη σύμβαση με άμεση ισχύ,',
+        'χωρίς ποινές ή επιβαρύνσεις, καθώς η αλλαγή έγινε μονομερώς', 'και όχι κατόπιν δικού μου αιτήματος.', '',
+        'Ως εκ τούτου ζητώ:', '  1. γραπτή επιβεβαίωση της λύσης της σύμβασης και της ημερομηνίας της·', '  2. τη διακοπή κάθε χρέωσης·',
+        '  3. την επιστροφή των ποσών που καταβλήθηκαν για περιόδους μετά τη λύση.'];
+    },
+    identity: ({ you, c }) => [`Συμβαλλόμενος: ${you.name}`, `Διεύθυνση: ${you.address}`, `Email επικοινωνίας: ${you.email}`,
+      `Αριθμός πελάτη / σύμβασης: ${you.customerId || '[συμπληρώστε]'}`,
+      ...(c.url ? [`Σύναψη μέσω: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Αποτύπωμα των όρων που έγιναν δεκτοί (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Με εκτίμηση', '', you.name, '', 'Υπογραφή _______________________', `Ημερομηνία ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Χρήσιμες διατάξεις:', ...refs.map((r) => `  · ${r}`), '',
+      'Έγγραφο που δημιουργήθηκε αυτόματα από το AnteFirma με βάση τους όρους που αναλύθηκαν.',
+      'Ελέγξτε τα στοιχεία σε αγκύλες πριν από την αποστολή. Δεν αποτελεί νομική συμβουλή.'].join('\n'),
+    subject: { withdrawal: (p) => `Άσκηση δικαιώματος υπαναχώρησης — ${p}`, cancellation: (p) => `Καταγγελία της σύμβασης — ${p}`, change_withdrawal: (p) => `Λύση λόγω αλλαγής όρων — ${p}` },
+    refs: {
+      withdrawal: ['Ν. 2251/1994, άρθρο 3ε — δικαίωμα υπαναχώρησης από συμβάσεις εξ αποστάσεως',
+        'Ν. 2251/1994, παράρτημα — υπόδειγμα εντύπου υπαναχώρησης', 'Οδηγία 2011/83/ΕΕ'],
+      cancellation: ['Ν. 2251/1994, άρθρο 2 — καταχρηστικοί γενικοί όροι συναλλαγών',
+        'Οδηγία 93/13/ΕΟΚ, παράρτημα, σημείο 1 στοιχείο η — αυτόματη ανανέωση με αδικαιολόγητα πρόωρη προθεσμία'],
+      change_withdrawal: ['Ν. 2251/1994, άρθρο 2 παρ. 7 — μονομερής αλλαγή τιμής ή όρων',
+        'Οδηγία 93/13/ΕΟΚ, παράρτημα, σημείο 1 στοιχεία ι και ιβ'],
+    },
+  },
+
 };
 
 /**
@@ -979,6 +1154,7 @@ const SENDING = {
   pl: 'sendWayProvesDateListPolecony', pt: 'sendWayProvesDateCartaRegistada', sv: 'sendWayProvesDateRekommenderat',
   ro: 'sendWayProvesDateScrisoareRecomandata', cs: 'sendWayProvesDateDoporucenyDopis', da: 'sendWayProvesDateAnbefaletBrev',
   fi: 'sendWayProvesDateKirjattuKirje', no: 'sendWayProvesDateRekommandertBrev',
+  sk: 'sendWayProvesDateDoporucenyList', hu: 'sendWayProvesDateTertivevenyes', el: 'sendWayProvesDateSystimeni',
 };
 
 /** The advice next to the letter: in the user's language, with the sending method of the letter's country. */
