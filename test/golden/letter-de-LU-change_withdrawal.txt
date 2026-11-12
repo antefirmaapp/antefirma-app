@@ -1,0 +1,59 @@
+Kündigung wegen Vertragsänderung — Saas_fair
+kuendigung-nach-aenderung-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+An Saas_fair
+[Anschrift des Anbieters / in den Bedingungen genannte E-Mail]
+
+Ort, Datum: ______________, 15. August 2026
+
+Versandart: ☐ Einschreiben mit Rückschein   ☐ Kündigungsbutton der Website   ☐ Online-Formular   ☐ E-Mail
+
+Betreff: Kündigung wegen einseitiger Änderung der Vertragsbedingungen
+
+Sehr geehrte Damen und Herren,
+
+mir ist eine Änderung der Bedingungen meines Vertrags über "SaaS mensile senza vincoli" (geschätzte Verpflichtung 12,00 €) aufgefallen,
+gegenüber den Bedingungen, die ich am 15. August 2026 akzeptiert habe.
+
+Die Änderung betrifft den Preis oder die Bedingungen der Leistung.
+
+Da ich den neuen Bedingungen nicht zustimme, beende ich den Vertrag mit sofortiger Wirkung,
+ohne Vertragsstrafe und ohne Kosten, da die Änderung einseitig und nicht auf meinen
+Wunsch erfolgt ist.
+
+Ich bitte Sie daher:
+  1. mir die Beendigung des Vertrags und deren Zeitpunkt schriftlich zu bestätigen;
+  2. alle Abbuchungen einzustellen;
+  3. Beträge für Zeiträume nach Vertragsende zu erstatten.
+
+Vertragsinhaber: Mario Rossi
+Anschrift: Via Roma 1, 20100 Milano
+Kontakt-E-Mail: mario.rossi@example.com
+Kunden- / Vertragsnummer: C-42
+Abgeschlossen über: https://saas_fair.test/checkout
+
+Mit freundlichen Grüßen
+
+Mario Rossi
+
+Unterschrift _______________________
+Datum 15. August 2026
+
+—
+Nützliche Rechtsgrundlagen:
+  · Code de la consommation (Luxemburg), Art. L. 211-3 — einseitige Preis- und Leistungsänderungen
+  · Richtlinie 93/13/EWG, Anhang Nr. 1 Buchst. j und l
+
+Von AnteFirma automatisch aus den analysierten Bedingungen erstelltes Dokument.
+Prüfen Sie die Angaben in eckigen Klammern vor dem Versand. Keine Rechtsberatung.
+
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: Einschreiben mit Rückschein (raccomandata con ricevuta di ritorno) o il pulsante di disdetta del sito.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Code de la consommation (Luxemburg), Art. L. 211-3 — einseitige Preis- und Leistungsänderungen
+Richtlinie 93/13/EWG, Anhang Nr. 1 Buchst. j und l

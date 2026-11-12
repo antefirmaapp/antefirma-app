@@ -483,3 +483,22 @@ test('the letter in Slovak, Hungarian and Greek, with each country\'s laws', asy
   const { letterLangFor } = await import('../src/core/letter.js');
   assert.deepEqual(['SK', 'HU', 'GR'].map((j) => letterLangFor(j)), ['sk', 'hu', 'el']);
 });
+
+test('Ireland, Malta, Cyprus and Luxembourg: letters in the shared language with the national laws', async () => {
+  const { letterLangFor } = await import('../src/core/letter.js');
+  assert.deepEqual(['IE', 'MT', 'CY'].map((j) => letterLangFor(j)), ['en-IE', 'en-MT', 'el-CY']);
+  assert.equal(letterLangFor('LU', 'fr'), 'fr-LU');
+  assert.equal(letterLangFor('LU', 'de'), 'de-LU');
+  assert.equal(letterLangFor('LU', 'it'), 'fr-LU');
+  const c = { provider: 'Example', url: 'https://example.com', createdAt: T0, renewalAt: T0 + 30 * 86400000 };
+  const cases = [['en-IE', 'Consumer Rights Act 2022', 'Yours'], ['en-MT', 'S.L. 378.17', 'Yours'], ['el-CY', '112(I)/2021', 'Με εκτίμηση'],
+    ['fr-LU', 'L. 222-9', 'Veuillez'], ['de-LU', 'L. 222-9', 'freundlichen']];
+  for (const [v, ref, words] of cases) {
+    const l = buildLetter(c, {}, LETTER_KINDS.WITHDRAWAL, T0, v);
+    assert.equal(l.variant, v);
+    assert.ok(l.text.includes(ref), v);
+    assert.ok(l.text.includes(words), v);
+    // The UK, Greek, French and German laws stay out of the other countries' letters.
+    assert.ok(!/Consumer Contracts Regulations|2251\/1994|L221-18|BGB/.test(l.text), v);
+  }
+});

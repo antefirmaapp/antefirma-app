@@ -28,10 +28,15 @@ import { t, locale } from '../i18n/index.js';
  * amounts follow the variant's locale.
  */
 export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el'];
-export const LETTER_VARIANTS = [...LETTER_LANGS, 'de-AT', 'fr-BE', 'nl-BE'];
-const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR' };
-const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs', DK: 'da', FI: 'fi', NO: 'no', SK: 'sk', HU: 'hu', GR: 'el' };
-export const letterLangFor = (jurisdiction, uiLang = '') => (jurisdiction === 'BE' ? (uiLang === 'nl' ? 'nl-BE' : 'fr-BE') : BY_COUNTRY[jurisdiction] || 'en');
+export const LETTER_VARIANTS = [...LETTER_LANGS, 'de-AT', 'fr-BE', 'nl-BE', 'en-IE', 'en-MT', 'el-CY', 'fr-LU', 'de-LU'];
+const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', 'en-IE': 'en-IE', 'en-MT': 'en-MT', 'el-CY': 'el-CY', 'fr-LU': 'fr-LU', 'de-LU': 'de-LU', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR' };
+const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs', DK: 'da', FI: 'fi', NO: 'no', SK: 'sk', HU: 'hu', GR: 'el', IE: 'en-IE', MT: 'en-MT', CY: 'el-CY' };
+// Belgium and Luxembourg have more than one language: the letter follows the person's own.
+export const letterLangFor = (jurisdiction, uiLang = '') => {
+  if (jurisdiction === 'BE') return uiLang === 'nl' ? 'nl-BE' : 'fr-BE';
+  if (jurisdiction === 'LU') return uiLang === 'de' ? 'de-LU' : 'fr-LU';
+  return BY_COUNTRY[jurisdiction] || 'en';
+};
 
 export const LETTER_KINDS = {
   WITHDRAWAL: 'withdrawal',
@@ -1145,7 +1150,41 @@ const COUNTRY_REFS = {
     change_withdrawal: ['Wetboek van economisch recht, art. VI.83, 1° en 3° — eenzijdige wijziging van prijs en voorwaarden',
       'Richtlijn 93/13/EEG, bijlage, punt 1 j) en l)'],
   },
-
+  'en-IE': {
+    withdrawal: ['Consumer Rights Act 2022, Part 3 — cancellation of distance contracts within 14 days',
+      'Directive 2011/83/EU, Annex I, Part B — model withdrawal form', 'Directive 2011/83/EU'],
+    cancellation: ['Consumer Rights Act 2022, Part 4 and Schedule 3 — unfair terms (automatic extension, long notice)'],
+    change_withdrawal: ['Consumer Rights Act 2022, Schedule 3 — unilateral change of price or terms',
+      'Directive 93/13/EEC, Annex, points 1(j) and (l)'],
+  },
+  'en-MT': {
+    withdrawal: ['Consumer Rights Regulations (S.L. 378.17) — right of withdrawal from distance contracts',
+      'Directive 2011/83/EU, Annex I, Part B — model withdrawal form', 'Directive 2011/83/EU'],
+    cancellation: ['Consumer Affairs Act (Cap. 378), arts. 44–47 — unfair terms (automatic extension, long notice)'],
+    change_withdrawal: ['Consumer Affairs Act (Cap. 378), arts. 44–47 — unilateral change of price or terms',
+      'Directive 93/13/EEC, Annex, points 1(j) and (l)'],
+  },
+  'el-CY': {
+    withdrawal: ['Ν. 112(I)/2021 (περί Προστασίας του Καταναλωτή) — δικαίωμα υπαναχώρησης από συμβάσεις εξ αποστάσεως',
+      'Οδηγία 2011/83/ΕΕ, παράρτημα I, μέρος Β — υπόδειγμα εντύπου υπαναχώρησης', 'Οδηγία 2011/83/ΕΕ'],
+    cancellation: ['Ν. 112(I)/2021 (περί Προστασίας του Καταναλωτή) — καταχρηστικές ρήτρες (σιωπηρή ανανέωση, μεγάλη προθεσμία)'],
+    change_withdrawal: ['Ν. 112(I)/2021 (περί Προστασίας του Καταναλωτή) — μονομερής αλλαγή τιμής ή όρων',
+      'Οδηγία 93/13/ΕΟΚ, παράρτημα, σημείο 1 στοιχεία ι) και ιβ)'],
+  },
+  'fr-LU': {
+    withdrawal: ['Code de la consommation (Luxembourg), art. L. 222-9 et suivants — droit de rétractation dans les contrats à distance',
+      'Directive 2011/83/UE, annexe I, partie B — formulaire de rétractation', 'Directive 2011/83/UE'],
+    cancellation: ['Code de la consommation (Luxembourg), art. L. 211-2 et L. 211-3 — clauses abusives (reconduction tacite, préavis)'],
+    change_withdrawal: ['Code de la consommation (Luxembourg), art. L. 211-3 — modification unilatérale du prix et des conditions',
+      'Directive 93/13/CEE, annexe, point 1 j) et l)'],
+  },
+  'de-LU': {
+    withdrawal: ['Code de la consommation (Luxemburg), Art. L. 222-9 ff. — Widerrufsrecht bei Fernabsatzverträgen',
+      'Richtlinie 2011/83/EU, Anhang I Teil B — Muster-Widerrufsformular', 'Richtlinie 2011/83/EU'],
+    cancellation: ['Code de la consommation (Luxemburg), Art. L. 211-2 und L. 211-3 — missbräuchliche Klauseln (stillschweigende Verlängerung, Kündigungsfrist)'],
+    change_withdrawal: ['Code de la consommation (Luxemburg), Art. L. 211-3 — einseitige Preis- und Leistungsänderungen',
+      'Richtlinie 93/13/EWG, Anhang Nr. 1 Buchst. j und l'],
+  },
 };
 
 const SENDING = {

@@ -34,7 +34,7 @@ const CHECKS = [
       FR: ['Code de la consommation, art. R212-2, 10°'], BE: ['Code de droit économique, art. VI.83, 23°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub n'], PL: ['Kodeks cywilny, art. 385³ pkt 23'], PT: ['Decreto-Lei n.º 446/85, art. 21.º, alínea h)'],
       SE: ['Lag (1999:116) om skiljeförfarande, 6 §'], RO: ['Legea nr. 193/2000 privind clauzele abuzive, art. 4 și anexa'], CZ: ['Zákon č. 216/1994 Sb., o rozhodčím řízení, § 2 odst. 3'],
       DK: ['Voldgiftsloven, § 7'], FI: ['Kuluttajansuojalaki (38/1978), 12 luku 1 c §'], NO: ['Voldgiftsloven, § 11'],
-      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'] },
+      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'], IE: ['Consumer Rights Act 2022, Part 4 and Schedule 3'], MT: ['Consumer Affairs Act (Cap. 378), arts. 44–47'], CY: ['Ν. 112(I)/2021 (περί Προστασίας του Καταναλωτή), καταχρηστικές ρήτρες'], LU: ['Code de la consommation, art. L. 211-2 et L. 211-3'] },
     boost: 12,
   },
   {
@@ -47,7 +47,7 @@ const CHECKS = [
     national: { AT: ['KSchG § 14'], FR: ['Code de la consommation, art. R212-2, 10°'], BE: ['Code de droit économique, art. VI.83, 23°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub n'], PL: ['Kodeks cywilny, art. 385³ pkt 23'], PT: ['Decreto-Lei n.º 446/85, art. 19.º, alínea g)'],
       SE: ['Lag (1994:1512) om avtalsvillkor i konsumentförhållanden, 11 §'], RO: ['Legea nr. 193/2000 privind clauzele abuzive, art. 4 și anexa'], CZ: ['Občanský zákoník (zákon č. 89/2012 Sb.), § 1813–1815'],
       DK: ['Retsplejeloven, § 245, stk. 2'], FI: ['Kuluttajansuojalaki (38/1978), 12 luku 1 d §'], NO: ['Tvisteloven, § 4-6'],
-      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'] },
+      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'], IE: ['Consumer Rights Act 2022, Part 4 and Schedule 3'], MT: ['Consumer Affairs Act (Cap. 378), arts. 44–47'], CY: ['Ν. 112(I)/2021 (περί Προστασίας του Καταναλωτή), καταχρηστικές ρήτρες'], LU: ['Code de la consommation, art. L. 211-2 et L. 211-3'] },
     boost: 12,
   },
   {
@@ -71,7 +71,7 @@ const CHECKS = [
       FR: ['Code de la consommation, art. R212-1, 3° et 4°'], BE: ['Code de droit économique, art. VI.83, 1° et 3°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub i en 6:237 sub c'], PL: ['Kodeks cywilny, art. 385³ pkt 19 i 20'], PT: ['Decreto-Lei n.º 446/85, art. 22.º, n.º 1, alíneas c) e d)'],
       SE: ['Lag (1994:1512) om avtalsvillkor i konsumentförhållanden, 11 §'], RO: ['Legea nr. 193/2000, anexa, lit. a)'], CZ: ['Občanský zákoník (zákon č. 89/2012 Sb.), § 1752 a § 1814'],
       DK: ['Aftaleloven, §§ 36 og 38 c'], FI: ['Kuluttajansuojalaki (38/1978), 3 luku 1 § ja 4 luku 1 §'], NO: ['Avtaleloven § 36 og markedsføringsloven § 22'],
-      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'] },
+      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'], IE: ['Consumer Rights Act 2022, Part 4 and Schedule 3'], MT: ['Consumer Affairs Act (Cap. 378), arts. 44–47'], CY: ['Ν. 112(I)/2021 (περί Προστασίας του Καταναλωτή), καταχρηστικές ρήτρες'], LU: ['Code de la consommation, art. L. 211-2 et L. 211-3'] },
     boost: 12,
   },
   {
@@ -86,7 +86,7 @@ const CHECKS = [
       FR: ['Code de la consommation, art. R212-1, 6°'], BE: ['Code de droit économique, art. VI.83, 13°'], NL: ['Burgerlijk Wetboek, art. 6:237 sub f'], PL: ['Kodeks cywilny, art. 385³ pkt 2'], PT: ['Decreto-Lei n.º 446/85, art. 18.º, alíneas a) a d)'],
       SE: ['Lag (1994:1512) om avtalsvillkor i konsumentförhållanden, 11 §'], RO: ['Legea nr. 193/2000 privind clauzele abuzive, art. 4 și anexa'], CZ: ['Občanský zákoník (zákon č. 89/2012 Sb.), § 1814 a § 2898'],
       DK: ['Aftaleloven, §§ 36 og 38 c'], FI: ['Kuluttajansuojalaki (38/1978), 3 luku 1 § ja 4 luku 1 §'], NO: ['Avtaleloven § 36 og markedsføringsloven § 22'],
-      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'] },
+      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'], IE: ['Consumer Rights Act 2022, Part 4 and Schedule 3'], MT: ['Consumer Affairs Act (Cap. 378), arts. 44–47'], CY: ['Ν. 112(I)/2021 (περί Προστασίας του Καταναλωτή), καταχρηστικές ρήτρες'], LU: ['Code de la consommation, art. L. 211-2 et L. 211-3'] },
     boost: 10,
   },
   {
@@ -101,7 +101,7 @@ const CHECKS = [
       FR: ['Code de la consommation, art. L221-18 à L221-28'], BE: ['Code de droit économique, art. VI.47 à VI.53'], NL: ['Burgerlijk Wetboek, art. 6:230o-6:230s'], PL: ['Ustawa o prawach konsumenta, art. 27–38'], PT: ['Decreto-Lei n.º 24/2014, arts. 10.º a 17.º'],
       SE: ['Lag (2005:59) om distansavtal och avtal utanför affärslokaler, 2 kap. 10–15 §§'], RO: ['OUG nr. 34/2014, art. 9–16'], CZ: ['Občanský zákoník (zákon č. 89/2012 Sb.), § 1829–1837'],
       DK: ['Forbrugeraftaleloven, §§ 17–24'], FI: ['Kuluttajansuojalaki (38/1978), 6 luku 14–16 §'], NO: ['Angrerettloven, §§ 20–26'],
-      SK: ['Zákon č. 108/2024 Z. z. o ochrane spotrebiteľa'], HU: ['45/2014. (II. 26.) Korm. rendelet, 20–23. §'], GR: ['Ν. 2251/1994, άρθρο 3ε'] },
+      SK: ['Zákon č. 108/2024 Z. z. o ochrane spotrebiteľa'], HU: ['45/2014. (II. 26.) Korm. rendelet, 20–23. §'], GR: ['Ν. 2251/1994, άρθρο 3ε'], IE: ['Consumer Rights Act 2022, Part 3'], MT: ['Consumer Rights Regulations (S.L. 378.17)'], CY: ['Ν. 112(I)/2021 (περί Προστασίας του Καταναλωτή), δικαίωμα υπαναχώρησης'], LU: ['Code de la consommation, art. L. 222-9 et suivants'] },
     boost: 10,
     test: ({ text, actionType, findings }) => {
       const isCommerce = ['purchase', 'subscribe'].includes(actionType) || findings.some((f) => ['auto_renewal', 'no_refund'].includes(f.category));
@@ -134,7 +134,7 @@ const CHECKS = [
       FR: ['Code de la consommation, art. L215-1'], BE: ['Code de droit économique, art. VI.83, 8°'], NL: ['Burgerlijk Wetboek, art. 6:236 sub j'], PL: ['Kodeks cywilny, art. 385³ pkt 18'], PT: ['Decreto-Lei n.º 446/85, art. 22.º, n.º 1, alínea a)'],
       SE: ['Lag (1994:1512) om avtalsvillkor i konsumentförhållanden, 11 §'], RO: ['Legea nr. 193/2000 privind clauzele abuzive, art. 4 și anexa'], CZ: ['Občanský zákoník (zákon č. 89/2012 Sb.), § 1813–1815'],
       DK: ['Aftaleloven, §§ 36 og 38 c'], FI: ['Kuluttajansuojalaki (38/1978), 3 luku 1 § ja 4 luku 1 §'], NO: ['Avtaleloven § 36 og markedsføringsloven § 22'],
-      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'] },
+      SK: ['Občiansky zákonník, § 53 ods. 1 a 4'], HU: ['Ptk. 6:102–6:104. §'], GR: ['Ν. 2251/1994, άρθρο 2 παρ. 6 και 7'], IE: ['Consumer Rights Act 2022, Part 4 and Schedule 3'], MT: ['Consumer Affairs Act (Cap. 378), arts. 44–47'], CY: ['Ν. 112(I)/2021 (περί Προστασίας του Καταναλωτή), καταχρηστικές ρήτρες'], LU: ['Code de la consommation, art. L. 211-2 et L. 211-3'] },
     boost: 10,
     test: ({ cost }) => Boolean(cost?.notice && cost.notice.months >= 1),
   },
@@ -237,7 +237,7 @@ const CHECKS = [
   },
 ];
 
-const NATIONAL = ['DE', 'AT', 'FR', 'BE', 'NL', 'PL', 'PT', 'SE', 'RO', 'CZ', 'DK', 'FI', 'NO', 'SK', 'HU', 'GR'];
+const NATIONAL = ['DE', 'AT', 'FR', 'BE', 'NL', 'PL', 'PT', 'SE', 'RO', 'CZ', 'DK', 'FI', 'NO', 'SK', 'HU', 'GR', 'IE', 'MT', 'CY', 'LU'];
 /** References to Italian law, left out where it doesn't apply. */
 const ITALIAN_SOURCE = /^(?:Codice|D\.Lgs)/;
 

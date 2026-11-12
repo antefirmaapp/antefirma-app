@@ -28,7 +28,7 @@ const ACTION_MAP = {
 };
 
 /** The country to send to the server, from the jurisdiction in settings. */
-const COUNTRY_MAP = { IT: 'IT', ES: 'ES', DE: 'DE', AT: 'AT', FR: 'FR', BE: 'BE', NL: 'NL', PL: 'PL', PT: 'PT', SE: 'SE', RO: 'RO', CZ: 'CZ', DK: 'DK', FI: 'FI', NO: 'NO', SK: 'SK', HU: 'HU', GR: 'GR', UK: 'GB', US: 'US' };
+const COUNTRY_MAP = { IT: 'IT', ES: 'ES', DE: 'DE', AT: 'AT', FR: 'FR', BE: 'BE', NL: 'NL', PL: 'PL', PT: 'PT', SE: 'SE', RO: 'RO', CZ: 'CZ', DK: 'DK', FI: 'FI', NO: 'NO', SK: 'SK', HU: 'HU', GR: 'GR', IE: 'IE', MT: 'MT', CY: 'CY', LU: 'LU', UK: 'GB', US: 'US' };
 
 /**
  * A server error with the code that decides what to do.

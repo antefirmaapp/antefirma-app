@@ -1,0 +1,60 @@
+Notice of withdrawal — Saas_fair
+withdrawal-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+To: Saas_fair
+[Provider address / email given in the terms]
+
+Place and date: ______________, 15 August 2026
+
+Sent by: ☐ recorded delivery   ☐ email   ☐ online form   ☐ other: ________
+
+Subject: notice of withdrawal
+
+Dear Saas_fair,
+
+I hereby give notice that I withdraw from my contract for the supply
+of the service "SaaS mensile senza vincoli" (estimated commitment €12.00), concluded on 15 August 2026.
+
+I am exercising the right of withdrawal for distance contracts, within fourteen days of
+the conclusion of the contract, without giving any reason and without any cost to me.
+
+I therefore ask you to:
+  1. stop the service and any related charges immediately;
+  2. refund any amount already paid within fourteen days of receiving this notice,
+     using the same means of payment;
+  3. confirm in writing that you have received this notice.
+
+Account holder: Mario Rossi
+Address: Via Roma 1, 20100 Milano
+Contact email: mario.rossi@example.com
+Customer / contract number: C-42
+Signed up at: https://saas_fair.test/checkout
+
+Yours faithfully,
+
+Mario Rossi
+
+Signature _______________________
+Date 15 August 2026
+
+—
+Useful legal references:
+  · Consumer Rights Regulations (S.L. 378.17) — right of withdrawal from distance contracts
+  · Directive 2011/83/EU, Annex I, Part B — model withdrawal form
+  · Directive 2011/83/EU
+
+Document generated automatically by AnteFirma from the terms it analysed.
+Check the details in square brackets before sending it. It is not legal advice.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia con un mezzo che lasci prova della data: raccomandata con ricevuta o email con conferma di lettura.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Consumer Rights Regulations (S.L. 378.17) — right of withdrawal from distance contracts
+Directive 2011/83/EU, Annex I, Part B — model withdrawal form
+Directive 2011/83/EU

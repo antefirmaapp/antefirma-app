@@ -551,3 +551,14 @@ test('Slovakia, Hungary and Greece: EU checks with national references', () => {
   assert.equal(w('ΔΙΚΑΙΩΜΑ ΥΠΑΝΑΧΩΡΗΣΗΣ'), false);
   assert.equal(w('Az előfizetés automatikusan megújul.'), true);
 });
+
+test('Ireland, Malta, Cyprus and Luxembourg: EU checks with national references', () => {
+  const findings = [{ category: 'arbitration', severity: 60 }];
+  for (const [j, ref] of [['IE', /Consumer Rights Act 2022/], ['MT', /Cap\. 378/], ['CY', /112\(I\)\/2021/], ['LU', /L\. 211-2/]]) {
+    const r = runConsumerChecks({ text: 'x', findings, jurisdiction: j });
+    assert.ok(r.applicable, j);
+    const flag = r.flags.find((f) => f.id === 'eu.arbitration');
+    assert.match(flag.refs[0], ref, j);
+    assert.ok(!flag.refs.some((x) => /^Codice/.test(x)), j);
+  }
+});

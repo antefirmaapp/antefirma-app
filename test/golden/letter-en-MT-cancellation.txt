@@ -1,0 +1,57 @@
+Cancellation — Saas_fair
+cancellation-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+To: Saas_fair
+[Provider address / email given in the terms]
+
+Place and date: ______________, 15 August 2026
+
+Sent by: ☐ recorded delivery   ☐ email   ☐ online form   ☐ other: ________
+
+Subject: cancellation — no automatic renewal
+
+Dear Saas_fair,
+
+I hereby give notice that I am cancelling my contract for "SaaS mensile senza vincoli" (estimated commitment €12.00),
+started on 15 August 2026.
+
+This notice is given so that the contract does not renew at the end of the term on 15 September 2026,
+in accordance with the notice period set out in the terms.
+
+I therefore ask you to:
+  1. confirm in writing that you have received this notice and the date the cancellation takes effect;
+  2. stop all charges from the end date stated above;
+  3. itemise any amount you consider still due, stating the clause it is based on.
+
+Please note that no further charge will be accepted for any period after the end date stated above.
+
+Account holder: Mario Rossi
+Address: Via Roma 1, 20100 Milano
+Contact email: mario.rossi@example.com
+Customer / contract number: C-42
+Signed up at: https://saas_fair.test/checkout
+
+Yours faithfully,
+
+Mario Rossi
+
+Signature _______________________
+Date 15 August 2026
+
+—
+Useful legal references:
+  · Consumer Affairs Act (Cap. 378), arts. 44–47 — unfair terms (automatic extension, long notice)
+
+Document generated automatically by AnteFirma from the terms it analysed.
+Check the details in square brackets before sending it. It is not legal advice.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia con un mezzo che lasci prova della data: raccomandata con ricevuta o email con conferma di lettura.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Consumer Affairs Act (Cap. 378), arts. 44–47 — unfair terms (automatic extension, long notice)

@@ -1,0 +1,57 @@
+Kündigung — Saas_fair
+kuendigung-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+An Saas_fair
+[Anschrift des Anbieters / in den Bedingungen genannte E-Mail]
+
+Ort, Datum: ______________, 15. August 2026
+
+Versandart: ☐ Einschreiben mit Rückschein   ☐ Kündigungsbutton der Website   ☐ Online-Formular   ☐ E-Mail
+
+Betreff: Kündigung des Vertrags — keine automatische Verlängerung
+
+Sehr geehrte Damen und Herren,
+
+hiermit kündige ich den Vertrag über "SaaS mensile senza vincoli" (geschätzte Verpflichtung 12,00 €),
+abgeschlossen am 15. August 2026, ordentlich und fristgerecht zum nächstmöglichen Zeitpunkt.
+
+Die Kündigung erfolgt, damit sich der Vertrag zum 15. September 2026 nicht verlängert,
+unter Einhaltung der vertraglichen Kündigungsfrist.
+
+Ich bitte Sie daher:
+  1. mir den Eingang dieser Kündigung und den Zeitpunkt ihrer Wirksamkeit schriftlich zu bestätigen;
+  2. alle Abbuchungen ab dem genannten Zeitpunkt einzustellen;
+  3. etwaige noch offene Beträge mit der zugrunde liegenden Vertragsklausel aufzuschlüsseln.
+
+Abbuchungen für Zeiträume nach dem genannten Vertragsende werde ich nicht akzeptieren.
+
+Vertragsinhaber: Mario Rossi
+Anschrift: Via Roma 1, 20100 Milano
+Kontakt-E-Mail: mario.rossi@example.com
+Kunden- / Vertragsnummer: C-42
+Abgeschlossen über: https://saas_fair.test/checkout
+
+Mit freundlichen Grüßen
+
+Mario Rossi
+
+Unterschrift _______________________
+Datum 15. August 2026
+
+—
+Nützliche Rechtsgrundlagen:
+  · Code de la consommation (Luxemburg), Art. L. 211-2 und L. 211-3 — missbräuchliche Klauseln (stillschweigende Verlängerung, Kündigungsfrist)
+
+Von AnteFirma automatisch aus den analysierten Bedingungen erstelltes Dokument.
+Prüfen Sie die Angaben in eckigen Klammern vor dem Versand. Keine Rechtsberatung.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: Einschreiben mit Rückschein (raccomandata con ricevuta di ritorno) o il pulsante di disdetta del sito.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Code de la consommation (Luxemburg), Art. L. 211-2 und L. 211-3 — missbräuchliche Klauseln (stillschweigende Verlängerung, Kündigungsfrist)
