@@ -1,0 +1,59 @@
+Sopimuksen irtisanominen — Saas_fair
+irtisanominen-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Vastaanottaja: Saas_fair
+[Palveluntarjoajan osoite / ehdoissa ilmoitettu sähköposti]
+
+Paikka ja päivämäärä: ______________, 15. elokuuta 2026
+
+Lähetetty: ☐ kirjattuna kirjeenä vastaanottokuittauksella   ☐ verkkolomakkeella   ☐ sähköpostilla
+
+Asia: sopimuksen irtisanominen — ei automaattista jatkumista
+
+Hyvä vastaanottaja,
+
+irtisanon täten sopimuksen, joka koskee "SaaS mensile senza vincoli" (arvioitu sitoumus 12,00 €)
+ja on tehty 15. elokuuta 2026.
+
+Irtisanon sopimuksen, jotta se ei jatku 15. syyskuuta 2026,
+noudattaen sopimusehdoissa mainittua irtisanomisaikaa.
+
+Pyydän siksi:
+  1. kirjallista vahvistusta irtisanomisen vastaanottamisesta ja sen voimaantulopäivästä;
+  2. kaikkien veloitusten lopettamista tuosta päivästä alkaen;
+  3. erittelyä mahdollisista summista, joita katsotte minun olevan velkaa, sekä sopimusehtoa, johon ne perustuvat.
+
+En hyväksy mitään veloituksia ilmoitetun päättymispäivän jälkeiseltä ajalta.
+
+Sopimusosapuoli: Mario Rossi
+Osoite: Via Roma 1, 20100 Milano
+Yhteyssähköposti: mario.rossi@example.com
+Asiakas- / sopimusnumero: C-42
+Tehty osoitteessa: https://saas_fair.test/checkout
+
+Ystävällisin terveisin
+
+Mario Rossi
+
+Allekirjoitus _______________________
+Päivämäärä 15. elokuuta 2026
+
+—
+Hyödyllisiä oikeuslähteitä:
+  · Kuluttajansuojalaki, 3 luku 1 § ja 4 luku 1 § — kohtuuttomat sopimusehdot
+  · Direktiivi 93/13/ETY, liite, 1 kohdan h alakohta — automaattinen jatkuminen kohtuuttoman aikaisella määräajalla
+
+AnteFirman analysoitujen ehtojen perusteella automaattisesti laatima asiakirja.
+Tarkista hakasulkeissa olevat tiedot ennen lähettämistä. Tämä ei ole oikeudellista neuvontaa.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: kirjattu kirje vastaanottokuittauksella (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Kuluttajansuojalaki, 3 luku 1 § ja 4 luku 1 § — kohtuuttomat sopimusehdot
+Direktiivi 93/13/ETY, liite, 1 kohdan h alakohta — automaattinen jatkuminen kohtuuttoman aikaisella määräajalla

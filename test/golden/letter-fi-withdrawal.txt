@@ -1,0 +1,60 @@
+Peruuttamisoikeuden käyttäminen — Saas_fair
+peruuttaminen-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Vastaanottaja: Saas_fair
+[Palveluntarjoajan osoite / ehdoissa ilmoitettu sähköposti]
+
+Paikka ja päivämäärä: ______________, 15. elokuuta 2026
+
+Lähetetty: ☐ kirjattuna kirjeenä vastaanottokuittauksella   ☐ verkkolomakkeella   ☐ sähköpostilla
+
+Asia: peruuttamisoikeuden käyttäminen
+
+Hyvä vastaanottaja,
+
+ilmoitan täten peruuttavani sopimuksen, joka koskee
+palvelua "SaaS mensile senza vincoli" (arvioitu sitoumus 12,00 €) ja on tehty 15. elokuuta 2026.
+
+Käytän etäsopimuksiin liittyvää peruuttamisoikeutta neljäntoista päivän kuluessa
+sopimuksen tekemisestä, syytä ilmoittamatta ja ilman kuluja.
+
+Pyydän siksi:
+  1. palvelun ja kaikkien siihen liittyvien veloitusten lopettamista välittömästi;
+  2. kaikkien vastaanotettujen maksujen palauttamista neljäntoista päivän kuluessa
+     tämän ilmoituksen vastaanottamisesta samalla maksutavalla;
+  3. kirjallista vahvistusta tämän ilmoituksen vastaanottamisesta.
+
+Sopimusosapuoli: Mario Rossi
+Osoite: Via Roma 1, 20100 Milano
+Yhteyssähköposti: mario.rossi@example.com
+Asiakas- / sopimusnumero: C-42
+Tehty osoitteessa: https://saas_fair.test/checkout
+
+Ystävällisin terveisin
+
+Mario Rossi
+
+Allekirjoitus _______________________
+Päivämäärä 15. elokuuta 2026
+
+—
+Hyödyllisiä oikeuslähteitä:
+  · Kuluttajansuojalaki (38/1978), 6 luku 14–16 § — peruuttamisoikeus etämyynnissä
+  · Kuluttajansuojalaki, 6 luku — peruuttamislomakkeen malli
+  · Direktiivi 2011/83/EU
+
+AnteFirman analysoitujen ehtojen perusteella automaattisesti laatima asiakirja.
+Tarkista hakasulkeissa olevat tiedot ennen lähettämistä. Tämä ei ole oikeudellista neuvontaa.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: kirjattu kirje vastaanottokuittauksella (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Kuluttajansuojalaki (38/1978), 6 luku 14–16 § — peruuttamisoikeus etämyynnissä
+Kuluttajansuojalaki, 6 luku — peruuttamislomakkeen malli
+Direktiivi 2011/83/EU

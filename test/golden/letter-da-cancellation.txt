@@ -1,0 +1,59 @@
+Opsigelse af aftalen — Saas_fair
+opsigelse-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Til: Saas_fair
+[Udbyderens adresse / e-mail angivet i vilkårene]
+
+Sted og dato: ______________, 15. august 2026
+
+Sendt med: ☐ anbefalet brev med kvittering   ☐ onlineformular   ☐ e-mail
+
+Vedrørende: opsigelse af aftalen — ingen automatisk fornyelse
+
+Hej,
+
+jeg opsiger hermed aftalen om "SaaS mensile senza vincoli" (anslået forpligtelse 12,00 €),
+indgået den 15. august 2026.
+
+Opsigelsen sker, for at aftalen ikke fornyes den 15. september 2026,
+med det opsigelsesvarsel, der står i aftalens vilkår.
+
+Jeg beder derfor om:
+  1. skriftlig bekræftelse på modtagelsen af opsigelsen og datoen for dens virkning;
+  2. at alle opkrævninger ophører fra den dato;
+  3. en specifikation af eventuelle beløb, I mener er skyldige, med det aftalevilkår, de bygger på.
+
+Jeg accepterer ingen opkrævninger for perioder efter den angivne ophørsdato.
+
+Aftalepart: Mario Rossi
+Adresse: Via Roma 1, 20100 Milano
+Kontakt-e-mail: mario.rossi@example.com
+Kunde- / aftalenummer: C-42
+Indgået via: https://saas_fair.test/checkout
+
+Med venlig hilsen
+
+Mario Rossi
+
+Underskrift _______________________
+Dato 15. august 2026
+
+—
+Nyttige retsregler:
+  · Aftaleloven, §§ 36 og 38 c — urimelige aftalevilkår i forbrugeraftaler
+  · Direktiv 93/13/EØF, bilag, punkt 1 h — automatisk fornyelse med urimeligt tidlig frist
+
+Dokument genereret automatisk af AnteFirma ud fra de analyserede vilkår.
+Tjek oplysningerne i kantede parenteser, før du sender. Dette er ikke juridisk rådgivning.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: anbefalet brev med kvittering (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Aftaleloven, §§ 36 og 38 c — urimelige aftalevilkår i forbrugeraftaler
+Direktiv 93/13/EØF, bilag, punkt 1 h — automatisk fornyelse med urimeligt tidlig frist

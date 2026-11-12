@@ -696,3 +696,49 @@ test('prices, periods and free trials in Swedish, Romanian, Czech and Polish cur
     assert.ok(Math.abs((p.trial?.months ?? 0) - months) < 1e-9, `${text} → ${JSON.stringify(p.trial)}`);
   }
 });
+
+// ── Danish, Norwegian, Finnish ──────────────────────────────────────────────
+
+test('recognises commitment buttons in Danish, Norwegian and Finnish', () => {
+  const cases = {
+    'Køb nu': 'purchase', 'Gennemfør køb': 'purchase', 'Betal': 'purchase', 'Gå til kassen': 'purchase', 'Køb med betalingsforpligtelse': 'purchase',
+    'Abonnér': 'subscribe', 'Start din gratis prøveperiode': 'subscribe', 'Bliv medlem': 'subscribe', 'Underskriv aftalen': 'sign',
+    'Fortsæt med Google': 'oauth', 'Accepter alle cookies': 'consent', 'Jeg accepterer': 'accept_terms', 'Opret konto': 'signup',
+    'Kjøp nå': 'purchase', 'Fullfør bestillingen': 'purchase', 'Bestilling med betalingsplikt': 'purchase', 'Abonner nå': 'subscribe',
+    'Prøv gratis': 'subscribe', 'Signer avtalen': 'sign', 'Fortsett med Google': 'oauth', 'Godta alle': 'consent', 'Jeg godtar': 'accept_terms', 'Opprett konto': 'signup',
+    'Osta nyt': 'purchase', 'Tilaa maksuvelvollisena': 'purchase', 'Siirry kassalle': 'purchase', 'Tilaa': 'subscribe', 'Aloita ilmainen kokeilu': 'subscribe',
+    'Allekirjoita sopimus': 'sign', 'Jatka Googlella': 'oauth', 'Hyväksy kaikki evästeet': 'consent', 'Hyväksy ehdot': 'accept_terms', 'Luo tili': 'signup', 'Rekisteröidy': 'signup',
+  };
+  for (const [text, wanted] of Object.entries(cases)) assert.equal(classifyText(text), wanted, `"${text}"`);
+});
+
+test('Danish, Norwegian and Finnish refusals and harmless buttons stay out', () => {
+  for (const text of ['Afvis alle', 'Kun nødvendige cookies', 'Annuller', 'Tilbage', 'Luk', 'Tilmeld nyhedsbrev', 'Læg i kurven', 'Læs mere', 'Fortsæt med at handle', 'Betalingsmetoder',
+    'Avvis alle', 'Bare nødvendige', 'Avbryt', 'Tilbake', 'Lukk', 'Legg i handlekurven', 'Les mer', 'Fortsett å handle',
+    'Hylkää kaikki', 'Vain välttämättömät', 'Peruuta', 'Takaisin', 'Sulje', 'Tilaa uutiskirje', 'Lisää ostoskoriin', 'Lue lisää', 'Jatka ostoksia']) {
+    assert.equal(classifyText(text), null, `"${text}"`);
+  }
+  assert.equal(classifyText('Abonnér — opsig når som helst'), 'subscribe');
+  assert.equal(classifyText('Abonner nå, si opp når du vil'), 'subscribe');
+  assert.equal(classifyText('Tilaa nyt — voit peruuttaa milloin tahansa'), 'subscribe');
+});
+
+test('the Nordic crowns follow the page: Danish, Norwegian or Swedish', () => {
+  const cases = [
+    ['da', 'Fuldt medlemskab med alle funktioner og support inkluderet. 299 kr. om måneden, 30 dage gratis, opsig når som helst.', 299, 'DKK', 'month', 1],
+    ['no', 'Fullt medlemskap med alle funksjoner og kundestøtte inkludert. Kun kr 199,- per måned, 14 dager gratis.', 199, 'NOK', 'month', 14 / 30],
+    ['fi', 'Täysi jäsenyys kaikilla ominaisuuksilla ja tuella. 19,90 € kuukaudessa, 30 päivää ilmaiseksi.', 19.9, 'EUR', 'month', 1],
+    ['sv', 'Fullt medlemskap med alla funktioner och support ingår. 129 kr/mån, första månaden gratis.', 129, 'SEK', 'month', 1],
+    ['da', 'Årsabonnement med alle funktioner og support inkluderet. 990 kr. om året.', 990, 'DKK', 'year', 0],
+  ];
+  for (const [lang, text, amount, currency, period, months] of cases) {
+    const { body, btn } = page([text]);
+    const ctx = loadContext(body);
+    globalThis.document.documentElement.lang = lang;
+    const p = ctx.extractPricing(btn);
+    assert.equal(p.amount, amount, text);
+    assert.equal(p.currency, currency, text);
+    assert.equal(p.period, period, text);
+    assert.ok(Math.abs((p.trial?.months ?? 0) - months) < 1e-9, `${text} → ${JSON.stringify(p.trial)}`);
+  }
+});

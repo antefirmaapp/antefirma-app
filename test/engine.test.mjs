@@ -518,3 +518,19 @@ test('Sweden, Romania and the Czech Republic: EU checks with national references
   assert.equal(w('Máte právo odstoupit od smlouvy do 14 dnů.'), false);
   assert.equal(w('Prenumerationen förlängs automatiskt.'), true);
 });
+
+test('Denmark, Finland and Norway: EU checks with national references', () => {
+  const findings = [{ category: 'arbitration', severity: 60 }];
+  for (const [j, ref] of [['DK', /Voldgiftsloven, § 7/], ['FI', /12 luku 1 c/], ['NO', /Voldgiftsloven, § 11/]]) {
+    const r = runConsumerChecks({ text: 'x', findings, jurisdiction: j });
+    assert.ok(r.applicable, j);
+    const flag = r.flags.find((f) => f.id === 'eu.arbitration');
+    assert.match(flag.refs[0], ref, j);
+    assert.ok(!flag.refs.some((x) => /^Codice/.test(x)), j);
+  }
+  const w = (text) => runConsumerChecks({ text, findings: [], actionType: 'purchase', jurisdiction: 'DK' }).flags.some((f) => f.id === 'eu.withdrawal');
+  assert.equal(w('Du har 14 dages fortrydelsesret.'), false);
+  assert.equal(w('Sinulla on peruuttamisoikeus.'), false);
+  assert.equal(w('Du har angrerett i 14 dager.'), false);
+  assert.equal(w('Abonnementet fornyes automatisk.'), true);
+});

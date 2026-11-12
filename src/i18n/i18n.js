@@ -17,8 +17,8 @@
 (() => {
   const g = globalThis;
   if (g.AF_I18N) return;
-  const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs'];
-  const LOCALES = { it: 'it-IT', en: 'en-GB', es: 'es-ES', de: 'de-DE', fr: 'fr-FR', nl: 'nl-NL', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ' };
+  const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no'];
+  const LOCALES = { it: 'it-IT', en: 'en-GB', es: 'es-ES', de: 'de-DE', fr: 'fr-FR', nl: 'nl-NL', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO' };
   let lang = 'it';
   let byItalian = null;
 
@@ -38,7 +38,8 @@
     /** "auto" follows the browser language; outside it/es English is used. */
     resolve(pref, uiLanguage = '') {
       if (LANGS.includes(pref)) return pref;
-      const b = String(uiLanguage || '').slice(0, 2).toLowerCase();
+      // Norwegian browsers say "nb" (Bokmål) or "nn" (Nynorsk): both read the Norwegian interface.
+      const b = String(uiLanguage || '').slice(0, 2).toLowerCase().replace(/^n[bn]$/, 'no');
       return LANGS.includes(b) ? b : 'en';
     },
     /** The text of `id` in a given language, whatever the current one. */

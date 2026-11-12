@@ -33,7 +33,7 @@
    */
 
   /**
-   * German, French, Dutch, Polish, Portuguese, Swedish, Romanian and Czech are a third branch appended to each table, for
+   * German, French, Dutch, Polish, Portuguese, Swedish, Romanian, Czech, Danish, Norwegian and Finnish are a third branch appended to each table, for
    * the same hygiene reason as Spanish: the older branches stay identical
    * character for character, so a wrong new rule can only add matches. Every
    * alternative is delimited by the accent-aware lookarounds ("Kauf
@@ -58,6 +58,7 @@
         'onderteken(?:en)?', 'teken\\s+(?:het\\s+)?(?:contract|document|overeenkomst)', 'akkoord\\s+en\\s+ondertekenen',
         'podpisz(?:\\s+(?:umow(?:ę|e)|dokument))?', 'podpisuj(?:ę|e)', 'assinar(?:\\s+(?:o\\s+)?(?:contrato|documento))?', 'aceitar\\s+e\\s+assinar',
         'signera(?:\\s+(?:avtalet|dokumentet))?', 'skriv\\s+under', 'godk(?:ä|a)nn\\s+och\\s+signera', 'semneaz(?:ă|a)(?:\\s+(?:contractul|documentul))?', 'semnez', 'accept(?:ă|a)\\s+(?:ș|ş|s)i\\s+semneaz(?:ă|a)', 'podepsat(?:\\s+(?:smlouvu|dokument))?', 'podepi(?:š|s)te', 'podepisuji', 'souhlas(?:í|i)m\\s+a\\s+podepisuji',
+        'underskriv(?:\\s+(?:aftalen|kontrakten|dokumentet))?', 'sign(?:é|e)r\\s+(?:aftalen|avtalen|kontrakten|dokumentet)', 'accepter\\s+og\\s+underskriv', 'undertegn(?:\\s+(?:avtalen|kontrakten))?', 'godta\\s+og\\s+signer', 'allekirjoita(?:\\s+(?:sopimus|asiakirja))?', 'hyv(?:ä|a)ksy\\s+ja\\s+allekirjoita',
       ]),
     },
     {
@@ -70,6 +71,7 @@
         'subskrybuj', 'zasubskrybuj', 'wykup\\s+(?:subskrypcj(?:ę|e)|abonament|pakiet)', '(?:rozpocznij|zacznij|aktywuj)\\s+(?:darmowy\\s+)?(?:okres\\s+próbny|okres\\s+probny|subskrypcj(?:ę|e)|abonament)', 'wypróbuj\\s+za\\s+darmo', 'wyprobuj\\s+za\\s+darmo', 'przejd(?:ź|z)\\s+na\\s+(?:premium|pro|plus)', 'wybierz\\s+(?:ten\\s+)?(?:plan|pakiet|abonament)', 'zosta(?:ń|n)\\s+(?:członkiem|czlonkiem)',
         'subscrever', 'subscreva(?:\\s+j(?:á|a))?', 'aderir(?:\\s+(?:j(?:á|a)|ao\\s+plano|à\\s+oferta))?', 'adira\\s+j(?:á|a)', '(?:iniciar|come(?:ç|c)ar|ativar)\\s+(?:o\\s+|a\\s+)?(?:per(?:í|i)odo\\s+experimental|experi(?:ê|e)ncia\\s+gr(?:á|a)tis|subscri(?:ç|c)(?:ã|a)o|ades(?:ã|a)o|plano)', 'experimentar\\s+gr(?:á|a)tis', 'experimente\\s+gr(?:á|a)tis', 'escolher\\s+(?:este\\s+|o\\s+)?(?:plano|tarif(?:á|a)rio)', 'passar\\s+a\\s+(?:premium|pro|plus)',
         'prenumerera(?:\\s+nu)?', 'starta\\s+(?:din\\s+|en\\s+)?(?:gratis\\s+)?(?:provperiod|prenumeration|testperiod)', 'prova\\s+gratis', 'testa\\s+gratis', 'bli\\s+medlem', 'uppgradera(?:\\s+till\\s+(?:premium|pro|plus))?', 'v(?:ä|a)lj\\s+(?:detta\\s+|den\\s+h(?:ä|a)r\\s+)?(?:abonnemang|plan|paket)', 'teckna\\s+(?:abonnemang|prenumeration|avtal)', 'aboneaz(?:ă|a)-te', 'm(?:ă|a)\\s+abonez', '(?:(?:î|i)ncepe|activeaz(?:ă|a))\\s+(?:perioada\\s+de\\s+prob(?:ă|a)|abonamentul|planul|proba\\s+gratuit(?:ă|a))', '(?:î|i)ncearc(?:ă|a)\\s+gratuit', 'treci\\s+la\\s+(?:premium|pro|plus)', 'alege\\s+(?:acest\\s+)?(?:planul?|abonamentul?|pachetul?)', 'devino\\s+membru', 'p(?:ř|r)edplatit(?:\\s+(?:si|nyn(?:í|i)|te(?:ď|d)))?', 'p(?:ř|r)edpla(?:ť|t)te\\s+si', 'za(?:č|c)(?:í|i)t\\s+(?:zku(?:š|s)ebn(?:í|i)\\s+(?:obdob(?:í|i)|verzi)|p(?:ř|r)edplatn(?:é|e))', 'vyzkou(?:š|s)et\\s+zdarma', 'vyzkou(?:š|s)ejte\\s+zdarma', 'aktivovat\\s+(?:p(?:ř|r)edplatn(?:é|e)|tarif)', 'p(?:ř|r)ej(?:í|i)t\\s+na\\s+(?:premium|pro|plus)', 'vybrat\\s+(?:tento\\s+)?(?:tarif|pl(?:á|a)n|bal(?:í|i)(?:č|c)ek)', 'st(?:á|a)t\\s+se\\s+(?:č|c)lenem',
+        'abonn(?:é|e)r(?:\\s+n(?:u|å))?', 'tegn\\s+abonnement', 'start\\s+(?:din\\s+|en\\s+)?(?:gratis\\s+)?pr(?:ø|o)veperiode(?:n)?', 'pr(?:ø|o)v\\s+gratis', 'bliv\\s+medlem', 'opgrader(?:\\s+til\\s+(?:premium|pro|plus))?', 'oppgrader(?:\\s+til\\s+(?:premium|pro|plus))?', 'v(?:æ|a)lg\\s+(?:dette\\s+)?(?:abonnement|pakke)', 'velg\\s+(?:dette\\s+)?(?:abonnement|pakke)', 'tilaa(?!\\s+(?:maksuvelvollisena|ja\\s+maksa))(?:\\s+nyt)?', 'aloita\\s+(?:ilmainen\\s+)?kokeilu(?:jakso)?', 'kokeile\\s+ilmaiseksi', 'liity\\s+j(?:ä|a)seneksi', 'p(?:ä|a)ivit(?:ä|a)\\s+(?:premium|pro|plus)\\w*', 'valitse\\s+(?:t(?:ä|a)m(?:ä|a)\\s+)?(?:tilaus|paketti)',
       ]),
     },
     {
@@ -91,6 +93,7 @@
         'kup(?:uj(?:ę|e))?(?:\\s+teraz)?', 'zamawiam(?:\\s+i\\s+płacę|\\s+i\\s+placę|\\s+z\\s+obowiązkiem\\s+zapłaty|\\s+z\\s+obowiazkiem\\s+zaplaty)?', 'zamów(?:\\s+(?:i\\s+zapłać|teraz))?', 'zamow(?:\\s+(?:i\\s+zaplac|teraz))?', 'złóż\\s+zamówienie', 'zloz\\s+zamowienie', 'zapłać(?:\\s+teraz)?', 'zaplac(?:\\s+teraz)?', 'przejd(?:ź|z)\\s+do\\s+(?:kasy|płatności|platnosci)', '(?:potwierdź|potwierdz)\\s+(?:i\\s+zapłać|zakup|zamówienie|zamowienie)',
         '(?<!(?:continuar|voltar)\\s+a\\s)comprar(?:\\s+agora|\\s+j(?:á|a))?', 'finalizar\\s+(?:a\\s+)?(?:compra|encomenda)', 'concluir\\s+(?:a\\s+)?(?:compra|encomenda)', 'confirmar\\s+(?:a\\s+)?(?:compra|encomenda|e\\s+pagar)', '(?<!(?:sem|sin)\\s)(?<!(?:formas|m(?:é|e)todos|meios|op(?:ç|c)(?:õ|o)es)\\s+de\\s)pagar(?:\\s+agora)?', 'encomendar(?:\\s+agora)?', 'efetuar\\s+(?:o\\s+)?pagamento', 'avan(?:ç|c)ar\\s+para\\s+(?:o\\s+)?(?:pagamento|checkout)', 'ir\\s+para\\s+(?:o\\s+)?(?:pagamento|checkout)',
         'k(?:ö|o)p(?:\\s+nu)?', 'best(?:ä|a)ll(?:\\s+(?:nu|och\\s+betala))?', 'slutf(?:ö|o)r\\s+(?:k(?:ö|o)pet|best(?:ä|a)llningen)', 'l(?:ä|a)gg\\s+best(?:ä|a)llning(?:en)?', '(?<!att\\s)betala(?:\\s+nu)?', 'till\\s+kassan', 'g(?:å|a)\\s+till\\s+(?:kassan|betalning(?:en)?)', 'bekr(?:ä|a)fta\\s+(?:och\\s+betala|k(?:ö|o)pet|best(?:ä|a)llningen)', 'cump(?:ă|a)r(?:ă|a)(?:\\s+acum)?', 'pl(?:ă|a)te(?:ș|ş|s)te(?:\\s+acum)?', 'plaseaz(?:ă|a)\\s+comanda', 'trimite\\s+comanda', 'finalizeaz(?:ă|a)\\s+(?:comanda|achizi(?:ț|ţ|t)ia|plata)', 'comand(?:ă|a)\\s+acum', 'comand(?:ă|a)\\s+cu\\s+obliga(?:ț|ţ|t)ie\\s+de\\s+plat(?:ă|a)', 'mergi\\s+la\\s+(?:plat(?:ă|a)|cas(?:ă|a)|checkout)', 'continu(?:ă|a)\\s+(?:spre|c(?:ă|a)tre)\\s+plat(?:ă|a)', 'confirm(?:ă|a)\\s+(?:(?:ș|ş|s)i\\s+pl(?:ă|a)te(?:ș|ş|s)te|comanda|plata)', 'koupit(?:\\s+(?:nyn(?:í|i)|te(?:ď|d)))?', 'kupte\\s+(?:nyn(?:í|i)|te(?:ď|d))', 'objednat(?:\\s+(?:nyn(?:í|i)|te(?:ď|d)|a\\s+zaplatit|s\\s+povinnost(?:í|i)\\s+platby))?', 'objedn(?:á|a)vka\\s+zavazuj(?:í|i)c(?:í|i)\\s+k\\s+platb(?:ě|e)', 'odeslat\\s+objedn(?:á|a)vku', 'dokon(?:č|c)it\\s+(?:objedn(?:á|a)vku|n(?:á|a)kup|platbu)', 'zaplatit(?:\\s+(?:nyn(?:í|i)|te(?:ď|d)))?', 'p(?:ř|r)ej(?:í|i)t\\s+(?:k\\s+platb(?:ě|e)|do\\s+pokladny|k\\s+pokladn(?:ě|e))', 'pokra(?:č|c)ovat\\s+k\\s+platb(?:ě|e)', 'potvrdit\\s+(?:a\\s+zaplatit|objedn(?:á|a)vku|n(?:á|a)kup)',
+        'k(?:ø|o)b(?:\\s+nu)?', 'k(?:ø|o)b\\s+med\\s+betalingsforpligtelse', 'bestil(?:\\s+nu)?', 'gennemf(?:ø|o)r\\s+(?:k(?:ø|o)b(?:et)?|bestilling(?:en)?)', 'afgiv\\s+bestilling', 'g(?:å|a)\\s+til\\s+(?:kassen|betaling(?:en)?)', 'betal(?:\\s+n(?:u|å))?', 'bekr(?:æ|a)ft\\s+(?:og\\s+betal|k(?:ø|o)b(?:et)?|bestilling(?:en)?)', 'kj(?:ø|o)p(?:\\s+n(?:å|a))?', 'kj(?:ø|o)p\\s+med\\s+betalingsplikt', 'bestill(?:\\s+n(?:å|a))?', 'bestilling\\s+med\\s+betalingsplikt', 'fullf(?:ø|o)r\\s+(?:kj(?:ø|o)p(?:et)?|bestilling(?:en)?)', 'bekreft\\s+(?:og\\s+betal|kj(?:ø|o)p(?:et)?|bestilling(?:en)?)', 'osta(?:\\s+nyt)?', 'maksa(?:\\s+nyt)?', 'tilaa\\s+ja\\s+maksa', 'tilaa\\s+maksuvelvollisena', 'siirry\\s+(?:kassalle|maksamaan)', 'vahvista\\s+(?:tilaus|ostos|ja\\s+maksa)', 'tee\\s+tilaus', 'viimeistele\\s+(?:tilaus|ostos)',
       ]),
     },
     {
@@ -103,6 +106,7 @@
         'autoryzuj', 'zezw(?:ó|o)l\\s+na\\s+dost(?:ę|e)p', `(?:kontynuuj|zaloguj\\s+si(?:ę|e)|zarejestruj\\s+si(?:ę|e))\\s+(?:przez|z)\\s+${OAUTH}`,
         'autorizar(?:\\s+(?:o\\s+)?acesso)?', 'permitir\\s+(?:o\\s+)?acesso', `(?:continuar|iniciar\\s+sess(?:ã|a)o|entrar|registar-se|inscrever-se)\\s+com\\s+(?:o\\s+|a\\s+)?${OAUTH}`,
         'auktorisera', 'till(?:å|a)t\\s+(?:å|a)tkomst', 'ge\\s+(?:å|a)tkomst', `(?:forts(?:ä|a)tt|logga\\s+in|registrera\\s+dig)\\s+med\\s+${OAUTH}`, 'autorizeaz(?:ă|a)', 'permite\\s+accesul', `(?:continu(?:ă|a)|conecteaz(?:ă|a)-te|autentific(?:ă|a)-te|(?:î|i)nregistreaz(?:ă|a)-te)\\s+cu\\s+${OAUTH}`, 'autorizovat', 'povolit\\s+p(?:ř|r)(?:í|i)stup', `(?:pokra(?:č|c)ovat|p(?:ř|r)ihl(?:á|a)sit\\s+se|registrovat\\s+se)\\s+(?:p(?:ř|r)es|se|s)\\s+(?:(?:ú|u)(?:č|c)tem\\s+)?${OAUTH}`,
+        `forts(?:æ|a)t\\s+med\\s+${OAUTH}`, `log\\s+ind\\s+med\\s+${OAUTH}`, 'tillad\\s+adgang', 'giv\\s+adgang', `fortsett\\s+med\\s+${OAUTH}`, `logg\\s+inn\\s+med\\s+${OAUTH}`, 'tillat\\s+tilgang', 'gi\\s+tilgang', `jatka\\s+${OAUTH}\\w*`, `kirjaudu\\s+(?:sis(?:ä|a)(?:ä|a)n\\s+)?${OAUTH}\\w*`, 'salli\\s+p(?:ää|aa)sy', 'my(?:ö|o)nn(?:ä|a)\\s+k(?:ä|a)ytt(?:ö|o)oikeus',
       ]),
     },
     {
@@ -122,6 +126,7 @@
         '(?:akceptuj|zaakceptuj|zezw(?:ó|o)l\\s+na)\\s+wszystk(?:ie|o)', 'akceptuj(?:ę|e)\\s+wszystk(?:ie|o)', 'zgadzam\\s+si(?:ę|e)\\s+na\\s+wszystk(?:ie|o)',
         'aceitar\\s+tod(?:o|os|as)(?:\\s+os\\s+cookies)?', 'aceitar\\s+(?:os\\s+)?cookies', 'permitir\\s+tod(?:o|os|as)', 'aceito\\s+tud(?:o)',
         '(?:acceptera|godk(?:ä|a)nn|till(?:å|a)t)\\s+alla(?:\\s+cookies)?', 'jag\\s+godk(?:ä|a)nner\\s+alla', 'accept(?:ă|a)?\\s+tot(?:ul|ate)?(?:\\s+cookie-urile)?', 'permite\\s+tot(?:ul|ate)', 'sunt\\s+de\\s+acord\\s+cu\\s+toate', 'accept(?:ă|a)\\s+cookie-urile', 'p(?:ř|r)ijmout\\s+v(?:š|s)e(?:chny)?(?:\\s+cookies)?', 'povolit\\s+v(?:š|s)e(?:chny)?(?:\\s+cookies)?', 'souhlas(?:í|i)m\\s+se\\s+v(?:š|s)emi',
+        'accept(?:é|e)r\\s+alle(?:\\s+cookies)?', 'tillad\\s+alle(?:\\s+cookies)?', 'godkend\\s+alle(?:\\s+cookies)?', 'godta\\s+alle(?:\\s+informasjonskapsler)?', 'aksepter\\s+alle', 'tillat\\s+alle', 'hyv(?:ä|a)ksy\\s+kaikki(?:\\s+ev(?:ä|a)steet)?', 'salli\\s+kaikki(?:\\s+ev(?:ä|a)steet)?',
       ], /^[\s"'«(]*(?:einverstanden|j['’]ai\s+compris|akkoord|oké)[\s!.…»)]*$/i.source),
     },
     {
@@ -134,6 +139,7 @@
         'akceptuj(?:ę|e)?', 'zaakceptuj', 'zgadzam\\s+si(?:ę|e)', 'akceptuj(?:ę|e)\\s+regulamin', 'akceptuj\\s+i\\s+kontynuuj',
         'aceito', 'aceitar(?:\\s+e\\s+continuar)?', 'concordo', 'aceitar\\s+(?:os\\s+)?(?:termos|condi(?:ç|c)(?:õ|o)es)',
         'jag\\s+(?:godk(?:ä|a)nner|accepterar|samtycker)', 'godk(?:ä|a)nn(?:\\s+(?:villkoren|och\\s+forts(?:ä|a)tt))?', 'acceptera(?:\\s+(?:villkoren|och\\s+forts(?:ä|a)tt))?', 'accept(?:ă|a)(?:\\s+(?:termenii|condi(?:ț|ţ|t)iile|(?:ș|ş|s)i\\s+continu(?:ă|a)))?', 'accept\\s+(?:termenii|condi(?:ț|ţ|t)iile)', 'sunt\\s+de\\s+acord', 'am\\s+citit\\s+(?:ș|ş|s)i\\s+accept', 'souhlas(?:í|i)m(?:\\s+s\\s+(?:obchodn(?:í|i)mi\\s+)?podm(?:í|i)nkami)?', 'p(?:ř|r)ijmout(?:\\s+(?:podm(?:í|i)nky|a\\s+pokra(?:č|c)ovat))?', 'p(?:ř|r)ij(?:í|i)m(?:á|a)m', 'souhlasit\\s+a\\s+pokra(?:č|c)ovat',
+        'jeg\\s+(?:accepterer|godtar|samtykker|er\\s+enig)', 'accept(?:é|e)r\\s+(?:vilk(?:å|a)rene|og\\s+forts(?:æ|a)t)', 'godkend(?:\\s+vilk(?:å|a)rene)?', 'godta(?:\\s+(?:vilk(?:å|a)rene|og\\s+fortsett))?', 'aksepter(?:\\s+vilk(?:å|a)rene)?', 'hyv(?:ä|a)ksy(?:\\s+(?:ehdot|ja\\s+jatka))?', 'hyv(?:ä|a)ksyn(?:\\s+ehdot)?',
       ]),
     },
     {
@@ -146,6 +152,7 @@
         'za(?:ł|l)(?:ó|o)(?:ż|z)\\s+konto', 'utw(?:ó|o)rz\\s+konto', 'zarejestruj(?:\\s+si(?:ę|e))?', 'rejestracja',
         'criar\\s+(?:uma\\s+)?conta', 'registar(?:-se)?', 'registe-se', 'inscrever(?:-se)?', 'inscreva-se', 'abrir\\s+(?:uma\\s+)?conta',
         'skapa\\s+(?:ett\\s+)?konto', 'registrera(?:\\s+dig)?', '(?:ö|o)ppna\\s+(?:ett\\s+)?konto', 'creeaz(?:ă|a)\\s+(?:un\\s+)?cont', '(?:î|i)nregistreaz(?:ă|a)-te', '(?:î|i)nregistrare', 'deschide\\s+(?:un\\s+)?cont', 'vytvo(?:ř|r)it\\s+(?:si\\s+)?(?:ú|u)(?:č|c)et', 'zaregistrovat(?:\\s+se)?', 'registrovat(?:\\s+se)?', 'registrace', 'zalo(?:ž|z)it\\s+(?:si\\s+)?(?:ú|u)(?:č|c)et',
+        'opret\\s+(?:en\\s+)?konto', 'tilmeld\\s+dig', 'registrer\\s+(?:dig|deg)', 'opprett\\s+(?:en\\s+)?konto', 'meld\\s+deg\\s+p(?:å|a)', 'luo\\s+tili', 'rekister(?:ö|o)idy',
       ]),
     },
   ];
@@ -193,6 +200,12 @@
     'refuz(?:ă|a)?(?:\\s+tot(?:ul|ate)?)?', 'respinge(?:\\s+tot(?:ul|ate)?)?', '(?:doar|numai)\\s+(?:cele\\s+)?(?:necesare|esen(?:ț|ţ|t)iale)', 'nu\\s+(?:accept|sunt\\s+de\\s+acord)', 'anuleaz(?:ă|a)', 'anulare', '(?:î|i)napoi', '(?:î|i)nchide', 'renun(?:ț|ţ|t)(?:ă|a)', 'deconectare', 'dezabonare', 'dezaboneaz(?:ă|a)-te', 'reziliaz(?:ă|a)', '(?:gestioneaz(?:ă|a)|personalizeaz(?:ă|a)|set(?:ă|a)ri)\\s+(?:preferin(?:ț|ţ|t)ele|cookie-uri(?:le)?|op(?:ț|ţ|t)iuni(?:le)?)', 'continu(?:ă|a)\\s+f(?:ă|a)r(?:ă|a)\\s+(?:a\\s+accepta|s(?:ă|a)\\s+accep(?:ț|ţ|t)i|plat(?:ă|a))',
     // Czech.
     '(?:odm(?:í|i)tnout|zam(?:í|i)tnout)(?:\\s+v(?:š|s)e)?', '(?:pouze|jen)\\s+(?:nezbytn(?:é|e)|nutn(?:é|e))(?:\\s+cookies)?', 'nesouhlas(?:í|i)m', 'zru(?:š|s)it', 'zp(?:ě|e)t', 'zav(?:ř|r)(?:í|i)t', 'vypov(?:ě|e)d(?:ě|e)t(?:\\s+smlouvu)?', 'odhl(?:á|a)sit(?:\\s+(?:se|odb(?:ě|e)r))?', '(?:spravovat|upravit|nastaven(?:í|i))\\s+(?:cookies|preference|p(?:ř|r)edvolby)', 'pokra(?:č|c)ovat\\s+bez\\s+(?:souhlasu|p(?:ř|r)ijet(?:í|i)|placen(?:í|i))',
+    // Danish. "Afslut" alone stays out: "Afslut køb" completes a purchase.
+    'afvis(?:\\s+alle)?', 'kun\\s+n(?:ø|o)dvendige(?:\\s+cookies)?', 'annuller', 'tilbage', 'luk', 'opsig(?:\\s+abonnement(?:et)?)?', 'log\\s+ud', 'afmeld(?:\\s+dig)?', '(?:administrer|tilpas)\\s+(?:indstillinger|cookies|valg)', 'forts(?:æ|a)t\\s+uden\\s+at\\s+(?:acceptere|betale)', 'jeg\\s+accepterer\\s+ikke',
+    // Norwegian. "Avslutt" alone stays out for the same reason.
+    'avvis(?:\\s+alle)?', 'bare\\s+n(?:ø|o)dvendige(?:\\s+informasjonskapsler)?', 'tilbake', 'lukk', 'si\\s+opp(?:\\s+abonnementet)?', 'logg\\s+ut', 'meld\\s+(?:deg\\s+)?av', '(?:administrer|tilpass)\\s+(?:innstillinger|informasjonskapsler|valg)', 'fortsett\\s+uten\\s+(?:å|a)\\s+(?:godta|betale)', 'jeg\\s+godtar\\s+ikke',
+    // Finnish.
+    'hylk(?:ää|aa)(?:\\s+kaikki)?', 'vain\\s+v(?:ä|a)ltt(?:ä|a)m(?:ä|a)tt(?:ö|o)m(?:ä|a)t(?:\\s+ev(?:ä|a)steet)?', 'peruuta', 'takaisin', 'palaa', 'sulje', 'irtisano(?:\\s+tilaus)?', 'kirjaudu\\s+ulos', 'peru\\s+tilaus', '(?:hallinnoi|muokkaa)\\s+(?:asetuksia|ev(?:ä|a)steit(?:ä|a)|valintoja)', 'ev(?:ä|a)steasetukset', 'jatka\\s+hyv(?:ä|a)ksym(?:ä|a)tt(?:ä|a)', 'en\\s+hyv(?:ä|a)ksy',
   ]);
 
   /**
@@ -207,6 +220,7 @@
     'benachrichtig\\w*', 'newsletter', `lettre\\s+d${AP}information`, 'alertes?', `m${AP}avertir`, 'nieuwsbrief', 'meldingen', 'houd\\s+me\\s+op\\s+de\\s+hoogte',
     'newsletter(?:a|y|ze)?', 'powiadomie(?:ń|n)', 'alert(?:y|ów)', 'boletim\\s+informativo', 'notifica(?:ç|c)(?:õ|o)es', 'alertas',
     'nyhetsbrev(?:et)?', 'aviseringar', 'meddela\\s+mig', 'buletin\\s+informativ', 'notific(?:ă|a)ri', 'anun(?:ț|ţ|t)(?:ă|a)-m(?:ă|a)', 'alerte', 'odeb(?:í|i)rat\\s+novinky', 'upozorn(?:ě|e)n(?:í|i)', 'upozorn(?:ě|e)te\\s+m(?:ě|e)',
+    'nyhedsbrev(?:et)?', 'notifikationer', 'giv\\s+mig\\s+besked', 'varsler', 'gi\\s+meg\\s+beskjed', 'uutiskirje(?:en|eemme)?', 'ilmoitukset', 'ilmoita\\s+minulle',
   ]);
 
   const PRICED = /[€$£]|\d/;
