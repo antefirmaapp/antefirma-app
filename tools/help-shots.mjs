@@ -50,7 +50,7 @@ async function setup(context, extId, l, { consent = false } = {}) {
   await opt.goto(`chrome-extension://${extId}/src/options/options.html`);
   await opt.waitForTimeout(700);
   await opt.selectOption('#uiLang', l);
-  await opt.selectOption('#jurisdiction', { it: 'IT', en: 'EU', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL', pl: 'PL', pt: 'PT', sv: 'SE', ro: 'RO', cs: 'CZ', da: 'DK', fi: 'FI', no: 'NO', sk: 'SK', hu: 'HU', el: 'GR', hr: 'HR', sl: 'SI', bg: 'BG' }[l]);
+  await opt.selectOption('#jurisdiction', { it: 'IT', en: 'EU', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL', pl: 'PL', pt: 'PT', sv: 'SE', ro: 'RO', cs: 'CZ', da: 'DK', fi: 'FI', no: 'NO', sk: 'SK', hu: 'HU', el: 'GR', hr: 'HR', sl: 'SI', bg: 'BG', lt: 'LT', lv: 'LV', et: 'EE' }[l]);
   const you = PAGE[l].you;
   await opt.fill('#id-name', you.name); await opt.fill('#id-address', you.address); await opt.fill('#id-email', you.email);
   await opt.click('#save');
@@ -194,7 +194,7 @@ async function videos(l, dir) {
     await p.waitForSelector('#track', { timeout: 15000 }); await p.click('#track'); await p.waitForTimeout(500);
     await press(p, '#tab-btn-commitments', 1500);
     await press(p, '[data-act="letter"]', 2500);
-    const other = { it: 'en', en: 'es', es: 'it', de: 'en', fr: 'en', nl: 'en', pl: 'en', pt: 'en', sv: 'en', ro: 'en', cs: 'en', da: 'en', fi: 'en', no: 'en', sk: 'en', hu: 'en', el: 'en', hr: 'en', sl: 'en', bg: 'en' }[l];
+    const other = { it: 'en', en: 'es', es: 'it', de: 'en', fr: 'en', nl: 'en', pl: 'en', pt: 'en', sv: 'en', ro: 'en', cs: 'en', da: 'en', fi: 'en', no: 'en', sk: 'en', hu: 'en', el: 'en', hr: 'en', sl: 'en', bg: 'en', lt: 'en', lv: 'en', et: 'en' }[l];
     await p.locator('#letter-lang').scrollIntoViewIfNeeded();
     const bb = await p.locator('#letter-lang').boundingBox();
     if (bb) await p.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2, { steps: 15 });

@@ -18,14 +18,14 @@ const SITE = new URL('../../antefirma-site/help.mjs', import.meta.url);
 test('topics and slugs are those of the help centre', { skip: !existsSync(SITE) && 'website not checked out' }, async () => {
   const { ARTICLES, helpPaths } = await import(SITE.href);
   assert.deepEqual([...HELP_TOPICS].sort(), ARTICLES.map((a) => a.key).sort());
-  for (const k of HELP_TOPICS) for (const l of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg']) assert.equal(helpUrl(k, l), `https://antefirma.app${helpPaths(k)[l]}`);
+  for (const k of HELP_TOPICS) for (const l of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et']) assert.equal(helpUrl(k, l), `https://antefirma.app${helpPaths(k)[l]}`);
 });
 
 test('the warning links to the help page in its own language', async () => {
   const { readFileSync } = await import('node:fs');
   const src = readFileSync(new URL('../src/content/overlay.js', import.meta.url), 'utf8');
   const map = new Function(`return ${src.match(/const WARNING_HELP = (\{[^}]*\});/)[1]}`)();
-  for (const l of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg']) {
+  for (const l of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et']) {
     assert.equal(`https://antefirma.app${map[l]}`, helpUrl('warning', l), l);
   }
 });

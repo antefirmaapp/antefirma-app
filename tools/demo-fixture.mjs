@@ -105,6 +105,21 @@ export const PAGE = {
     q: ['минимален срок от 12 месеца', 'се подновява автоматично за още една година', 'поне 30 дни предварително', 'такса от 120 €'],
     why: ['Една година трябва да плащате.', 'Ако не прекратите навреме, плащате още една година.', 'Прекратяването трябва да пристигне месец по-рано.', 'По-ранното излизане струва 120 €.'],
     summary: 'Обвързвате се за година: подновява се сам, а по-ранното излизане струва 120 €.', you: { name: 'Мария Иванова', address: 'ул. „Витоша“ 1, 1000 София', email: 'maria.ivanova@primer.bg' } },
+  lt: { title: 'Sporto klubas Horizontas — Narystė Plus', name: 'Narystė Plus', per: 'per mėnesį', btn: 'Prenumeruoti', feats: ['Neribotas sporto klubas ir treniruotės', 'Atidaryta 7 dienas per savaitę', 'Programėlė su treniruočių planais'],
+    terms: 'Narystės minimalus terminas yra 12 mėnesių nuo aktyvavimo. Sutartis automatiškai pratęsiama dar vieneriems metams, jei ji nenutraukiama likus ne mažiau kaip 30 dienų. Išankstinis nutraukimas kainuoja 120 € mokestį. Įstojimo mokestis negrąžinamas.',
+    q: ['minimalus terminas yra 12 mėnesių', 'automatiškai pratęsiama dar vieneriems metams', 'ne mažiau kaip 30 dienų', '120 € mokestį'],
+    why: ['Metus turite mokėti.', 'Jei nenutrauksite laiku, mokėsite dar metus.', 'Nutraukimas turi būti gautas prieš mėnesį.', 'Ankstesnis išėjimas kainuoja 120 €.'],
+    summary: 'Įsipareigojate metams: pratęsiama savaime, o ankstesnis išėjimas kainuoja 120 €.', you: { name: 'Rūta Kazlauskienė', address: 'Gedimino pr. 1, LT-01103 Vilnius', email: 'ruta.kazlauskiene@pavyzdys.lt' } },
+  lv: { title: 'Sporta klubs Horizonts — Dalība Plus', name: 'Dalība Plus', per: 'mēnesī', btn: 'Abonēt', feats: ['Neierobežots sporta klubs un treniņi', 'Atvērts 7 dienas nedēļā', 'Lietotne ar treniņu plāniem'],
+    terms: 'Dalības minimālais termiņš ir 12 mēneši no aktivizēšanas. Līgums tiek automātiski pagarināts vēl uz vienu gadu, ja tas netiek uzteikts vismaz 30 dienas iepriekš. Pirmstermiņa uzteikums maksā 120 € maksu. Iestāšanās maksa netiek atmaksāta.',
+    q: ['minimālais termiņš ir 12 mēneši', 'automātiski pagarināts vēl uz vienu gadu', 'vismaz 30 dienas iepriekš', '120 € maksu'],
+    why: ['Gadu jums jāmaksā.', 'Ja neuzteiksiet laikus, maksāsiet vēl gadu.', 'Uzteikumam jāpienāk mēnesi iepriekš.', 'Agrāka izstāšanās maksā 120 €.'],
+    summary: 'Uzņematies saistības uz gadu: tas pagarinās pats, un agrāka izstāšanās maksā 120 €.', you: { name: 'Anna Bērziņa', address: 'Brīvības iela 1, Rīga, LV-1010', email: 'anna.berzina@piemers.lv' } },
+  et: { title: 'Spordiklubi Horisont — Liikmesus Plus', name: 'Liikmesus Plus', per: 'kuus', btn: 'Hakka tellijaks', feats: ['Piiramatu spordiklubi ja treeningud', 'Avatud 7 päeva nädalas', 'Rakendus treeningkavadega'],
+    terms: 'Liikmesuse minimaalne tähtaeg on 12 kuud aktiveerimisest. Leping pikeneb automaatselt veel üheks aastaks, kui seda ei öelda üles vähemalt 30 päeva ette. Ennetähtaegne ülesütlemine maksab 120 € tasu. Liitumistasu ei tagastata.',
+    q: ['minimaalne tähtaeg on 12 kuud', 'pikeneb automaatselt veel üheks aastaks', 'vähemalt 30 päeva ette', '120 € tasu'],
+    why: ['Aasta jooksul peate maksma.', 'Kui te õigel ajal üles ei ütle, maksate veel aasta.', 'Ülesütlemine peab kohale jõudma kuu varem.', 'Varasem lahkumine maksab 120 €.'],
+    summary: 'Seote end aastaks: pikeneb ise ja varasem lahkumine maksab 120 €.', you: { name: 'Mari Tamm', address: 'Narva mnt 1, 10117 Tallinn', email: 'mari.tamm@naide.ee' } },
 };
 export const page = (l) => {
   const p = PAGE[l];
@@ -125,7 +140,7 @@ document.getElementById('f').addEventListener('submit',(e)=>{e.preventDefault();
 };
 
 // An invented domain (.example doesn't exist): the warning and the letter show the site's name, not 127.0.0.1.
-export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example', sv: 'gym-horisont.example', ro: 'sala-orizont.example', cs: 'posilovna-horizont.example', da: 'fitness-horisont.example', fi: 'kuntosali-horisontti.example', no: 'treningssenter-horisont.example', sk: 'fitnes-horizont.example', hu: 'horizont-fitnesz.example', el: 'gymnastirio-orizontas.example', hr: 'fitness-horizont.example.hr', sl: 'fitnes-horizont.example.si', bg: 'fitnes-horizont.example.bg' };
+export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example', sv: 'gym-horisont.example', ro: 'sala-orizont.example', cs: 'posilovna-horizont.example', da: 'fitness-horisont.example', fi: 'kuntosali-horisontti.example', no: 'treningssenter-horisont.example', sk: 'fitnes-horizont.example', hu: 'horizont-fitnesz.example', el: 'gymnastirio-orizontas.example', hr: 'fitness-horizont.example.hr', sl: 'fitnes-horizont.example.si', bg: 'fitnes-horizont.example.bg', lt: 'sporto-klubas-horizontas.example.lt', lv: 'sporta-klubs-horizonts.example.lv', et: 'spordiklubi-horisont.example.ee' };
 
 export const verdict = (l) => {
   const p = PAGE[l];
