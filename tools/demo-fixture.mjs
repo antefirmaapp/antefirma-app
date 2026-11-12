@@ -60,6 +60,21 @@ export const PAGE = {
     q: ['minimální dobu 12 měsíců', 'automaticky prodlužuje o další rok', 'nejméně 30 dní předem', 'poplatek 120 €'],
     why: ['Rok musíte platit.', 'Pokud nevypovíte včas, platíte další rok.', 'Výpověď musí dorazit měsíc předem.', 'Dřívější odchod stojí 120 €.'],
     summary: 'Zavazujete se na rok: prodlužuje se samo a dřívější odchod stojí 120 €.', you: { name: 'Jana Nováková', address: 'Václavské náměstí 1, 110 00 Praha 1', email: 'jana.novakova@priklad.cz' } },
+  da: { title: 'Fitness Horisont — Medlemskab Plus', name: 'Medlemskab Plus', per: 'om måneden', btn: 'Abonnér nu', feats: ['Fri adgang til fitness og hold', 'Åbent 7 dage om ugen', 'App med træningsprogrammer'],
+    terms: 'Medlemskabet har en bindingsperiode på 12 måneder fra aktivering. Aftalen fornyes automatisk med endnu et år, medmindre den opsiges mindst 30 dage før. Opsigelse før tid koster et gebyr på 120 €. Indmeldelsesgebyret refunderes ikke.',
+    q: ['en bindingsperiode på 12 måneder', 'fornyes automatisk med endnu et år', 'mindst 30 dage før', 'et gebyr på 120 €'],
+    why: ['Du skal betale i et år.', 'Opsiger du ikke i tide, betaler du et år mere.', 'Opsigelsen skal være fremme en måned før.', 'At stoppe før tid koster 120 €.'],
+    summary: 'Du binder dig i et år: det fornyes af sig selv, og at stoppe før tid koster 120 €.', you: { name: 'Mette Hansen', address: 'Vesterbrogade 1, 1620 København V', email: 'mette.hansen@eksempel.dk' } },
+  fi: { title: 'Kuntosali Horisontti — Jäsenyys Plus', name: 'Jäsenyys Plus', per: 'kuukaudessa', btn: 'Tilaa nyt', feats: ['Rajaton kuntosali ja ryhmäliikunta', 'Auki 7 päivänä viikossa', 'Sovellus treeniohjelmineen'],
+    terms: 'Jäsenyyden määräaika on 12 kuukautta aktivoinnista. Sopimus jatkuu automaattisesti vuodella, ellei sitä irtisanota vähintään 30 päivää ennen. Ennenaikainen irtisanominen maksaa 120 €:n maksun. Liittymismaksua ei palauteta.',
+    q: ['määräaika on 12 kuukautta', 'jatkuu automaattisesti vuodella', 'vähintään 30 päivää ennen', '120 €:n maksun'],
+    why: ['Sinun on maksettava vuoden ajan.', 'Jos et irtisano ajoissa, maksat vielä vuoden.', 'Irtisanomisen on oltava perillä kuukautta ennen.', 'Aiemmin lopettaminen maksaa 120 €.'],
+    summary: 'Sitoudut vuodeksi: jäsenyys jatkuu itsestään, ja aiemmin lopettaminen maksaa 120 €.', you: { name: 'Laura Virtanen', address: 'Mannerheimintie 1, 00100 Helsinki', email: 'laura.virtanen@esimerkki.fi' } },
+  no: { title: 'Treningssenter Horisont — Medlemskap Pluss', name: 'Medlemskap Pluss', per: 'i måneden', btn: 'Abonner nå', feats: ['Fri tilgang til treningssal og timer', 'Åpent 7 dager i uken', 'App med treningsprogrammer'],
+    terms: 'Medlemskapet har en bindingstid på 12 måneder fra aktivering. Avtalen fornyes automatisk med ett år til med mindre den sies opp minst 30 dager før. Oppsigelse før tiden koster et gebyr på 120 €. Innmeldingsavgiften refunderes ikke.',
+    q: ['en bindingstid på 12 måneder', 'fornyes automatisk med ett år til', 'minst 30 dager før', 'et gebyr på 120 €'],
+    why: ['Du må betale i ett år.', 'Sier du ikke opp i tide, betaler du ett år til.', 'Oppsigelsen må komme frem en måned før.', 'Å slutte før tiden koster 120 €.'],
+    summary: 'Du binder deg i ett år: det fornyes av seg selv, og å slutte før tiden koster 120 €.', you: { name: 'Ingrid Hansen', address: 'Karl Johans gate 1, 0154 Oslo', email: 'ingrid.hansen@eksempel.no' } },
 };
 export const page = (l) => {
   const p = PAGE[l];
@@ -80,7 +95,7 @@ document.getElementById('f').addEventListener('submit',(e)=>{e.preventDefault();
 };
 
 // An invented domain (.example doesn't exist): the warning and the letter show the site's name, not 127.0.0.1.
-export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example', sv: 'gym-horisont.example', ro: 'sala-orizont.example', cs: 'posilovna-horizont.example' };
+export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example', sv: 'gym-horisont.example', ro: 'sala-orizont.example', cs: 'posilovna-horizont.example', da: 'fitness-horisont.example', fi: 'kuntosali-horisontti.example', no: 'treningssenter-horisont.example' };
 
 export const verdict = (l) => {
   const p = PAGE[l];
