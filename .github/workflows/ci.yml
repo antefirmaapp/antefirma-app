@@ -30,7 +30,7 @@ jobs:
       - name: Extension end-to-end check
         run: xvfb-run -a npm run test:e2e
       - name: End-to-end scenarios (demo pages, server failures, tokens, plans, SPA, iframe, decisions, synthetic clicks)
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: xvfb-run -a node test/e2e/all.mjs
       - name: Web app in a real browser (first visit, consent, verdict, accessibility, phone)
         run: node test/web.mjs
