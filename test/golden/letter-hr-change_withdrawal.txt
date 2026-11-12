@@ -1,0 +1,59 @@
+Raskid zbog promjene uvjeta — Saas_fair
+raskid-zbog-promjene-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Primatelj: Saas_fair
+[Adresa / e-pošta pružatelja navedena u uvjetima]
+
+Mjesto i datum: ______________, 15. kolovoza 2026.
+
+Poslano: ☐ preporučenom pošiljkom s povratnicom   ☐ internetskim obrascem   ☐ e-poštom
+
+Predmet: raskid ugovora zbog jednostrane promjene uvjeta
+
+Poštovani,
+
+utvrdio/utvrdila sam da se ugovor o usluzi "SaaS mensile senza vincoli" (procijenjena obveza 12,00 €) promijenio
+u odnosu na uvjete koje sam prihvatio/prihvatila (15. kolovoza 2026.).
+
+Promjena se odnosi na cijenu ili uvjete usluge.
+
+Budući da ne prihvaćam nove uvjete, raskidam ugovor s trenutačnim učinkom,
+bez naknada i troškova, jer je promjena izvršena jednostrano
+i ne na moj zahtjev.
+
+Stoga tražim:
+  1. pisanu potvrdu prestanka ugovora i njegova datuma;
+  2. prestanak svih terećenja;
+  3. povrat iznosa plaćenih za razdoblja nakon prestanka ugovora.
+
+Ugovorna strana: Mario Rossi
+Adresa: Via Roma 1, 20100 Milano
+Kontaktna e-pošta: mario.rossi@example.com
+Broj korisnika / ugovora: C-42
+Sklopljen putem: https://saas_fair.test/checkout
+
+S poštovanjem,
+
+Mario Rossi
+
+Potpis _______________________
+Datum: 15. kolovoza 2026.
+
+—
+Korisni propisi:
+  · Zakon o zaštiti potrošača (NN 19/22) — jednostrana promjena cijene ili uvjeta
+  · Direktiva 93/13/EEZ, Prilog, točka 1. podtočke (j) i (l)
+
+Dokument je automatski izradila AnteFirma na temelju analiziranih uvjeta.
+Prije slanja provjerite podatke u uglatim zagradama. Ovo nije pravni savjet.
+
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: preporučeno pismo s povratnicom (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zakon o zaštiti potrošača (NN 19/22) — jednostrana promjena cijene ili uvjeta
+Direktiva 93/13/EEZ, Prilog, točka 1. podtočke (j) i (l)

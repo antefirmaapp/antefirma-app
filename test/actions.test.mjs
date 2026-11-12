@@ -793,3 +793,51 @@ test('prices, periods and free trials in Slovak, Hungarian and Greek; forints on
   const { body, btn } = page(['A 6 ft folding table with a steel frame and a two-year warranty, delivered to your door. 49 € per month.']);
   assert.equal(loadContext(body).extractPricing(btn).currency, 'EUR');
 });
+
+// ── Croatian, Slovenian, Bulgarian ──────────────────────────────────────────
+
+test('recognises commitment buttons in Croatian, Slovenian and Bulgarian', () => {
+  const cases = {
+    'Kupi sada': 'purchase', 'Narudžba s obvezom plaćanja': 'purchase', 'Nastavi na plaćanje': 'purchase', 'Završi narudžbu': 'purchase',
+    'Pretplati se sada': 'subscribe', 'Isprobajte besplatno': 'subscribe', 'Postanite član': 'subscribe', 'Potpiši ugovor': 'sign', 'Nastavi s Googleom': 'oauth',
+    'Prihvati sve kolačiće': 'consent', 'Prihvaćam uvjete': 'accept_terms', 'Izradi račun': 'signup', 'Registrirajte se': 'signup',
+    'Kupi zdaj': 'purchase', 'Naročilo z obveznostjo plačila': 'purchase', 'Naroči zdaj': 'purchase', 'Zaključi nakup': 'purchase',
+    'Naroči se': 'subscribe', 'Začni brezplačni preizkus': 'subscribe', 'Podpiši pogodbo': 'sign', 'Nadaljuj z Googlom': 'oauth',
+    'Sprejmi vse piškotke': 'consent', 'Strinjam se s pogoji': 'accept_terms', 'Ustvari račun': 'signup',
+    'Купи сега': 'purchase', 'Поръчка със задължение за плащане': 'purchase', 'Към касата': 'purchase', 'Абонирай се': 'subscribe',
+    'Опитайте безплатно': 'subscribe', 'Подпиши договора': 'sign', 'Продължи с Google': 'oauth', 'Приеми всички бисквитки': 'consent',
+    'Приемам условията': 'accept_terms', 'Създай профил': 'signup',
+    // Uppercase Cyrillic from CSS still counts.
+    'КУПИ СЕГА': 'purchase', 'АБОНИРАЙ СЕ': 'subscribe',
+  };
+  for (const [text, wanted] of Object.entries(cases)) assert.equal(classifyText(text), wanted, `"${text}"`);
+});
+
+test('Croatian, Slovenian and Bulgarian refusals and harmless buttons stay out', () => {
+  for (const text of ['Odbij sve', 'Samo nužni kolačići', 'Odustani', 'Natrag', 'Zatvori', 'Pretplati se na newsletter', 'Dodaj u košaricu', 'Nastavi kupovati',
+    'Zavrni vse', 'Samo nujni piškotki', 'Prekliči', 'Nazaj', 'Zapri', 'Naroči se na e-novice', 'Dodaj v košarico', 'Nadaljuj z nakupovanjem',
+    'Откажи всички', 'Само необходимите бисквитки', 'Отказ', 'Назад', 'Затвори', 'Абонирай се за бюлетина', 'Добави в количката', 'Продължи пазаруването']) {
+    assert.equal(classifyText(text), null, `"${text}"`);
+  }
+  assert.equal(classifyText('Pretplati se — otkaži bilo kada'), 'subscribe');
+  assert.equal(classifyText('Naroči se — odpoveš kadar koli'), 'subscribe');
+  assert.equal(classifyText('Абонирай се — прекрати по всяко време'), 'subscribe');
+});
+
+test('prices, periods and free trials in Croatian, Slovenian and Bulgarian', () => {
+  const cases = [
+    ['Potpuna pretplata sa svim značajkama i podrškom. Cijena 9,99 € mjesečno, 14 dana besplatno.', 9.99, 'EUR', 'month', 14 / 30],
+    ['Celotna naročnina z vsemi funkcijami in podporo. 12,99 € na mesec, brezplačni preizkus 7 dni.', 12.99, 'EUR', 'month', 7 / 30],
+    ['Пълен абонамент с всички функции и поддръжка. 8,99 € на месец, първият месец безплатно.', 8.99, 'EUR', 'month', 1],
+    ['Godišnja pretplata sa svim značajkama i podrškom. 99 € godišnje.', 99, 'EUR', 'year', 0],
+    ['Годишен абонамент с всички функции и поддръжка. 79 € годишно, 30 дни безплатно.', 79, 'EUR', 'year', 1],
+  ];
+  for (const [text, amount, currency, period, months] of cases) {
+    const { body, btn } = page([text]);
+    const p = loadContext(body).extractPricing(btn);
+    assert.equal(p.amount, amount, text);
+    assert.equal(p.currency, currency, text);
+    assert.equal(p.period, period, text);
+    assert.ok(Math.abs((p.trial?.months ?? 0) - months) < 1e-9, `${text} → ${JSON.stringify(p.trial)}`);
+  }
+});

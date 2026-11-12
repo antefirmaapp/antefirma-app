@@ -1,0 +1,60 @@
+Jednostrani raskid ugovora — Saas_fair
+jednostrani-raskid-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Primatelj: Saas_fair
+[Adresa / e-pošta pružatelja navedena u uvjetima]
+
+Mjesto i datum: ______________, 15. kolovoza 2026.
+
+Poslano: ☐ preporučenom pošiljkom s povratnicom   ☐ internetskim obrascem   ☐ e-poštom
+
+Predmet: jednostrani raskid ugovora
+
+Poštovani,
+
+ovime vas obavješćujem da jednostrano raskidam ugovor o usluzi
+"SaaS mensile senza vincoli" (procijenjena obveza 12,00 €) (sklopljen: 15. kolovoza 2026.).
+
+Koristim pravo na jednostrani raskid ugovora sklopljenog na daljinu u roku od četrnaest dana
+od njegova sklapanja, bez navođenja razloga i bez ikakvih troškova.
+
+Stoga tražim:
+  1. trenutačni prestanak pružanja usluge i svih povezanih terećenja;
+  2. povrat svih izvršenih plaćanja najkasnije u roku od četrnaest dana od primitka
+     ove obavijesti, istim načinom plaćanja;
+  3. pisanu potvrdu primitka ove obavijesti.
+
+Ugovorna strana: Mario Rossi
+Adresa: Via Roma 1, 20100 Milano
+Kontaktna e-pošta: mario.rossi@example.com
+Broj korisnika / ugovora: C-42
+Sklopljen putem: https://saas_fair.test/checkout
+
+S poštovanjem,
+
+Mario Rossi
+
+Potpis _______________________
+Datum: 15. kolovoza 2026.
+
+—
+Korisni propisi:
+  · Zakon o zaštiti potrošača (NN 19/22) — pravo na jednostrani raskid ugovora sklopljenog na daljinu
+  · Direktiva 2011/83/EU, Prilog I. dio B — obrazac za jednostrani raskid
+  · Direktiva 2011/83/EU
+
+Dokument je automatski izradila AnteFirma na temelju analiziranih uvjeta.
+Prije slanja provjerite podatke u uglatim zagradama. Ovo nije pravni savjet.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: preporučeno pismo s povratnicom (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zakon o zaštiti potrošača (NN 19/22) — pravo na jednostrani raskid ugovora sklopljenog na daljinu
+Direktiva 2011/83/EU, Prilog I. dio B — obrazac za jednostrani raskid
+Direktiva 2011/83/EU

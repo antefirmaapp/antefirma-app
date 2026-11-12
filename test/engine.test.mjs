@@ -562,3 +562,19 @@ test('Ireland, Malta, Cyprus and Luxembourg: EU checks with national references'
     assert.ok(!flag.refs.some((x) => /^Codice/.test(x)), j);
   }
 });
+
+test('Croatia, Slovenia and Bulgaria: EU checks with national references and the 14 days in their words', () => {
+  const findings = [{ category: 'arbitration', severity: 60 }];
+  for (const [j, ref] of [['HR', /NN 19\/22/], ['SI', /ZVPot-1/], ['BG', /чл\. 143/]]) {
+    const r = runConsumerChecks({ text: 'x', findings, jurisdiction: j });
+    assert.ok(r.applicable, j);
+    const flag = r.flags.find((f) => f.id === 'eu.arbitration');
+    assert.match(flag.refs[0], ref, j);
+    assert.ok(!flag.refs.some((x) => /^Codice/.test(x)), j);
+  }
+  const w = (text) => runConsumerChecks({ text, findings: [], actionType: 'purchase', jurisdiction: 'HR' }).flags.some((f) => f.id === 'eu.withdrawal');
+  assert.equal(w('Imate pravo na jednostrani raskid ugovora.'), false);
+  assert.equal(w('Potrošnik ima pravico do odstopa od pogodbe.'), false);
+  assert.equal(w('Имате право на отказ в 14-дневен срок.'), false);
+  assert.equal(w('Pretplata se plaća mjesečno.'), true);
+});

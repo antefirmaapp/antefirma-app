@@ -502,3 +502,18 @@ test('Ireland, Malta, Cyprus and Luxembourg: letters in the shared language with
     assert.ok(!/Consumer Contracts Regulations|2251\/1994|L221-18|BGB/.test(l.text), v);
   }
 });
+
+test('Croatian, Slovenian and Bulgarian letters: own laws, sending method and file names', async () => {
+  const { letterLangFor } = await import('../src/core/letter.js');
+  assert.deepEqual(['HR', 'SI', 'BG'].map((j) => letterLangFor(j)), ['hr', 'sl', 'bg']);
+  const c = { provider: 'Example', url: 'https://example.com', createdAt: T0, renewalAt: T0 + 30 * 86400000, notice: { days: 30 } };
+  const cases = [['hr', 'NN 19/22', 'S poštovanjem', /^otkaz-/], ['sl', 'ZVPot-1', 'Lep pozdrav', /^odpoved-/], ['bg', 'чл. 143', 'С уважение', /^prekratyavane-/]];
+  for (const [l, ref, words, file] of cases) {
+    const letter = buildLetter(c, {}, LETTER_KINDS.CANCELLATION, T0, l);
+    assert.ok(letter.text.includes(ref), l);
+    assert.ok(letter.text.includes(words), l);
+    assert.match(letter.filename, file);
+    // Croatian and Bulgarian dates end with a full stop: never a double one.
+    assert.ok(!/\.\./.test(letter.text.replace(/…/g, '')), l);
+  }
+});

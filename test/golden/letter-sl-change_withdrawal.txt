@@ -1,0 +1,59 @@
+Prekinitev zaradi spremembe pogojev — Saas_fair
+odpoved-po-spremembi-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Naslovnik: Saas_fair
+[Naslov / e-pošta ponudnika, naveden v pogojih]
+
+Kraj in datum: ______________, 15. avgust 2026
+
+Poslano: ☐ s priporočenim pismom s povratnico   ☐ s spletnim obrazcem   ☐ po e-pošti
+
+Zadeva: prekinitev pogodbe zaradi enostranske spremembe pogojev
+
+Spoštovani,
+
+ugotovil(a) sem, da se je pogodba o storitvi "SaaS mensile senza vincoli" (ocenjena obveznost 12,00 €) spremenila
+glede na pogoje, ki sem jih sprejel(a) 15. avgust 2026.
+
+Sprememba zadeva ceno ali pogoje storitve.
+
+Ker novih pogojev ne sprejemam, pogodbo odpovedujem s takojšnjim učinkom,
+brez nadomestil in stroškov, saj je bila sprememba izvedena enostransko
+in ne na mojo zahtevo.
+
+Zato zahtevam:
+  1. pisno potrdilo o prenehanju pogodbe in njegovem datumu;
+  2. prenehanje vseh bremenitev;
+  3. vračilo zneskov, plačanih za obdobja po prenehanju pogodbe.
+
+Pogodbena stranka: Mario Rossi
+Naslov: Via Roma 1, 20100 Milano
+Kontaktna e-pošta: mario.rossi@example.com
+Številka stranke / pogodbe: C-42
+Sklenjena prek: https://saas_fair.test/checkout
+
+Lep pozdrav,
+
+Mario Rossi
+
+Podpis _______________________
+Datum: 15. avgust 2026
+
+—
+Koristni predpisi:
+  · Zakon o varstvu potrošnikov (ZVPot-1) — enostranska sprememba cene ali pogojev
+  · Direktiva 93/13/EGS, Priloga, točka 1(j) in (l)
+
+Dokument je samodejno pripravila AnteFirma na podlagi analiziranih pogojev.
+Pred pošiljanjem preverite podatke v oglatih oklepajih. To ni pravni nasvet.
+
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: priporočeno pismo s povratnico (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zakon o varstvu potrošnikov (ZVPot-1) — enostranska sprememba cene ali pogojev
+Direktiva 93/13/EGS, Priloga, točka 1(j) in (l)

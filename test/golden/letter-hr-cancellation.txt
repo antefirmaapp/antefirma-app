@@ -1,0 +1,59 @@
+Otkaz ugovora — Saas_fair
+otkaz-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Primatelj: Saas_fair
+[Adresa / e-pošta pružatelja navedena u uvjetima]
+
+Mjesto i datum: ______________, 15. kolovoza 2026.
+
+Poslano: ☐ preporučenom pošiljkom s povratnicom   ☐ internetskim obrascem   ☐ e-poštom
+
+Predmet: otkaz ugovora — bez automatskog obnavljanja
+
+Poštovani,
+
+ovime otkazujem ugovor o usluzi "SaaS mensile senza vincoli" (procijenjena obveza 12,00 €)
+(sklopljen: 15. kolovoza 2026.).
+
+Otkaz dajem kako se ugovor ne bi automatski obnovio (datum obnove: 15. rujna 2026.),
+uz poštivanje otkaznog roka navedenog u ugovornim uvjetima.
+
+Stoga tražim:
+  1. pisanu potvrdu primitka otkaza i datuma njegova stupanja na snagu;
+  2. prestanak svih terećenja od tog datuma;
+  3. specifikaciju eventualnih iznosa koje smatrate dugovanima, uz navođenje ugovorne odredbe na kojoj se temelje.
+
+Ne prihvaćam nikakva terećenja za razdoblja nakon navedenog datuma prestanka.
+
+Ugovorna strana: Mario Rossi
+Adresa: Via Roma 1, 20100 Milano
+Kontaktna e-pošta: mario.rossi@example.com
+Broj korisnika / ugovora: C-42
+Sklopljen putem: https://saas_fair.test/checkout
+
+S poštovanjem,
+
+Mario Rossi
+
+Potpis _______________________
+Datum: 15. kolovoza 2026.
+
+—
+Korisni propisi:
+  · Zakon o zaštiti potrošača (NN 19/22) — nepoštene ugovorne odredbe
+  · Direktiva 93/13/EEZ, Prilog, točka 1. podtočka (h) — automatsko produljenje s nerazumno ranim rokom
+
+Dokument je automatski izradila AnteFirma na temelju analiziranih uvjeta.
+Prije slanja provjerite podatke u uglatim zagradama. Ovo nije pravni savjet.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: preporučeno pismo s povratnicom (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zakon o zaštiti potrošača (NN 19/22) — nepoštene ugovorne odredbe
+Direktiva 93/13/EEZ, Prilog, točka 1. podtočka (h) — automatsko produljenje s nerazumno ranim rokom

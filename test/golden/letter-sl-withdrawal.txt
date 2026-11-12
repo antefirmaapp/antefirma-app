@@ -1,0 +1,60 @@
+Odstop od pogodbe — Saas_fair
+odstop-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Naslovnik: Saas_fair
+[Naslov / e-pošta ponudnika, naveden v pogojih]
+
+Kraj in datum: ______________, 15. avgust 2026
+
+Poslano: ☐ s priporočenim pismom s povratnico   ☐ s spletnim obrazcem   ☐ po e-pošti
+
+Zadeva: odstop od pogodbe
+
+Spoštovani,
+
+s tem vas obveščam, da odstopam od pogodbe o storitvi
+"SaaS mensile senza vincoli" (ocenjena obveznost 12,00 €), sklenjene 15. avgust 2026.
+
+Uveljavljam pravico do odstopa od pogodbe, sklenjene na daljavo, v roku štirinajstih dni
+od njene sklenitve, brez navedbe razloga in brez kakršnih koli stroškov.
+
+Zato zahtevam:
+  1. takojšnjo prekinitev storitve in vseh povezanih bremenitev;
+  2. vračilo vseh opravljenih plačil najpozneje v štirinajstih dneh od prejema
+     tega obvestila, na enak način, kot so bila plačana;
+  3. pisno potrdilo o prejemu tega obvestila.
+
+Pogodbena stranka: Mario Rossi
+Naslov: Via Roma 1, 20100 Milano
+Kontaktna e-pošta: mario.rossi@example.com
+Številka stranke / pogodbe: C-42
+Sklenjena prek: https://saas_fair.test/checkout
+
+Lep pozdrav,
+
+Mario Rossi
+
+Podpis _______________________
+Datum: 15. avgust 2026
+
+—
+Koristni predpisi:
+  · Zakon o varstvu potrošnikov (ZVPot-1) — pravica do odstopa od pogodbe, sklenjene na daljavo
+  · Direktiva 2011/83/EU, Priloga I, del B — obrazec za odstop od pogodbe
+  · Direktiva 2011/83/EU
+
+Dokument je samodejno pripravila AnteFirma na podlagi analiziranih pogojev.
+Pred pošiljanjem preverite podatke v oglatih oklepajih. To ni pravni nasvet.
+
+Verifica di essere entro i 14 giorni dalla conclusione del contratto.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: priporočeno pismo s povratnico (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zakon o varstvu potrošnikov (ZVPot-1) — pravica do odstopa od pogodbe, sklenjene na daljavo
+Direktiva 2011/83/EU, Priloga I, del B — obrazec za odstop od pogodbe
+Direktiva 2011/83/EU

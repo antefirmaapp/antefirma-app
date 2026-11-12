@@ -1,0 +1,59 @@
+Odpoved pogodbe — Saas_fair
+odpoved-saas-fair-2026-08-15.txt
+
+Mario Rossi
+Via Roma 1, 20100 Milano
+mario.rossi@example.com
+
+Naslovnik: Saas_fair
+[Naslov / e-pošta ponudnika, naveden v pogojih]
+
+Kraj in datum: ______________, 15. avgust 2026
+
+Poslano: ☐ s priporočenim pismom s povratnico   ☐ s spletnim obrazcem   ☐ po e-pošti
+
+Zadeva: odpoved pogodbe — brez samodejnega podaljšanja
+
+Spoštovani,
+
+s tem odpovedujem pogodbo o storitvi "SaaS mensile senza vincoli" (ocenjena obveznost 12,00 €),
+sklenjeno 15. avgust 2026.
+
+Odpoved podajam, da se pogodba 15. september 2026 ne podaljša,
+ob upoštevanju odpovednega roka, navedenega v pogodbenih pogojih.
+
+Zato zahtevam:
+  1. pisno potrdilo o prejemu odpovedi in datumu, ko začne učinkovati;
+  2. prenehanje vseh bremenitev od tega datuma;
+  3. specifikacijo morebitnih zneskov, ki jih štejete za dolgovane, z navedbo pogodbenega določila, na katerem temeljijo.
+
+Ne sprejemam nobenih bremenitev za obdobja po navedenem datumu prenehanja.
+
+Pogodbena stranka: Mario Rossi
+Naslov: Via Roma 1, 20100 Milano
+Kontaktna e-pošta: mario.rossi@example.com
+Številka stranke / pogodbe: C-42
+Sklenjena prek: https://saas_fair.test/checkout
+
+Lep pozdrav,
+
+Mario Rossi
+
+Podpis _______________________
+Datum: 15. avgust 2026
+
+—
+Koristni predpisi:
+  · Zakon o varstvu potrošnikov (ZVPot-1) — nedopustni pogodbeni pogoji
+  · Direktiva 93/13/EGS, Priloga, točka 1(h) — samodejno podaljšanje z nerazumno zgodnjim rokom
+
+Dokument je samodejno pripravila AnteFirma na podlagi analiziranih pogojev.
+Pred pošiljanjem preverite podatke v oglatih oklepajih. To ni pravni nasvet.
+
+Invia entro il 15 settembre 2026: è il termine di preavviso.
+Completa i campi fra parentesi quadre (indirizzo del fornitore, codice cliente).
+Invia in modo da poter dimostrare la data: priporočeno pismo s povratnico (raccomandata con ricevuta di ritorno) o il modulo online del fornitore.
+Conserva la ricevuta di invio insieme allo snapshot delle condizioni.
+
+Zakon o varstvu potrošnikov (ZVPot-1) — nedopustni pogodbeni pogoji
+Direktiva 93/13/EGS, Priloga, točka 1(h) — samodejno podaljšanje z nerazumno zgodnjim rokom

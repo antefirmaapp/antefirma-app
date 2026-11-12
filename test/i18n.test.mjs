@@ -14,7 +14,7 @@ import { join } from 'node:path';
 import { t, tn, tIn, setLang, resolveLang } from '../src/i18n/index.js';
 import { buildMessages } from '../tools/i18n-build.mjs';
 
-const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el'];
+const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg'];
 const L = Object.fromEntries(LANGS.map((l) => [l, JSON.parse(readFileSync(`src/i18n/locales/${l}.json`, 'utf8'))]));
 const ids = Object.keys(L.it);
 
@@ -119,7 +119,7 @@ test('labels and texts of the vocabularies are ids with translations', async () 
 
 test('the HTML pages\' texts all have an id', () => {
   const missing = [];
-  const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|Deutsch|Français|Nederlands|Polski|Português|Svenska|Română|Čeština|Dansk|Suomi|Norsk|Slovenčina|Magyar|Ελληνικά|https?:\/\/\S+)$/;
+  const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|Deutsch|Français|Nederlands|Polski|Português|Svenska|Română|Čeština|Dansk|Suomi|Norsk|Slovenčina|Magyar|Ελληνικά|Hrvatski|Slovenščina|Български|https?:\/\/\S+)$/;
   for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html']) {
     const html = readFileSync(f, 'utf8').replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style|textarea)[\s\S]*?<\/\1>/g, '');
     const texts = [

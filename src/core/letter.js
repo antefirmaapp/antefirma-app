@@ -27,10 +27,10 @@ import { t, locale } from '../i18n/index.js';
  * such as 'de-AT' is the same text with the other country's laws. Dates and
  * amounts follow the variant's locale.
  */
-export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el'];
+export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg'];
 export const LETTER_VARIANTS = [...LETTER_LANGS, 'de-AT', 'fr-BE', 'nl-BE', 'en-IE', 'en-MT', 'el-CY', 'fr-LU', 'de-LU'];
-const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', 'en-IE': 'en-IE', 'en-MT': 'en-MT', 'el-CY': 'el-CY', 'fr-LU': 'fr-LU', 'de-LU': 'de-LU', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR' };
-const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs', DK: 'da', FI: 'fi', NO: 'no', SK: 'sk', HU: 'hu', GR: 'el', IE: 'en-IE', MT: 'en-MT', CY: 'el-CY' };
+const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', 'en-IE': 'en-IE', 'en-MT': 'en-MT', 'el-CY': 'el-CY', 'fr-LU': 'fr-LU', 'de-LU': 'de-LU', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR', hr: 'hr-HR', sl: 'sl-SI', bg: 'bg-BG' };
+const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs', DK: 'da', FI: 'fi', NO: 'no', SK: 'sk', HU: 'hu', GR: 'el', IE: 'en-IE', MT: 'en-MT', CY: 'el-CY', HR: 'hr', SI: 'sl', BG: 'bg' };
 // Belgium and Luxembourg have more than one language: the letter follows the person's own.
 export const letterLangFor = (jurisdiction, uiLang = '') => {
   if (jurisdiction === 'BE') return uiLang === 'nl' ? 'nl-BE' : 'fr-BE';
@@ -68,6 +68,9 @@ const FILE_SLUGS = {
   sk: { withdrawal: 'odstupenie', cancellation: 'vypoved', change_withdrawal: 'vypoved-po-zmene' },
   hu: { withdrawal: 'elallas', cancellation: 'felmondas', change_withdrawal: 'felmondas-modositas-miatt' },
   el: { withdrawal: 'yparaxorisi', cancellation: 'kataggelia', change_withdrawal: 'kataggelia-meta-allagi' },
+  hr: { withdrawal: 'jednostrani-raskid', cancellation: 'otkaz', change_withdrawal: 'raskid-zbog-promjene' },
+  sl: { withdrawal: 'odstop', cancellation: 'odpoved', change_withdrawal: 'odpoved-po-spremembi' },
+  bg: { withdrawal: 'otkaz', cancellation: 'prekratyavane', change_withdrawal: 'prekratyavane-sled-promyana' },
 };
 
 export const LETTER_LABELS = {
@@ -1119,6 +1122,179 @@ const TEXT = {
     },
   },
 
+
+  // Croatia: Consumer Protection Act (Zakon o zaštiti potrošača, NN 19/22). Croatian long dates end with
+  // a full stop ("15. kolovoza 2026."), so dates stay inside brackets and never close a sentence.
+  hr: {
+    ph: { name: '[Ime i prezime]', address: '[Adresa]', email: '[E-pošta]', provider: '[Pružatelj]', service: '[opis usluge]', date: '[datum]' },
+    estimated: (x) => `(procijenjena obveza ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Primatelj: ${provider}`,
+      '[Adresa / e-pošta pružatelja navedena u uvjetima]', '', `Mjesto i datum: ______________, ${today}`, '',
+      'Poslano: ☐ preporučenom pošiljkom s povratnicom   ☐ internetskim obrascem   ☐ e-poštom'].join('\n'),
+    withdrawal: (k) => ['Predmet: jednostrani raskid ugovora', '', 'Poštovani,', '',
+      'ovime vas obavješćujem da jednostrano raskidam ugovor o usluzi',
+      `${service(k)} (sklopljen: ${orderDate(k)}).`, '',
+      'Koristim pravo na jednostrani raskid ugovora sklopljenog na daljinu u roku od četrnaest dana',
+      'od njegova sklapanja, bez navođenja razloga i bez ikakvih troškova.', '', 'Stoga tražim:',
+      '  1. trenutačni prestanak pružanja usluge i svih povezanih terećenja;',
+      '  2. povrat svih izvršenih plaćanja najkasnije u roku od četrnaest dana od primitka',
+      '     ove obavijesti, istim načinom plaćanja;', '  3. pisanu potvrdu primitka ove obavijesti.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Predmet: otkaz ugovora — bez automatskog obnavljanja', '', 'Poštovani,', '',
+        `ovime otkazujem ugovor o usluzi ${service(k)}`, `(sklopljen: ${orderDate(k)}).`, '',
+        renewal ? `Otkaz dajem kako se ugovor ne bi automatski obnovio (datum obnove: ${renewal}),`
+          : 'Otkaz dajem kako se ugovor ne bi automatski obnovio na kraju razdoblja,',
+        notice ? `uz poštivanje otkaznog roka od ${notice} dana navedenog u uvjetima${deadline ? ` (posljednji dan: ${deadline})` : ''}.`
+          : 'uz poštivanje otkaznog roka navedenog u ugovornim uvjetima.', '',
+        'Stoga tražim:', '  1. pisanu potvrdu primitka otkaza i datuma njegova stupanja na snagu;',
+        '  2. prestanak svih terećenja od tog datuma;',
+        '  3. specifikaciju eventualnih iznosa koje smatrate dugovanima, uz navođenje ugovorne odredbe na kojoj se temelje.', '',
+        'Ne prihvaćam nikakva terećenja za razdoblja nakon navedenog datuma prestanka.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Predmet: raskid ugovora zbog jednostrane promjene uvjeta', '', 'Poštovani,', '',
+        `utvrdio/utvrdila sam da se ugovor o usluzi ${service(k)} promijenio`, `u odnosu na uvjete koje sam prihvatio/prihvatila (${orderDate(k)}).`, '',
+        ch?.summary ? `Konkretno: ${ch.summary}` : 'Promjena se odnosi na cijenu ili uvjete usluge.', '',
+        'Budući da ne prihvaćam nove uvjete, raskidam ugovor s trenutačnim učinkom,',
+        'bez naknada i troškova, jer je promjena izvršena jednostrano', 'i ne na moj zahtjev.', '',
+        'Stoga tražim:', '  1. pisanu potvrdu prestanka ugovora i njegova datuma;', '  2. prestanak svih terećenja;',
+        '  3. povrat iznosa plaćenih za razdoblja nakon prestanka ugovora.'];
+    },
+    identity: ({ you, c }) => [`Ugovorna strana: ${you.name}`, `Adresa: ${you.address}`, `Kontaktna e-pošta: ${you.email}`,
+      `Broj korisnika / ugovora: ${you.customerId || '[upisati]'}`,
+      ...(c.url ? [`Sklopljen putem: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Otisak prihvaćenih uvjeta (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['S poštovanjem,', '', you.name, '', 'Potpis _______________________', `Datum: ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Korisni propisi:', ...refs.map((r) => `  · ${r}`), '',
+      'Dokument je automatski izradila AnteFirma na temelju analiziranih uvjeta.',
+      'Prije slanja provjerite podatke u uglatim zagradama. Ovo nije pravni savjet.'].join('\n'),
+    subject: { withdrawal: (p) => `Jednostrani raskid ugovora — ${p}`, cancellation: (p) => `Otkaz ugovora — ${p}`, change_withdrawal: (p) => `Raskid zbog promjene uvjeta — ${p}` },
+    refs: {
+      withdrawal: ['Zakon o zaštiti potrošača (NN 19/22) — pravo na jednostrani raskid ugovora sklopljenog na daljinu',
+        'Direktiva 2011/83/EU, Prilog I. dio B — obrazac za jednostrani raskid', 'Direktiva 2011/83/EU'],
+      cancellation: ['Zakon o zaštiti potrošača (NN 19/22) — nepoštene ugovorne odredbe',
+        'Direktiva 93/13/EEZ, Prilog, točka 1. podtočka (h) — automatsko produljenje s nerazumno ranim rokom'],
+      change_withdrawal: ['Zakon o zaštiti potrošača (NN 19/22) — jednostrana promjena cijene ili uvjeta',
+        'Direktiva 93/13/EEZ, Prilog, točka 1. podtočke (j) i (l)'],
+    },
+  },
+
+  // Slovenia: Consumer Protection Act (Zakon o varstvu potrošnikov, ZVPot-1).
+  sl: {
+    ph: { name: '[Ime in priimek]', address: '[Naslov]', email: '[E-pošta]', provider: '[Ponudnik]', service: '[opis storitve]', date: '[datum]' },
+    estimated: (x) => `(ocenjena obveznost ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `Naslovnik: ${provider}`,
+      '[Naslov / e-pošta ponudnika, naveden v pogojih]', '', `Kraj in datum: ______________, ${today}`, '',
+      'Poslano: ☐ s priporočenim pismom s povratnico   ☐ s spletnim obrazcem   ☐ po e-pošti'].join('\n'),
+    withdrawal: (k) => ['Zadeva: odstop od pogodbe', '', 'Spoštovani,', '',
+      's tem vas obveščam, da odstopam od pogodbe o storitvi',
+      `${service(k)}, sklenjene ${orderDate(k)}.`, '',
+      'Uveljavljam pravico do odstopa od pogodbe, sklenjene na daljavo, v roku štirinajstih dni',
+      'od njene sklenitve, brez navedbe razloga in brez kakršnih koli stroškov.', '', 'Zato zahtevam:',
+      '  1. takojšnjo prekinitev storitve in vseh povezanih bremenitev;',
+      '  2. vračilo vseh opravljenih plačil najpozneje v štirinajstih dneh od prejema',
+      '     tega obvestila, na enak način, kot so bila plačana;', '  3. pisno potrdilo o prejemu tega obvestila.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Zadeva: odpoved pogodbe — brez samodejnega podaljšanja', '', 'Spoštovani,', '',
+        `s tem odpovedujem pogodbo o storitvi ${service(k)},`, `sklenjeno ${orderDate(k)}.`, '',
+        renewal ? `Odpoved podajam, da se pogodba ${renewal} ne podaljša,`
+          : 'Odpoved podajam, da se pogodba ob koncu obdobja samodejno ne podaljša,',
+        notice ? `ob upoštevanju odpovednega roka ${notice} dni, navedenega v pogojih${deadline ? ` (zadnji dan: ${deadline})` : ''}.`
+          : 'ob upoštevanju odpovednega roka, navedenega v pogodbenih pogojih.', '',
+        'Zato zahtevam:', '  1. pisno potrdilo o prejemu odpovedi in datumu, ko začne učinkovati;',
+        '  2. prenehanje vseh bremenitev od tega datuma;',
+        '  3. specifikacijo morebitnih zneskov, ki jih štejete za dolgovane, z navedbo pogodbenega določila, na katerem temeljijo.', '',
+        'Ne sprejemam nobenih bremenitev za obdobja po navedenem datumu prenehanja.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Zadeva: prekinitev pogodbe zaradi enostranske spremembe pogojev', '', 'Spoštovani,', '',
+        `ugotovil(a) sem, da se je pogodba o storitvi ${service(k)} spremenila`, `glede na pogoje, ki sem jih sprejel(a) ${orderDate(k)}.`, '',
+        ch?.summary ? `Konkretno: ${ch.summary}` : 'Sprememba zadeva ceno ali pogoje storitve.', '',
+        'Ker novih pogojev ne sprejemam, pogodbo odpovedujem s takojšnjim učinkom,',
+        'brez nadomestil in stroškov, saj je bila sprememba izvedena enostransko', 'in ne na mojo zahtevo.', '',
+        'Zato zahtevam:', '  1. pisno potrdilo o prenehanju pogodbe in njegovem datumu;', '  2. prenehanje vseh bremenitev;',
+        '  3. vračilo zneskov, plačanih za obdobja po prenehanju pogodbe.'];
+    },
+    identity: ({ you, c }) => [`Pogodbena stranka: ${you.name}`, `Naslov: ${you.address}`, `Kontaktna e-pošta: ${you.email}`,
+      `Številka stranke / pogodbe: ${you.customerId || '[izpolniti]'}`,
+      ...(c.url ? [`Sklenjena prek: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Prstni odtis sprejetih pogojev (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['Lep pozdrav,', '', you.name, '', 'Podpis _______________________', `Datum: ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Koristni predpisi:', ...refs.map((r) => `  · ${r}`), '',
+      'Dokument je samodejno pripravila AnteFirma na podlagi analiziranih pogojev.',
+      'Pred pošiljanjem preverite podatke v oglatih oklepajih. To ni pravni nasvet.'].join('\n'),
+    subject: { withdrawal: (p) => `Odstop od pogodbe — ${p}`, cancellation: (p) => `Odpoved pogodbe — ${p}`, change_withdrawal: (p) => `Prekinitev zaradi spremembe pogojev — ${p}` },
+    refs: {
+      withdrawal: ['Zakon o varstvu potrošnikov (ZVPot-1) — pravica do odstopa od pogodbe, sklenjene na daljavo',
+        'Direktiva 2011/83/EU, Priloga I, del B — obrazec za odstop od pogodbe', 'Direktiva 2011/83/EU'],
+      cancellation: ['Zakon o varstvu potrošnikov (ZVPot-1) — nedopustni pogodbeni pogoji',
+        'Direktiva 93/13/EGS, Priloga, točka 1(h) — samodejno podaljšanje z nerazumno zgodnjim rokom'],
+      change_withdrawal: ['Zakon o varstvu potrošnikov (ZVPot-1) — enostranska sprememba cene ali pogojev',
+        'Direktiva 93/13/EGS, Priloga, točka 1(j) in (l)'],
+    },
+  },
+
+  // Bulgaria: Consumer Protection Act (Закон за защита на потребителите), arts. 50–57 (withdrawal)
+  // and 143–148 (unfair terms). Bulgarian dates end in "г.", so they never close a sentence either.
+  bg: {
+    ph: { name: '[Име и фамилия]', address: '[Адрес]', email: '[Имейл]', provider: '[Доставчик]', service: '[описание на услугата]', date: '[дата]' },
+    estimated: (x) => `(оценено задължение ${x})`,
+    header: ({ you, provider, today }) => [you.name, you.address, you.email, '', `До: ${provider}`,
+      '[Адрес / имейл на доставчика, посочен в условията]', '', `Място и дата: ______________, ${today}`, '',
+      'Изпратено: ☐ с препоръчано писмо с обратна разписка   ☐ с онлайн формуляр   ☐ по имейл'].join('\n'),
+    withdrawal: (k) => ['Относно: отказ от договор', '', 'Уважаеми госпожи и господа,', '',
+      'с настоящото ви уведомявам, че се отказвам от договора за услугата',
+      `${service(k)} (сключен на: ${orderDate(k)}).`, '',
+      'Упражнявам правото си на отказ от договор от разстояние в срок от четиринадесет дни',
+      'от сключването му, без да посочвам причина и без каквито и да било разходи.', '', 'Затова моля:',
+      '  1. незабавно прекратяване на услугата и на всички свързани плащания;',
+      '  2. връщане на всички извършени плащания не по-късно от четиринадесет дни от получаването',
+      '     на това уведомление, по същия начин, по който са платени;', '  3. писмено потвърждение за получаването на това уведомление.'],
+    cancellation: (k) => {
+      const notice = noticeOf(k.c), deadline = when(k.c.deadlineAt, k.fmt), renewal = when(k.c.renewalAt, k.fmt);
+      return ['Относно: прекратяване на договор — без автоматично подновяване', '', 'Уважаеми госпожи и господа,', '',
+        `с настоящото прекратявам договора за услугата ${service(k)}`, `(сключен на: ${orderDate(k)}).`, '',
+        renewal ? `Прекратявам го, за да не бъде подновен автоматично (дата на подновяване: ${renewal}),`
+          : 'Прекратявам го, за да не бъде подновен автоматично в края на периода,',
+        notice ? `при спазване на посоченото в условията предизвестие от ${notice} дни${deadline ? ` (последен ден: ${deadline})` : ''}.`
+          : 'при спазване на предизвестието, посочено в договорните условия.', '',
+        'Затова моля:', '  1. писмено потвърждение за получаването на прекратяването и датата, от която то действа;',
+        '  2. спиране на всички плащания от тази дата;',
+        '  3. посочване на евентуални суми, които смятате за дължими, с клаузата от договора, на която се основават.', '',
+        'Не приемам никакви плащания за периоди след посочената дата на прекратяване.'];
+    },
+    change: (k) => {
+      const ch = (k.c.changes || []).slice(-1)[0];
+      return ['Относно: прекратяване на договор поради едностранна промяна на условията', '', 'Уважаеми госпожи и господа,', '',
+        `установих, че договорът за услугата ${service(k)} е променен`, `спрямо условията, които приех (${orderDate(k)}).`, '',
+        ch?.summary ? `Конкретно: ${ch.summary}` : 'Промяната засяга цената или условията на услугата.', '',
+        'Тъй като не приемам новите условия, прекратявам договора с незабавно действие,',
+        'без неустойки и разходи, тъй като промяната е извършена едностранно', 'и не по мое искане.', '',
+        'Затова моля:', '  1. писмено потвърждение за прекратяването на договора и датата му;', '  2. спиране на всички плащания;',
+        '  3. връщане на сумите, платени за периоди след прекратяването.'];
+    },
+    identity: ({ you, c }) => [`Страна по договора: ${you.name}`, `Адрес: ${you.address}`, `Имейл за контакт: ${you.email}`,
+      `Клиентски номер / номер на договора: ${you.customerId || '[попълнете]'}`,
+      ...(c.url ? [`Сключен чрез: ${c.url}`] : []),
+      ...(c.snapshot?.hash ? [`Отпечатък на приетите условия (SHA-256): ${c.snapshot.hash.slice(0, 32)}…`] : [])].join('\n'),
+    signature: ({ you, today }) => ['С уважение,', '', you.name, '', 'Подпис _______________________', `Дата: ${today}`].join('\n'),
+    footer: (refs) => ['—', 'Полезни нормативни актове:', ...refs.map((r) => `  · ${r}`), '',
+      'Документът е създаден автоматично от AnteFirma въз основа на анализираните условия.',
+      'Преди изпращане проверете данните в квадратни скоби. Това не е правен съвет.'].join('\n'),
+    subject: { withdrawal: (p) => `Отказ от договор — ${p}`, cancellation: (p) => `Прекратяване на договор — ${p}`, change_withdrawal: (p) => `Прекратяване поради промяна на условията — ${p}` },
+    refs: {
+      withdrawal: ['Закон за защита на потребителите, чл. 50–57 — право на отказ от договор от разстояние',
+        'Директива 2011/83/ЕС, приложение I, част Б — стандартен формуляр за отказ', 'Директива 2011/83/ЕС'],
+      cancellation: ['Закон за защита на потребителите, чл. 143–148 — неравноправни клаузи',
+        'Директива 93/13/ЕИО, приложение, точка 1, буква з) — автоматично продължаване с неразумно ранен срок'],
+      change_withdrawal: ['Закон за защита на потребителите, чл. 143 — едностранна промяна на цената или условията',
+        'Директива 93/13/ЕИО, приложение, точка 1, букви й) и л)'],
+    },
+  },
 };
 
 /**
@@ -1194,6 +1370,7 @@ const SENDING = {
   ro: 'sendWayProvesDateScrisoareRecomandata', cs: 'sendWayProvesDateDoporucenyDopis', da: 'sendWayProvesDateAnbefaletBrev',
   fi: 'sendWayProvesDateKirjattuKirje', no: 'sendWayProvesDateRekommandertBrev',
   sk: 'sendWayProvesDateDoporucenyList', hu: 'sendWayProvesDateTertivevenyes', el: 'sendWayProvesDateSystimeni',
+  hr: 'sendWayProvesDatePreporucenoPismo', sl: 'sendWayProvesDatePriporocenoPismo', bg: 'sendWayProvesDatePreporachanoPismo',
 };
 
 /** The advice next to the letter: in the user's language, with the sending method of the letter's country. */

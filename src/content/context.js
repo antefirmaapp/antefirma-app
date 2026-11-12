@@ -73,6 +73,12 @@
     [/\/\s*(?:t(?:ý|y)(?:ž|z)de(?:ň|n)|h(?:é|e)t|εβδομάδα)(?![\wÀ-ɏͰ-Ͽ])|(?<![\wÀ-ɏͰ-Ͽ])(?:t(?:ý|y)(?:ž|z)denne|za\s+t(?:ý|y)(?:ž|z)de(?:ň|n)|hetente|την\s+εβδομάδα|ανά\s+εβδομάδα|εβδομαδιαίως)(?![\wÀ-ɏͰ-Ͽ])/i, 'week'],
     [/(?<![\wÀ-ɏͰ-Ͽ])(?:denne|za\s+de(?:ň|n)|naponta|την\s+ημέρα|ανά\s+ημέρα|ημερησίως)(?![\wÀ-ɏͰ-Ͽ])/i, 'day'],
     [/(?<![\wÀ-ɏͰ-Ͽ])(?:(?:š|s)tvr(?:ť|t)ro(?:č|c)ne|za\s+(?:š|s)tvr(?:ť|t)rok|negyed(?:é|e)vente|ανά\s+τρίμηνο|τριμηνιαίως)(?![\wÀ-ɏͰ-Ͽ])/i, 'quarter'],
+    // Croatian, Slovenian and Bulgarian, appended for the same reason. Cyrillic letters count as letters too.
+    [/\/\s*(?:mj(?:esec)?\.?|mes(?:ec)?\.?|месец|мес\.?)(?![\wÀ-ɏͰ-ϿЀ-ӿ])|(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:mjese(?:č|c)no|na\s+mjesec|mese(?:č|c)no|na\s+mesec|месечно|на\s+месец)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'month'],
+    [/\/\s*(?:god(?:ina|inu)?\.?|leto|година|год\.?)(?![\wÀ-ɏͰ-ϿЀ-ӿ])|(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:godi(?:š|s)nje|na\s+godinu|letno|na\s+leto|годишно|на\s+година)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'year'],
+    [/\/\s*(?:tjedan|teden|седмица)(?![\wÀ-ɏͰ-ϿЀ-ӿ])|(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:tjedno|na\s+tjedan|tedensko|na\s+teden|седмично|на\s+седмица)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'week'],
+    [/(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:dnevno|na\s+dan|дневно|на\s+ден)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'day'],
+    [/(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:tromjese(?:č|c)no|(?:č|c)etrtletno|тримесечно)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i, 'quarter'],
   ];
 
   /**
@@ -118,6 +124,9 @@
     /(?<![\wÀ-ɏͰ-Ͽ])(?:δωρεάν\s+(?:δοκιμ[Ͱ-Ͽ]*\s+(?:περίοδος\s+)?)?(?:για\s+)?)(?<n>\d{1,2})\s*(?<u>ημέρ[Ͱ-Ͽ]*|ημερ[Ͱ-Ͽ]*|μήν[Ͱ-Ͽ]*|μην[Ͱ-Ͽ]*|εβδομάδ[Ͱ-Ͽ]*|εβδομαδ[Ͱ-Ͽ]*)/i,
     /(?<![\wÀ-ɏͰ-Ͽ])(?<n>\d{1,2})\s*(?<u>ημέρ[Ͱ-Ͽ]*|ημερ[Ͱ-Ͽ]*|μήν[Ͱ-Ͽ]*|μην[Ͱ-Ͽ]*|εβδομάδ[Ͱ-Ͽ]*|εβδομαδ[Ͱ-Ͽ]*)\s+(?:δωρεάν|δοκιμ[Ͱ-Ͽ]*)/i,
     /(?<![\wÀ-ɏͰ-Ͽ])(?:prv(?:ý|y)\s+mesiac\s+zadarmo|els(?:ő|o)\s+h(?:ó|o)nap\s+ingyen(?:es)?|πρώτος\s+μήνας\s+δωρεάν|τον\s+πρώτο\s+μήνα\s+δωρεάν)(?![\wÀ-ɏͰ-Ͽ])/i,
+    /(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?<n>\d{1,2})\s*(?<u>dan(?:a)?|dni|dneh|mjesec(?:a|i)?|mesec(?:a|e|ev)?|tjed(?:an|na|ana)|ted(?:en|na|ne|nov)|дни|ден|месец(?:а)?|седмиц(?:а|и))\s+(?:besplatno|brezpla(?:č|c)no|безплатно)/i,
+    /(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:besplatn\w*\s+(?:probn\w*\s+)?(?:razdoblje\s+)?(?:od\s+|na\s+)?|brezpla(?:č|c)n\w*\s+(?:preizkus\w*\s+)?(?:za\s+)?|безплат\S*\s+(?:пробен\s+)?(?:период\s+)?(?:от\s+|за\s+)?)(?<n>\d{1,2})\s*(?<u>dan(?:a)?|dni|dneh|mjesec(?:a|i)?|mesec(?:a|e|ev)?|tjed(?:an|na|ana)|ted(?:en|na|ne|nov)|дни|ден|месец(?:а)?|седмиц(?:а|и))/i,
+    /(?<![\wÀ-ɏͰ-ϿЀ-ӿ])(?:prvi\s+mjesec\s+besplatno|prvi\s+mesec\s+brezpla(?:č|c)no|първи(?:ят)?\s+месец\s+безплатно)(?![\wÀ-ɏͰ-ϿЀ-ӿ])/i,
   ];
 
   /** The first free trial in a text: { raw, months } or null. */
@@ -127,7 +136,7 @@
       if (!m) continue;
       const n = Number(m.groups?.n || 1);
       const u = (m.groups?.u || 'month').toLowerCase();
-      const months = /^(giorn|day|d[ií]a|tag|jour|dag|dni|dzie|zi|dn|den|de[ňn]|p[äa]iv|nap|ημ[έε]ρ)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek|tydz|tygod|veck|s[ăa]pt|t[ýy]d|uge|uke|viik|t[ýy][žz]d|h[ée]t|εβδομ)/.test(u) ? n / 4.345 : n;
+      const months = /^(giorn|day|d[ií]a|tag|jour|dag|dni|dzie|zi|dn|den|de[ňn]|p[äa]iv|nap|ημ[έε]ρ|dan|дн|ден)/.test(u) ? n / 30 : /^(settiman|week|semana|woche|semaine|wek|tydz|tygod|veck|s[ăa]pt|t[ýy]d|uge|uke|viik|t[ýy][žz]d|h[ée]t|εβδομ|tjed|ted|седм)/.test(u) ? n / 4.345 : n;
       return { raw: m[0].replace(/\s+/g, ' ').trim(), months };
     }
     return null;
