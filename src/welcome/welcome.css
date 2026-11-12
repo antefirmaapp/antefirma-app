@@ -35,3 +35,7 @@ header p { margin: 2px 0 0; color: var(--muted); }
   .mtile.strong b { color: #ff8a80; }
   .ok { color: #7fe0a8; }
 }
+
+/* Greek capitals keep their accents when CSS uppercases them in most browsers,
+   which is wrong in Greek typography: in Greek the labels stay in normal case. */
+:lang(el) * { text-transform: none !important; }

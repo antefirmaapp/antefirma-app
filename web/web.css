@@ -46,3 +46,7 @@ html[data-web] .save-bar { background: var(--bg, #fff); border-top: 1px solid va
 .web-welcome .acts { display: flex; gap: 8px; flex-wrap: wrap; }
 .web-welcome button { font: 600 14px system-ui, sans-serif; border-radius: 9px; padding: 10px 14px; cursor: pointer; border: 1px solid var(--line, #e8eaef); background: var(--bg, #fff); color: var(--fg, #16191f); }
 .web-welcome button.go { background: #15203a; color: #fff; border-color: #15203a; }
+
+/* Greek capitals keep their accents when CSS uppercases them in most browsers,
+   which is wrong in Greek typography: in Greek the labels stay in normal case. */
+:lang(el) * { text-transform: none !important; }

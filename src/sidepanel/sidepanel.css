@@ -481,3 +481,7 @@ html:not([data-web]) header.top .brand { display: none; }
 html:not([data-web]) header.top { justify-content: flex-end; gap: 6px; }
 html:not([data-web]) header.top .quota { margin-inline-start: 0; margin-inline-end: auto; }
 #engine-note .link { font: inherit; color: inherit; padding: 0; text-decoration: underline; text-decoration-style: dotted; }
+
+/* Greek capitals keep their accents when CSS uppercases them in most browsers,
+   which is wrong in Greek typography: in Greek the labels stay in normal case. */
+:lang(el) * { text-transform: none !important; }

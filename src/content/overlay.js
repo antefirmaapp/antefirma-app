@@ -18,6 +18,11 @@
   if (CF.overlay) return;
   const esc = CF.util.escapeHtml;
   const I = globalThis.AF_I18N;
+  /**
+   * The help page on the warning, per interface language. A content script can't
+   * import core/help.js: test/help.test.mjs checks these match helpUrl('warning').
+   */
+  const WARNING_HELP = { it: '/aiuto/l-avviso/', en: '/en/help/the-warning/', es: '/es/ayuda/el-aviso/', de: '/de/hilfe/die-warnung/', fr: '/fr/aide/l-avertissement/', nl: '/nl/hulp/de-waarschuwing/', pl: '/pl/pomoc/ostrzezenie/', pt: '/pt/ajuda/o-aviso/', sv: '/sv/hjalp/varningen/', ro: '/ro/ajutor/avertismentul/', cs: '/cs/napoveda/upozorneni/', da: '/da/hjaelp/advarslen/', fi: '/fi/ohje/varoitus/', no: '/no/hjelp/advarselen/', sk: '/sk/pomocnik/upozornenie/', hu: '/hu/sugo/a-figyelmeztetes/', el: '/el/voitheia/i-proeidopoiisi/' };
   const t = (s, v) => I.t(s, v);
   const tn = (n, one, many, v) => I.tn(n, one, many, v);
 
@@ -242,6 +247,8 @@
     .tile { border: 1px solid #e3e6eb; border-radius: 10px; padding: 10px 11px; background: #f7f8fa; min-width: 0; }
     .tile.strong { border-color: var(--level-color, #b8860b); }
     .tlabel { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; font-weight: 650; }
+    /* Greek capitals keep their accents when CSS uppercases them: in Greek the labels stay in normal case. */
+    :host([lang="el"]) * { text-transform: none !important; }
     .tvalue { font-size: 18px; font-weight: 720; letter-spacing: -.01em; color: #15203a; margin-top: 3px; line-height: 1.2; overflow-wrap: anywhere; }
     .tile.strong .tvalue { color: var(--level-ink, #15203a); font-size: 22px; }
     .tsub { font-size: 11.5px; color: #6b7280; margin-top: 2px; }
@@ -365,6 +372,8 @@
       if (this.host?.isConnected) return;
       this.host = document.createElement(HOST_TAG);
       this.host.setAttribute('data-open', '1');
+      // The interface language, not the site's: Greek capitals drop their accents only when the browser knows the text is Greek.
+      this.host.setAttribute('lang', I.lang === 'no' ? 'nb' : I.lang);
       this.root = this.host.attachShadow({ mode: 'open' });
       const style = document.createElement('style');
       style.textContent = STYLES;
@@ -774,7 +783,7 @@
               : ''
           }
           <div class="provenance">${esc((verdict.engine?.cached ? t('analysisAlreadyDoneText') : t('automaticAnalysisAntefirma')) + quotaNote(verdict))}</div>
-          <div class="disclaimer">${esc(consumer.disclaimer || t('automaticAnalysisInformationOnlyNotLegal'))} <a class="help" href="https://antefirma.app${{ en: '/en/help/the-warning/', es: '/es/ayuda/el-aviso/' }[I.lang] || '/aiuto/l-avviso/'}" target="_blank" rel="noopener">${esc(t('howReadWarning'))}</a></div>
+          <div class="disclaimer">${esc(consumer.disclaimer || t('automaticAnalysisInformationOnlyNotLegal'))} <a class="help" href="https://antefirma.app${WARNING_HELP[I.lang] || WARNING_HELP.en}" target="_blank" rel="noopener">${esc(t('howReadWarning'))}</a></div>
         </div>
       `,
         { role: 'alertdialog', labelledby: 'v-title' }

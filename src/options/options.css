@@ -123,3 +123,7 @@ html { scroll-padding-top: 20px; scroll-behavior: smooth; }
   .srv-ok { color: #7fe0a8; }
   .srv-bad { color: #ff8a80; }
 }
+
+/* Greek capitals keep their accents when CSS uppercases them in most browsers,
+   which is wrong in Greek typography: in Greek the labels stay in normal case. */
+:lang(el) * { text-transform: none !important; }

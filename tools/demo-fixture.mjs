@@ -75,6 +75,21 @@ export const PAGE = {
     q: ['en bindingstid på 12 måneder', 'fornyes automatisk med ett år til', 'minst 30 dager før', 'et gebyr på 120 €'],
     why: ['Du må betale i ett år.', 'Sier du ikke opp i tide, betaler du ett år til.', 'Oppsigelsen må komme frem en måned før.', 'Å slutte før tiden koster 120 €.'],
     summary: 'Du binder deg i ett år: det fornyes av seg selv, og å slutte før tiden koster 120 €.', you: { name: 'Ingrid Hansen', address: 'Karl Johans gate 1, 0154 Oslo', email: 'ingrid.hansen@eksempel.no' } },
+  sk: { title: 'Fitnes Horizont — Členstvo Plus', name: 'Členstvo Plus', per: 'mesačne', btn: 'Predplatiť', feats: ['Neobmedzená posilňovňa a lekcie', 'Otvorené 7 dní v týždni', 'Aplikácia s tréningovými plánmi'],
+    terms: 'Členstvo má minimálnu dobu 12 mesiacov od aktivácie. Zmluva sa automaticky predlžuje o ďalší rok, ak nie je vypovedaná najmenej 30 dní vopred. Predčasné ukončenie stojí poplatok 120 €. Zápisné sa nevracia.',
+    q: ['minimálnu dobu 12 mesiacov', 'automaticky predlžuje o ďalší rok', 'najmenej 30 dní vopred', 'poplatok 120 €'],
+    why: ['Rok musíte platiť.', 'Ak nevypoviete včas, platíte ďalší rok.', 'Výpoveď musí prísť mesiac vopred.', 'Skorší odchod stojí 120 €.'],
+    summary: 'Zaväzujete sa na rok: predlžuje sa samo a skorší odchod stojí 120 €.', you: { name: 'Jana Kováčová', address: 'Hlavná 1, 811 01 Bratislava', email: 'jana.kovacova@priklad.sk' } },
+  hu: { title: 'Horizont Fitnesz — Plus tagság', name: 'Plus tagság', per: 'havonta', btn: 'Előfizetek', feats: ['Korlátlan konditerem és órák', 'Nyitva a hét minden napján', 'Alkalmazás edzéstervekkel'],
+    terms: 'A tagság minimális időtartama az aktiválástól 12 hónap. A szerződés automatikusan további egy évvel meghosszabbodik, ha nem mondják fel legalább 30 nappal előre. Az idő előtti felmondás 120 € díjjal jár. A belépési díj nem jár vissza.',
+    q: ['minimális időtartama az aktiválástól 12 hónap', 'automatikusan további egy évvel meghosszabbodik', 'legalább 30 nappal előre', '120 € díjjal'],
+    why: ['Egy évig fizetned kell.', 'Ha nem mondod fel időben, még egy évet fizetsz.', 'A felmondásnak egy hónappal előre be kell érkeznie.', 'A korábbi kilépés 120 €-ba kerül.'],
+    summary: 'Egy évre kötelezed magad: magától megújul, és a korábbi kilépés 120 €-ba kerül.', you: { name: 'Kovács Anna', address: 'Fő utca 1., 1011 Budapest', email: 'kovacs.anna@pelda.hu' } },
+  el: { title: 'Γυμναστήριο Ορίζοντας — Συνδρομή Plus', name: 'Συνδρομή Plus', per: 'τον μήνα', btn: 'Γίνετε συνδρομητής', feats: ['Απεριόριστο γυμναστήριο και μαθήματα', 'Ανοιχτό 7 ημέρες την εβδομάδα', 'Εφαρμογή με προγράμματα προπόνησης'],
+    terms: 'Η συνδρομή έχει ελάχιστη διάρκεια 12 μηνών από την ενεργοποίηση. Η σύμβαση ανανεώνεται αυτόματα για ακόμη ένα έτος, εκτός αν καταγγελθεί τουλάχιστον 30 ημέρες νωρίτερα. Η πρόωρη λύση κοστίζει τέλος 120 €. Το τέλος εγγραφής δεν επιστρέφεται.',
+    q: ['ελάχιστη διάρκεια 12 μηνών', 'ανανεώνεται αυτόματα για ακόμη ένα έτος', 'τουλάχιστον 30 ημέρες νωρίτερα', 'τέλος 120 €'],
+    why: ['Για έναν χρόνο πρέπει να πληρώνετε.', 'Αν δεν καταγγείλετε εγκαίρως, πληρώνετε άλλον έναν χρόνο.', 'Η καταγγελία πρέπει να φτάσει έναν μήνα νωρίτερα.', 'Η πρόωρη αποχώρηση κοστίζει 120 €.'],
+    summary: 'Δεσμεύεστε για έναν χρόνο: ανανεώνεται μόνη της και η πρόωρη αποχώρηση κοστίζει 120 €.', you: { name: 'Μαρία Παπαδοπούλου', address: 'Ερμού 1, 105 63 Αθήνα', email: 'maria.papadopoulou@paradeigma.gr' } },
 };
 export const page = (l) => {
   const p = PAGE[l];
@@ -95,7 +110,7 @@ document.getElementById('f').addEventListener('submit',(e)=>{e.preventDefault();
 };
 
 // An invented domain (.example doesn't exist): the warning and the letter show the site's name, not 127.0.0.1.
-export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example', sv: 'gym-horisont.example', ro: 'sala-orizont.example', cs: 'posilovna-horizont.example', da: 'fitness-horisont.example', fi: 'kuntosali-horisontti.example', no: 'treningssenter-horisont.example' };
+export const HOST = { it: 'palestra-orizzonte.example', en: 'horizon-gym.example', es: 'gimnasio-horizonte.example', de: 'fitness-horizont.example', fr: 'salle-horizon.example', nl: 'sportschool-horizon.example', pl: 'silownia-horyzont.example', pt: 'ginasio-horizonte.example', sv: 'gym-horisont.example', ro: 'sala-orizont.example', cs: 'posilovna-horizont.example', da: 'fitness-horisont.example', fi: 'kuntosali-horisontti.example', no: 'treningssenter-horisont.example', sk: 'fitnes-horizont.example', hu: 'horizont-fitnesz.example', el: 'gymnastirio-orizontas.example' };
 
 export const verdict = (l) => {
   const p = PAGE[l];

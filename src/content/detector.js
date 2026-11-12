@@ -576,6 +576,7 @@
     })) {
       toast.host.style.setProperty(prop, value, 'important');
     }
+    toast.host.setAttribute('lang', globalThis.AF_I18N.lang === 'no' ? 'nb' : globalThis.AF_I18N.lang);
     toast.root = toast.host.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = TOAST_CSS;
