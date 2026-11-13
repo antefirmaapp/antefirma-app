@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "description": "__MSG_extDescription__",
   "homepage_url": "https://antefirma.app",
   "minimum_chrome_version": "116",
@@ -32,7 +32,7 @@
       "run_at": "document_start",
       "js": [
         "src/i18n/i18n.js",
-        "src/i18n/messages.js",
+        "src/i18n/messages-boot.js",
         "src/content/bridge.js",
         "src/content/actions.js",
         "src/content/context.js",

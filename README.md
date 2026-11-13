@@ -301,14 +301,21 @@ Conventions: everything in English except user-facing text; no secrets in code.
 
 **Languages.** Code refers to user-facing texts by English id: `t('goBack')`,
 `tn(n, 'nDay', 'nDays2')` for singular and plural. The texts live in
-`src/i18n/locales/{it,en,es}.json`; after editing them run
-`node tools/i18n-build.mjs`, which writes `src/i18n/messages.js` (content scripts
-can't import JSON). HTML pages are written in Italian and translated by
+`src/i18n/locales/<lang>.json`; after editing them run
+`node tools/i18n-build.mjs`, which writes `src/i18n/messages.js` (every text in
+every language: service worker, extension pages, tests) and
+`src/i18n/messages-boot.js` (a dozen texts, `BOOT_IDS` in the tool). Content
+scripts load only the second: they run in every page and every frame, where the
+full file cost 1.4 MB each time. The texts of the language in use reach the page
+from the service worker when a warning is about to be shown (`bridge.texts()`);
+the boot texts cover the error card if the service worker cannot be reached. A
+text shown by that card must be in `BOOT_IDS`: `test/i18n.test.mjs` checks it.
+HTML pages are written in Italian and translated by
 `src/i18n/dom.js`, which finds each text's id in `it.json`. The language is chosen
 in settings ("Automatic" follows the browser; outside it/es, English) and also
 applies to the server's answers. `test/i18n.test.mjs` fails if an id is missing
-in any language, if placeholders differ, if `messages.js` is stale, or if an id
-is unused.
+in any language, if placeholders differ, if a generated file is stale, if an id
+is unused, or if the content scripts grow past their size budget.
 
 ### Mutation testing
 

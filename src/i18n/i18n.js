@@ -1,12 +1,18 @@
 /**
- * The extension's languages: Italian, English, Spanish.
+ * The extension's languages.
  *
  * Code refers to texts by English ids: `t('goBack')` returns the text in the
- * chosen language. The texts live in `locales/{it,en,es}.json`;
- * `tools/i18n-build.mjs` turns them into `messages.js`, which content scripts can
- * load (they are not modules and cannot read JSON). A missing translation falls
- * back to Italian, then to the id itself, so it shows up instead of breaking
- * something; `test/i18n.test.mjs` makes sure none is missing.
+ * chosen language. The texts live in `locales/<lang>.json`;
+ * `tools/i18n-build.mjs` turns them into two generated files:
+ *  - `messages.js`, every text in every language, for the service worker, the
+ *    extension's pages and the tests;
+ *  - `messages-boot.js`, a handful of texts in every language, which is all
+ *    content scripts load into a page (they are not modules and cannot read
+ *    JSON). The texts of the language in use are fetched from the service
+ *    worker when a warning is about to be shown: see `bridge.texts()`.
+ * A missing translation falls back to Italian, then to the id itself, so it
+ * shows up instead of breaking something; `test/i18n.test.mjs` makes sure none
+ * is missing.
  *
  * Placeholders: `t('cancelWithinNDays', { n: 5 })`.
  *

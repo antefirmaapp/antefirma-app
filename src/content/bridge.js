@@ -8,8 +8,14 @@
   const CF = (globalThis.__CF ||= {});
   if (CF.bridge) return;
 
+  // Until the settings arrive, the few built-in texts follow the browser's language.
+  const I18N = globalThis.AF_I18N;
+  I18N?.setLang(I18N.resolve('auto', globalThis.navigator?.language));
+
   CF.state = CF.state || {
     settings: null,
+    // The language whose full texts are loaded in this frame (see texts()).
+    textsFor: null,
     lastVerdict: null,
     approvedTargets: new WeakSet(),
     analyzing: false,
@@ -38,8 +44,26 @@
       if (!force && CF.state.settings) return CF.state.settings;
       CF.state.settings = await this.send('GET_CONTENT_SETTINGS');
       // The warning's language: chosen by the extension (settings or browser language).
-      globalThis.AF_I18N?.setLang(CF.state.settings?.uiLang);
+      I18N?.setLang(CF.state.settings?.uiLang);
       return CF.state.settings;
+    },
+
+    /**
+     * Loads the interface texts of the language in use, once per frame.
+     *
+     * Content scripts start with a handful of texts (messages-boot.js) so that
+     * a page pays almost nothing for having the extension installed. The rest
+     * comes from the service worker the first time a warning is about to be
+     * shown, for one language only. Callers await this before rendering; if it
+     * fails, the built-in texts still cover the error card.
+     */
+    async texts() {
+      await this.settings();
+      const lang = I18N.lang;
+      if (CF.state.textsFor === lang) return;
+      const messages = await this.send('GET_TEXTS', { lang });
+      I18N.add({ [lang]: messages });
+      CF.state.textsFor = lang;
     },
   };
 

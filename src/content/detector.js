@@ -167,6 +167,8 @@
   const state = {
     approved: new WeakSet(),
     busy: false,
+    // True between a held click and its warning appearing on screen.
+    opening: false,
     settings: null,
   };
 
@@ -210,6 +212,10 @@
   function onClick(event) {
     if (!event.isTrusted) return; // our replay must not trigger the firewall again
     if (event.button !== 0) return;
+    // A held click whose warning is not on screen yet (its texts are loading):
+    // nothing else on the page may go through in the meantime, as nothing
+    // would once the warning covers it. A fast double click lands here.
+    if (state.opening) { event.preventDefault(); event.stopImmediatePropagation(); return; }
     if (state.busy) return;
     if (disabledHere()) return;
 
@@ -222,6 +228,7 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     state.busy = true;
+    state.opening = true;
 
     handleAction(found, event);
   }
@@ -305,7 +312,10 @@
     let via = 'blocked';
     try {
       const { ctx, text } = CF.context.build(found.el, found.type);
+      // The page was read at the moment of the click; now the texts of the warning (see bridge.texts).
+      await CF.bridge.texts().catch(() => {});
       overlay.showLoading(t(ACTION_LABELS[found.type]), previewOf(ctx));
+      state.opening = false;
       const res = await requestAnalysis(overlay, waiting, { actionType: found.type, ctx, text }, t(ACTION_LABELS[found.type]));
 
       if (res?.__userAborted) {
@@ -338,6 +348,7 @@
       decision = await waiting;
     } finally {
       state.busy = false;
+      state.opening = false;
     }
 
     decision = await finalize(decision, current, via);
@@ -394,6 +405,8 @@
    */
   function onSubmit(event) {
     if (!event.isTrusted) return;
+    // See onClick: while a warning is opening, nothing else goes through.
+    if (state.opening) { event.preventDefault(); event.stopImmediatePropagation(); return; }
     if (state.busy) return;
     if (disabledHere()) return;
 
@@ -410,6 +423,7 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     state.busy = true;
+    state.opening = true;
 
     handleSubmit(form, submitter, type);
   }
@@ -422,7 +436,10 @@
     let via = 'blocked';
     try {
       const { ctx, text } = CF.context.build(submitter || form, type);
+      // The page was read at the moment of the click; now the texts of the warning (see bridge.texts).
+      await CF.bridge.texts().catch(() => {});
       overlay.showLoading(t(ACTION_LABELS[type]), previewOf(ctx));
+      state.opening = false;
       const res = await requestAnalysis(overlay, waiting, { actionType: type, ctx, text }, t(ACTION_LABELS[type]));
       if (res?.__userAborted) decision = res.__userAborted;
       else if (res?.error) { overlay.showError(res.error.message, res.error.code); decision = await waiting; }
@@ -443,6 +460,7 @@
       decision = await waiting;
     } finally {
       state.busy = false;
+      state.opening = false;
     }
 
     decision = await finalize(decision, current, via);

@@ -122,6 +122,12 @@ async function handle(msg, sender) {
   switch (msg?.type) {
     case 'GET_CONTENT_SETTINGS':
       return contentSettings();
+    case 'GET_TEXTS': {
+      // The interface texts of one language, for a content script about to show a warning.
+      const I = globalThis.AF_I18N;
+      const lang = I.LANGS.includes(msg.payload?.lang) ? msg.payload.lang : I.lang;
+      return I.messages[lang];
+    }
     case 'ALLOWLIST_ADD':
       return allowlistAdd(msg.payload?.host);
     case 'GRANT_CONSENT':

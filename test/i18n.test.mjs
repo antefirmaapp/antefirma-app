@@ -12,7 +12,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { t, tn, tIn, setLang, resolveLang } from '../src/i18n/index.js';
-import { buildMessages } from '../tools/i18n-build.mjs';
+import { buildMessages, buildBootMessages, BOOT_IDS } from '../tools/i18n-build.mjs';
 
 const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et'];
 const L = Object.fromEntries(LANGS.map((l) => [l, JSON.parse(readFileSync(`src/i18n/locales/${l}.json`, 'utf8'))]));
@@ -59,6 +59,33 @@ test('ids are English camelCase', () => {
 
 test('messages.js is generated from the current locale files', () => {
   assert.equal(readFileSync('src/i18n/messages.js', 'utf8'), buildMessages(), 'run node tools/i18n-build.mjs');
+});
+
+test('messages-boot.js is generated from the current locale files', () => {
+  assert.equal(readFileSync('src/i18n/messages-boot.js', 'utf8'), buildBootMessages(), 'run node tools/i18n-build.mjs');
+});
+
+test('content scripts carry only the boot texts: a page pays little for the extension', () => {
+  const manifest = JSON.parse(readFileSync('manifest.json', 'utf8'));
+  const js = manifest.content_scripts.flatMap((c) => c.js);
+  assert.ok(js.includes('src/i18n/messages-boot.js'));
+  assert.ok(!js.includes('src/i18n/messages.js'), 'every text in every language must not be injected into pages');
+  const bytes = js.reduce((n, f) => n + readFileSync(f).length, 0);
+  // Injected into every page and every frame: 1.57 MB before the texts were split.
+  assert.ok(bytes < 260_000, `content scripts weigh ${bytes} bytes`);
+});
+
+test('the boot texts cover what a content script shows when the service worker is unreachable', () => {
+  // The error card and the countdown announcement of overlay.js, and the bridge's own errors.
+  const overlay = readFileSync('src/content/overlay.js', 'utf8');
+  const errorCard = overlay.slice(overlay.indexOf('    showError('), overlay.indexOf('    armProceed('));
+  const release = overlay.slice(overlay.indexOf('    releaseProceed('), overlay.indexOf('    bind('));
+  const bridge = readFileSync('src/content/bridge.js', 'utf8');
+  const needed = [...`${errorCard}\n${release}\n${bridge}`.matchAll(/\bt\('([A-Za-z0-9]+)'/g)].map((m) => m[1]);
+  assert.ok(needed.length >= 9, 'the texts were found in the source');
+  assert.deepEqual(needed.filter((id) => !BOOT_IDS.includes(id)), []);
+  assert.ok(BOOT_IDS.includes('errorDuringAnalysis'), 'the detector\'s fallback error');
+  for (const id of BOOT_IDS) for (const l of LANGS) assert.equal(typeof L[l][id], 'string', `${id} in ${l}`);
 });
 
 test('every id is used somewhere (code, vocabularies or HTML pages)', () => {
