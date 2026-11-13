@@ -1,0 +1,15 @@
+# beta.antefirma.app: the download page for developers and testers (Workers Static Assets).
+# Workers Builds, linked to this repository:
+#   build command:   node tools/beta-site-build.mjs
+#   deploy command:  npx wrangler deploy --config wrangler.beta.toml
+# The extension and AnteFirma web don't use this file: it is only for the "antefirma-beta" Worker.
+name = "antefirma-beta"
+compatibility_date = "2026-11-01"
+
+routes = [
+  { pattern = "beta.antefirma.app", custom_domain = true },
+]
+
+[assets]
+directory = "./dist/beta-site"
+html_handling = "auto-trailing-slash"

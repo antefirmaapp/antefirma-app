@@ -1,5 +1,5 @@
 /**
- * dev.antefirma.app and its packages: the ZIP writer produces valid,
+ * beta.antefirma.app and its packages: the ZIP writer produces valid,
  * reproducible archives, and the built page offers files that exist and match
  * the checksums it shows.
  */
@@ -14,7 +14,7 @@ import { createHash } from 'node:crypto';
 import { inflateRawSync, crc32 } from 'node:zlib';
 
 import { zipEntries } from '../tools/zip.mjs';
-import { TEXT } from '../dev-site/text.mjs';
+import { TEXT } from '../beta-site/text.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -67,9 +67,9 @@ test('dev page texts: Italian and English have the same keys and list lengths', 
 });
 
 test('dev site build: pages, downloads and checksums agree', () => {
-  const out = mkdtempSync(join(tmpdir(), 'dev-site-'));
+  const out = mkdtempSync(join(tmpdir(), 'beta-site-'));
   try {
-    execFileSync(process.execPath, [join(ROOT, 'tools', 'dev-site-build.mjs'), out], { cwd: ROOT, stdio: 'ignore' });
+    execFileSync(process.execPath, [join(ROOT, 'tools', 'beta-site-build.mjs'), out], { cwd: ROOT, stdio: 'ignore' });
     const manifest = JSON.parse(readFileSync(join(ROOT, 'manifest.json'), 'utf8'));
     const versions = JSON.parse(readFileSync(join(out, 'versions.json'), 'utf8'));
     assert.equal(versions.version, manifest.version);

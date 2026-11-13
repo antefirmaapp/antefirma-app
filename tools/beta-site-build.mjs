@@ -1,8 +1,8 @@
 /**
- * dev.antefirma.app: the download page for developers and testers, in Italian
+ * beta.antefirma.app: the download page for developers and testers, in Italian
  * (/) and English (/en/).
  *
- *     node tools/dev-site-build.mjs [folder]     (default: dist/dev-site)
+ *     node tools/beta-site-build.mjs [folder]     (default: dist/beta-site)
  *
  * It builds the packages it offers and puts them next to the pages:
  *  - files/antefirma-dev-<version>.zip     Chrome and Edge (tools/dev-zip.mjs)
@@ -11,7 +11,7 @@
  *  - versions.json                         version, sizes and SHA-256, for scripts
  * The desktop app is AnteFirma web (web.antefirma.app): the page links to it.
  *
- * The "antefirma-dev" Worker (wrangler.dev.toml) publishes dist/dev-site. The
+ * The "antefirma-beta" Worker (wrangler.beta.toml) publishes dist/beta-site. The
  * build has no dependencies and no external commands (tools/zip.mjs), so
  * Cloudflare Workers Builds can run it on every push.
  */
@@ -23,11 +23,11 @@ import { createHash } from 'node:crypto';
 
 import { buildDevZip, DEV_ID } from './dev-zip.mjs';
 import { zipFolder } from './zip.mjs';
-import { TEXT } from '../dev-site/text.mjs';
+import { TEXT } from '../beta-site/text.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const OUT = resolve(process.argv[2] || join(ROOT, 'dist', 'dev-site'));
-const ORIGIN = 'https://dev.antefirma.app';
+const OUT = resolve(process.argv[2] || join(ROOT, 'dist', 'beta-site'));
+const ORIGIN = 'https://beta.antefirma.app';
 const version = JSON.parse(readFileSync(join(ROOT, 'manifest.json'), 'utf8')).version;
 
 rmSync(OUT, { recursive: true, force: true });
@@ -106,13 +106,13 @@ function page(lang) {
 <link rel="alternate" hreflang="it" href="${ORIGIN}/">
 <link rel="alternate" hreflang="en" href="${ORIGIN}/en/">
 <link rel="icon" href="${pre}favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="${pre}dev.css">
-<script src="${pre}dev.js" defer></script>
+<link rel="stylesheet" href="${pre}beta.css">
+<script src="${pre}beta.js" defer></script>
 </head>
 <body data-copied="${L.copied}">
 <a class="skip" href="#main">${L.skip}</a>
 <header class="top"><div class="wrap">
-<a class="brand" href="${path}">${LOGO}<span>AnteFirma <em>dev</em></span></a>
+<a class="brand" href="${path}">${LOGO}<span>AnteFirma <em>beta</em></span></a>
 <a class="lang" href="${otherPath}" hreflang="${other}" lang="${other}">${L.other}</a>
 </div></header>
 <main id="main">
@@ -158,8 +158,8 @@ ${L.trouble.map(([q, a]) => `<details><summary>${q}</summary><p>${fill(a)}</p></
 const focusablePre = (html) => html.replaceAll('<pre>', '<pre tabindex="0">');
 writeFileSync(join(OUT, 'index.html'), focusablePre(page('it')));
 writeFileSync(join(OUT, 'en', 'index.html'), focusablePre(page('en')));
-cpSync(join(ROOT, 'dev-site', 'dev.css'), join(OUT, 'dev.css'));
-cpSync(join(ROOT, 'dev-site', 'dev.js'), join(OUT, 'dev.js'));
+cpSync(join(ROOT, 'beta-site', 'beta.css'), join(OUT, 'beta.css'));
+cpSync(join(ROOT, 'beta-site', 'beta.js'), join(OUT, 'beta.js'));
 writeFileSync(join(OUT, 'favicon.svg'), LOGO.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ').replaceAll('var(--mark)', '#ffe04a').replaceAll('var(--ink)', '#15203a'));
 writeFileSync(join(OUT, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
 // Strict rules: only the page's own files; the ZIPs are served as downloads and never cached for long.
@@ -174,4 +174,4 @@ writeFileSync(join(OUT, '_headers'), `/*
   Cache-Control: public, max-age=300
 `);
 
-console.log(`dist/dev-site ready (version ${version}): ${Object.values(FILES).map((f) => `${f.name} ${f.sha256.slice(0, 12)}`).join(', ')}`);
+console.log(`dist/beta-site ready (version ${version}): ${Object.values(FILES).map((f) => `${f.name} ${f.sha256.slice(0, 12)}`).join(', ')}`);

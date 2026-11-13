@@ -1,4 +1,4 @@
-/* dev.antefirma.app: the same palette as antefirma.app, system fonts only. */
+/* beta.antefirma.app: the same palette as antefirma.app, system fonts only. */
 :root {
   color-scheme: light dark;
   --paper: #f5f6f8; --surface: #ffffff; --ink: #15203a; --ink-2: #4b566e; --rule: #d8dde7;

@@ -1,5 +1,5 @@
 /**
- * The texts of dev.antefirma.app, in Italian and English.
+ * The texts of beta.antefirma.app, in Italian and English.
  *
  * Placeholders: {v} version, {id} developer extension ID, {chrome} {safari}
  * download links. Button and menu names are the browsers' own, word for word.
@@ -83,7 +83,7 @@ export const TEXT = {
     devStackH: 'Contro un server locale',
     devStack: '<p>Con <code>antefirma-server</code> nella cartella accanto:</p><pre><code>node tools/local-stack.mjs          # prova a mano le pagine demo\nnode tools/local-stack.mjs --auto   # tutti gli scenari, con un rapporto</code></pre><p>Avvia il server con segreti inventati e un archivio in memoria, costruisce una copia dell’estensione puntata lì e apre Chromium sulle pagine demo. Senza <code>ANTHROPIC_API_KEY</code> risponde un modello finto locale, gratis.</p>',
     devBuildH: 'Costruire i pacchetti',
-    devBuild: '<pre><code>node tools/dev-zip.mjs        # → dist/antefirma-dev-&lt;versione&gt;.zip (Chrome, Edge)\nnode tools/safari-build.mjs   # → dist/safari (da convertire su un Mac)\nnode tools/web-build.mjs      # → dist/web (web.antefirma.app)\nnode tools/dev-site-build.mjs # → dist/dev-site (questa pagina)</code></pre><p>Gli ZIP sono riproducibili: la stessa versione dà sempre lo stesso SHA-256, così puoi verificare che il pacchetto scaricato corrisponda al codice.</p>',
+    devBuild: '<pre><code>node tools/dev-zip.mjs        # → dist/antefirma-dev-&lt;versione&gt;.zip (Chrome, Edge)\nnode tools/safari-build.mjs   # → dist/safari (da convertire su un Mac)\nnode tools/web-build.mjs      # → dist/web (web.antefirma.app)\nnode tools/beta-site-build.mjs # → dist/beta-site (questa pagina)</code></pre><p>Gli ZIP sono riproducibili: la stessa versione dà sempre lo stesso SHA-256, così puoi verificare che il pacchetto scaricato corrisponda al codice.</p>',
     devIdsH: 'ID e server',
     devIds: [
       ['ID del pacchetto di sviluppo', '<code>{id}</code>: fisso, grazie alla chiave pubblica nel manifest del pacchetto.'],
@@ -175,7 +175,7 @@ export const TEXT = {
     devStackH: 'Against a local server',
     devStack: '<p>With <code>antefirma-server</code> in the sibling folder:</p><pre><code>node tools/local-stack.mjs          # try the demo pages by hand\nnode tools/local-stack.mjs --auto   # every scenario, with a report</code></pre><p>It starts the server with made-up secrets and an in-memory store, builds a copy of the extension pointed at it and opens Chromium on the demo pages. Without <code>ANTHROPIC_API_KEY</code> a local fake model answers, for free.</p>',
     devBuildH: 'Building the packages',
-    devBuild: '<pre><code>node tools/dev-zip.mjs        # → dist/antefirma-dev-&lt;version&gt;.zip (Chrome, Edge)\nnode tools/safari-build.mjs   # → dist/safari (to convert on a Mac)\nnode tools/web-build.mjs      # → dist/web (web.antefirma.app)\nnode tools/dev-site-build.mjs # → dist/dev-site (this page)</code></pre><p>The ZIPs are reproducible: the same version always gives the same SHA-256, so you can check that the package you downloaded matches the code.</p>',
+    devBuild: '<pre><code>node tools/dev-zip.mjs        # → dist/antefirma-dev-&lt;version&gt;.zip (Chrome, Edge)\nnode tools/safari-build.mjs   # → dist/safari (to convert on a Mac)\nnode tools/web-build.mjs      # → dist/web (web.antefirma.app)\nnode tools/beta-site-build.mjs # → dist/beta-site (this page)</code></pre><p>The ZIPs are reproducible: the same version always gives the same SHA-256, so you can check that the package you downloaded matches the code.</p>',
     devIdsH: 'IDs and server',
     devIds: [
       ['Developer package ID', '<code>{id}</code>: fixed, thanks to the public key in the package’s manifest.'],

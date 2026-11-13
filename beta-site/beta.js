@@ -1,4 +1,4 @@
-// dev.antefirma.app: marks the download that fits the visitor's browser and copies checksums.
+// beta.antefirma.app: marks the download that fits the visitor's browser and copies checksums.
 // The page works without it: every download and step is already in the HTML.
 (() => {
   const ua = navigator.userAgent;

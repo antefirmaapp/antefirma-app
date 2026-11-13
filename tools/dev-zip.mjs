@@ -43,7 +43,7 @@ export function buildDevZip() {
     '',
     `The extension ID is always ${DEV_ID}: the AnteFirma server recognises it.`,
     '',
-    'Updating: download the new ZIP from https://dev.antefirma.app/en/, replace the folder\'s content,',
+    'Updating: download the new ZIP from https://beta.antefirma.app/en/, replace the folder\'s content,',
     'then press "Reload" on the AnteFirma card in chrome://extensions.',
     '',
   ].join('\n'));
