@@ -44,7 +44,7 @@ h3 { font-size: 1.2rem; margin: 32px 0 8px; scroll-margin-top: 16px; }
 /* Side by side, the cards share their rows: titles, buttons and checksums line up whatever their length. */
 @supports (grid-template-rows: subgrid) {
   .card { display: grid; grid-row: span 6; grid-template-rows: subgrid; align-content: start; }
-  .card .rec { grid-row: 1; }
+  .card .rec { grid-row: 1; justify-self: start; align-self: start; }
   .card h3 { grid-row: 2; }
   .card p:not(.rec) { grid-row: 3; }
   .card .btn { grid-row: 4; align-self: start; }
