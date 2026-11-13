@@ -162,9 +162,11 @@ cpSync(join(ROOT, 'beta-site', 'beta.css'), join(OUT, 'beta.css'));
 cpSync(join(ROOT, 'beta-site', 'beta.js'), join(OUT, 'beta.js'));
 writeFileSync(join(OUT, 'favicon.svg'), LOGO.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ').replaceAll('var(--mark)', '#ffe04a').replaceAll('var(--ink)', '#15203a'));
 writeFileSync(join(OUT, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
-// Strict rules: only the page's own files; the ZIPs are served as downloads and never cached for long.
+// Strict rules: only the page's own files, plus Cloudflare Web Analytics (injected by
+// Cloudflare, cookieless), as on web.antefirma.app. The ZIPs are served as downloads
+// and never cached for long.
 writeFileSync(join(OUT, '_headers'), `/*
-  Content-Security-Policy: default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'none'; style-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src https://cloudflareinsights.com; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Robots-Tag: noindex
