@@ -13,8 +13,9 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { t, tn, tIn, setLang, resolveLang } from '../src/i18n/index.js';
 import { buildMessages, buildBootMessages, BOOT_IDS } from '../tools/i18n-build.mjs';
+import { LANGS as ALL_LANGS, LANGUAGES } from '../src/core/languages.js';
 
-const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et'];
+const LANGS = ALL_LANGS;
 const L = Object.fromEntries(LANGS.map((l) => [l, JSON.parse(readFileSync(`src/i18n/locales/${l}.json`, 'utf8'))]));
 const ids = Object.keys(L.it);
 
@@ -146,7 +147,7 @@ test('labels and texts of the vocabularies are ids with translations', async () 
 
 test('the HTML pages\' texts all have an id', () => {
   const missing = [];
-  const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|Italiano|English|Español|Deutsch|Français|Nederlands|Polski|Português|Svenska|Română|Čeština|Dansk|Suomi|Norsk|Slovenčina|Magyar|Ελληνικά|Hrvatski|Slovenščina|Български|Lietuvių|Latviešu|Eesti|https?:\/\/\S+)$/;
+  const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|https?:\/\/\S+)$/;
   for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html']) {
     const html = readFileSync(f, 'utf8').replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style|textarea)[\s\S]*?<\/\1>/g, '');
     const texts = [
@@ -156,4 +157,31 @@ test('the HTML pages\' texts all have an id', () => {
     for (const s of texts) if (!globalThis.AF_I18N.idOf(s.replace(/&amp;/g, '&'))) missing.push(`${f}: ${s}`);
   }
   assert.deepEqual(missing, []);
+});
+
+test('one list of languages: everything a language needs exists for each of them', async () => {
+  const { readdirSync } = await import('node:fs');
+  const codes = LANGUAGES.map((l) => l.code);
+  assert.equal(new Set(codes).size, codes.length, 'no duplicates');
+  for (const l of LANGUAGES) {
+    assert.match(l.locale, /^[a-z]{2}-[A-Z]{2}$/, `${l.code}: locale`);
+    assert.ok(l.name && l.country, `${l.code}: name and country`);
+    assert.doesNotThrow(() => new Intl.DateTimeFormat(l.locale), `${l.code}: a locale the browser knows`);
+  }
+  // Texts, the browser's own _locales folder, letters, help pages, demo fixtures.
+  assert.deepEqual(readdirSync('src/i18n/locales').map((f) => f.replace('.json', '')).sort(), [...codes].sort(), 'src/i18n/locales');
+  assert.deepEqual(readdirSync('_locales').sort(), [...codes].sort(), '_locales');
+  const { buildLetter, LETTER_KINDS, letterLangFor } = await import('../src/core/letter.js');
+  const { helpUrl } = await import('../src/core/help.js');
+  const { jurisdictionFor } = await import('../src/core/jurisdiction.js');
+  const { PAGE, HOST } = await import('../tools/demo-fixture.mjs');
+  for (const { code, country } of LANGUAGES) {
+    assert.equal(buildLetter({}, {}, LETTER_KINDS.CANCELLATION, Date.now(), code).lang, code, `${code}: a letter in its language`);
+    assert.ok(helpUrl('warning', code).includes(code === 'it' ? '/aiuto/' : `/${code}/`), `${code}: help pages`);
+    assert.equal(jurisdictionFor(code), country, `${code}: its default country`);
+    assert.ok(PAGE[code] && HOST[code], `${code}: demo fixture for the screenshots`);
+    if (code !== 'en') assert.equal(letterLangFor(country).slice(0, 2), code, `${code}: letters for ${country} are in ${code}`);
+  }
+  // The settings menu is filled from the list, not written by hand.
+  assert.ok(!/<option value="(?:en|de|et)"/.test(readFileSync('src/options/options.html', 'utf8')));
 });

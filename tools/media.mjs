@@ -23,6 +23,10 @@ const { chromium } = require('playwright');
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = resolve(process.argv[2] || join(ROOT, '..', 'antefirma-site', 'assets', 'media'));
 import { PAGE, HOST, mockServer } from './demo-fixture.mjs';
+import { countryOf } from '../src/core/languages.js';
+
+// The protections shown in the screenshots: the language's country; for English, the EU rules.
+const shotCountry = (lang) => (lang === 'en' ? 'EU' : countryOf(lang));
 const W = 1280, H = 800;
 
 const ALT = {
@@ -49,7 +53,7 @@ async function record(l) {
   await opt.goto(`chrome-extension://${extId}/src/options/options.html`);
   await opt.waitForTimeout(800);
   await opt.selectOption('#uiLang', l);
-  await opt.selectOption('#jurisdiction', { it: 'IT', en: 'EU', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL', pl: 'PL', pt: 'PT', sv: 'SE', ro: 'RO', cs: 'CZ', da: 'DK', fi: 'FI', no: 'NO', sk: 'SK', hu: 'HU', el: 'GR', hr: 'HR', sl: 'SI', bg: 'BG', lt: 'LT', lv: 'LV', et: 'EE' }[l]);
+  await opt.selectOption('#jurisdiction', shotCountry(l));
   const you = PAGE[l].you;
   await opt.fill('#id-name', you.name); await opt.fill('#id-address', you.address); await opt.fill('#id-email', you.email);
   await opt.click('#save');

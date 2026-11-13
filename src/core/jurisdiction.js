@@ -1,3 +1,5 @@
+import { countryOf } from './languages.js';
+
 /**
  * The protections to start from, guessed from the browser language at install
  * ("de-AT" → Austria, "fr-BE" and "nl-BE" → Belgium, "en-IE" → Ireland,
@@ -14,5 +16,6 @@ export function jurisdictionFor(uiLanguage = '') {
   if (r === 'BR') return 'OTHER';
   if (r === 'GB') return 'UK';
   if (r === 'US') return 'US';
-  return { it: 'IT', es: 'ES', de: 'DE', fr: 'FR', nl: 'NL', pl: 'PL', pt: 'PT', sv: 'SE', ro: 'RO', cs: 'CZ', da: 'DK', fi: 'FI', no: 'NO', nb: 'NO', nn: 'NO', sk: 'SK', hu: 'HU', el: 'GR', hr: 'HR', sl: 'SI', bg: 'BG', lt: 'LT', lv: 'LV', et: 'EE', en: 'UK' }[l] || 'EU';
+  // Norwegian browsers say "nb" or "nn": both are the Norwegian of the table.
+  return countryOf(l === 'nb' || l === 'nn' ? 'no' : l) || 'EU';
 }

@@ -299,7 +299,11 @@ tools/                               builds, screenshots, dev package, English c
 
 Conventions: everything in English except user-facing text; no secrets in code.
 
-**Languages.** Code refers to user-facing texts by English id: `t('goBack')`,
+**Languages.** The list of languages (code, locale, own name, default country) is
+one table in `src/i18n/i18n.js`; modules read it through `src/core/languages.js`.
+The settings menu, the letter languages, the tools and the tests derive from it,
+and `test/i18n.test.mjs` lists what a new row still lacks (texts, `_locales`,
+letters, help pages, demo fixture). Code refers to user-facing texts by English id: `t('goBack')`,
 `tn(n, 'nDay', 'nDays2')` for singular and plural. The texts live in
 `src/i18n/locales/<lang>.json`; after editing them run
 `node tools/i18n-build.mjs`, which writes `src/i18n/messages.js` (every text in

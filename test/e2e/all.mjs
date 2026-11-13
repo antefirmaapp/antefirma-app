@@ -20,6 +20,7 @@
  */
 import { startStack, ROOT } from './harness.mjs';
 import { join } from 'node:path';
+import { LANGS } from '../../src/core/languages.js';
 
 // .provenance exists only in a verdict: the waiting card also has .tiles.
 const verdictShown = (pg) => pg.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('.provenance'), null, { timeout: 12000 }).then(() => true, () => false);
@@ -248,7 +249,7 @@ const SCENARIOS = {
 };
 
 SCENARIOS.a11y = async (h) => {
-  for (const lang of ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et']) {
+  for (const lang of LANGS) {
     await h.settings({ uiLang: lang, consent: true });
     for (const scheme of ['light', 'dark']) {
       const tag = `${lang} ${scheme}`;

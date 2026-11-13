@@ -12,6 +12,7 @@
 
 import { API_BASE } from './config.js';
 import { t } from '../i18n/index.js';
+import { LANGS } from './languages.js';
 
 const AUTH_KEY = 'antefirmaAuth';
 
@@ -125,7 +126,7 @@ export async function analyzeRemote(
     url: url || undefined,
     action: ACTION_MAP[actionType] || 'other',
     button: button ? String(button).slice(0, 120) : undefined,
-    uiLang: ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et'].includes(uiLang) ? uiLang : 'it',
+    uiLang: LANGS.includes(uiLang) ? uiLang : 'it',
     userCountry: COUNTRY_MAP[jurisdiction] || 'IT',
   };
 

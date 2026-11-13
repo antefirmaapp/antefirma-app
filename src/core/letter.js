@@ -14,6 +14,7 @@
 import { formatMoney as fm } from './text.js';
 import { formatDate as fd } from './commitments.js';
 import { t, locale } from '../i18n/index.js';
+import { LANGS, localeOf } from './languages.js';
 
 /**
  * The letter's language is the provider's, not the extension's: Italian for
@@ -27,9 +28,10 @@ import { t, locale } from '../i18n/index.js';
  * such as 'de-AT' is the same text with the other country's laws. Dates and
  * amounts follow the variant's locale.
  */
-export const LETTER_LANGS = ['it', 'es', 'en', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et'];
+export const LETTER_LANGS = LANGS;
 export const LETTER_VARIANTS = [...LETTER_LANGS, 'de-AT', 'fr-BE', 'nl-BE', 'en-IE', 'en-MT', 'el-CY', 'fr-LU', 'de-LU'];
-const LOCALE = { it: 'it-IT', es: 'es-ES', en: 'en-GB', de: 'de-DE', 'de-AT': 'de-AT', fr: 'fr-FR', 'fr-BE': 'fr-BE', nl: 'nl-NL', 'nl-BE': 'nl-BE', 'en-IE': 'en-IE', 'en-MT': 'en-MT', 'el-CY': 'el-CY', 'fr-LU': 'fr-LU', 'de-LU': 'de-LU', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR', hr: 'hr-HR', sl: 'sl-SI', bg: 'bg-BG', lt: 'lt-LT', lv: 'lv-LV', et: 'et-EE' };
+// A country variant ('de-AT', 'el-CY') is already a locale; a language takes the interface's.
+const localeFor = (variant) => localeOf(variant) || variant;
 const BY_COUNTRY = { IT: 'it', ES: 'es', DE: 'de', AT: 'de-AT', FR: 'fr', NL: 'nl', PL: 'pl', PT: 'pt', SE: 'sv', RO: 'ro', CZ: 'cs', DK: 'da', FI: 'fi', NO: 'no', SK: 'sk', HU: 'hu', GR: 'el', IE: 'en-IE', MT: 'en-MT', CY: 'el-CY', HR: 'hr', SI: 'sl', BG: 'bg', LT: 'lt', LV: 'lv', EE: 'et' };
 // Belgium and Luxembourg have more than one language: the letter follows the person's own.
 export const letterLangFor = (jurisdiction, uiLang = '') => {
@@ -109,7 +111,7 @@ export function buildLetter(commitment = {}, identity = {}, kind = null, now = D
   const L = variant.slice(0, 2);
   const X = TEXT[L];
   const type = kind || suggestKind(commitment, now);
-  const fmt = { date: (d) => fd(d, LOCALE[variant]), money: (a, c) => fm(a, c, LOCALE[variant]) };
+  const fmt = { date: (d) => fd(d, localeFor(variant)), money: (a, c) => fm(a, c, localeFor(variant)) };
   const you = {
     name: identity.name?.trim() || X.ph.name,
     address: identity.address?.trim() || X.ph.address,

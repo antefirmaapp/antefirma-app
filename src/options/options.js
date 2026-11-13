@@ -6,6 +6,7 @@ import { PROTECTION_LABELS } from '../core/constants.js';
 import { t, setLang, resolveLang, locale, getLang } from '../i18n/index.js';
 import { translateDom } from '../i18n/dom.js';
 import { helpUrl } from '../core/help.js';
+import { LANGUAGES } from '../core/languages.js';
 
 const $ = (s) => document.querySelector(s);
 
@@ -350,6 +351,15 @@ function addHelpLinks() {
     a.title = a.ariaLabel = t('helpS', { s: h.textContent.trim() });
     h.append(' ', a);
   }
+}
+
+// The language menu: every language under its own name, never translated.
+for (const { code, name } of LANGUAGES) {
+  const option = document.createElement('option');
+  option.value = code;
+  option.textContent = name;
+  option.dataset.noI18n = '';
+  $('#uiLang').append(option);
 }
 
 // Language first: the page is written in Italian and translated here.

@@ -18,7 +18,8 @@
 import { esc } from './render.js';
 import { formatMoney } from '../core/text.js';
 import { commitmentState, costOfDoingNothing, portfolioSummary, formatDate } from '../core/commitments.js';
-import { LETTER_LABELS, LETTER_KINDS } from '../core/letter.js';
+import { LETTER_LABELS, LETTER_KINDS, LETTER_LANGS } from '../core/letter.js';
+import { nameOf } from '../core/languages.js';
 import { t, tn, locale, getLang } from '../i18n/index.js';
 import { helpUrl } from '../core/help.js';
 
@@ -484,11 +485,23 @@ async function finalizeDelete() {
 
 // ── the four actions ────────────────────────────────────────────────────────
 
+/**
+ * Letter languages that exist for more than one country say which one; the
+ * others use the language's own name (src/i18n/i18n.js).
+ */
+const VARIANT_LABELS = {
+  en: 'English (UK)', 'en-IE': 'English (Ireland)', 'en-MT': 'English (Malta)',
+  de: 'Deutsch (Deutschland)', 'de-AT': 'Deutsch (Österreich)', 'de-LU': 'Deutsch (Luxemburg)',
+  fr: 'Français (France)', 'fr-BE': 'Français (Belgique)', 'fr-LU': 'Français (Luxembourg)',
+  nl: 'Nederlands (Nederland)', 'nl-BE': 'Nederlands (België)',
+  pt: 'Português (Portugal)',
+  el: 'Ελληνικά (Ελλάδα)', 'el-CY': 'Ελληνικά (Κύπρος)',
+};
+
 export async function showLetter(id, kind = null, lang = null) {
   const letter = await send('BUILD_LETTER', { id, kind, lang });
   // Names in their own language, like the language menu in settings; countries that share a language keep their own laws.
-  const langs = [['it', 'Italiano'], ['es', 'Español'], ['en', 'English (UK)'], ['en-IE', 'English (Ireland)'], ['en-MT', 'English (Malta)'], ['de', 'Deutsch (Deutschland)'], ['de-AT', 'Deutsch (Österreich)'], ['de-LU', 'Deutsch (Luxemburg)'],
-    ['fr', 'Français (France)'], ['fr-BE', 'Français (Belgique)'], ['fr-LU', 'Français (Luxembourg)'], ['nl', 'Nederlands (Nederland)'], ['nl-BE', 'Nederlands (België)'], ['pl', 'Polski'], ['pt', 'Português (Portugal)'], ['sv', 'Svenska'], ['ro', 'Română'], ['cs', 'Čeština'], ['da', 'Dansk'], ['fi', 'Suomi'], ['no', 'Norsk'], ['sk', 'Slovenčina'], ['hu', 'Magyar'], ['el', 'Ελληνικά (Ελλάδα)'], ['el-CY', 'Ελληνικά (Κύπρος)'], ['hr', 'Hrvatski'], ['sl', 'Slovenščina'], ['bg', 'Български'], ['lt', 'Lietuvių'], ['lv', 'Latviešu'], ['et', 'Eesti']]
+  const langs = LETTER_LANGS.flatMap((code) => [[code, VARIANT_LABELS[code] || nameOf(code)], ...Object.entries(VARIANT_LABELS).filter(([k]) => k.startsWith(`${code}-`))])
     .map(([k, label]) => `<option value="${k}" ${k === (letter.variant || letter.lang) ? 'selected' : ''}>${label}</option>`).join('');
 
   const options = Object.entries(LETTER_LABELS)

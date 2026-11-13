@@ -23,8 +23,25 @@
 (() => {
   const g = globalThis;
   if (g.AF_I18N) return;
-  const LANGS = ['it', 'en', 'es', 'de', 'fr', 'nl', 'pl', 'pt', 'sv', 'ro', 'cs', 'da', 'fi', 'no', 'sk', 'hu', 'el', 'hr', 'sl', 'bg', 'lt', 'lv', 'et'];
-  const LOCALES = { it: 'it-IT', en: 'en-GB', es: 'es-ES', de: 'de-DE', fr: 'fr-FR', nl: 'nl-NL', pl: 'pl-PL', pt: 'pt-PT', sv: 'sv-SE', ro: 'ro-RO', cs: 'cs-CZ', da: 'da-DK', fi: 'fi-FI', no: 'nb-NO', sk: 'sk-SK', hu: 'hu-HU', el: 'el-GR', hr: 'hr-HR', sl: 'sl-SI', bg: 'bg-BG', lt: 'lt-LT', lv: 'lv-LV', et: 'et-EE' };
+  /**
+   * Every language of the interface, in one place: code, locale for dates and
+   * amounts, its own name, and the country whose consumer protections apply
+   * by default. Everything else that needs the list reads it from here
+   * (src/core/languages.js for modules). Adding a language starts with a row
+   * here; `test/i18n.test.mjs` then says what is still missing.
+   */
+  const LANGUAGES = [
+    ['it', 'it-IT', 'Italiano', 'IT'], ['en', 'en-GB', 'English', 'UK'], ['es', 'es-ES', 'Español', 'ES'],
+    ['de', 'de-DE', 'Deutsch', 'DE'], ['fr', 'fr-FR', 'Français', 'FR'], ['nl', 'nl-NL', 'Nederlands', 'NL'],
+    ['pl', 'pl-PL', 'Polski', 'PL'], ['pt', 'pt-PT', 'Português', 'PT'], ['sv', 'sv-SE', 'Svenska', 'SE'],
+    ['ro', 'ro-RO', 'Română', 'RO'], ['cs', 'cs-CZ', 'Čeština', 'CZ'], ['da', 'da-DK', 'Dansk', 'DK'],
+    ['fi', 'fi-FI', 'Suomi', 'FI'], ['no', 'nb-NO', 'Norsk', 'NO'], ['sk', 'sk-SK', 'Slovenčina', 'SK'],
+    ['hu', 'hu-HU', 'Magyar', 'HU'], ['el', 'el-GR', 'Ελληνικά', 'GR'], ['hr', 'hr-HR', 'Hrvatski', 'HR'],
+    ['sl', 'sl-SI', 'Slovenščina', 'SI'], ['bg', 'bg-BG', 'Български', 'BG'], ['lt', 'lt-LT', 'Lietuvių', 'LT'],
+    ['lv', 'lv-LV', 'Latviešu', 'LV'], ['et', 'et-EE', 'Eesti', 'EE'],
+  ].map(([code, locale, name, country]) => ({ code, locale, name, country }));
+  const LANGS = LANGUAGES.map((l) => l.code);
+  const LOCALES = Object.fromEntries(LANGUAGES.map((l) => [l.code, l.locale]));
   let lang = 'it';
   let byItalian = null;
 
@@ -32,6 +49,7 @@
 
   g.AF_I18N = {
     LANGS,
+    LANGUAGES,
     /** { it: { id: text }, en: {…}, … }. Filled by messages.js. */
     messages: Object.fromEntries(LANGS.map((l) => [l, {}])),
     add(messages) {
