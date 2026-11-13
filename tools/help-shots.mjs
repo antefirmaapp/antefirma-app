@@ -14,14 +14,21 @@
  * calendar, commitments, letter, settings-plan, settings-data.
  * Videos (15–20 s, .mp4 via ffmpeg): video-commitment, video-letter, video-key.
  * Also writes sizes.json (width and height of each image).
+ *
+ * A screenshot is rewritten only when it looks different from the one already
+ * there (tools/write-if-changed.mjs). The screenshots show dates that follow
+ * the day they are taken, and videos are always encoded anew: to keep the
+ * website's repository from growing for nothing, regenerate only the languages
+ * that changed (`--lang=`), and pass `--no-video` when the videos don't need it.
  */
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync, readdirSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, rmSync, readdirSync, readFileSync, existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
 import { PAGE, HOST, mockServer } from './demo-fixture.mjs';
+import { writeIfChanged, sameImage } from './write-if-changed.mjs';
 import { LANGS as ALL_LANGS, countryOf } from '../src/core/languages.js';
 
 // The protections shown in the screenshots: the language's country; for English, the EU rules.
@@ -64,9 +71,24 @@ async function setup(context, extId, l, { consent = false } = {}) {
 }
 
 const sizes = {};
+// Every file written for the language in hand: what is left over from an older run is removed at the end.
+const produced = new Set();
+// A plain browser page, only to compare a new screenshot with the one already there.
+let compareBrowser = null;
+let comparing = null;
+async function comparePage() {
+  if (!comparing) {
+    compareBrowser = await chromium.launch();
+    comparing = await compareBrowser.newPage();
+  }
+  return comparing;
+}
 async function shot(target, dir, name, opts = {}) {
   const file = join(dir, `${name}.jpg`);
-  const bb = await target.screenshot({ path: file, type: 'jpeg', quality: 84, ...opts });
+  const bb = await target.screenshot({ type: 'jpeg', quality: 84, ...opts });
+  // Kept as it is when nothing visible changed: see write-if-changed.mjs.
+  await writeIfChanged(file, bb, sameImage(await comparePage()));
+  produced.add(`${name}.jpg`);
   const vp = opts.clip || (target.viewportSize ? target.viewportSize() : await target.boundingBox());
   sizes[name + '.jpg'] = { w: Math.round(vp.width), h: Math.round(vp.height) };
   return bb;
@@ -158,6 +180,7 @@ async function clip(l, dir, name, viewport, run) {
   // The poster: the last frame, which shows the result.
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-sseof', '-0.6', '-i', join(dir, `${name}.mp4`), '-frames:v', '1', '-q:v', '4', join(dir, `${name}.jpg`)]);
   sizes[`${name}.jpg`] = { w: viewport.width, h: viewport.height };
+  produced.add(`${name}.mp4`).add(`${name}.jpg`);
   rmSync(vids, { recursive: true, force: true });
 }
 
@@ -221,11 +244,19 @@ async function videos(l, dir) {
 
 for (const l of LANGS) {
   const dir = join(OUT, l);
-  rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
   for (const k of Object.keys(sizes)) delete sizes[k];
+  produced.clear();
+  // sizes.json also holds the entries of files other tools write here (team.jpg, from the website's tool).
+  const sizesFile = join(dir, 'sizes.json');
+  const before = existsSync(sizesFile) ? JSON.parse(readFileSync(sizesFile, 'utf8')) : {};
   await screens(l, dir);
   if (VIDEO) await videos(l, dir);
-  writeFileSync(join(dir, 'sizes.json'), JSON.stringify(sizes, null, 1) + '\n');
+  const mine = (f) => /\.(jpg|mp4)$/.test(f) && f !== 'team.jpg' && (VIDEO || !f.startsWith('video-'));
+  for (const f of readdirSync(dir)) if (mine(f) && !produced.has(f)) rmSync(join(dir, f));
+  // Same order as before, so an unchanged run leaves the file untouched.
+  const kept = Object.fromEntries(Object.entries(before).filter(([f]) => !mine(f) || f in sizes));
+  await writeIfChanged(sizesFile, JSON.stringify({ ...kept, ...sizes }, null, 1) + '\n');
   console.log(`${l}: ${readdirSync(dir).length} files`);
 }
+await compareBrowser?.close();
