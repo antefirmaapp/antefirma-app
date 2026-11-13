@@ -16,7 +16,7 @@ export const TEXT = {
     built: 'Versione {v}',
     notStore: 'Sono pacchetti di sviluppo: non si aggiornano da soli. Quando esce una versione nuova, la scarichi da qui.',
     dlH: 'Scarica',
-    recommended: 'Consigliato per il tuo browser',
+    recommended: 'Consigliato per te',
     size: 'Dimensione', sha: 'SHA-256', copy: 'Copia', copied: 'Copiato',
     guideLink: 'Come si installa',
     cards: {
@@ -108,7 +108,7 @@ export const TEXT = {
     built: 'Version {v}',
     notStore: 'These are developer packages: they don’t update on their own. When a new version comes out, download it from here.',
     dlH: 'Download',
-    recommended: 'Recommended for your browser',
+    recommended: 'Recommended for you',
     size: 'Size', sha: 'SHA-256', copy: 'Copy', copied: 'Copied',
     guideLink: 'How to install',
     cards: {
