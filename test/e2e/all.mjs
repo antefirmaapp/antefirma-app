@@ -95,6 +95,12 @@ const SCENARIOS = {
     await pg.waitForTimeout(800);
     h.check('"Continue without waiting" performs the action', await pg.evaluate(() => window.__demoSubmitted === true));
     h.fake.delay = 0;
+    // The slow analysis is still on its way: when it lands, the extension caches
+    // its verdict. Let it land now, or it would land after one of the cache
+    // clean-ups below and the next failure would be answered from the cache.
+    for (let i = 0; i < 80 && h.fake.pending > 0; i++) await pg.waitForTimeout(100);
+    await pg.waitForTimeout(300);
+    h.check('the slow analysis has finished before the failures start', h.fake.pending === 0);
     for (const mode of ['500', 'malformed', 'network', 'timeout']) {
       h.fake.mode = mode;
       await h.clearCache();

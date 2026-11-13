@@ -55,7 +55,7 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
 
   const fake = {
     engine: 'keywords', fixed: null, mode: 'ok', delay: 0, notice: null,
-    analyzeCalls: 0, registerCalls: 0, lastLang: null, lastText: '', feedback: [], served401: 0,
+    analyzeCalls: 0, pending: 0, registerCalls: 0, lastLang: null, lastText: '', feedback: [], served401: 0,
     license: { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 4 } } },
     quota: { plan: 'free', remaining: 4, month: { limit: 5, remaining: 4 } },
   };
@@ -70,15 +70,25 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
       const body = JSON.parse(req.postData() || '{}');
       fake.lastLang = body.uiLang;
       fake.lastText = body.text || '';
-      if (fake.mode === '401-always' || (fake.mode === '401-once' && fake.served401 === 0)) { fake.served401 += 1; return json(401, { error: 'auth', message: 'token' }); }
-      if (fake.mode === 'network') return route.abort('connectionrefused');
-      if (fake.mode === 'timeout') { await new Promise((r) => setTimeout(r, 17_000)); return route.abort('timedout').catch(() => {}); }
-      if (fake.mode === 'slow' || fake.delay) await new Promise((r) => setTimeout(r, fake.delay || 5000));
-      if (fake.mode === '500') return json(500, { error: 'upstream', message: 'boom' });
-      if (fake.mode === 'malformed') return route.fulfill({ status: 200, contentType: 'application/json', body: '{"findings": [ {"category": "auto_ren' });
-      if (fake.mode === 'quota') return json(429, { error: 'quota_month', message: 'server' });
-      const answer = fake.fixed || { findings: keywordFindings(fake.lastText, fake.lastLang), terms: EMPTY_TERMS, summary: '' };
-      return json(200, { dropped: 0, truncated: false, model: 'fake', cached: false, quota: fake.quota, ...answer, notice: fake.notice });
+      // The answer is decided when the request arrives, as a real server would:
+      // a slow request must not change its mind because a later test step
+      // switched the mode while it was waiting.
+      const mode = fake.mode;
+      const delay = fake.delay;
+      fake.pending += 1;
+      try {
+        if (mode === '401-always' || (mode === '401-once' && fake.served401 === 0)) { fake.served401 += 1; return await json(401, { error: 'auth', message: 'token' }); }
+        if (mode === 'network') return await route.abort('connectionrefused');
+        if (mode === 'timeout') { await new Promise((r) => setTimeout(r, 17_000)); return await route.abort('timedout').catch(() => {}); }
+        if (mode === 'slow' || delay) await new Promise((r) => setTimeout(r, delay || 5000));
+        if (mode === '500') return await json(500, { error: 'upstream', message: 'boom' });
+        if (mode === 'malformed') return await route.fulfill({ status: 200, contentType: 'application/json', body: '{"findings": [ {"category": "auto_ren' });
+        if (mode === 'quota') return await json(429, { error: 'quota_month', message: 'server' });
+        const answer = fake.fixed || { findings: keywordFindings(body.text || '', body.uiLang), terms: EMPTY_TERMS, summary: '' };
+        return await json(200, { dropped: 0, truncated: false, model: 'fake', cached: false, quota: fake.quota, ...answer, notice: fake.notice });
+      } finally {
+        fake.pending -= 1;
+      }
     }
     if (path === '/v1/feedback') { fake.feedback.push(JSON.parse(req.postData() || '{}').category); return json(200, { ok: true }); }
     if (path === '/v1/license') return json(200, fake.license);
