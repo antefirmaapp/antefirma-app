@@ -279,16 +279,18 @@ check on every push.
 ## Code structure
 
 ```
-manifest.json, _locales/{it,en,es}   name and description in three languages
+manifest.json, _locales/<lang>       name and description in every language
 src/background/service-worker.js     listeners and message router
 src/background/{settings,analysis,commitments,changes,exit-kit,plan}.js  the work behind each message
-src/content/                         detector, page context, warning
+src/content/                         detector, page context, warning (overlay.js; its style sheet in overlay-styles.js)
 src/core/config.js                   server address
 src/core/server.js                   server client: token, analysis, errors
 src/core/analyzer.js                 from the server's answer to the verdict
 src/core/consequence.js              cost and timeline from verified figures
 src/core/{profile,eu,scoring}.js     profile, EU/IT protections, score
 src/core/{commitments,letter,ics,proof}.js  exit kit and proof
+src/core/letters/<lang>.js           the letter texts, one file per language (shared.js: what they share)
+src/core/languages.js                the list of languages, for modules (the table is in src/i18n/i18n.js)
 src/core/help.js                     links to the help centre
 src/sidepanel/, src/options/         panel and settings
 src/i18n/                            languages: t(), locales/*.json, generated messages.js, page translation
