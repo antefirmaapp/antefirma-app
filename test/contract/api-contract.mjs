@@ -34,7 +34,7 @@ export const CONTRACT = {
   },
   teamKeys: {
     month: { limit: 'number', remaining: 'number' }, periodEnd: 'string?',
-    seats: [{ seat: 'number', key: 'string', browsers: 'number', limit: 'number' }],
+    seats: [{ seat: 'number', key: 'string', browsers: 'number', limit: 'number', used: { month: 'number', today: 'number' } }],
   },
 };
 
