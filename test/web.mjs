@@ -11,7 +11,11 @@
  */
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { server, BASE, TEXT, calls, api } from './web-harness.mjs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { server, BASE, TEXT, READ_TEXT, calls, api } from './web-harness.mjs';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const require = createRequire(import.meta.url);
 const { chromium } = require('playwright');
@@ -94,6 +98,12 @@ try {
   await page.fill('#paste-text', TEXT);
   await page.click('#run-paste');
   await page.waitForFunction(() => /599[.,]76/.test(document.getElementById('result')?.textContent || ''), null, { timeout: 10000 });
+
+  // A photo of the contract: the server reads it, the text lands in the box and is analysed.
+  await page.setInputFiles('#pdf-file', join(ROOT, 'test', 'fixtures', 'scan', 'page1.jpg'));
+  await page.waitForFunction((text) => document.getElementById('paste-text').value === text, READ_TEXT, { timeout: 12000 }).catch(() => {});
+  await page.waitForFunction(() => /599[.,]76/.test(document.getElementById('result')?.textContent || ''), null, { timeout: 10000 }).catch(() => {});
+  check('a photo is read by the server and analysed, in the web app too', calls.includes('/v1/read') && (await page.inputValue('#paste-text')) === READ_TEXT && /foto|photo/i.test(await page.textContent('#result')), `${calls.filter((c) => c === '/v1/read').length} reads · ${await page.textContent('#status')} · ${(await page.inputValue('#paste-text')).slice(0, 40)}`);
 
   // Recorded as a commitment: it appears in the Commitments tab with its deadline.
   await page.click('#track');

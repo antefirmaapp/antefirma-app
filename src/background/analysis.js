@@ -7,6 +7,7 @@ import { SAMPLES } from '../core/samples.js';
 import { t } from '../i18n/index.js';
 import { isAllowlisted, getCached, setCached, pushHistory } from '../core/storage.js';
 import { fetchDocument } from './changes.js';
+import { readRemote } from '../core/server.js';
 import { ANALYSIS_BUDGET_MS, TERMS_FETCH_BUDGET_MS, cacheKey, failure, getSettings, showQuotaBadge, updateBadge } from './settings.js';
 
 export async function analyzeAction(payload = {}, sender) {
@@ -192,4 +193,18 @@ export async function importData(file) {
     commitments: next.commitments.length - (cur.commitments || []).length,
     history: next.history.length - (cur.history || []).length,
   };
+}
+
+/**
+ * A photo or a scanned PDF from the panel: the server reads the text in it.
+ * The files leave the browser, so the same consent as for an analysis applies.
+ */
+export async function readFiles(payload = {}) {
+  const settings = await getSettings();
+  if (!settings.remoteConsentAt) return { needsConsent: true };
+  const files = Array.isArray(payload.files) ? payload.files : [];
+  if (!files.length) throw new Error(t('fileNotPdfOrImage'));
+  const { text, truncated, reads } = await readRemote(files);
+  // Paragraphs are kept: the person reads this text, and may correct it, before the analysis.
+  return { text: String(text).trim(), truncated: Boolean(truncated), reads: reads || null };
 }

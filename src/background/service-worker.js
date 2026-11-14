@@ -21,7 +21,7 @@ import { t } from '../i18n/index.js';
 import { openReport } from '../core/report.js';
 import { getSettings as readSettings, setSettings, clearCache, getHistory, clearHistory, getCommitments } from '../core/storage.js';
 import { getSettings, contentSettings, allowlistAdd, forgetOldEngine, grantConsent, withCode, serverStatus } from './settings.js';
-import { analyzeAction, analyzeText, analyzeSample, exportData, importData } from './analysis.js';
+import { analyzeAction, analyzeText, analyzeSample, exportData, importData, readFiles } from './analysis.js';
 import { recordDecision, commitmentFromVerdict, updateAndReschedule, removeCommitment, WATCH_ALARM, SWEEP_ALARM, scheduleAlarms, sweep, notifTarget, openCommitment } from './commitments.js';
 import { checkChanges, watchAllCommitments, fetchDocument } from './changes.js';
 import { letterFor, icsFor, proofFor } from './exit-kit.js';
@@ -143,6 +143,8 @@ async function handle(msg, sender) {
       return analyzeAction(msg.payload, sender);
     case 'ANALYZE_TEXT':
       return analyzeText(msg.payload);
+    case 'READ_FILES':
+      return readFiles(msg.payload);
     case 'ANALYZE_SAMPLE':
       return analyzeSample(msg.payload?.key);
     case 'EXPORT_DATA':

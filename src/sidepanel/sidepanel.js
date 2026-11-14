@@ -6,6 +6,7 @@
 import { renderVerdict, esc } from './render.js';
 import * as commitments from './commitments-ui.js';
 import { extractPdfText } from '../lib/pdf-text.js';
+import { prepareFiles, isPdf, isImage } from '../core/files.js';
 import { formatMoney } from '../core/text.js';
 import { t, setLang, resolveLang, locale, getLang } from '../i18n/index.js';
 import { translateDom } from '../i18n/dom.js';
@@ -40,8 +41,13 @@ function status(message, kind = 'info') {
 }
 
 let lastVerdict = null;
+// True while the text being analysed comes from a photo or a scan (see readAndAnalyze).
+let fromPhoto = false;
 
 function showResult(verdict) {
+  // Read from a photo or a scan: the verdict says so, here and in the report.
+  if (fromPhoto) verdict = { ...verdict, fromPhoto: true };
+  fromPhoto = false;
   lastVerdict = verdict;
   // An example is not your contract: you look at it, you don't record it.
   const trackable = !verdict.example && (verdict.cost?.horizonMonths || verdict.cost?.hasAutoRenewal || verdict.cost?.worstCase != null);
@@ -180,12 +186,12 @@ async function runSample(key) {
  * Consent at the first analysis, asked from the panel. The text goes to the
  * AnteFirma server only after a yes.
  */
-function askConsent() {
+function askConsent(extra = '') {
   return new Promise((resolve) => {
     commitments.openModal(
       t('canIReadText'),
       `<p>${esc(t('tellWhatReCommittingAntefirmaSends'))}</p>
-       <p>${esc(t('serverKeepsNeitherTextNorAddress'))}</p>`,
+       <p>${esc(t('serverKeepsNeitherTextNorAddress'))}</p>${extra ? `<p>${esc(extra)}</p>` : ''}`,
       [
         { label: t('notNow'), act: () => { commitments.closeModal(); resolve(false); } },
         {
@@ -338,8 +344,10 @@ const dropzone = $('#dropzone');
 
 $('#pick-pdf').addEventListener('click', () => $('#pdf-file').click());
 $('#pdf-file').addEventListener('change', (e) => {
-  const file = e.target.files?.[0];
-  if (file) handlePdf(file);
+  const files = [...(e.target.files || [])];
+  // The same file can be chosen again (after a retake, say).
+  e.target.value = '';
+  if (files.length) handleFiles(files);
 });
 
 ['dragenter', 'dragover'].forEach((ev) =>
@@ -355,39 +363,71 @@ $('#pdf-file').addEventListener('change', (e) => {
   })
 );
 dropzone.addEventListener('drop', (e) => {
-  const file = e.dataTransfer?.files?.[0];
-  if (file) handlePdf(file);
+  e.stopPropagation();
+  const files = [...(e.dataTransfer?.files || [])];
+  if (files.length) handleFiles(files);
 });
 
-// Dropping the PDF anywhere in the panel works too.
+// Dropping the PDF or the photos anywhere in the panel works too.
 document.addEventListener('dragover', (e) => e.preventDefault());
 document.addEventListener('drop', (e) => {
   e.preventDefault();
-  const file = e.dataTransfer?.files?.[0];
-  if (file && file.type === 'application/pdf') {
+  const files = [...(e.dataTransfer?.files || [])].filter((f) => isPdf(f) || isImage(f));
+  if (files.length) {
     if (!isWeb) selectSource('pdf');
-    handlePdf(file);
+    handleFiles(files);
   }
 });
 
-async function handlePdf(file) {
-  if (!/pdf$/i.test(file.name) && file.type !== 'application/pdf') {
-    status(t('fileIsnTPdf'), 'error');
-    return;
+/**
+ * What the person chose or dropped: a PDF, or photos of a contract (its pages,
+ * in order). A PDF with text is read here; photos and scans go to the server.
+ */
+async function handleFiles(files) {
+  const pdfs = files.filter(isPdf);
+  const images = files.filter((f) => !isPdf(f) && isImage(f));
+  if (pdfs.length) return handlePdf(pdfs[0]);
+  if (!images.length) return status(t('fileNotPdfOrImage'), 'error');
+  return readAndAnalyze(images, images.length === 1 ? images[0].name : `${images[0].name} +${images.length - 1}`);
+}
+
+/**
+ * Photos, or a PDF made of scanned pages: the server reads the text, which
+ * lands in the text box — where it can be checked and corrected — and is
+ * analysed like any pasted text.
+ */
+async function readAndAnalyze(files, title) {
+  if (state.busy) return;
+  status(t('readingTextFromDocument'));
+  $('#result').innerHTML = '';
+  let read;
+  try {
+    const prepared = await prepareFiles(files);
+    read = await send('READ_FILES', { files: prepared });
+    if (read?.needsConsent) {
+      status(null);
+      if (!(await askConsent(t('filesNotePdfStaysPhotosSent')))) return status(t('withoutConsentTextIsnTSent'), 'error');
+      status(t('readingTextFromDocument'));
+      read = await send('READ_FILES', { files: prepared });
+    }
+  } catch (err) {
+    return status(err.code === 'file_type' ? t('fileNotPdfOrImage') : err.message || t('couldnTReadPdf'), 'error');
   }
-  status(`Leggo ${file.name}…`);
+  $('#paste-text').value = read.text;
+  fromPhoto = true;
+  await analyze({ text: read.text, title, actionType: 'sign', ctx: { source: 'photo' } });
+  if (read.truncated) status(t('pageWasVeryLongOnlyPart'), 'error');
+}
+
+async function handlePdf(file) {
+  status(t('readingTextFromDocument'));
   try {
     const buffer = await file.arrayBuffer();
     const { text, pages, reliable, note } = await extractPdfText(buffer);
-    if (!text || text.length < 60) {
-      status(note || t('iCouldnTExtractTextFrom'), 'error');
-      return;
-    }
+    // No text inside: a scan. The server reads it as it reads a photo.
+    if (!text || text.length < 60) return readAndAnalyze([file], file.name);
     if (!reliable && note) status(note, 'error');
-    await analyze(
-      { text, title: file.name, actionType: 'sign', ctx: { source: 'pdf', pages } },
-      `Analizzo ${file.name} (${pages} pagine)…`
-    );
+    await analyze({ text, title: file.name, actionType: 'sign', ctx: { source: 'pdf', pages } });
   } catch (err) {
     status(err.message || t('couldnTReadPdf'), 'error');
   }
@@ -579,11 +619,11 @@ function setupExtras() {
     selectSource('paste');
     const pdf = document.createElement('p');
     pdf.className = 'pdf-hint muted small';
-    pdf.innerHTML = `${esc(t('gotPdfDropHere'))} <button class="link" id="pick-pdf-2">${esc(t('chooseFromComputer'))}</button>`;
+    pdf.innerHTML = `${esc(t('gotPdfOrPhotoDropHere'))} <button class="link" id="pick-pdf-2">${esc(t('chooseFromComputer'))}</button>`;
     $('#run-paste').after(pdf);
     $('#pick-pdf-2').addEventListener('click', () => $('#pdf-file').click());
     // "Open with AnteFirma" from the system (web/boot.js): the PDF arrives here.
-    window.__afOpenPdf = (file) => handlePdf(file);
+    window.__afOpenPdf = (file) => handleFiles([file]);
     window.__afSample = runSample;
   }
 }

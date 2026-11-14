@@ -42,7 +42,7 @@ export function renderVerdict(v) {
       </div>
       <div class="content">
         ${v.engine?.notice ? `<div class="status" style="margin-bottom:10px">${esc(v.engine.notice[getLang()] || v.engine.notice.it)}</div>` : ''}
-        ${v.engine?.truncated ? `<div class="status error" style="margin-bottom:10px">${esc(t('pageWasVeryLongOnlyPart'))}</div>` : ''}
+        ${v.fromPhoto ? `<div class="status" style="margin-bottom:10px">${esc(t('textReadFromPhotoCheckIt'))}</div>\n        ` : ''}${v.engine?.truncated ? `<div class="status error" style="margin-bottom:10px">${esc(t('pageWasVeryLongOnlyPart'))}</div>` : ''}
         ${renderCost(cost)}
         ${v.mustRemember ? `<div class="remember">📌 ${esc(v.mustRemember)}</div>` : ''}
         ${v.summary ? `<p class="summary">${esc(v.summary)}</p>` : ''}

@@ -66,6 +66,11 @@ const MESSAGES = {
   origin: 'serverDoesnTRecogniseVersionExtension',
   size: 'pageTooLongAnalyse',
   upstream: 'analysisFailedTryAgainShortly',
+  // Reading photos and scans (readRemote).
+  read_size: 'tooManyOrTooLargeFiles',
+  file_type: 'fileNotPdfOrImage',
+  quota_read: 'usedTodaySPhotoReadings',
+  no_text: 'noReadableTextRetakePhoto',
 };
 
 function messageFor(code) {
@@ -143,6 +148,34 @@ export async function analyzeRemote(
       continue;
     }
     throw errorFrom(res, body);
+  }
+  throw new ServerError('auth', { status: 401 });
+}
+
+// ── photos and scans ──────────────────────────────────────────────────────────
+
+/** The server's codes for a refused read, as the codes this file has messages for. */
+const READ_CODES = { size: 'read_size', too_many: 'read_size', unreadable: 'no_text' };
+
+/**
+ * Sends photos or a scanned PDF to be read and returns the text in them.
+ * `files` is what `prepareFiles()` (files.js) gives. The text then goes through
+ * `analyzeRemote` like any other.
+ *
+ * @returns {Promise<{ text: string, truncated: boolean, reads: { limit, remaining } }>}
+ */
+export async function readRemote(files, { storage = chrome.storage.local, fetchImpl = fetch, base = API_BASE, signal } = {}) {
+  const opts = { storage, fetchImpl, base };
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const bearer = await token(opts);
+    // Reading images takes longer than reading text: the server allows the model a minute.
+    const res = await call(fetchImpl, `${base}/v1/read`, { files }, { bearer, signal: signal || AbortSignal.timeout(75000) });
+    const body = await readJson(res);
+    if (res.ok && typeof body?.text === 'string' && body.text.trim()) return body;
+    if (res.ok) throw new ServerError('no_text', { status: res.status });
+    if (res.status === 401 && attempt === 0) { await writeAuth(storage, { token: null }); continue; }
+    const err = errorFrom(res, body);
+    throw READ_CODES[err.code] ? new ServerError(READ_CODES[err.code], { status: err.status, detail: err.detail }) : err;
   }
   throw new ServerError('auth', { status: 401 });
 }

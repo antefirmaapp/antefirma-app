@@ -6,7 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { analyzeRemote, register, installId, ServerError } from '../src/core/server.js';
+import { analyzeRemote, readRemote, register, installId, ServerError } from '../src/core/server.js';
 
 const BASE = 'https://api.test';
 
@@ -215,4 +215,44 @@ test('the starting protections come from the browser language', async () => {
   const cases = { 'de-AT': 'AT', 'de-DE': 'DE', de: 'DE', 'de-CH': 'DE', 'fr-BE': 'BE', 'nl-BE': 'BE', nl: 'NL', 'fr-FR': 'FR', 'fr-CA': 'FR',
     'en-US': 'US', 'en-GB': 'UK', en: 'UK', 'es-MX': 'ES', 'it-CH': 'IT', 'pt-BR': 'OTHER', 'pt-PT': 'PT', pt: 'PT', 'pl-PL': 'PL', 'sv-SE': 'SE', 'ro-RO': 'RO', cs: 'CZ', 'da-DK': 'DK', 'fi-FI': 'FI', 'nb-NO': 'NO', nn: 'NO', 'sk-SK': 'SK', hu: 'HU', 'el-GR': 'GR', 'el-CY': 'CY', 'lt-LT': 'LT', lv: 'LV', 'et-EE': 'EE', 'en-IE': 'IE', 'mt-MT': 'MT', 'fr-LU': 'LU', 'de-LU': 'LU', 'is-IS': 'EU', '': 'EU', es_ES: 'ES' };
   for (const [ui, want] of Object.entries(cases)) assert.equal(jurisdictionFor(ui), want, ui);
+});
+
+// ── reading photos and scans ────────────────────────────────────────────────
+
+const FILES = [{ type: 'image/jpeg', data: '/9j/' }];
+const registerRoute = { '/v1/register': () => json(200, { token: 'v1.t' }) };
+
+test('reading: the files go with the token and the text comes back', async () => {
+  const { fetchImpl, calls } = fakeServer({ ...registerRoute, '/v1/read': () => json(200, { text: 'Art. 1 Durata', truncated: false, reads: { limit: 3, remaining: 2 } }) });
+  const out = await readRemote(FILES, { storage: memoryStorage(), fetchImpl, base: BASE });
+  assert.equal(out.text, 'Art. 1 Durata');
+  assert.deepEqual(out.reads, { limit: 3, remaining: 2 });
+  const sent = calls.find((c) => c.path === '/v1/read');
+  assert.deepEqual(sent.body, { files: FILES });
+  assert.equal(sent.auth, 'Bearer v1.t');
+});
+
+test('reading: an expired token is renewed once', async () => {
+  let n = 0;
+  const { fetchImpl, calls } = fakeServer({ ...registerRoute, '/v1/read': () => (n++ ? json(200, { text: 'ok text' }) : json(401, { error: 'auth' })) });
+  const out = await readRemote(FILES, { storage: memoryStorage(), fetchImpl, base: BASE });
+  assert.equal(out.text, 'ok text');
+  assert.equal(calls.filter((c) => c.path === '/v1/register').length, 2);
+});
+
+test('reading: the server errors become the messages the panel shows', async () => {
+  const cases = [
+    [413, 'size', 'read_size'], [400, 'too_many', 'read_size'], [400, 'file_type', 'file_type'],
+    [429, 'quota_read', 'quota_read'], [422, 'no_text', 'no_text'], [422, 'unreadable', 'no_text'], [502, 'upstream', 'upstream'],
+  ];
+  for (const [status, error, code] of cases) {
+    const { fetchImpl } = fakeServer({ ...registerRoute, '/v1/read': () => json(status, { error, message: 'server' }) });
+    await assert.rejects(readRemote(FILES, { storage: memoryStorage(), fetchImpl, base: BASE }),
+      (e) => e instanceof ServerError && e.code === code && e.message.length > 5, `${error} → ${code}`);
+  }
+});
+
+test('reading: an empty answer is "no text", not a result', async () => {
+  const { fetchImpl } = fakeServer({ ...registerRoute, '/v1/read': () => json(200, { text: '   ' }) });
+  await assert.rejects(readRemote(FILES, { storage: memoryStorage(), fetchImpl, base: BASE }), (e) => e.code === 'no_text');
 });

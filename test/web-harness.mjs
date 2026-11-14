@@ -37,6 +37,7 @@ export const VERDICT = {
   summary: '', dropped: 0, truncated: false, model: 'fake', cached: false,
   quota: { plan: 'free', remaining: 4, month: { limit: 5, remaining: 4 } },
 };
+export const READ_TEXT = 'Art. 1 Il canone è di € 19,99 al mese, con durata minima di 24 mesi.\n\nArt. 2 In caso di recesso anticipato è dovuta una penale di € 120,00.';
 export const calls = [];
 export async function api(route) {
   const req = route.request();
@@ -46,6 +47,8 @@ export async function api(route) {
   if (path === '/v1/health') return json(200, { ok: true });
   if (path === '/v1/register') return json(200, { token: 'v1.fake' });
   if (path === '/v1/analyze') return json(200, VERDICT);
+  // Photos and scans: the text of the same contract comes back, to be analysed.
+  if (path === '/v1/read') return json(200, { text: READ_TEXT, truncated: false, reads: { limit: 3, remaining: 2 } });
   if (path === '/v1/license') return json(200, { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 4 } } });
   return json(404, { error: 'not_found' });
 }

@@ -49,7 +49,7 @@
         </button>
         <button class="source" data-source="pdf">
           <span class="ico">📄</span>
-          <span class="lbl">PDF</span>
+          <span class="lbl">PDF o foto</span>
           <span class="hint">Trascina o scegli il file</span>
         </button>
         <button class="source" data-source="url">
@@ -82,12 +82,12 @@
 
       <div id="input-pdf" class="input-block" hidden>
         <div id="dropzone" class="dropzone">
-          <p><strong>Trascina qui il PDF</strong></p>
+          <p><strong>Trascina qui il PDF o le foto del contratto</strong></p>
           <p class="muted">oppure</p>
           <button class="secondary" id="pick-pdf">Scegli un file</button>
-          <input type="file" id="pdf-file" accept="application/pdf,.pdf" hidden>
+          <input type="file" id="pdf-file" accept="application/pdf,.pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" multiple hidden>
         </div>
-        <p class="muted small">Il file resta sul tuo computer: viene letto qui dentro. Solo il testo estratto raggiunge il modello, se hai attivato l'analisi AI.</p>
+        <p class="muted small">Un PDF con testo viene letto qui dentro e resta sul tuo computer. Una foto o una scansione viene inviata al server di AnteFirma per essere letta, con i dati personali che contiene, e non viene conservata.</p>
       </div>
 
       <div id="input-url" class="input-block" hidden>

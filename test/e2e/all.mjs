@@ -11,6 +11,8 @@
  *  3. tokens      401 → new token → one retry; 401 again → clear error, no loop
  *  4. plans       analyses used up and "Upgrade to Pro"; an active licence
  *     report     the analysis report, opened from the panel and from the warning
+ *     photos     photos and a scanned PDF: read by the server, then analysed;
+ *                consent first; no text, limits, a file that is not a document
  *  5. pages       SPA buttons created late and recreated; fast double click;
  *                 checkout inside an iframe; form sent with Enter
  *  6. decisions   "Go back" does not perform the action; "Continue" performs it once
@@ -263,6 +265,55 @@ const SCENARIOS = {
     const empty = await h.open(h.extUrl('src/report/report.html'), 'report-empty');
     await empty.waitForSelector('#empty:not([hidden])', { timeout: 5000 });
     h.check('report with nothing stored: a plain message, no buttons', await empty.evaluate(() => document.querySelector('#report').hidden && document.querySelector('#tools').hidden));
+  },
+
+  async photos(h) {
+    const SCAN = join(ROOT, 'test', 'fixtures', 'scan');
+    const TEXT = 'Art. 1 Durata. Il contratto ha durata minima di ventiquattro mesi e si rinnova automaticamente salvo disdetta con preavviso di 60 giorni.\n\nArt. 2 Recesso. In caso di recesso anticipato è dovuta una penale di € 120,00.';
+    h.fake.readText = TEXT;
+    await h.settings(); // no consent yet
+    const panel = await h.open(h.extUrl('src/sidepanel/sidepanel.html'), 'panel');
+    await panel.waitForTimeout(700);
+    const statusText = () => panel.evaluate(() => document.querySelector('#status')?.textContent || '');
+    const settled = (re) => panel.waitForFunction((src) => new RegExp(src, 'i').test(document.querySelector('#status')?.textContent || ''), re.source, { timeout: 12000 }).then(() => true, () => false);
+
+    const until = async (fn, ms = 15000) => { for (const end = Date.now() + ms; Date.now() < end && !fn();) await panel.waitForTimeout(100); };
+    // Consent comes before anything leaves the browser.
+    await panel.setInputFiles('#pdf-file', [join(SCAN, 'page1.jpg'), join(SCAN, 'page2.jpg')]);
+    await panel.waitForSelector('#modal-foot button', { timeout: 8000 });
+    h.check('photos: consent is asked before the photos are sent, and says a photo is sent', h.fake.readCalls === 0 && /foto/i.test(await panel.textContent('#modal-body')), `${h.fake.readCalls} reads`);
+    await panel.locator('#modal-foot button').nth(1).click();
+    const shown = await panel.waitForSelector('#report-open', { timeout: 15000 }).then(() => true, () => false);
+    h.check('photos: after the yes they are read and the text is analysed', shown && h.fake.readCalls === 1 && h.fake.analyzeCalls === 1 && /ventiquattro/.test(h.fake.lastText), `${h.fake.readCalls} reads, ${h.fake.analyzeCalls} analyses`);
+    h.check('photos: two pages go as JPEG, in order', h.fake.lastFiles.length === 2 && h.fake.lastFiles.every((f) => f.type === 'image/jpeg' && f.head === '/9j/'), JSON.stringify(h.fake.lastFiles));
+    h.check('photos: the text that was read is in the text box, to check and correct', (await panel.inputValue('#paste-text')) === TEXT);
+    h.check('photos: the verdict says the text comes from a photo', /foto|photo/i.test(await panel.textContent('#result')));
+    await h.a11y(panel, 'panel after a photo');
+
+    // A PDF made of scanned pages has no text inside: the server reads it.
+    await h.clearCache();
+    await panel.setInputFiles('#pdf-file', join(SCAN, 'scan.pdf'));
+    await until(() => h.fake.analyzeCalls === 2);
+    h.check('scanned PDF: sent as a PDF and read by the server', h.fake.readCalls === 2 && h.fake.lastFiles.length === 1 && h.fake.lastFiles[0].type === 'application/pdf', JSON.stringify(h.fake.lastFiles));
+    // A PDF with text never leaves as a file.
+    await h.clearCache();
+    await panel.setInputFiles('#pdf-file', join(ROOT, 'demo', 'contratto.pdf'));
+    await until(() => h.fake.analyzeCalls === 3);
+    await panel.waitForSelector('#report-open', { timeout: 12000 }).catch(() => {});
+    h.check('a PDF with text is read in the browser: no file is sent', h.fake.analyzeCalls === 3 && h.fake.readCalls === 2, `${h.fake.readCalls} reads, ${h.fake.analyzeCalls} analyses`);
+
+    // What can go wrong, said plainly; nothing is analysed.
+    const before = h.fake.analyzeCalls;
+    for (const [mode, re] of [['no_text', /luce|light/], ['quota', /domani|tomorrow/], ['size', /MB/]]) {
+      h.fake.readMode = mode;
+      await panel.setInputFiles('#pdf-file', join(SCAN, 'page1.jpg'));
+      const said = await settled(re);
+      h.check(`photos, ${mode}: a clear message and no analysis`, said && h.fake.analyzeCalls === before, await statusText());
+    }
+    h.fake.readMode = 'ok';
+    const reads = h.fake.readCalls;
+    await panel.setInputFiles('#pdf-file', { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') });
+    h.check('a file that is neither a PDF nor an image is refused here, nothing sent', (await settled(/JPEG/)) && h.fake.readCalls === reads, await statusText());
   },
 
   async decisions(h) {

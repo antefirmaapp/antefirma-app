@@ -55,6 +55,7 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
 
   const fake = {
     engine: 'keywords', fixed: null, mode: 'ok', delay: 0, notice: null,
+    readCalls: 0, readMode: 'ok', lastFiles: [], readText: null,
     analyzeCalls: 0, pending: 0, registerCalls: 0, lastLang: null, lastText: '', feedback: [], served401: 0,
     license: { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 4 } } },
     quota: { plan: 'free', remaining: 4, month: { limit: 5, remaining: 4 } },
@@ -89,6 +90,14 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
       } finally {
         fake.pending -= 1;
       }
+    }
+    if (path === '/v1/read') {
+      fake.readCalls += 1;
+      fake.lastFiles = (JSON.parse(req.postData() || '{}').files || []).map((f) => ({ type: f.type, bytes: Math.floor(f.data.length * 3 / 4), head: f.data.slice(0, 4) }));
+      if (fake.readMode === 'no_text') return json(422, { error: 'no_text', message: 'server' });
+      if (fake.readMode === 'quota') return json(429, { error: 'quota_read', message: 'server' });
+      if (fake.readMode === 'size') return json(413, { error: 'size', message: 'server' });
+      return json(200, { text: fake.readText, truncated: false, reads: { limit: 3, remaining: 2 } });
     }
     if (path === '/v1/feedback') { fake.feedback.push(JSON.parse(req.postData() || '{}').category); return json(200, { ok: true }); }
     if (path === '/v1/license') return json(200, fake.license);

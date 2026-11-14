@@ -257,12 +257,13 @@ worker needs Safari 16.4 or later.
 | `features.test.mjs` | proof, commitments, reminders, `.ics`, letters |
 | `actions.test.mjs` | which buttons are intercepted; price choice on the page |
 | `pdf.test.mjs` | text extraction from PDFs |
+| `files.test.mjs` | photos and scans before they are sent: accepted types, scaling, base64 |
 | `i18n.test.mjs` | every sentence of code and pages has its English and Spanish translation, with the same placeholders |
 | `golden.test.mjs` | verdicts, panel HTML (it/en/es), letters (3 × 3) and `.ics` compared with approved copies in `test/golden/` (`UPDATE_GOLDEN=1` to accept a deliberate change) |
 | `contract.test.mjs` | test fixtures and the demo mock match the API contract shared with the server (`test/contract/`) |
 | `help.test.mjs`, `names.test.mjs` | help links; seller name on payment pages |
 | `properties.test.mjs` | property-based tests (fast-check): amounts, cost, reminders, score, seller names, `.ics` hold for hundreds of random inputs |
-| `e2e/all.mjs` | end-to-end scenarios on fresh profiles (`e2e/harness.mjs`, shared with `smoke.mjs`): every demo page as `demo/index.html` declares, slow server and "Continue without waiting", timeout / network / 500 / malformed answers never shown as "all fine", 401 retry without loops, quota and active licence, SPA, double click, iframe, Enter, "Go back" / "Continue", synthetic clicks on "Yes, analyse" (`ONLY=failures` for one) |
+| `e2e/all.mjs` | end-to-end scenarios on fresh profiles (`e2e/harness.mjs`, shared with `smoke.mjs`): every demo page as `demo/index.html` declares, slow server and "Continue without waiting", timeout / network / 500 / malformed answers never shown as "all fine", 401 retry without loops, quota and active licence, SPA, double click, iframe, Enter, "Go back" / "Continue", synthetic clicks on "Yes, analyse", the analysis report, photos and scanned PDFs read by the server (`ONLY=failures` for one) |
 | `detector.test.mjs` | which buttons are held on 30 realistic pages in `test/fixtures/pages/` (each with its expected `.json`): precision, recall, content-script coverage |
 | `web.mjs` | the web app in a real Chromium: first visit, consent, verdict, settings, phone width, axe-core accessibility |
 | `visual.mjs` | visual regression: ten web app screens (desktop and phone) against the approved images in `test/visual/` (`UPDATE_VISUAL=1` to approve a deliberate change) |
@@ -291,6 +292,8 @@ src/core/{profile,eu,scoring}.js     profile, EU/IT protections, score
 src/core/{commitments,letter,ics,proof}.js  exit kit and proof
 src/core/letters/<lang>.js           the letter texts, one file per language (shared.js: what they share)
 src/core/languages.js                the list of languages, for modules (the table is in src/i18n/i18n.js)
+src/core/files.js                    photos and scans made ready for the server (`/v1/read`): scaled JPEGs, PDF as is
+src/core/report.js, src/report/      the analysis report: a page to print, save as a PDF or copy
 src/core/help.js                     links to the help centre
 src/sidepanel/, src/options/         panel and settings
 src/i18n/                            languages: t(), locales/*.json, generated messages.js, page translation
