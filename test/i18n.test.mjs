@@ -91,7 +91,7 @@ test('the boot texts cover what a content script shows when the service worker i
 
 test('every id is used somewhere (code, vocabularies or HTML pages)', () => {
   const all = Object.values(code).join('\n');
-  const html = ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html'].map((f) => readFileSync(f, 'utf8').replace(/&#10;/g, ' ').replace(/\s+/g, ' ')).join('\n');
+  const html = ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html', 'src/report/report.html'].map((f) => readFileSync(f, 'utf8').replace(/&#10;/g, ' ').replace(/\s+/g, ' ')).join('\n');
   const unused = ids.filter((id) => { const v = L.it[id].replace(/\s+/g, ' '); return !all.includes(`'${id}'`) && !html.includes(v.replace(/&/g, '&amp;')) && !html.includes(v); });
   assert.deepEqual(unused, []);
 });
@@ -148,7 +148,7 @@ test('labels and texts of the vocabularies are ids with translations', async () 
 test('the HTML pages\' texts all have an id', () => {
   const missing = [];
   const skip = /^(AnteFirma\*?|PDF|Max|Team|Pro|AF-X{4}(-X{4}){3}|https?:\/\/\S+)$/;
-  for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html']) {
+  for (const f of ['src/options/options.html', 'src/sidepanel/sidepanel.html', 'src/welcome/welcome.html', 'src/report/report.html']) {
     const html = readFileSync(f, 'utf8').replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style|textarea)[\s\S]*?<\/\1>/g, '');
     const texts = [
       ...[...html.matchAll(/>([^<>]+)</g)].map((m) => m[1]),

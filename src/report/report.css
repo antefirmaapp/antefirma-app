@@ -1,0 +1,26 @@
+/* The analysis report: the panel's result on a sheet of paper. */
+body { margin: 0; background: var(--soft); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+.sheet { max-width: 760px; margin: 0 auto; padding: 16px; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; margin-bottom: 14px; }
+.tools button { font: inherit; font-weight: 600; padding: 9px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); cursor: pointer; }
+.tools button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.tools .hint { color: var(--muted); font-size: 13px; flex-basis: 100%; }
+#report { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+.rhead { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; }
+.rhead h1 { margin: 0; font-size: 22px; line-height: 1.2; }
+.rhead .meta { margin: 2px 0 0; color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+.rfoot { margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.empty { color: var(--muted); }
+
+/* On paper: black on white, nothing cut between pages, no buttons. */
+@media print {
+  :root { --bg: #fff; --fg: #111; --muted: #444; --line: #bbb; --soft: #fff; color-scheme: light; }
+  body { background: #fff; }
+  .sheet { max-width: none; padding: 0; }
+  .tools { display: none; }
+  #report { border: 0; padding: 0; border-radius: 0; }
+  .finding, .verdict .cost, li, blockquote { break-inside: avoid; }
+  summary { list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  a { color: inherit; text-decoration: none; }
+}

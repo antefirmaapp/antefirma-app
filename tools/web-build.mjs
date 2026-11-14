@@ -30,7 +30,7 @@ if (process.argv.includes('--icons')) { await makeIcons(); process.exit(0); }
 const OUT = resolve(process.argv[2] || join(ROOT, 'dist', 'web'));
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(OUT, { recursive: true });
-for (const p of ['background', 'core', 'i18n', 'lib', 'sidepanel', 'options', 'icons']) cpSync(join(ROOT, 'src', p), join(OUT, 'src', p), { recursive: true });
+for (const p of ['background', 'core', 'i18n', 'lib', 'sidepanel', 'options', 'report', 'icons']) cpSync(join(ROOT, 'src', p), join(OUT, 'src', p), { recursive: true });
 for (const f of ['shim.js', 'boot.js', 'web.css']) cpSync(join(ROOT, 'web', f), join(OUT, 'web', f));
 if (!existsSync(ICONS)) throw new Error('icons missing: node tools/web-build.mjs --icons');
 cpSync(ICONS, join(OUT, 'icons'), { recursive: true });
@@ -61,6 +61,10 @@ writeFileSync(join(OUT, 'settings', 'index.html'), prepare(opt, (h) => h
   .replace('<head>', '<head>\n  <base href="/src/options/">')
   .replace('<div class="wrap">', '<div class="wrap">\n    <a class="web-back" href="/">← AnteFirma</a>')));
 rmSync(opt);
+
+// The analysis report keeps its place: it only needs the web layer.
+const rep = join(OUT, 'src', 'report', 'report.html');
+writeFileSync(rep, prepare(rep));
 
 writeFileSync(join(OUT, 'manifest.webmanifest'), JSON.stringify({
   name: 'AnteFirma', short_name: 'AnteFirma',

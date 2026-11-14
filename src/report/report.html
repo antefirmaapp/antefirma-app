@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rapporto dell’analisi</title>
+  <link rel="stylesheet" href="../sidepanel/sidepanel.css">
+  <link rel="stylesheet" href="report.css">
+</head>
+<body>
+  <main class="sheet">
+    <!-- What is printed starts here: the toolbar below is for the screen only. -->
+    <div class="tools" id="tools">
+      <button type="button" class="primary" id="print">Stampa o salva come PDF</button>
+      <button type="button" id="copy">Copia come testo</button>
+      <span class="hint">Per salvarlo come PDF, scegli «Salva come PDF» nella finestra di stampa.</span>
+      <span class="status" id="said" role="status" aria-live="polite" hidden></span>
+    </div>
+    <article id="report" hidden>
+      <header class="rhead">
+        <img src="../icons/icon48.png" alt="" width="36" height="36">
+        <div>
+          <h1>Rapporto dell’analisi</h1>
+          <p class="meta" id="meta" data-no-i18n></p>
+        </div>
+      </header>
+      <div id="body" data-no-i18n></div>
+      <footer class="rfoot">Generato da AnteFirma · antefirma.app</footer>
+    </article>
+    <p class="empty" id="empty" hidden>Nessun rapporto da mostrare: fai prima un’analisi.</p>
+  </main>
+  <script type="module" src="report.js"></script>
+</body>
+</html>

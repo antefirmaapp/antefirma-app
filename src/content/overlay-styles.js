@@ -170,6 +170,8 @@
     @keyframes spin { to { transform: rotate(360deg) } }
     .loading p { font-size: 14px; color: #414852; margin: 0; }
     .loading small { display: block; margin-top: 6px; color: #6b7280; font-size: 12px; }
+    .why .report { all: unset; cursor: pointer; display: block; margin-top: 12px; font-size: 13px; font-weight: 600; text-decoration: underline; }
+    .why .report:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 4px; }
     .finding .wrong { all: unset; cursor: pointer; display: inline-block; margin-top: 6px; font-size: 11.5px; text-decoration: underline; opacity: .7; }
     .finding .wrong:hover, .finding .wrong:focus-visible { opacity: 1; }
     .finding .wrong:disabled { text-decoration: none; cursor: default; }

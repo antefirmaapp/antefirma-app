@@ -114,7 +114,10 @@ export async function analyzeText(payload = {}) {
 
   if (!payload.force) {
     const cached = await getCached(key, settings.cacheTtlHours);
-    if (cached) return { ...cached, cached: true };
+    // A verdict from the cache can become a commitment too: it needs its text for
+    // the proof, like a fresh one. Without this, "Record as a commitment" failed on
+    // any text analysed a second time.
+    if (cached) return { ...cached, cached: true, historyId: await rememberManual(cached, text) };
   }
 
   // From the panel the error bubbles up as an exception: the panel shows the message.
@@ -125,10 +128,16 @@ export async function analyzeText(payload = {}) {
   await setCached(key, verdict);
 
   // Manual analyses can become commitments to watch, too.
-  const id = `manual-${Date.now().toString(36)}`;
-  await chrome.storage.session.set({ [`verdict:${id}`]: { verdict, text } });
+  const id = await rememberManual(verdict, text);
   await showQuotaBadge(verdict.engine?.quota);
   return { ...verdict, historyId: id };
+}
+
+/** Keeps a manual verdict with the text it was computed on, for the session, and returns its id. */
+async function rememberManual(verdict, text) {
+  const id = `manual-${Date.now().toString(36)}`;
+  await chrome.storage.session.set({ [`verdict:${id}`]: { verdict, text } });
+  return id;
 }
 
 /**

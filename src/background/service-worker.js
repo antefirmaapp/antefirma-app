@@ -18,6 +18,7 @@ import { jurisdictionFor } from '../core/jurisdiction.js';
 import { COMMITMENT_STATUS } from '../core/commitments.js';
 import { register, installId, getLicense, startCheckout, activateLicense, deactivateLicense, sendFeedback } from '../core/server.js';
 import { t } from '../i18n/index.js';
+import { openReport } from '../core/report.js';
 import { getSettings as readSettings, setSettings, clearCache, getHistory, clearHistory, getCommitments } from '../core/storage.js';
 import { getSettings, contentSettings, allowlistAdd, forgetOldEngine, grantConsent, withCode, serverStatus } from './settings.js';
 import { analyzeAction, analyzeText, analyzeSample, exportData, importData } from './analysis.js';
@@ -122,6 +123,10 @@ async function handle(msg, sender) {
   switch (msg?.type) {
     case 'GET_CONTENT_SETTINGS':
       return contentSettings();
+    case 'OPEN_REPORT':
+      // From the warning: the verdict it shows, on a page of its own (see core/report.js).
+      await openReport(msg.payload?.verdict || {});
+      return true;
     case 'GET_TEXTS': {
       // The interface texts of one language, for a content script about to show a warning.
       const I = globalThis.AF_I18N;

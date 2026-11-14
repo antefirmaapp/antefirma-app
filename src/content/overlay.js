@@ -472,6 +472,8 @@
              <button class="upgrade" type="button" data-upgrade>${esc(t('upgradePro50AnalysesMonth'))}</button><p class="upsell-note" aria-live="polite"></p></div>`
         : '';
       this.model = verdict.engine?.model || null;
+      // Kept for the report: the same verdict on a page of its own (see bind()).
+      this.verdict = verdict;
       const n = verdict.engine?.notice;
       const noticeBlock = n ? `<div class="notice ${n.level === 'warn' ? 'warn' : ''}" role="note">${esc(n[I.lang] || n.it)}</div>` : '';
       const errorBlock = verdict.engine?.truncated
@@ -504,6 +506,7 @@
               ${costBlock}
               ${timelineBlock}
               ${lawBlock}
+              <button type="button" class="report" data-report>${esc(t('reportOpen'))}</button>
             </details>
           </div>
           <footer>
@@ -627,6 +630,15 @@
           // it is our job.
           if (btn.getAttribute('aria-disabled') === 'true') return;
           this.finish(btn.dataset.act);
+        });
+      }
+      // The report: what this warning shows, on a page to print, save or copy. It stays in the browser.
+      for (const b of this.root.querySelectorAll('[data-report]')) {
+        b.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!e.isTrusted || !this.verdict) return;
+          try { await CF.bridge.send('OPEN_REPORT', { verdict: this.verdict }); } catch { /* the warning itself still stands */ }
         });
       }
       // "Wrong warning?": only the category goes to the server, never the text.

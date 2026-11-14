@@ -10,6 +10,7 @@
  *                 500, malformed JSON: "the server didn't answer", never "all fine"
  *  3. tokens      401 → new token → one retry; 401 again → clear error, no loop
  *  4. plans       analyses used up and "Upgrade to Pro"; an active licence
+ *     report     the analysis report, opened from the panel and from the warning
  *  5. pages       SPA buttons created late and recreated; fast double click;
  *                 checkout inside an iframe; form sent with Enter
  *  6. decisions   "Go back" does not perform the action; "Continue" performs it once
@@ -209,6 +210,59 @@ const SCENARIOS = {
     await kb.press('input[name="nome"]', 'Enter');
     h.check('a form sent with Enter is held', await verdictShown(kb));
     await act(h, kb, 'cancel');
+  },
+
+  async report(h) {
+    await h.settings({ consent: true });
+    /** Waits for the report tab a click opens and says what it shows. */
+    const reportFrom = async (click) => {
+      const [tab] = await Promise.all([h.context.waitForEvent('page', { timeout: 8000 }), click()]);
+      await tab.waitForSelector('#report:not([hidden])', { timeout: 8000 });
+      const seen = await tab.evaluate(() => ({
+        title: document.title,
+        url: location.pathname,
+        findings: document.querySelectorAll('#body .finding, #body blockquote, #body q').length,
+        text: document.querySelector('#report').innerText,
+        closed: [...document.querySelectorAll('#body details')].filter((d) => !d.open).length,
+        toolsVisible: getComputedStyle(document.querySelector('#tools')).display !== 'none',
+      }));
+      await tab.emulateMedia({ media: 'print' });
+      seen.toolsOnPaper = await tab.evaluate(() => getComputedStyle(document.querySelector('#tools')).display !== 'none');
+      await tab.emulateMedia({ media: 'screen' });
+      return { tab, seen };
+    };
+
+    // From the side panel, after analysing a contract.
+    const panel = await h.open(h.extUrl('src/sidepanel/sidepanel.html'), 'panel');
+    await panel.waitForTimeout(700);
+    await panel.setInputFiles('#pdf-file', join(ROOT, 'demo', 'contratto.pdf'));
+    await panel.waitForSelector('#report-open', { timeout: 12000 });
+    const a = await reportFrom(() => panel.click('#report-open'));
+    h.check('report from the panel: its own page, with the title', a.seen.url.endsWith('/src/report/report.html') && a.seen.title.length > 5, `${a.seen.url} · ${a.seen.title}`);
+    h.check('report from the panel: the clauses and their sentences are there, every detail open', a.seen.text.length > 300 && a.seen.closed === 0, `${a.seen.text.length} characters, ${a.seen.closed} closed`);
+    h.check('report: says when it was made and who made it', /antefirma\.app/.test(a.seen.text) && /\d{4}/.test(a.seen.text));
+    h.check('report: buttons on screen, not on paper', a.seen.toolsVisible && !a.seen.toolsOnPaper);
+    await h.a11y(a.tab, 'report page');
+    await a.tab.screenshot({ path: process.env.REPORT_SHOT || '/dev/null', fullPage: true }).catch(() => {});
+    await a.tab.close();
+
+    // From the warning on a page.
+    const pg = await h.open('checkout.html', 'checkout');
+    await pg.waitForTimeout(600);
+    await pg.click('button.cta');
+    await verdictShown(pg);
+    await h.alert(pg).locator('details.why > summary').click();
+    const b = await reportFrom(() => h.alert(pg).locator('[data-report]').click());
+    h.check('report from the warning: the same verdict on its own page', b.seen.text.length > 300 && b.seen.closed === 0, `${b.seen.text.length} characters`);
+    h.check('report from the warning: the page behind is still held', await h.alertOpen(pg));
+    await b.tab.close();
+    await act(h, pg, 'cancel');
+
+    // Opened with nothing to show: it says so instead of an empty sheet.
+    await h.sw.evaluate(() => globalThis.chrome.storage.local.remove('report'));
+    const empty = await h.open(h.extUrl('src/report/report.html'), 'report-empty');
+    await empty.waitForSelector('#empty:not([hidden])', { timeout: 5000 });
+    h.check('report with nothing stored: a plain message, no buttons', await empty.evaluate(() => document.querySelector('#report').hidden && document.querySelector('#tools').hidden));
   },
 
   async decisions(h) {

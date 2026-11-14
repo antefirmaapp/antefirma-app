@@ -82,6 +82,19 @@ try {
   check('only the analysis went to the server, after the yes', calls.includes('/v1/analyze'));
   await a11y(page, 'the verdict');
 
+  // The report: the same result on a page to print, save as a PDF or copy.
+  await page.click('#report-open');
+  await page.waitForSelector('#report:not([hidden])', { timeout: 8000 });
+  const report = await page.evaluate(() => ({ path: location.pathname, text: document.querySelector('#report').innerText, closed: [...document.querySelectorAll('#body details')].filter((d) => !d.open).length }));
+  check('the report opens in the web app with the same figures, every detail open', /report/.test(report.path) && /599[.,]76/.test(report.text) && report.closed === 0, `${report.path}, ${report.closed} closed`);
+  await a11y(page, 'the report');
+  await page.goBack();
+  await page.waitForSelector('#paste-text', { timeout: 8000 });
+  // Coming back, the panel is fresh: the same text is analysed again (from the cache).
+  await page.fill('#paste-text', TEXT);
+  await page.click('#run-paste');
+  await page.waitForFunction(() => /599[.,]76/.test(document.getElementById('result')?.textContent || ''), null, { timeout: 10000 });
+
   // Recorded as a commitment: it appears in the Commitments tab with its deadline.
   await page.click('#track');
   await page.waitForTimeout(600);

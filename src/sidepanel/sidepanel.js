@@ -11,6 +11,7 @@ import { t, setLang, resolveLang, locale, getLang } from '../i18n/index.js';
 import { translateDom } from '../i18n/dom.js';
 import { SAMPLES } from '../core/samples.js';
 import { helpUrl } from '../core/help.js';
+import { openReport } from '../core/report.js';
 
 const $ = (sel) => document.querySelector(sel);
 const state = { source: null, busy: false };
@@ -50,8 +51,11 @@ function showResult(verdict) {
     renderVerdict(verdict) +
     (trackable
       ? `<button class="primary" id="track" style="margin-top:10px;width:100%">${esc(t('recordCommitmentRemindMe'))}</button>`
-      : '');
+      : '') +
+    // The result on a page of its own, to print, save as a PDF or copy: not for the made-up examples.
+    (verdict.example ? '' : `<button id="report-open" style="margin-top:8px;width:100%">${esc(t('reportOpen'))}</button>`);
   if (trackable) $('#track').addEventListener('click', trackCurrent);
+  $('#report-open')?.addEventListener('click', () => openReport(verdict).catch((e) => status(e.message, 'error')));
   $('#result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 

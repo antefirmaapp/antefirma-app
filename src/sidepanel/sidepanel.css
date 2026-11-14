@@ -141,6 +141,12 @@ a.icon-btn { text-decoration: none; font-weight: 700; display: inline-grid; plac
   font-size: 10.5px; letter-spacing: .07em; font-weight: 700;
   padding: 3px 8px; border-radius: 999px;
 }
+/* White text needs a darker band than the amber and orange used for the bar
+   and the amounts: on those two it fell short of the 4.5:1 contrast. */
+@media (prefers-color-scheme: light) {
+  .verdict[data-level='review'] .badge { background: #8a6508; }
+  .verdict[data-level='commitment'] .badge { background: #a8520b; }
+}
 .verdict h2 { margin: 8px 0 0; font-size: 15.5px; line-height: 1.35; }
 .verdict .meta { font-size: 11px; color: var(--muted); margin-top: 5px; }
 .verdict .content { padding: 12px 13px; }
