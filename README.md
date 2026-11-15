@@ -238,6 +238,13 @@ on submission (no errors; the warnings are the guarded `chrome.sidePanel`
 calls and `innerHTML` with escaped values). A permanent installation needs the
 package signed by addons.mozilla.org.
 
+`FIREFOX=/path/to/firefox node tools/firefox-check.mjs` tries the build in a
+real Firefox (headless, driven with WebDriver BiDi) against the real server
+started locally: the warning at a real click, consent, the analysis from a
+`moz-extension://` origin, the panel, the sidebar, notifications, a reminder
+sent by the background page on its alarm, the settings. Firefox is not
+downloaded by the script and CI does not run it: run it before a release.
+
 ## Safari (Mac)
 
 ```bash
