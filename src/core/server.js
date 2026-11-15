@@ -199,6 +199,8 @@ async function authed(path, payload, { storage = chrome.storage.local, fetchImpl
 /** `{ plan: 'free'|'pro'|'max'|'team', active, status, periodEnd, cancelAt, activations, quota }` */
 export const getLicense = (o) => authed('/v1/license', undefined, { ...o, method: 'GET' });
 /** `{ claim, url }`: the purchase page, linked to this installation. */
+/** The web app's push reminders: the address and the hours at which to wake the browser. `{ planned }` */
+export const pushRemote = (plan, o) => authed('/v1/push', plan, o);
 /** `lang` picks the pricing page's language on the website. */
 export const startCheckout = (plan, o, lang) => authed('/v1/pro/checkout', { plan, ...(lang ? { lang } : {}) }, o);
 export const activateLicense = (key, o) => authed('/v1/license/activate', { key: String(key || '').trim() }, o);

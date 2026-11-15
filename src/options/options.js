@@ -57,6 +57,7 @@ async function load() {
   $('#uiLang').value = s.uiLang || 'auto';
   $('#trackCommitments').checked = s.trackCommitments;
   $('#reminders').checked = s.reminders;
+  $('#pushReminders').checked = Boolean(s.pushReminders);
   $('#watchChanges').checked = s.watchChanges;
   $('#watchUsesRemote').checked = s.watchUsesRemote;
   $('#id-name').value = s.identity?.name || '';
@@ -110,6 +111,7 @@ async function save() {
       uiLang: $('#uiLang').value,
       trackCommitments: $('#trackCommitments').checked,
       reminders: $('#reminders').checked,
+      pushReminders: $('#pushReminders').checked,
       watchChanges: $('#watchChanges').checked,
       watchUsesRemote: $('#watchUsesRemote').checked,
       identity: {
@@ -237,7 +239,7 @@ $('#save').addEventListener('click', save);
 
 // Saves by itself: checkboxes and menus at once, text fields when you leave them. "Save" stays for those who look for it.
 // Not the language: changing it redraws the page, so "Save" does it, when you are done.
-const AUTO = '#enabled, #blockFrom, #jurisdiction, #minBlockAmount, #trackCommitments, #reminders, #watchChanges, #watchUsesRemote, #id-name, #id-email, #id-address, #id-customer, #allowlist, #profile-grid input';
+const AUTO = '#enabled, #blockFrom, #jurisdiction, #minBlockAmount, #trackCommitments, #reminders, #pushReminders, #watchChanges, #watchUsesRemote, #id-name, #id-email, #id-address, #id-customer, #allowlist, #profile-grid input';
 let autoTimer = null;
 document.addEventListener('change', (e) => {
   if (!e.target.matches?.(AUTO)) return;
@@ -306,6 +308,19 @@ function adaptForWeb() {
   rem?.addEventListener('change', () => { if (rem.checked && 'Notification' in self && Notification.permission === 'default') Notification.requestPermission(); });
   const em = rem?.closest('label')?.querySelector('em');
   if (em) em.textContent = t('notifications3071DayBefore2');
+  // Where the browser can be woken by the server, reminders can also arrive with the app closed.
+  const push = $('#pushReminders');
+  if ('serviceWorker' in navigator && 'PushManager' in self && 'Notification' in self) $('#push-row').hidden = false;
+  push?.addEventListener('change', async () => {
+    if (!push.checked) return;
+    // The permission must be asked inside the click.
+    const answer = Notification.permission === 'default' ? await Notification.requestPermission() : Notification.permission;
+    if (answer !== 'granted') { push.checked = false; await save(); flash(t('notificationsBlockedAllowThem')); return; }
+    if (!rem.checked) rem.checked = true;
+    // Saved again now that the answer is known: the plan is sent only with the permission.
+    await save();
+    send('SYNC_PUSH').catch(() => {});
+  });
 }
 
 if (new URLSearchParams(location.search).has('welcome')) {

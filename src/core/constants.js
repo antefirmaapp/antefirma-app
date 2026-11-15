@@ -285,6 +285,8 @@ export const DEFAULT_SETTINGS = {
   enabled: true,
   /** Commitment register and deadline reminders. */
   trackCommitments: true,
+  /** Web version: reminders also when AnteFirma is closed (push). Asked for, never on by itself. */
+  pushReminders: false,
   reminders: true,
   /** Periodic check of terms already accepted. */
   watchChanges: true,

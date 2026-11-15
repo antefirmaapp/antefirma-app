@@ -6,6 +6,7 @@
  *
  * It builds the packages it offers and puts them next to the pages:
  *  - files/antefirma-dev-<version>.zip     Chrome and Edge (tools/dev-zip.mjs)
+ *  - files/antefirma-firefox-<version>.zip the Firefox extension (tools/firefox-build.mjs)
  *  - files/antefirma-safari-<version>.zip  the folder for Xcode (tools/safari-build.mjs)
  *  - files/antefirma-dev-latest.zip and files/antefirma-safari-latest.zip, the same bytes
  *  - versions.json                         version, sizes and SHA-256, for scripts
@@ -23,6 +24,7 @@ import { createHash } from 'node:crypto';
 
 import { buildDevZip, DEV_ID } from './dev-zip.mjs';
 import { zipFolder } from './zip.mjs';
+import { buildFirefox } from './firefox-build.mjs';
 import { TEXT } from '../beta-site/text.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -40,9 +42,15 @@ execFileSync(process.execPath, [join(ROOT, 'tools', 'safari-build.mjs')], { cwd:
 // The archive holds a "safari" folder: the converter command on the page expects that name.
 const safariZip = zipFolder(join(ROOT, 'dist', 'safari'), 'safari/');
 
+// Firefox: the same extension with its own manifest (tools/firefox-build.mjs). The files sit at the
+// top of the archive, as Firefox wants them.
+buildFirefox();
+const firefoxZip = zipFolder(join(ROOT, 'dist', 'firefox'));
+
 const sha = (b) => createHash('sha256').update(b).digest('hex');
 const FILES = {
   chrome: { name: `antefirma-dev-${version}.zip`, latest: 'antefirma-dev-latest.zip', data: chromeZip },
+  firefox: { name: `antefirma-firefox-${version}.zip`, latest: 'antefirma-firefox-latest.zip', data: firefoxZip },
   safari: { name: `antefirma-safari-${version}.zip`, latest: 'antefirma-safari-latest.zip', data: safariZip },
 };
 for (const f of Object.values(FILES)) {
@@ -63,6 +71,7 @@ const LOGO = '<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M32 4 L55.5 1
 const ICONS = {
   chrome: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3.6" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 8.4h8.8M8.9 13.8 4.5 6.2M15.1 13.8l-4.4 7.6" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>',
   edge: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13.5c0-5-3.8-9-8.5-9S3.5 8 3.5 12.5 7 20 11.5 20c2.6 0 4.6-.9 6-2.3-1 .3-2 .4-3 .2-2.7-.4-4.5-2.4-4.5-4.6 0-1.7 1.4-3 3.3-3s3.4 1.4 3.4 3.2h3.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  firefox: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12.5" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6.5 6.5c.4 1.6 1.4 2.4 2.8 2.6 1.6.2 2.2 1 2.2 2 0 1.2-1 2-2.3 2-.9 0-1.6-.4-2-1 .1 2.6 2.2 4.6 4.8 4.6 2.7 0 4.9-2.2 4.9-4.9 0-2.6-1.6-4.3-3.2-5.6.2.9.1 1.6-.4 2.1-.3-1.7-1.6-3-3.3-3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
   safari: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m15.8 8.2-2.4 5.2-5.2 2.4 2.4-5.2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
   desktop: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 20h7M12 16.5V20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
 };
@@ -75,7 +84,7 @@ function card(key, L, lang) {
   const c = L.cards[key];
   const f = key === 'edge' ? FILES.chrome : FILES[key];
   const href = key === 'desktop' ? 'https://web.antefirma.app/' : `/files/${f.name}`;
-  const anchor = { chrome: 'chrome', edge: 'edge', safari: 'safari', desktop: 'desktop' }[key];
+  const anchor = key;
   const meta = f ? `<dl class="meta"><div><dt>${L.size}</dt><dd>${mb(f.size, lang)}</dd></div>
 <div><dt>${L.sha}</dt><dd><code class="hash" title="${f.sha256}">${f.sha256.slice(0, 16)}…</code><button type="button" class="copy" data-copy="${f.sha256}">${L.copy}</button></dd></div></dl>` : '';
   return `<article class="card" data-browser="${key}">
@@ -123,11 +132,12 @@ function page(lang) {
 <p class="note">${L.notStore}</p>
 </div></section>
 <section class="wrap" aria-labelledby="dl"><h2 id="dl">${L.dlH}</h2>
-<div class="cards">${['chrome', 'edge', 'safari', 'desktop'].map((k) => card(k, L, lang)).join('\n')}</div>
+<div class="cards">${['chrome', 'edge', 'firefox', 'safari', 'desktop'].map((k) => card(k, L, lang)).join('\n')}</div>
 </section>
 <section class="wrap guide" aria-labelledby="guide"><h2 id="guide">${L.guideH}</h2>
 <h3 id="chrome">${L.chromeH}</h3>${steps(L.chromeSteps)}<p class="tip">${L.chromeNote}</p>
 <h3 id="edge">${L.edgeH}</h3>${steps(L.edgeSteps)}<p class="tip">${L.edgeNote}</p>
+<h3 id="firefox">${L.firefoxH}</h3><p>${L.firefoxIntro}</p>${steps(L.firefoxSteps)}<p class="tip">${L.firefoxNote}</p>
 <h3 id="safari">${L.safariH}</h3><p>${L.safariIntro}</p>${steps(L.safariSteps)}<p class="tip">${L.safariNote}</p>
 <h3 id="desktop">${L.desktopH}</h3><p>${L.desktopIntro}</p>${steps(L.desktopSteps)}<p class="tip">${L.desktopNote}</p>
 <h3 id="update">${L.updateH}</h3><ul class="plain">${L.updateSteps.map((s) => `<li>${s}</li>`).join('')}</ul>

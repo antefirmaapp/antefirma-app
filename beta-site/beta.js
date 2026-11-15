@@ -4,9 +4,10 @@
   const ua = navigator.userAgent;
   const isMac = /Macintosh|Mac OS X/.test(ua);
   const browser = /Edg\//.test(ua) ? 'edge'
-    : /(Chrome|Chromium|CriOS)\//.test(ua) ? 'chrome'
-      : (isMac && /Safari\//.test(ua)) ? 'safari'
-        : null;
+    : /Firefox\//.test(ua) ? 'firefox'
+      : /(Chrome|Chromium|CriOS)\//.test(ua) ? 'chrome'
+        : (isMac && /Safari\//.test(ua)) ? 'safari'
+          : null;
   const card = browser && document.querySelector(`.card[data-browser="${browser}"]`);
   if (card) {
     card.classList.add('is-rec');

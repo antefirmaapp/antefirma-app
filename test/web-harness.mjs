@@ -15,6 +15,8 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 
 export const server = createServer((req, res) => {
   let p = join(DIST, decodeURIComponent(new URL(req.url, 'http://x').pathname));
   if (existsSync(p) && statSync(p).isDirectory()) p = join(p, 'index.html');
+  // As the real host does: /src/report/report serves report.html. The service worker caches these addresses.
+  if (!existsSync(p) && existsSync(`${p}.html`)) p = `${p}.html`;
   if (!existsSync(p)) { res.writeHead(404); return res.end(); }
   res.writeHead(200, { 'content-type': TYPES[extname(p)] || 'application/octet-stream' });
   res.end(readFileSync(p));
@@ -39,6 +41,7 @@ export const VERDICT = {
 };
 export const READ_TEXT = 'Art. 1 Il canone è di € 19,99 al mese, con durata minima di 24 mesi.\n\nArt. 2 In caso di recesso anticipato è dovuta una penale di € 120,00.';
 export const calls = [];
+export const pushPlans = [];
 export async function api(route) {
   const req = route.request();
   const path = new URL(req.url()).pathname;
@@ -49,6 +52,8 @@ export async function api(route) {
   if (path === '/v1/analyze') return json(200, VERDICT);
   // Photos and scans: the text of the same contract comes back, to be analysed.
   if (path === '/v1/read') return json(200, { text: READ_TEXT, truncated: false, reads: { limit: 3, remaining: 2 } });
+  // Push reminders: what the app tells the server is kept, to be looked at.
+  if (path === '/v1/push') { const body = JSON.parse(req.postData() || '{}'); pushPlans.push(body); return json(200, { planned: (body.times || []).length }); }
   if (path === '/v1/license') return json(200, { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 4 } } });
   return json(404, { error: 'not_found' });
 }

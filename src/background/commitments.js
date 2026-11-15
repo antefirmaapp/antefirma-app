@@ -166,17 +166,7 @@ export async function sweep(now = Date.now()) {
     const due = dueReminder(c, now);
     if (!due) continue;
 
-    const state = commitmentState(c, now);
-    const renewalAmount = c.recurringTotal ?? c.worstCase;
-    await notify({
-      id: `reminder-${c.id}-${due.days}`,
-      title: t('cancelXNDaysLeft', { x: c.provider || c.host, n: due.days }),
-      message: renewalAmount != null
-        ? `${t('ifDonTCancelTimeNew', { x: formatMoney(renewalAmount, c.currency) })} ${state.label}.`
-        : `${state.label}. ${t('openGenerateCancellationLetter')}`,
-      commitmentId: c.id,
-      kind: 'reminder',
-    });
+    await notify({ ...reminderNotice(c, due, now), commitmentId: c.id, kind: 'reminder' });
 
     // Every reminder further away than this counts as used: warning at 30
     // days after already warning at 7 makes no sense.
@@ -188,6 +178,22 @@ export async function sweep(now = Date.now()) {
   return { fired, checked: list.length };
 }
 
+/** Firefox: `browser.runtime.getBrowserInfo` exists only there. */
+const PLAIN_NOTIFICATIONS = typeof globalThis.browser?.runtime?.getBrowserInfo === 'function';
+
+/** What a reminder says: used now by sweep(), and ahead of time by the push plan (push.js). */
+export function reminderNotice(c, reminder, now = Date.now()) {
+  const state = commitmentState(c, now);
+  const renewalAmount = c.recurringTotal ?? c.worstCase;
+  return {
+    id: `reminder-${c.id}-${reminder.days}`,
+    title: t('cancelXNDaysLeft', { x: c.provider || c.host, n: reminder.days }),
+    message: renewalAmount != null
+      ? `${t('ifDonTCancelTimeNew', { x: formatMoney(renewalAmount, c.currency) })} ${state.label}.`
+      : `${state.label}. ${t('openGenerateCancellationLetter')}`,
+  };
+}
+
 export async function notify({ id, title, message, commitmentId, kind = 'open', sticky = true }) {
   try {
     await chrome.notifications.create(id, {
@@ -196,11 +202,15 @@ export async function notify({ id, title, message, commitmentId, kind = 'open', 
       title,
       message,
       priority: 2,
-      requireInteraction: sticky,
-      // Cancellation reminders lead straight to the action.
-      buttons: kind === 'reminder'
-        ? [{ title: t('writeLetter') }, { title: t('iVeAlreadyCancelled') }]
-        : [{ title: t('openExitKit') }],
+      // Firefox refuses a notification with buttons or one that stays until
+      // answered: there a click on it opens the commitment.
+      ...(PLAIN_NOTIFICATIONS ? {} : {
+        requireInteraction: sticky,
+        // Cancellation reminders lead straight to the action.
+        buttons: kind === 'reminder'
+          ? [{ title: t('writeLetter') }, { title: t('iVeAlreadyCancelled') }]
+          : [{ title: t('openExitKit') }],
+      }),
     });
     await chrome.storage.session.set({ [`notif:${id}`]: { commitmentId, kind } });
   } catch (err) {

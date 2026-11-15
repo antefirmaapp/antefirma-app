@@ -7,12 +7,12 @@
 export const TEXT = {
   it: {
     title: 'AnteFirma per sviluppatori e tester',
-    description: 'Scarica l’estensione AnteFirma di sviluppo per Chrome, Edge e Safari, o installa l’app sul computer. Con la guida per sviluppatori.',
+    description: 'Scarica l’estensione AnteFirma di sviluppo per Chrome, Edge, Firefox e Safari, o installa l’app sul computer. Con la guida per sviluppatori.',
     langName: 'Italiano', other: 'English',
     skip: 'Vai al contenuto',
     eyebrow: 'Per sviluppatori e tester',
     h1: 'Prova AnteFirma prima che arrivi negli store',
-    lead: 'Qui trovi i pacchetti per chi sviluppa e prova AnteFirma: l’estensione per Chrome, Edge e Safari e l’app per il computer. La versione pubblica arriva negli store a gennaio 2027.',
+    lead: 'Qui trovi i pacchetti per chi sviluppa e prova AnteFirma: l’estensione per Chrome, Edge, Firefox e Safari e l’app per il computer. La versione pubblica arriva negli store a gennaio 2027.',
     built: 'Versione {v}',
     notStore: 'Sono pacchetti di sviluppo: non si aggiornano da soli. Quando esce una versione nuova, la scarichi da qui.',
     dlH: 'Scarica',
@@ -22,6 +22,7 @@ export const TEXT = {
     cards: {
       chrome: { name: 'Chrome', what: 'Estensione completa: avviso al clic, pannello laterale, promemoria.', btn: 'Scarica per Chrome' },
       edge: { name: 'Edge', what: 'Lo stesso pacchetto di Chrome: Edge usa le stesse estensioni.', btn: 'Scarica per Edge' },
+      firefox: { name: 'Firefox', what: 'Avviso al clic e pannello nella barra laterale. Si carica come componente temporaneo.', btn: 'Scarica per Firefox' },
       safari: { name: 'Safari (Mac)', what: 'La cartella da trasformare in app con Xcode. Serve un Mac.', btn: 'Scarica per Safari' },
       desktop: { name: 'App per il computer', what: 'AnteFirma web, installata come app: testi incollati e PDF. Nessun download.', btn: 'Apri e installa' },
     },
@@ -43,6 +44,15 @@ export const TEXT = {
       'Premi <b>Carica decompressa</b> e scegli la cartella che contiene <code>manifest.json</code>.',
     ],
     edgeNote: 'Edge può mostrare un avviso sulle estensioni in modalità sviluppatore all’avvio: è normale, chiudilo.',
+    firefoxH: 'Firefox',
+    firefoxIntro: 'Firefox installa in modo stabile solo le estensioni firmate da Mozilla. Per provare questa versione la carichi come componente aggiuntivo temporaneo: resta fino alla chiusura di Firefox. Serve Firefox 128 o successivo.',
+    firefoxSteps: [
+      'Scarica lo ZIP per Firefox. Non serve estrarlo.',
+      'Apri <code>about:debugging#/runtime/this-firefox</code>.',
+      'Premi <b>Carica componente aggiuntivo temporaneo…</b> e scegli lo ZIP scaricato.',
+      'AnteFirma compare tra le estensioni: premi l’icona nella barra degli strumenti per aprire il pannello nella barra laterale.',
+    ],
+    firefoxNote: 'In Firefox le notifiche dei promemoria non hanno pulsanti: un clic sulla notifica apre l’impegno. A ogni riavvio di Firefox il componente temporaneo va caricato di nuovo; impegni e impostazioni di una prova non restano tra un caricamento e l’altro.',
     safariH: 'Safari (Mac)',
     safariIntro: 'Safari non carica le estensioni da una cartella: vanno trasformate in un’app con Xcode. Ti servono un Mac con macOS 13 o successivo, Safari 16.4 o successivo e Xcode (gratuito sull’App Store).',
     safariSteps: [
@@ -99,12 +109,12 @@ export const TEXT = {
   },
   en: {
     title: 'AnteFirma for developers and testers',
-    description: 'Download the AnteFirma developer extension for Chrome, Edge and Safari, or install the desktop app. With the developer guide.',
+    description: 'Download the AnteFirma developer extension for Chrome, Edge, Firefox and Safari, or install the desktop app. With the developer guide.',
     langName: 'English', other: 'Italiano',
     skip: 'Skip to content',
     eyebrow: 'For developers and testers',
     h1: 'Try AnteFirma before it reaches the stores',
-    lead: 'The packages for people who develop and test AnteFirma: the extension for Chrome, Edge and Safari, and the app for your computer. The public version reaches the stores in January 2027.',
+    lead: 'The packages for people who develop and test AnteFirma: the extension for Chrome, Edge, Firefox and Safari, and the app for your computer. The public version reaches the stores in January 2027.',
     built: 'Version {v}',
     notStore: 'These are developer packages: they don’t update on their own. When a new version comes out, download it from here.',
     dlH: 'Download',
@@ -114,6 +124,7 @@ export const TEXT = {
     cards: {
       chrome: { name: 'Chrome', what: 'The full extension: warning on click, side panel, reminders.', btn: 'Download for Chrome' },
       edge: { name: 'Edge', what: 'The same package as Chrome: Edge runs the same extensions.', btn: 'Download for Edge' },
+      firefox: { name: 'Firefox', what: 'Warning at the click and the panel in the sidebar. Loaded as a temporary add-on.', btn: 'Download for Firefox' },
       safari: { name: 'Safari (Mac)', what: 'The folder to turn into an app with Xcode. Needs a Mac.', btn: 'Download for Safari' },
       desktop: { name: 'Desktop app', what: 'AnteFirma web, installed as an app: pasted text and PDFs. Nothing to download.', btn: 'Open and install' },
     },
@@ -135,6 +146,15 @@ export const TEXT = {
       'Press <b>Load unpacked</b> and choose the folder that contains <code>manifest.json</code>.',
     ],
     edgeNote: 'Edge may warn about developer-mode extensions at start-up: that is expected, close it.',
+    firefoxH: 'Firefox',
+    firefoxIntro: 'Firefox installs for good only extensions signed by Mozilla. To try this version you load it as a temporary add-on: it stays until Firefox is closed. Firefox 128 or later is needed.',
+    firefoxSteps: [
+      'Download the ZIP for Firefox. There is no need to extract it.',
+      'Open <code>about:debugging#/runtime/this-firefox</code>.',
+      'Press <b>Load Temporary Add-on…</b> and choose the ZIP you downloaded.',
+      'AnteFirma appears among the extensions: press its icon in the toolbar to open the panel in the sidebar.',
+    ],
+    firefoxNote: 'In Firefox reminder notifications have no buttons: a click on the notification opens the commitment. Every time Firefox restarts the temporary add-on must be loaded again; the commitments and settings of a trial do not stay between one loading and the next.',
     safariH: 'Safari (Mac)',
     safariIntro: 'Safari doesn’t load extensions from a folder: they must be turned into an app with Xcode. You need a Mac with macOS 13 or later, Safari 16.4 or later and Xcode (free on the App Store).',
     safariSteps: [

@@ -88,6 +88,7 @@ test('dev site build: pages, downloads and checksums agree', () => {
       assert.equal(m.version, manifest.version);
       if (kind === 'chrome') assert.ok(m.key, 'the developer package carries the fixed key');
       if (kind === 'safari') assert.equal(m.side_panel, undefined, 'Safari has no side panel');
+      if (kind === 'firefox') { assert.ok(m.browser_specific_settings.gecko.id, 'Firefox needs the add-on id'); assert.ok(m.sidebar_action, 'Firefox has a sidebar'); assert.deepEqual(m.background.scripts, ['src/background/service-worker.js']); }
     }
 
     for (const page of ['index.html', 'en/index.html']) {

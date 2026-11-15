@@ -222,6 +222,22 @@ For every version that changes the look, regenerate the images and the manual:
 
 Both use a fake server and an invented site: no analysis spent, no real data.
 
+## Firefox
+
+```bash
+node tools/firefox-build.mjs    # → dist/firefox: event page, sidebar, options_ui, add-on id
+```
+
+Load it from `about:debugging#/runtime/this-firefox` → *Load Temporary Add-on…*
+→ `dist/firefox/manifest.json` (Firefox 128 or later). The same code runs
+there: the panel is the sidebar, opened by the toolbar button
+(`sidebarAction`); reminder notifications have no buttons, because Firefox
+refuses them; the server accepts `moz-extension://` origins with
+`ALLOW_FIREFOX=1`. `npx addons-linter dist/firefox` is the check Mozilla runs
+on submission (no errors; the warnings are the guarded `chrome.sidePanel`
+calls and `innerHTML` with escaped values). A permanent installation needs the
+package signed by addons.mozilla.org.
+
 ## Safari (Mac)
 
 ```bash
@@ -257,6 +273,8 @@ worker needs Safari 16.4 or later.
 | `features.test.mjs` | proof, commitments, reminders, `.ics`, letters |
 | `actions.test.mjs` | which buttons are intercepted; price choice on the page |
 | `pdf.test.mjs` | text extraction from PDFs |
+| `push.test.mjs` | push reminders of the web app: the plan kept in the browser, the hours told to the server, what the service worker shows when woken |
+| `firefox.test.mjs` | the Firefox manifest and build |
 | `files.test.mjs` | photos and scans before they are sent: accepted types, scaling, base64 |
 | `i18n.test.mjs` | every sentence of code and pages has its English and Spanish translation, with the same placeholders |
 | `golden.test.mjs` | verdicts, panel HTML (it/en/es), letters (3 × 3) and `.ics` compared with approved copies in `test/golden/` (`UPDATE_GOLDEN=1` to accept a deliberate change) |
@@ -294,11 +312,12 @@ src/core/letters/<lang>.js           the letter texts, one file per language (sh
 src/core/languages.js                the list of languages, for modules (the table is in src/i18n/i18n.js)
 src/core/files.js                    photos and scans made ready for the server (`/v1/read`): scaled JPEGs, PDF as is
 src/core/report.js, src/report/      the analysis report: a page to print, save as a PDF or copy
+src/core/push.js, src/background/push.js  web app: reminders when it is closed (Web Push; the wake-up has no content)
 src/core/help.js                     links to the help centre
 src/sidepanel/, src/options/         panel and settings
 src/i18n/                            languages: t(), locales/*.json, generated messages.js, page translation
 src/lib/pdf-text.js                  dependency-free PDF text extractor
-web/                                 the web app layer (shim, boot, styles, icons)
+web/                                 the web app layer (shim, boot, styles, icons; sw-push.js: reminders shown by the service worker)
 tools/                               builds, screenshots, dev package, English check
 ```
 

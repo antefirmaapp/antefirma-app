@@ -13,7 +13,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { server, BASE, TEXT, READ_TEXT, calls, api } from './web-harness.mjs';
+import { server, BASE, TEXT, READ_TEXT, calls, pushPlans, api } from './web-harness.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -51,7 +51,8 @@ const tooWide = (pg) => pg.evaluate(() => {
   return el ? name(el) : `page (${document.documentElement.scrollWidth} px)`;
 });
 
-const browser = await chromium.launch();
+// The full Chromium, not the headless shell: the shell refuses notifications whatever the test grants.
+const browser = await chromium.launch({ channel: 'chromium' });
 const errors = [];
 const open = async (opts) => {
   const ctx = await browser.newContext({ locale: 'en-GB', reducedMotion: 'reduce', ...opts });
@@ -128,6 +129,60 @@ try {
   await page.waitForTimeout(600);
   check('settings open in the web app', (await page.locator('#save, form, section').count()) > 0);
   await a11y(page, 'settings');
+
+  // ── reminders with the app closed (push) ──
+  // The browser's push service is not reachable from a test: the subscription is
+  // imitated, the rest is real — the settings, the server call, the service
+  // worker woken by a push with no content.
+  await ctx.grantPermissions(['notifications']);
+  await ctx.addInitScript(() => {
+    const sub = { endpoint: 'https://fcm.googleapis.com/fcm/send/test-address', unsubscribe: async () => { globalThis.__unsubscribed = true; return true; } };
+    PushManager.prototype.getSubscription = async () => null;
+    PushManager.prototype.subscribe = async function (o) { globalThis.__subscribeOptions = { visible: o.userVisibleOnly, key: o.applicationServerKey.length }; return sub; };
+  });
+  await page.reload();
+  await page.waitForSelector('#push-row:not([hidden])', { timeout: 8000 });
+  check('push: off until asked for, and nothing is sent', !(await page.isChecked('#pushReminders')) && pushPlans.length === 0);
+  await page.check('#pushReminders');
+  for (let i = 0; i < 60 && !pushPlans.length; i++) await page.waitForTimeout(100);
+  const sentPlan = pushPlans[0] || {};
+  check('push: switched on, the server gets a push address and the hours of the reminders',
+    sentPlan.endpoint === 'https://fcm.googleapis.com/fcm/send/test-address' && sentPlan.times?.length === 3 && sentPlan.times.every((x) => /^20\d\d-/.test(x)), JSON.stringify(sentPlan).slice(0, 200));
+  check('push: and nothing else — no seller, no amount, no keys', JSON.stringify(Object.keys(sentPlan).sort()) === '["endpoint","times"]' && !/Premium|19|120/.test(JSON.stringify(sentPlan.times)));
+  check('push: the subscription is a visible one, with the server key', await page.evaluate(() => globalThis.__subscribeOptions?.visible === true && globalThis.__subscribeOptions.key === 65));
+  const stored = await page.evaluate(() => globalThis.chrome.storage.local.get('pushPlan').then((x) => x.pushPlan));
+  check('push: the text of each reminder stays in the browser', stored?.items?.length === 3 && stored.items.every((x) => x.title && x.message && x.url) && Boolean(stored.fallback?.title), JSON.stringify(stored?.items?.[0] || null).slice(0, 160));
+  await a11y(page, 'settings with push reminders');
+
+  // A wake-up from the server, with no content, delivered to the service worker.
+  const cdp = await ctx.newCDPSession(page);
+  const registrations = [];
+  cdp.on('ServiceWorker.workerRegistrationUpdated', (e) => registrations.push(...e.registrations));
+  await cdp.send('ServiceWorker.enable');
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+  for (let i = 0; i < 40 && !registrations.length; i++) await page.waitForTimeout(100);
+  const registrationId = registrations.find((r) => r.scopeURL.startsWith(BASE))?.registrationId;
+  const wake = async () => { await cdp.send('ServiceWorker.deliverPushMessage', { origin: new URL(BASE).origin, registrationId, data: '' }); await page.waitForTimeout(700); };
+  const notifications = () => page.evaluate(async () => (await (await navigator.serviceWorker.ready).getNotifications()).map((n) => ({ title: n.title, body: n.body, tag: n.tag })));
+  await wake();
+  let seen = await notifications();
+  check('push: woken with nothing due, it still says something, in the person\'s language', seen.length === 1 && seen[0].title === stored.fallback.title, JSON.stringify(seen));
+  // The first reminder's day has come.
+  await page.evaluate(async () => { const { pushPlan } = await globalThis.chrome.storage.local.get('pushPlan'); pushPlan.items[0].at = Date.now() - 1000; await globalThis.chrome.storage.local.set({ pushPlan }); });
+  await wake();
+  seen = await notifications();
+  check('push: when a reminder is due, the notification is that reminder', seen.some((n) => n.tag === stored.items[0].tag && n.title === stored.items[0].title), JSON.stringify(seen));
+  check('push: and it is marked as said', await page.evaluate(() => globalThis.chrome.storage.local.get('pushPlan').then((x) => x.pushPlan.items[0].shown === true)));
+
+  // Switched off: the server forgets, the browser unsubscribes.
+  await ctx.addInitScript(() => { PushManager.prototype.getSubscription = async () => ({ endpoint: 'https://fcm.googleapis.com/fcm/send/test-address', unsubscribe: async () => { sessionStorage.setItem('unsubscribed', '1'); return true; } }); });
+  await page.reload();
+  await page.waitForSelector('#push-row:not([hidden])', { timeout: 8000 });
+  const before = pushPlans.length;
+  await page.uncheck('#pushReminders');
+  for (let i = 0; i < 60 && pushPlans.length === before; i++) await page.waitForTimeout(100);
+  const last = pushPlans[pushPlans.length - 1];
+  check('push: switched off, the server is told to forget and the browser unsubscribes', pushPlans.length > before && last.endpoint === null && last.times.length === 0 && await page.evaluate(() => sessionStorage.getItem('unsubscribed') === '1'), JSON.stringify(last));
   await ctx.close();
 
   // ── phone ──

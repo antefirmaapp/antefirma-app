@@ -25,6 +25,7 @@ import { analyzeAction, analyzeText, analyzeSample, exportData, importData, read
 import { recordDecision, commitmentFromVerdict, updateAndReschedule, removeCommitment, WATCH_ALARM, SWEEP_ALARM, scheduleAlarms, sweep, notifTarget, openCommitment } from './commitments.js';
 import { checkChanges, watchAllCommitments, fetchDocument } from './changes.js';
 import { letterFor, icsFor, proofFor } from './exit-kit.js';
+import { syncPush, pushSupported } from './push.js';
 import { CHECKOUT_ALARM, watchCheckout, checkCheckout, upgrade } from './plan.js';
 
 // ── lifecycle ───────────────────────────────────────────────────────────────
@@ -53,6 +54,10 @@ chrome.runtime.onStartup?.addListener(async () => {
 if (chrome.sidePanel?.setPanelBehavior) {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
 }
+// Firefox has a sidebar instead of the side panel: the toolbar button opens and
+// closes it. It must be asked for inside the click itself, before any await.
+const sidebar = globalThis.browser?.sidebarAction;
+if (!chrome.sidePanel && sidebar) chrome.action.onClicked.addListener(() => { sidebar.toggle(); });
 
 function setupContextMenus() {
   chrome.contextMenus.removeAll(() => {
@@ -77,8 +82,9 @@ function setupContextMenus() {
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!tab?.id) return;
   try {
-    // Safari has no side panel: the same panel opens in a tab.
+    // Firefox: the sidebar. Safari has neither: the same panel opens in a tab.
     if (chrome.sidePanel?.open) await chrome.sidePanel.open({ tabId: tab.id });
+    else if (sidebar) await sidebar.open();
     else await chrome.tabs.create({ url: chrome.runtime.getURL('src/sidepanel/sidepanel.html') });
   } catch { /* the panel may already be open */ }
 
@@ -215,10 +221,25 @@ async function handle(msg, sender) {
       if (pendingPanelRequest) await chrome.storage.session.remove('pendingPanelRequest');
       return pendingPanelRequest || null;
     }
+    case 'SYNC_PUSH':
+      return syncPush();
     default:
       throw new Error(`Unknown message: ${msg?.type}`);
   }
 }
+
+// ── push reminders (web version) ────────────────────────────────────────────
+
+// Commitments or settings changed: the plan follows. Grouped, because one
+// action writes several times.
+let pushTimer = null;
+chrome.storage.onChanged.addListener((changes, areaName) => {
+  if (areaName !== 'local' || !pushSupported()) return;
+  if (!('commitments' in changes) && !('settings' in changes)) return;
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(() => { syncPush().catch(() => {}); }, 1500);
+});
+if (pushSupported()) setTimeout(() => { syncPush().catch(() => {}); }, 3000);
 
 // ── alarms ──────────────────────────────────────────────────────────────────
 
