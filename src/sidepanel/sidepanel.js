@@ -13,6 +13,7 @@ import { translateDom } from '../i18n/dom.js';
 import { SAMPLES } from '../core/samples.js';
 import { helpUrl } from '../core/help.js';
 import { openReport } from '../core/report.js';
+import { readCompare, saveCompareBase, clearCompare, openCompare, sameVerdict, contractName } from '../core/compare.js';
 
 const $ = (sel) => document.querySelector(sel);
 const state = { source: null, busy: false };
@@ -62,7 +63,33 @@ function showResult(verdict) {
     (verdict.example ? '' : `<button id="report-open" style="margin-top:8px;width:100%">${esc(t('reportOpen'))}</button>`);
   if (trackable) $('#track').addEventListener('click', trackCurrent);
   $('#report-open')?.addEventListener('click', () => openReport(verdict).catch((e) => status(e.message, 'error')));
+  if (!verdict.example) compareButtons(verdict).catch(() => {});
   $('#result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/**
+ * Two contracts side by side. The first result is put aside with "Compare
+ * with another contract"; at the next one, a button opens the comparison.
+ */
+async function compareButtons(verdict) {
+  const base = (await readCompare())?.a?.verdict || null;
+  const box = document.createElement('div');
+  box.id = 'compare-box';
+  box.style.marginTop = '8px';
+  if (base && !sameVerdict(base, verdict)) {
+    box.innerHTML = `<button id="compare-open" style="width:100%">${esc(t('compareWithX', { x: contractName(base, t('firstContract')) }))}</button>
+      <button class="link" id="compare-clear" style="margin-top:6px">${esc(t('stopComparing'))}</button>`;
+  } else if (!base) {
+    box.innerHTML = `<button id="compare-start" style="width:100%">${esc(t('compareWithAnother'))}</button>`;
+  } else {
+    // This is the contract put aside: waiting for the second one.
+    box.innerHTML = `<div class="status">${esc(t('keptAsideAnalyseSecond'))}</div><button class="link" id="compare-clear" style="margin-top:6px">${esc(t('stopComparing'))}</button>`;
+  }
+  $('#compare-box')?.remove();
+  $('#result').append(box);
+  $('#compare-start')?.addEventListener('click', async () => { await saveCompareBase(verdict); await compareButtons(verdict); });
+  $('#compare-open')?.addEventListener('click', () => openCompare(verdict).catch((e) => status(e.message, 'error')));
+  $('#compare-clear')?.addEventListener('click', async () => { await clearCompare(); await compareButtons(verdict); });
 }
 
 /**

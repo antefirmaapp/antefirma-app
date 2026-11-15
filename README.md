@@ -282,6 +282,7 @@ worker needs Safari 16.4 or later.
 | `pdf.test.mjs` | text extraction from PDFs |
 | `push.test.mjs` | push reminders of the web app: the plan kept in the browser, the hours told to the server, what the service worker shows when woken |
 | `firefox.test.mjs` | the Firefox manifest and build |
+| `compare.test.mjs` | two contracts side by side: the rows, the mark on the lighter one, the sentence above |
 | `share.test.mjs` | "Share → AnteFirma" (web app): what the service worker keeps of a shared photo, PDF or text |
 | `files.test.mjs` | photos and scans before they are sent: accepted types, scaling, base64 |
 | `i18n.test.mjs` | every sentence of code and pages has its English and Spanish translation, with the same placeholders |
@@ -320,6 +321,7 @@ src/core/letters/<lang>.js           the letter texts, one file per language (sh
 src/core/languages.js                the list of languages, for modules (the table is in src/i18n/i18n.js)
 src/core/files.js                    photos and scans made ready for the server (`/v1/read`): scaled JPEGs, PDF as is
 src/core/report.js, src/report/      the analysis report: a page to print, save as a PDF or copy
+src/core/compare.js, src/compare/    two contracts side by side, from two results already in the browser
 src/core/push.js, src/background/push.js  web app: reminders when it is closed (Web Push; the wake-up has no content)
 src/core/help.js                     links to the help centre
 src/sidepanel/, src/options/         panel and settings

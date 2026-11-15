@@ -1,0 +1,16 @@
+/* Two contracts side by side: a table that stays a table on a phone and on paper. */
+.csum { font-size: 17px; font-weight: 650; margin: 4px 0 14px; }
+.ctable { overflow-x: auto; }
+.ctable table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ctable th, .ctable td { text-align: left; vertical-align: top; padding: 9px 10px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.ctable thead th { font-size: 15px; border-bottom: 2px solid var(--line); }
+.ctable tbody th { font-weight: 600; color: var(--muted); width: 30%; }
+.ctable td.better { font-weight: 700; }
+.ctable td.better::after { content: " ✓"; color: var(--ok, #1a7f37); }
+.cnote { color: var(--muted); font-size: 13px; margin: 12px 0 18px; }
+#details details { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; }
+#details summary { cursor: pointer; font-weight: 650; }
+@media print {
+  .ctable td.better::after { color: #111; }
+  #details details { border: 0; padding: 0; break-before: page; }
+}

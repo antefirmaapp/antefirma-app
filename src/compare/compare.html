@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confronto tra due contratti</title>
+  <link rel="stylesheet" href="../sidepanel/sidepanel.css">
+  <link rel="stylesheet" href="../report/report.css">
+  <link rel="stylesheet" href="compare.css">
+</head>
+<body>
+  <main class="sheet">
+    <!-- What is printed starts here: the toolbar below is for the screen only. -->
+    <div class="tools" id="tools">
+      <button type="button" class="primary" id="print">Stampa o salva come PDF</button>
+      <button type="button" id="copy">Copia come testo</button>
+      <span class="status" id="said" role="status" aria-live="polite" hidden></span>
+    </div>
+    <article id="report" hidden>
+      <header class="rhead">
+        <img src="../icons/icon48.png" alt="" width="36" height="36">
+        <div>
+          <h1>Confronto tra due contratti</h1>
+          <p class="meta" id="meta" data-no-i18n></p>
+        </div>
+      </header>
+      <p class="csum" id="summary" data-no-i18n></p>
+      <div class="ctable" id="table" data-no-i18n></div>
+      <p class="cnote">È un confronto di cifre e di vincoli, non un consiglio: leggi anche le clausole di ciascuno.</p>
+      <div id="details" data-no-i18n></div>
+      <footer class="rfoot">Generato da AnteFirma · antefirma.app</footer>
+    </article>
+    <p class="empty" id="empty" hidden>Nessun confronto da mostrare: analizza due contratti e scegli «Confronta».</p>
+  </main>
+  <script type="module" src="compare.js"></script>
+</body>
+</html>

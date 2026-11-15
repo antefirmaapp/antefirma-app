@@ -13,7 +13,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { server, BASE, TEXT, READ_TEXT, calls, pushPlans, api } from './web-harness.mjs';
+import { server, BASE, TEXT, TEXT_B, READ_TEXT, calls, pushPlans, api } from './web-harness.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -99,6 +99,34 @@ try {
   await page.fill('#paste-text', TEXT);
   await page.click('#run-paste');
   await page.waitForFunction(() => /599[.,]76/.test(document.getElementById('result')?.textContent || ''), null, { timeout: 10000 });
+
+  // Two contracts side by side: the first is put aside, the second opens the comparison.
+  await page.click('#compare-start');
+  await page.waitForSelector('#compare-clear', { timeout: 5000 });
+  check('compare: the first contract is put aside, and the panel says what to do next', (await page.locator('#compare-box .status').count()) === 1 && (await page.locator('#compare-open').count()) === 0);
+  await page.fill('#paste-text', TEXT_B);
+  await page.click('#run-paste');
+  await page.waitForSelector('#compare-open', { timeout: 12000 });
+  await page.click('#compare-open');
+  await page.waitForSelector('#report:not([hidden]) table', { timeout: 8000 });
+  const cmp = await page.evaluate(() => ({
+    path: location.pathname, summary: document.querySelector('#summary').textContent,
+    rows: Object.fromEntries([...document.querySelectorAll('#table tbody tr')].map((tr) => [tr.dataset.row, [...tr.querySelectorAll('td')].map((td) => `${td.textContent}${td.classList.contains('better') ? ' *' : ''}`)])),
+    details: document.querySelectorAll('#details > details').length,
+  }));
+  check('compare: the page shows the two contracts side by side', /compare/.test(cmp.path) && Object.keys(cmp.rows).length === 9 && cmp.details === 2, `${cmp.path} ${Object.keys(cmp.rows).join(',')} ${cmp.details}`);
+  check('compare: total cost €599.76 against €299.88, the lighter one marked', /599[.,]76/.test(cmp.rows.total[0]) && /299[.,]88 \*$/.test(cmp.rows.total[1]) && /299[.,]88/.test(cmp.summary), `${cmp.rows.total.join(' | ')} — ${cmp.summary}`);
+  check('compare: 24 months against 12, a fee against none', / \*$/.test(cmp.rows.term[1]) && /120/.test(cmp.rows.fee[0]) && / \*$/.test(cmp.rows.fee[1]), `${cmp.rows.term.join(' | ')} — ${cmp.rows.fee.join(' | ')}`);
+  await a11y(page, 'the comparison');
+  await page.goBack();
+  await page.waitForSelector('#paste-text', { timeout: 8000 });
+  // Back in the panel with the first contract again, for the steps that follow.
+  await page.fill('#paste-text', TEXT);
+  await page.click('#run-paste');
+  await page.waitForFunction(() => /599[.,]76/.test(document.getElementById('result')?.textContent || ''), null, { timeout: 10000 });
+  check('compare: the contract put aside is recognised, not compared with itself', (await page.locator('#compare-open').count()) === 0 && (await page.locator('#compare-box .status').count()) === 1);
+  await page.click('#compare-clear');
+  await page.waitForSelector('#compare-start', { timeout: 5000 });
 
   // A photo of the contract: the server reads it, the text lands in the box and is analysed.
   await page.setInputFiles('#pdf-file', join(ROOT, 'test', 'fixtures', 'scan', 'page1.jpg'));

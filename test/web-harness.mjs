@@ -40,6 +40,16 @@ export const VERDICT = {
   quota: { plan: 'free', remaining: 4, month: { limit: 5, remaining: 4 } },
 };
 export const READ_TEXT = 'Art. 1 Il canone è di € 19,99 al mese, con durata minima di 24 mesi.\n\nArt. 2 In caso di recesso anticipato è dovuta una penale di € 120,00.';
+export const TEXT_B = 'OFFERTA B. Abbonamento Base a € 24,99 al mese. Il contratto ha una durata minima di 12 mesi. Nessuna penale in caso di recesso.';
+export const VERDICT_B = {
+  findings: [{ category: 'minimum_term', quote: 'durata minima di 12 mesi', why: 'You are bound for a year.', confidence: 0.9 }],
+  terms: {
+    price: { value: 24.99, quote: '€ 24,99' }, currency: { value: 'EUR' }, billing_period: { value: 'month' },
+    minimum_term_months: { value: 12, quote: 'durata minima di 12 mesi' }, notice_days: null, exit_fee: null, extra_fees: [],
+  },
+  summary: '', dropped: 0, truncated: false, model: 'fake', cached: false,
+  quota: { plan: 'free', remaining: 3, month: { limit: 5, remaining: 3 } },
+};
 export const calls = [];
 export const pushPlans = [];
 export async function api(route) {
@@ -49,6 +59,8 @@ export async function api(route) {
   const json = (status, body) => route.fulfill({ status, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(body) });
   if (path === '/v1/health') return json(200, { ok: true });
   if (path === '/v1/register') return json(200, { token: 'v1.fake' });
+  // A second, lighter offer: the text that names it gets its own answer, to compare the two.
+  if (path === '/v1/analyze' && /OFFERTA B/.test(JSON.parse(req.postData() || '{}').text || '')) return json(200, VERDICT_B);
   if (path === '/v1/analyze') return json(200, VERDICT);
   // Photos and scans: the text of the same contract comes back, to be analysed.
   if (path === '/v1/read') return json(200, { text: READ_TEXT, truncated: false, reads: { limit: 3, remaining: 2 } });
