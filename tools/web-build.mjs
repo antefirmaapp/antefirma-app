@@ -71,7 +71,13 @@ writeFileSync(join(OUT, 'manifest.webmanifest'), JSON.stringify({
   description: 'Prima di accettare, sai a che cosa ti impegni: analizza contratti e condizioni, ricorda le scadenze, scrive la lettera di disdetta.',
   id: '/', start_url: '/', scope: '/', display: 'standalone',
   // "Open with AnteFirma" for PDFs, with the app installed (Chrome and Edge on desktop).
-  file_handlers: [{ action: '/', accept: { 'application/pdf': ['.pdf'] }, launch_type: 'single-client' }],
+  file_handlers: [{ action: '/', accept: { 'application/pdf': ['.pdf'], 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'], 'image/webp': ['.webp'] }, launch_type: 'single-client' }],
+  // "Share → AnteFirma" from another app, with the app installed (Android): a photo
+  // of a contract, a PDF, a text. The service worker receives it (web/sw-share.js).
+  share_target: {
+    action: '/share', method: 'POST', enctype: 'multipart/form-data',
+    params: { title: 'title', text: 'text', url: 'url', files: [{ name: 'files', accept: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', '.pdf', '.jpg', '.jpeg', '.png', '.webp'] }] },
+  },
   background_color: '#f5f6f8', theme_color: '#15203a', lang: 'it',
   icons: [
     { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -109,7 +115,7 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(fetch(e.request).then((r) => { if (r.ok && !r.redirected) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); } return r; })
     .catch(() => caches.match(e.request, { ignoreSearch: true }).then((r) => r || (e.request.mode === 'navigate' ? caches.match('/') : undefined))));
 });
-` + readFileSync(join(ROOT, 'web', 'sw-push.js'), 'utf8'));
+` + readFileSync(join(ROOT, 'web', 'sw-push.js'), 'utf8') + readFileSync(join(ROOT, 'web', 'sw-share.js'), 'utf8'));
 console.log(`AnteFirma web ${version}: ${files.length} files in ${OUT}`);
 
 /** The icons: the brand shield, drawn by the browser at 192 and 512 pixels. Redone only if the brand changes. */

@@ -282,6 +282,7 @@ worker needs Safari 16.4 or later.
 | `pdf.test.mjs` | text extraction from PDFs |
 | `push.test.mjs` | push reminders of the web app: the plan kept in the browser, the hours told to the server, what the service worker shows when woken |
 | `firefox.test.mjs` | the Firefox manifest and build |
+| `share.test.mjs` | "Share → AnteFirma" (web app): what the service worker keeps of a shared photo, PDF or text |
 | `files.test.mjs` | photos and scans before they are sent: accepted types, scaling, base64 |
 | `i18n.test.mjs` | every sentence of code and pages has its English and Spanish translation, with the same placeholders |
 | `golden.test.mjs` | verdicts, panel HTML (it/en/es), letters (3 × 3) and `.ics` compared with approved copies in `test/golden/` (`UPDATE_GOLDEN=1` to accept a deliberate change) |
@@ -324,7 +325,7 @@ src/core/help.js                     links to the help centre
 src/sidepanel/, src/options/         panel and settings
 src/i18n/                            languages: t(), locales/*.json, generated messages.js, page translation
 src/lib/pdf-text.js                  dependency-free PDF text extractor
-web/                                 the web app layer (shim, boot, styles, icons; sw-push.js: reminders shown by the service worker)
+web/                                 the web app layer (shim, boot, styles, icons; sw-push.js: reminders shown by the service worker; sw-share.js: "Share → AnteFirma" from another app)
 tools/                               builds, screenshots, dev package, English check
 ```
 

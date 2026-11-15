@@ -35,15 +35,40 @@ addEventListener('beforeinstallprompt', (e) => {
 });
 addEventListener('appinstalled', () => document.getElementById('web-install')?.remove());
 
+/** Runs `fn` once the panel has set up what it offers to this file. */
+function whenPanelReady(fn) { if (window.__afOpenFiles) fn(); else setTimeout(() => whenPanelReady(fn), 100); }
+
 // ── "Open with AnteFirma": a PDF opened from the system reaches the panel ──
 if ('launchQueue' in window) {
   launchQueue.setConsumer(async (params) => {
-    const handle = params.files?.[0];
-    if (!handle) return;
-    const file = await handle.getFile();
-    const wait = () => (window.__afOpenPdf ? window.__afOpenPdf(file) : setTimeout(wait, 100));
-    wait();
+    if (!params.files?.length) return;
+    const files = await Promise.all(params.files.map((h) => h.getFile()));
+    whenPanelReady(() => window.__afOpenFiles(files));
   });
+}
+
+// ── "Share → AnteFirma": what the service worker put aside (web/sw-share.js) ──
+const shared = new URLSearchParams(location.search).has('shared');
+if (shared && 'caches' in window) {
+  history.replaceState(null, '', location.pathname);
+  (async () => {
+    const cache = await caches.open('antefirma-share');
+    const files = [];
+    let text = '';
+    for (const req of await cache.keys()) {
+      const res = await cache.match(req);
+      const path = new URL(req.url).pathname;
+      if (path === '/shared/text') text = await res.text();
+      else files.push([path, new File([await res.blob()], decodeURIComponent(res.headers.get('x-name') || 'shared'), { type: res.headers.get('content-type') || '' })]);
+      // Taken once: what was shared does not stay in the browser.
+      await cache.delete(req);
+    }
+    files.sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }));
+    whenPanelReady(() => {
+      if (files.length) window.__afOpenFiles(files.map((f) => f[1]));
+      else if (text) window.__afShareText(text);
+    });
+  })().catch((err) => console.warn('[AnteFirma] share:', err?.message));
 }
 
 // ── the empty panel, right of the text, says what will appear ─────────────
@@ -66,7 +91,8 @@ if (result) {
 // ── welcome on first opening ────────────────────────────────────────────────
 let seen = false;
 try { seen = !!localStorage.getItem('af-web-welcome'); } catch { /* storage unavailable */ }
-if (!seen && document.getElementById('tab-analyze')) {
+// Arriving with something shared, the welcome would only be in the way.
+if (!seen && !shared && document.getElementById('tab-analyze')) {
   const box = document.createElement('div');
   box.className = 'web-welcome';
   box.setAttribute('role', 'dialog');

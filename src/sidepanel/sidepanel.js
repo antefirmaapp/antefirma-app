@@ -622,8 +622,10 @@ function setupExtras() {
     pdf.innerHTML = `${esc(t('gotPdfOrPhotoDropHere'))} <button class="link" id="pick-pdf-2">${esc(t('chooseFromComputer'))}</button>`;
     $('#run-paste').after(pdf);
     $('#pick-pdf-2').addEventListener('click', () => $('#pdf-file').click());
-    // "Open with AnteFirma" from the system (web/boot.js): the PDF arrives here.
-    window.__afOpenPdf = (file) => handleFiles([file]);
+    // "Open with AnteFirma" and "Share → AnteFirma" from the system (web/boot.js): files and text arrive here.
+    window.__afOpenFiles = (files) => handleFiles([...files]);
+    // A shared text is put in the box, not analysed by itself: the person looks at it and presses the button.
+    window.__afShareText = (text) => { const box = $('#paste-text'); box.value = String(text).slice(0, 200000); box.focus(); };
     window.__afSample = runSample;
   }
 }

@@ -106,6 +106,31 @@ try {
   await page.waitForFunction(() => /599[.,]76/.test(document.getElementById('result')?.textContent || ''), null, { timeout: 10000 }).catch(() => {});
   check('a photo is read by the server and analysed, in the web app too', calls.includes('/v1/read') && (await page.inputValue('#paste-text')) === READ_TEXT && /foto|photo/i.test(await page.textContent('#result')), `${calls.filter((c) => c === '/v1/read').length} reads · ${await page.textContent('#status')} · ${(await page.inputValue('#paste-text')).slice(0, 40)}`);
 
+  // "Share → AnteFirma" from another app: the system posts a form to /share, the
+  // service worker puts it aside and opens the app, the panel takes it from there.
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => true));
+  if (!(await page.evaluate(() => Boolean(navigator.serviceWorker.controller)))) await page.reload();
+  const share = (fields) => page.evaluate(async ({ text, photo }) => {
+    const form = document.createElement('form');
+    form.method = 'POST'; form.action = '/share'; form.enctype = 'multipart/form-data';
+    if (text) { const i = document.createElement('input'); i.name = 'text'; i.value = text; form.append(i); }
+    if (photo) {
+      const dt = new DataTransfer();
+      dt.items.add(new File([Uint8Array.from(atob(photo), (c) => c.charCodeAt(0))], 'pagina 1.jpg', { type: 'image/jpeg' }));
+      const i = document.createElement('input'); i.type = 'file'; i.name = 'files'; i.files = dt.files; form.append(i);
+    }
+    document.body.append(form);
+    form.submit();
+  }, fields);
+  await share({ text: 'Il contratto si rinnova automaticamente salvo disdetta.' });
+  const gotText = await page.waitForFunction(() => document.getElementById('paste-text')?.value.startsWith('Il contratto si rinnova') && !location.search, null, { timeout: 12000 }).then(() => true, () => false);
+  check('share: a shared text opens the app with the text in the box, not analysed by itself', gotText && (await page.locator('.web-welcome').count()) === 0, page.url());
+  const readsBefore = calls.filter((c) => c === '/v1/read').length;
+  await share({ photo: readFileSync(join(ROOT, 'test', 'fixtures', 'scan', 'page2.jpg')).toString('base64') });
+  await page.waitForFunction(() => /599[.,]76/.test(document.getElementById('result')?.textContent || ''), null, { timeout: 15000 }).catch(() => {});
+  check('share: a shared photo is read and analysed, as when it is chosen by hand', calls.filter((c) => c === '/v1/read').length === readsBefore + 1 && /599[.,]76/.test(await page.textContent('#result')), `${calls.filter((c) => c === '/v1/read').length - readsBefore} reads`);
+  check('share: what was shared does not stay in the browser', await page.evaluate(async () => (await (await caches.open('antefirma-share')).keys()).length === 0));
+
   // Recorded as a commitment: it appears in the Commitments tab with its deadline.
   await page.click('#track');
   await page.waitForTimeout(600);
