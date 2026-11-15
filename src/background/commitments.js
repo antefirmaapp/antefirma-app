@@ -142,6 +142,8 @@ export async function sweep(now = Date.now()) {
 
   const list = await getCommitments();
   let fired = 0;
+  const { pushPlan = null } = await chrome.storage.local.get('pushPlan');
+  const alreadyShown = new Set((pushPlan?.items || []).filter((i) => i.shown).map((i) => i.tag));
 
   for (const c of list) {
     if (c.status !== COMMITMENT_STATUS.ACTIVE) continue;
@@ -166,7 +168,10 @@ export async function sweep(now = Date.now()) {
     const due = dueReminder(c, now);
     if (!due) continue;
 
-    await notify({ ...reminderNotice(c, due, now), commitmentId: c.id, kind: 'reminder' });
+    // Web version: if the service worker already showed this reminder while the
+    // app was closed (push), it is not said a second time on opening.
+    const notice = reminderNotice(c, due, now);
+    if (!alreadyShown.has(notice.id)) await notify({ ...notice, commitmentId: c.id, kind: 'reminder' });
 
     // Every reminder further away than this counts as used: warning at 30
     // days after already warning at 7 makes no sense.

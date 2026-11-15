@@ -99,11 +99,24 @@ export function merchantFromTitle(title = '') {
   return parts[0] ? parts[0].slice(0, 60) : null;
 }
 
+/**
+ * A name from the title of a text with no site: often a file name. The
+ * extension goes, and so does "+2" (three photos of one contract). What a
+ * camera or a scanner calls its files (IMG_2041, page1, scan 3) names nobody:
+ * better empty, to be filled in the panel, than "Cancel page1.jpg".
+ */
+export function nameFromFileTitle(title) {
+  const base = String(title || '').replace(/\s\+\d+$/, '').replace(/\.(pdf|jpe?g|png|webp|heic|heif|bmp|gif|txt)$/i, '').trim();
+  if (!base) return null;
+  const GENERIC = /^(img|image|dsc|dscn|pxl|scan|scansione|page|pagina|photo|foto|picture|screenshot|document|documento|doc|file|whatsapp image|untitled|senza titolo)?[\s_\-.()\d]*(at [\d.\s]+)?$/i;
+  return GENERIC.test(base) ? null : base.slice(0, 60);
+}
+
 /** A readable provider name, from the title or the domain. */
 export function providerName(verdict = {}) {
   const host = (verdict.host || '').replace(/^www\./, '');
   // Without site or title the name stays empty: letter and panel use the placeholder in their language.
-  if (!host) return verdict.title || null;
+  if (!host) return nameFromFileTitle(verdict.title);
   // A Paddle, Stripe… page: the right name is in the title; otherwise empty, and it can be renamed in the panel.
   if (isPaymentHost(host)) return (verdict.merchant && merchantFromTitle(verdict.merchant)) || merchantFromTitle(verdict.title || '');
   const base = host.split('.')[0];

@@ -174,7 +174,22 @@ try {
   check('push: when a reminder is due, the notification is that reminder', seen.some((n) => n.tag === stored.items[0].tag && n.title === stored.items[0].title), JSON.stringify(seen));
   check('push: and it is marked as said', await page.evaluate(() => globalThis.chrome.storage.local.get('pushPlan').then((x) => x.pushPlan.items[0].shown === true)));
 
-  // Switched off: the server forgets, the browser unsubscribes.
+  // The app is opened after the service worker has already shown a reminder: it is not said twice.
+  await ctx.addInitScript(() => {
+    const Real = Notification;
+    globalThis.Notification = class extends Real { constructor(title, o) { super(title, o); sessionStorage.setItem('pageNotifications', `${sessionStorage.getItem('pageNotifications') || ''}|${o?.tag}`); } };
+  });
+  await page.evaluate(async () => {
+    const { commitments } = await globalThis.chrome.storage.local.get('commitments');
+    const first = commitments[0].reminders.findIndex((r) => !r.fired);
+    commitments[0].reminders[first].at = new Date(Date.now() - 60000).toISOString();
+    await globalThis.chrome.storage.local.set({ commitments });
+  });
+  await page.goto(BASE);
+  const firedNow = await page.waitForFunction(() => globalThis.chrome.storage.local.get('commitments').then((x) => x.commitments[0].reminders.some((r) => r.fired && Date.parse(r.at) > Date.now() - 3600000)), null, { timeout: 15000 }).then(() => true, () => false);
+  check('push: opening the app afterwards counts the reminder as sent, without a second notification', firedNow && !(await page.evaluate(() => sessionStorage.getItem('pageNotifications') || '')).includes(stored.items[0].tag), await page.evaluate(() => sessionStorage.getItem('pageNotifications') || 'none'));
+  await page.goto(`${BASE}settings/`);
+
   await ctx.addInitScript(() => { PushManager.prototype.getSubscription = async () => ({ endpoint: 'https://fcm.googleapis.com/fcm/send/test-address', unsubscribe: async () => { sessionStorage.setItem('unsubscribed', '1'); return true; } }); });
   await page.reload();
   await page.waitForSelector('#push-row:not([hidden])', { timeout: 8000 });
