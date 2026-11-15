@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "When you press a button that commits you, AnteFirma sends the page text and address to its own server, which has an AI model (Claude, by Anthropic) read it. The server replies with the clauses that bind you, each with the exact sentence from the page, and drops any warning whose sentence isn’t there.",
   "whenReAboutPress": "When you’re about to press",
   "whenRecordCommitmentAfterAnalysisCancellation": "When you record a commitment after an analysis, the cancellation deadline lands here, with the letter ready.",
+  "whoDidYouCommitTo": "Who did you commit to? The name appears in the reminders and in the cancellation letter.",
   "whyClausesExactSentencesCalculation": "Why? Clauses, exact sentences and calculation",
   "windowExpired": "Window expired",
   "withdrawConsent": "Withdraw consent",

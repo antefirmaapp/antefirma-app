@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Gdy klikasz przycisk, który Cię zobowiązuje, AnteFirma wysyła tekst i adres strony na własny serwer, który zleca ich przeczytanie modelowi AI (Claude, od Anthropic). Serwer odpowiada klauzulami, które Cię wiążą, każdą z dokładnym zdaniem ze strony, i odrzuca każde ostrzeżenie, którego zdania tam nie ma.",
   "whenReAboutPress": "Gdy zaraz klikniesz",
   "whenRecordCommitmentAfterAnalysisCancellation": "Gdy zapiszesz zobowiązanie po analizie, termin wypowiedzenia trafia tutaj, z gotowym pismem.",
+  "whoDidYouCommitTo": "Wobec kogo się zobowiązałeś? Nazwa pojawia się w przypomnieniach i w piśmie z wypowiedzeniem.",
   "whyClausesExactSentencesCalculation": "Dlaczego? Klauzule, dokładne zdania i obliczenie",
   "windowExpired": "Termin minął",
   "withdrawConsent": "Wycofaj zgodę",

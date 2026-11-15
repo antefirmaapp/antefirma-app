@@ -54,7 +54,7 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
   const BASE = `http://127.0.0.1:${site.address().port}/`;
 
   const fake = {
-    engine: 'keywords', fixed: null, mode: 'ok', delay: 0, notice: null,
+    engine: 'keywords', fixed: null, byText: null, mode: 'ok', delay: 0, notice: null,
     readCalls: 0, readMode: 'ok', lastFiles: [], readText: null,
     analyzeCalls: 0, pending: 0, registerCalls: 0, lastLang: null, lastText: '', feedback: [], served401: 0,
     license: { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 4 } } },
@@ -85,7 +85,8 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
         if (mode === '500') return await json(500, { error: 'upstream', message: 'boom' });
         if (mode === 'malformed') return await route.fulfill({ status: 200, contentType: 'application/json', body: '{"findings": [ {"category": "auto_ren' });
         if (mode === 'quota') return await json(429, { error: 'quota_month', message: 'server' });
-        const answer = fake.fixed || { findings: keywordFindings(body.text || '', body.uiLang), terms: EMPTY_TERMS, summary: '' };
+        // `byText`: an answer of its own for the text that matches, to tell two contracts apart.
+        const answer = fake.byText?.find(([re]) => re.test(body.text || ''))?.[1] || fake.fixed || { findings: keywordFindings(body.text || '', body.uiLang), terms: EMPTY_TERMS, summary: '' };
         return await json(200, { dropped: 0, truncated: false, model: 'fake', cached: false, quota: fake.quota, ...answer, notice: fake.notice });
       } finally {
         fake.pending -= 1;

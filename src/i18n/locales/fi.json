@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Kun painat sinua sitovaa painiketta, AnteFirma lähettää sivun tekstin ja osoitteen omalle palvelimelleen, joka antaa tekoälymallin (Anthropicin Claude) lukea ne. Palvelin vastaa sinua sitovilla ehdoilla, kukin sivun tarkan lauseen kera, ja hylkää jokaisen varoituksen, jonka lausetta ei löydy.",
   "whenReAboutPress": "Kun olet painamassa",
   "whenRecordCommitmentAfterAnalysisCancellation": "Kun tallennat sitoumuksen analyysin jälkeen, irtisanomisaika tulee tänne valmiin kirjeen kera.",
+  "whoDidYouCommitTo": "Kenelle sitouduit? Nimi näkyy muistutuksissa ja irtisanomiskirjeessä.",
   "whyClausesExactSentencesCalculation": "Miksi? Ehdot, tarkat lauseet ja laskelma",
   "windowExpired": "Määräaika päättynyt",
   "withdrawConsent": "Peru suostumus",

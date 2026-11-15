@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Quando premi un pulsante che ti impegna, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic). Il server risponde con le clausole che ti impegnano, ciascuna con la frase esatta della pagina, e scarta ogni avviso la cui frase non c'è.",
   "whenReAboutPress": "Quando stai per premere",
   "whenRecordCommitmentAfterAnalysisCancellation": "Quando registri un impegno dopo un’analisi, la scadenza di disdetta finisce qui, con la lettera già pronta.",
+  "whoDidYouCommitTo": "A chi ti sei impegnato? Il nome compare nei promemoria e nella lettera di disdetta.",
   "whyClausesExactSentencesCalculation": "Perché? Clausole, frasi esatte e calcolo",
   "windowExpired": "Finestra scaduta",
   "withdrawConsent": "Ritira il consenso",

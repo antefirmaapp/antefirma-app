@@ -38,7 +38,8 @@ export async function openCompare(verdict, now = Date.now()) {
 
 /** Are these the same analysis? (The same result must not be compared with itself.) */
 export function sameVerdict(a, b) {
-  const sig = (v) => JSON.stringify([v?.host || '', v?.title || '', v?.headline || '', v?.cost?.worstCase ?? null, (v?.findings || []).map((f) => f.quote || f.category)]);
+  // Not the title: a name given to the contract after it was put aside does not make it another contract.
+  const sig = (v) => JSON.stringify([v?.host || '', v?.headline || '', v?.cost?.worstCase ?? null, (v?.findings || []).map((f) => f.quote || f.category)]);
   return Boolean(a && b) && sig(a) === sig(b);
 }
 

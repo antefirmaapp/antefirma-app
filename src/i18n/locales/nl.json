@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Als u op een knop drukt die u verplicht, stuurt AnteFirma de tekst en het adres van de pagina naar zijn eigen server, die ze laat lezen door een AI-model (Claude, van Anthropic). De server antwoordt met de bedingen die u binden, elk met de precieze zin van de pagina, en verwerpt elke waarschuwing waarvan de zin er niet staat.",
   "whenReAboutPress": "Wanneer u gaat klikken op",
   "whenRecordCommitmentAfterAnalysisCancellation": "Als u na een analyse een verplichting opslaat, komt de opzegtermijn hier terecht, met de brief klaar.",
+  "whoDidYouCommitTo": "Bij wie heb je je verbonden? De naam staat in de herinneringen en in de opzegbrief.",
   "whyClausesExactSentencesCalculation": "Waarom? Bedingen, precieze zinnen en berekening",
   "windowExpired": "Termijn verstreken",
   "withdrawConsent": "Toestemming intrekken",

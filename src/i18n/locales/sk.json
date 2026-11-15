@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Keď stlačíte tlačidlo, ktoré vás zaväzuje, AnteFirma pošle text a adresu stránky na svoj server, ktorý ich dá prečítať modelu AI (Claude od spoločnosti Anthropic). Server odpovie ustanoveniami, ktoré vás zaväzujú, každým s presnou vetou zo stránky, a vyradí každé upozornenie, ktorého veta na stránke nie je.",
   "whenReAboutPress": "Keď sa chystáte stlačiť",
   "whenRecordCommitmentAfterAnalysisCancellation": "Keď po analýze uložíte záväzok, termín výpovede sa objaví tu, s pripraveným listom.",
+  "whoDidYouCommitTo": "Komu ste sa zaviazali? Názov sa objaví v pripomienkach a vo výpovedi.",
   "whyClausesExactSentencesCalculation": "Prečo? Ustanovenia, presné vety a výpočet",
   "windowExpired": "Lehota uplynula",
   "withdrawConsent": "Odvolať súhlas",

@@ -11,6 +11,7 @@
  *  3. tokens      401 → new token → one retry; 401 again → clear error, no loop
  *  4. plans       analyses used up and "Upgrade to Pro"; an active licence
  *     report     the analysis report, opened from the panel and from the warning
+ *     compare    two contracts side by side, from the panel
  *     photos     photos and a scanned PDF: read by the server, then analysed;
  *                consent first; no text, limits, a file that is not a document
  *  5. pages       SPA buttons created late and recreated; fast double click;
@@ -265,6 +266,48 @@ const SCENARIOS = {
     const empty = await h.open(h.extUrl('src/report/report.html'), 'report-empty');
     await empty.waitForSelector('#empty:not([hidden])', { timeout: 5000 });
     h.check('report with nothing stored: a plain message, no buttons', await empty.evaluate(() => document.querySelector('#report').hidden && document.querySelector('#tools').hidden));
+  },
+
+  async compare(h) {
+    const terms = (price, months, fee) => ({
+      price: { value: price, quote: `€ ${String(price).replace('.', ',')}` }, currency: { value: 'EUR' }, billing_period: { value: 'month' },
+      minimum_term_months: { value: months, quote: `durata minima di ${months} mesi` }, notice_days: null,
+      exit_fee: fee ? { value: fee, quote: `penale di € ${fee},00` } : null, extra_fees: [],
+    });
+    const A = 'OFFERTA UNO. Abbonamento a € 19,99 al mese, durata minima di 24 mesi. In caso di recesso anticipato è dovuta una penale di € 120,00.';
+    const B = 'OFFERTA DUE. Abbonamento a € 24,99 al mese, durata minima di 12 mesi. Nessuna penale.';
+    h.fake.byText = [
+      [/OFFERTA UNO/, { findings: [{ category: 'early_termination_penalty', quote: 'è dovuta una penale di € 120,00', why: 'Motivo.', confidence: 0.9 }, { category: 'minimum_term', quote: 'durata minima di 24 mesi', why: 'Motivo.', confidence: 0.9 }], terms: terms(19.99, 24, 120), summary: '' }],
+      [/OFFERTA DUE/, { findings: [{ category: 'minimum_term', quote: 'durata minima di 12 mesi', why: 'Motivo.', confidence: 0.9 }], terms: terms(24.99, 12, null), summary: '' }],
+    ];
+    await h.settings({ consent: true });
+    const panel = await h.open(h.extUrl('src/sidepanel/sidepanel.html'), 'panel');
+    await panel.waitForTimeout(700);
+    await panel.click('.source[data-source="paste"]');
+    const analyse = async (text, then) => { await panel.fill('#paste-text', text); await panel.click('#run-paste'); await panel.waitForSelector(then, { timeout: 12000 }); };
+
+    await analyse(A, '#compare-start');
+    await panel.click('#compare-start');
+    await panel.waitForSelector('#compare-clear', { timeout: 5000 });
+    h.check('compare: the first contract is put aside', (await panel.locator('#compare-box .status').count()) === 1);
+    await analyse(B, '#compare-open');
+    const [tab] = await Promise.all([h.context.waitForEvent('page', { timeout: 10000 }), panel.click('#compare-open')]);
+    await tab.waitForSelector('#report:not([hidden]) table', { timeout: 8000 });
+    const seen = await tab.evaluate(() => ({
+      url: location.href, summary: document.querySelector('#summary').textContent,
+      rows: Object.fromEntries([...document.querySelectorAll('#table tbody tr')].map((tr) => [tr.dataset.row, [...tr.querySelectorAll('td')].map((td) => `${td.textContent}${td.classList.contains('better') ? ' *' : ''}`)])),
+    }));
+    h.check('compare: the page opens in a tab with the two contracts in columns', seen.url.endsWith('/src/compare/compare.html') && Object.keys(seen.rows).length === 9, seen.url);
+    h.check('compare: 599,76 € against 299,88 €, the lighter one marked, and the sentence says by how much', /599[.,]76/.test(seen.rows.total[0]) && /299[.,]88.* \*$/.test(seen.rows.total[1]) && /299[.,]88/.test(seen.summary), `${seen.rows.total.join(' | ')} — ${seen.summary}`);
+    h.check('compare: 24 months against 12, a fee against none', / \*$/.test(seen.rows.term[1]) && /120/.test(seen.rows.fee[0]) && / \*$/.test(seen.rows.fee[1]), `${seen.rows.term.join(' | ')} — ${seen.rows.fee.join(' | ')}`);
+    h.check('compare: nothing new was asked of the server', h.fake.analyzeCalls === 2, `${h.fake.analyzeCalls} analyses`);
+    await h.a11y(tab, 'comparison page');
+    // The contract put aside is not compared with itself; "stop comparing" starts again.
+    await analyse(A, '#compare-clear');
+    h.check('compare: the contract put aside is recognised', (await panel.locator('#compare-open').count()) === 0);
+    await panel.click('#compare-clear');
+    h.check('compare: "stop comparing" forgets it', await panel.waitForSelector('#compare-start', { timeout: 5000 }).then(() => true, () => false));
+    h.fake.byText = null;
   },
 
   async photos(h) {

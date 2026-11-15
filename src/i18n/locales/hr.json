@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Kad pritisnete gumb koji vas obvezuje, AnteFirma šalje tekst i adresu stranice vlastitom poslužitelju, koji ih daje na čitanje modelu umjetne inteligencije (Claude, tvrtke Anthropic). Poslužitelj odgovara odredbama koje vas obvezuju, svaka s točnom rečenicom sa stranice, i odbacuje svako upozorenje čije rečenice ondje nema.",
   "whenReAboutPress": "Kad budete htjeli pritisnuti",
   "whenRecordCommitmentAfterAnalysisCancellation": "Kad zabilježite obvezu nakon analize, rok za otkaz stiže ovamo, sa spremnim pismom.",
+  "whoDidYouCommitTo": "Prema kome ste se obvezali? Naziv se pojavljuje u podsjetnicima i u pismu o otkazu.",
   "whyClausesExactSentencesCalculation": "Zašto? Odredbe, točne rečenice i izračun",
   "windowExpired": "Rok je istekao",
   "withdrawConsent": "Povuci privolu",

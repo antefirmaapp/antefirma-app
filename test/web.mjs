@@ -162,10 +162,17 @@ try {
   // Recorded as a commitment: it appears in the Commitments tab with its deadline.
   await page.click('#track');
   await page.waitForTimeout(600);
+  // A pasted text has no site to take a name from: asked once, right after saving.
+  await page.waitForSelector('#name-input', { timeout: 5000 });
+  await page.fill('#name-input', 'Palestra Orizzonte');
+  await page.click('#name-ask button[type="submit"]');
+  await page.waitForFunction(() => document.getElementById('name-said')?.textContent.length > 0, null, { timeout: 5000 }).catch(() => {});
+  check('a commitment without a site asks for the seller\'s name, and the calendar entry takes it', /Palestra(\+|%20)Orizzonte/.test(await page.getAttribute('#cal-offer a', 'href')), await page.getAttribute('#cal-offer a', 'href'));
   await page.click('#tab-btn-commitments');
   await page.waitForTimeout(600);
   const items = await page.locator('.c-item:not(.example)').count();
   check('the commitment is recorded and listed in the Commitments tab', items === 1, `${items} commitments`);
+  check('…under the name given', /Palestra Orizzonte/.test(await page.locator('.c-item:not(.example)').first().textContent()));
   check('…with its cancellation deadline', /2028/.test(await page.locator('.c-item:not(.example)').first().textContent()));
   await a11y(page, 'the Commitments tab');
   // The same screens in the dark theme.

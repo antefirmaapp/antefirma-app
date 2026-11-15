@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Quando carrega num botão que o compromete, o AnteFirma envia o texto e o endereço da página para o seu próprio servidor, que os dá a ler a um modelo de IA (Claude, da Anthropic). O servidor responde com as cláusulas que o vinculam, cada uma com a frase exata da página, e descarta qualquer aviso cuja frase lá não esteja.",
   "whenReAboutPress": "Quando estiver prestes a carregar em",
   "whenRecordCommitmentAfterAnalysisCancellation": "Quando regista um compromisso após uma análise, o prazo de cancelamento fica aqui, com a carta pronta.",
+  "whoDidYouCommitTo": "Com quem se comprometeu? O nome aparece nos lembretes e na carta de cancelamento.",
   "whyClausesExactSentencesCalculation": "Porquê? Cláusulas, frases exatas e cálculo",
   "windowExpired": "Prazo expirado",
   "withdrawConsent": "Retirar o consentimento",

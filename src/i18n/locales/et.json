@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Kui vajutate teid siduvat nuppu, saadab AnteFirma lehe teksti ja aadressi oma serverisse, mis laseb selle lugeda tehisintellekti mudelil (Claude, Anthropicult). Server vastab teid siduvate tingimustega, igaüks koos täpse lausega lehelt, ja jätab kõrvale iga hoiatuse, mille lauset seal pole.",
   "whenReAboutPress": "Kui olete vajutamas",
   "whenRecordCommitmentAfterAnalysisCancellation": "Kui salvestate pärast analüüsi kohustuse, jõuab ülesütlemise tähtaeg siia, koos valmis kirjaga.",
+  "whoDidYouCommitTo": "Kelle ees te kohustuse võtsite? Nimi kuvatakse meeldetuletustes ja ülesütlemiskirjas.",
   "whyClausesExactSentencesCalculation": "Miks? Tingimused, täpsed laused ja arvutus",
   "windowExpired": "Tähtaeg möödas",
   "withdrawConsent": "Võta nõusolek tagasi",

@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Când apeși un buton care te angajează, AnteFirma trimite textul și adresa paginii la propriul server, care le dă spre citire unui model AI (Claude, de la Anthropic). Serverul răspunde cu clauzele care te obligă, fiecare cu fraza exactă din pagină, și elimină orice avertisment a cărui frază nu se găsește acolo.",
   "whenReAboutPress": "Când ești pe punctul să apeși",
   "whenRecordCommitmentAfterAnalysisCancellation": "Când salvezi un angajament după o analiză, termenul de reziliere ajunge aici, cu scrisoarea gata.",
+  "whoDidYouCommitTo": "Față de cine te-ai angajat? Numele apare în mementouri și în scrisoarea de reziliere.",
   "whyClausesExactSentencesCalculation": "De ce? Clauze, fraze exacte și calcul",
   "windowExpired": "Termen expirat",
   "withdrawConsent": "Retrage consimțământul",

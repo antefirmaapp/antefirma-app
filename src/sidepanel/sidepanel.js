@@ -62,7 +62,8 @@ function showResult(verdict) {
     // The result on a page of its own, to print, save as a PDF or copy: not for the made-up examples.
     (verdict.example ? '' : `<button id="report-open" style="margin-top:8px;width:100%">${esc(t('reportOpen'))}</button>`);
   if (trackable) $('#track').addEventListener('click', trackCurrent);
-  $('#report-open')?.addEventListener('click', () => openReport(verdict).catch((e) => status(e.message, 'error')));
+  // `lastVerdict`, not `verdict`: a name given after saving the commitment belongs in the report too.
+  $('#report-open')?.addEventListener('click', () => openReport(lastVerdict).catch((e) => status(e.message, 'error')));
   if (!verdict.example) compareButtons(verdict).catch(() => {});
   $('#result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -87,8 +88,8 @@ async function compareButtons(verdict) {
   }
   $('#compare-box')?.remove();
   $('#result').append(box);
-  $('#compare-start')?.addEventListener('click', async () => { await saveCompareBase(verdict); await compareButtons(verdict); });
-  $('#compare-open')?.addEventListener('click', () => openCompare(verdict).catch((e) => status(e.message, 'error')));
+  $('#compare-start')?.addEventListener('click', async () => { await saveCompareBase(lastVerdict); await compareButtons(lastVerdict); });
+  $('#compare-open')?.addEventListener('click', () => openCompare(lastVerdict).catch((e) => status(e.message, 'error')));
   $('#compare-clear')?.addEventListener('click', async () => { await clearCompare(); await compareButtons(verdict); });
 }
 
@@ -114,12 +115,47 @@ async function trackCurrent() {
       return;
     }
     btn.textContent = t('savedCommitments');
+    askName(saved);
     offerCalendar(saved);
     await commitments.load();
   } catch (err) {
     status(err.message, 'error');
     btn.disabled = false;
   }
+}
+
+/**
+ * A commitment from a pasted text, a PDF or a photo has no site to take a name
+ * from. Asked here, once, right after saving: the name goes in the reminders,
+ * in the letter, in the calendar and in a comparison. It can be left empty
+ * and filled later from the Commitments tab.
+ */
+function askName(c) {
+  if (!c || c.provider || c.host || $('#name-ask')) return;
+  const box = document.createElement('form');
+  box.id = 'name-ask';
+  box.className = 'cal-offer';
+  box.innerHTML = `<label class="field"><span>${esc(t('whoDidYouCommitTo'))}</span>
+    <input id="name-input" maxlength="80" autocomplete="organization" placeholder="${esc(t('eGHorizonGym'))}"></label>
+    <div class="row"><button class="secondary" type="submit">${esc(t('save'))}</button><span class="muted small" id="name-said" role="status"></span></div>`;
+  $('#track').after(box);
+  box.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = $('#name-input').value.trim().slice(0, 80);
+    if (!name) return;
+    try {
+      const updated = await send('UPDATE_COMMITMENT', { id: c.id, patch: { provider: name } });
+      // The result on screen takes the name too: the report and a comparison show it.
+      if (lastVerdict) lastVerdict = { ...lastVerdict, title: name };
+      $('#name-said').textContent = t('saved');
+      // The calendar entry was written without a name: written again with it.
+      $('#cal-offer')?.remove();
+      offerCalendar({ ...c, ...(updated || {}), provider: name });
+      await commitments.load();
+    } catch (err) {
+      status(err.message, 'error');
+    }
+  });
 }
 
 /**
@@ -143,7 +179,7 @@ function offerCalendar(c) {
   box.innerHTML = `<p>${esc(t('putCalendarTooRemindsEvenWhen'))}</p>
     <div class="row"><a class="secondary btn-like" href="${esc(google)}" target="_blank" rel="noopener">Google Calendar</a>
     <button class="secondary" id="cal-ics">${esc(t('appleOutlookOthersIcs'))}</button></div>`;
-  $('#track').after(box);
+  ($('#name-ask') || $('#track')).after(box);
   $('#cal-ics').addEventListener('click', async () => {
     try {
       const { content, filename } = await send('BUILD_ICS', { id: c.id });

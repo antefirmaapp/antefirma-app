@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Kad nospiežat pogu, kas jūs saista, AnteFirma nosūta lapas tekstu un adresi uz savu serveri, kas ļauj to izlasīt MI modelim (Claude no Anthropic). Serveris atbild ar noteikumiem, kas jūs saista, katru ar precīzu teikumu no lapas, un atmet katru brīdinājumu, kura teikuma tur nav.",
   "whenReAboutPress": "Kad gatavojaties nospiest",
   "whenRecordCommitmentAfterAnalysisCancellation": "Kad pēc analīzes reģistrējat saistības, uzteikuma termiņš nonāk šeit, ar gatavu vēstuli.",
+  "whoDidYouCommitTo": "Pret ko esat uzņēmies saistības? Nosaukums parādās atgādinājumos un uzteikuma vēstulē.",
   "whyClausesExactSentencesCalculation": "Kāpēc? Noteikumi, precīzi teikumi un aprēķins",
   "windowExpired": "Termiņš beidzies",
   "withdrawConsent": "Atsaukt piekrišanu",

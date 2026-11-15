@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Wenn Sie auf eine Schaltfläche klicken, die Sie verpflichtet, sendet AnteFirma Text und Adresse der Seite an seinen eigenen Server, der sie von einem KI-Modell (Claude, von Anthropic) lesen lässt. Der Server antwortet mit den Klauseln, die Sie binden, jede mit dem genauen Satz von der Seite, und verwirft jede Warnung, deren Satz dort nicht steht.",
   "whenReAboutPress": "Wenn Sie gleich klicken auf",
   "whenRecordCommitmentAfterAnalysisCancellation": "Wenn Sie nach einer Analyse eine Verpflichtung speichern, landet die Kündigungsfrist hier, mit fertigem Schreiben.",
+  "whoDidYouCommitTo": "Bei wem haben Sie sich verpflichtet? Der Name erscheint in den Erinnerungen und im Kündigungsschreiben.",
   "whyClausesExactSentencesCalculation": "Warum? Klauseln, genaue Sätze und Berechnung",
   "windowExpired": "Frist abgelaufen",
   "withdrawConsent": "Einwilligung widerrufen",

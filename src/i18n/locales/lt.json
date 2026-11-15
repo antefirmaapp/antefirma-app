@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Kai paspaudžiate jus įpareigojantį mygtuką, AnteFirma siunčia puslapio tekstą ir adresą į savo serverį, kuris pateikia jį skaityti DI modeliui (Claude, sukurtam Anthropic). Serveris atsako jus įpareigojančiomis sąlygomis, kiekviena su tiksliu sakiniu iš puslapio, ir atmeta kiekvieną įspėjimą, kurio sakinio ten nėra.",
   "whenReAboutPress": "Kai ketinate paspausti",
   "whenRecordCommitmentAfterAnalysisCancellation": "Kai po analizės įrašote įsipareigojimą, nutraukimo terminas atsiduria čia – su paruoštu laišku.",
+  "whoDidYouCommitTo": "Kam įsipareigojote? Pavadinimas rodomas priminimuose ir nutraukimo laiške.",
   "whyClausesExactSentencesCalculation": "Kodėl? Sąlygos, tikslūs sakiniai ir skaičiavimas",
   "windowExpired": "Terminas baigėsi",
   "withdrawConsent": "Atšaukti sutikimą",

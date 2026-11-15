@@ -67,6 +67,9 @@ test('a result is not compared with itself; names come from the seller', () => {
   assert.ok(sameVerdict(A, structuredClone(A)));
   assert.ok(!sameVerdict(A, B));
   assert.ok(!sameVerdict(A, null));
+  // A name given after the contract was put aside does not make it another contract.
+  assert.ok(sameVerdict({ ...A, host: '' }, { ...A, host: '', title: 'FitClub' }));
+  assert.equal(contractName({ title: 'Palestra Orizzonte' }, 'First contract'), 'Palestra Orizzonte');
   assert.equal(contractName(A, 'First contract'), 'Fitclub');
   assert.equal(contractName({ title: 'page1.jpg' }, 'First contract'), 'First contract');
 });

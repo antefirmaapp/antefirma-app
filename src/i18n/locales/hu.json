@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Amikor megnyomsz egy téged kötelező gombot, az AnteFirma elküldi az oldal szövegét és címét a saját szerverére, amely egy MI-modellel (az Anthropic Claude modelljével) olvastatja el. A szerver a téged kötelező kikötésekkel válaszol, mindegyiket az oldal pontos mondatával, és elvet minden figyelmeztetést, amelynek mondata nincs az oldalon.",
   "whenReAboutPress": "Amikor éppen megnyomnád",
   "whenRecordCommitmentAfterAnalysisCancellation": "Ha egy elemzés után rögzítesz egy kötelezettséget, a felmondási határidő ide kerül, kész levéllel.",
+  "whoDidYouCommitTo": "Kivel szemben vállaltál kötelezettséget? A név megjelenik az emlékeztetőkben és a felmondólevélben.",
   "whyClausesExactSentencesCalculation": "Miért? Kikötések, pontos mondatok és számítás",
   "windowExpired": "Az idő lejárt",
   "withdrawConsent": "Hozzájárulás visszavonása",

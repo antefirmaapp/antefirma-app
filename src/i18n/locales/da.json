@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "Når du trykker på en knap, der binder dig, sender AnteFirma sidens tekst og adresse til sin egen server, som lader en AI-model (Claude, fra Anthropic) læse den. Serveren svarer med de vilkår, der binder dig, hver med den præcise sætning fra siden, og fjerner enhver advarsel, hvis sætning ikke står der.",
   "whenReAboutPress": "Når du er ved at trykke på",
   "whenRecordCommitmentAfterAnalysisCancellation": "Når du gemmer en forpligtelse efter en analyse, havner fristen for opsigelse her, med brevet klar.",
+  "whoDidYouCommitTo": "Hvem har du bundet dig til? Navnet vises i påmindelserne og i opsigelsesbrevet.",
   "whyClausesExactSentencesCalculation": "Hvorfor? Vilkår, præcise sætninger og beregning",
   "windowExpired": "Fristen er udløbet",
   "withdrawConsent": "Træk samtykket tilbage",

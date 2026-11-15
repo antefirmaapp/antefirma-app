@@ -747,6 +747,7 @@
   "whenPressButtonCommitsAntefirmaSends": "När du trycker på en knapp som binder dig skickar AnteFirma sidans text och adress till sin egen server, som låter en AI-modell (Claude, från Anthropic) läsa den. Servern svarar med villkoren som binder dig, vart och ett med den exakta meningen från sidan, och tar bort varje varning vars mening inte finns där.",
   "whenReAboutPress": "När du ska trycka på",
   "whenRecordCommitmentAfterAnalysisCancellation": "När du sparar ett åtagande efter en analys hamnar sista dagen för uppsägning här, med brevet klart.",
+  "whoDidYouCommitTo": "Vem har du bundit dig till? Namnet visas i påminnelserna och i uppsägningsbrevet.",
   "whyClausesExactSentencesCalculation": "Varför? Villkor, exakta meningar och beräkning",
   "windowExpired": "Fristen har gått ut",
   "withdrawConsent": "Återkalla samtycket",
