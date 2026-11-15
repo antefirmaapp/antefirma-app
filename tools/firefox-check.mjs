@@ -90,7 +90,10 @@ writeFileSync(join(profile, 'user.js'), [
   ['intl.accept_languages', 'it-IT, it'], ['remote.active-protocols', 1],
 ].map(([k, v]) => `user_pref(${JSON.stringify(k)}, ${JSON.stringify(v)});`).join('\n'));
 const bidiPort = 9300 + Math.floor(Math.random() * 90);
-const firefox = spawn(FIREFOX, ['--headless', '--no-remote', '--profile', profile, '--remote-debugging-port', String(bidiPort)], { stdio: ['ignore', 'pipe', 'pipe'] });
+// Recent Firefox versions let a remote client run scripts in an extension's own
+// pages only when started with this variable; older ones ignore it.
+const firefox = spawn(FIREFOX, ['--headless', '--no-remote', '--profile', profile, '--remote-debugging-port', String(bidiPort)],
+  { stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, MOZ_REMOTE_ALLOW_SYSTEM_ACCESS: '1' } });
 children.push(firefox);
 let firefoxLog = '';
 firefox.stderr.on('data', (d) => { firefoxLog += d; });
