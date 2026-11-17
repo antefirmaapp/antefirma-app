@@ -178,6 +178,35 @@
     },
   ];
 
+  /**
+   * What the extension met on a hundred real websites (tools/real-sites.mjs,
+   * November 2026) and the tables above missed. A fourth branch, for the same
+   * hygiene reason as the others: the older ones stay identical character for
+   * character, so a wrong rule here can only add matches.
+   */
+  const SEEN_ON_REAL_SITES = {
+    subscribe: [
+      // Free trials that turn into a paid plan.
+      'start\\s+(?:a|your|my)\\s+(?:\\d+[-\\s]days?\\s+)?free\\s+trial', 'try\\s+(?:it\\s+)?(?:free\\s+)?(?:for\\s+)?\\d+\\s+(?:days?|weeks?|months?)',
+      'prova\\s+(?:\\d+|un|uno|una)\\s+(?:mese|mesi|giorni|settimana|settimane)', 'pru(?:é|e)ba(?:lo)?\\s+(?:\\d+|un|una)\\s+(?:mes|meses|d(?:í|i)as|semanas?)',
+      // Spanish infinitive and imperative ("Suscribir", "Contrata").
+      'suscribir(?:me|se)?', 'contrata(?:lo|la)?(?:\\s+(?:ya|ahora|online))?',
+      // Lithuanian "order" (a plan, a package).
+      'u(?:ž|z)sisakyti', 'u(?:ž|z)sisakyk(?:ite)?',
+    ],
+    purchase: [
+      'purchase\\s+now', '^\\s*buy\\s+(?:\\S+\\s*){1,3}$',
+      // Dutch imperative, alone or with what is ordered ("Bestel nu", "Bestel iPhone 18 Pro").
+      'bestel(?:\\s+(?:nu|direct|online))?', '^\\s*bestel\\s+(?:\\S+\\s*){1,6}$',
+      'kupi(?:ć|c)', 'dokup(?:\\s+\\S+)?',
+      // Estonian "I order" and "order".
+      'tellin', 'telli\\s+(?:kohe|n(?:ü|u)(?:ü|u)d)', 'tellige',
+    ],
+    oauth: [`iscriviti\\s+con\\s+(?:il\\s+tuo\\s+account\\s+|l['’]account\\s+)?${OAUTH}`, `reg(?:í|i)strate\\s+con\\s+${OAUTH}`, `sign\\s+up\\s+with\\s+${OAUTH}`],
+    consent: ['n(?:õ|o)ustun\\s+k(?:õ|o)igi(?:ga|\\s+k(?:ü|u)psistega)?'],
+  };
+  for (const p of ACTION_PATTERNS) if (SEEN_ON_REAL_SITES[p.type]) p.re = more(p.re, SEEN_ON_REAL_SITES[p.type]);
+
   const ACTION_LABELS = {
     accept_terms: 'acceptingTermsConditions',
     subscribe: 'startingSubscription',
@@ -233,7 +262,37 @@
     'odbij(?:\\s+sve)?', 'samo\\s+(?:nu(?:ž|z)ni|neophodni)(?:\\s+kola(?:č|c)i(?:ć|c)i)?', 'ne\\s+prihva(?:ć|c)am', 'odustani', 'natrag', 'zatvori', 'otka(?:ž|z)i(?:\\s+pretplatu)?', 'odjavi\\s+se', 'odjava', '(?:postavke|upravljanje)\\s+kola(?:č|c)i(?:ć|c)(?:a|ima)', 'nastavi\\s+(?:kupovati|kupnju|bez\\s+(?:prihva(?:ć|c)anja|pla(?:ć|c)anja))', 'zavrni(?:\\s+vse)?', 'samo\\s+(?:nujni|nujne)(?:\\s+pi(?:š|s)kotki)?', 'ne\\s+sprejmem', 'prekli(?:č|c)i', 'nazaj', 'zapri', 'odpovej(?:\\s+naro(?:č|c)nino)?', 'odjavi\\s+se', 'odjava', '(?:nastavitve|upravljanje)\\s+pi(?:š|s)kotkov', 'nadaljuj\\s+(?:z\\s+nakupovanjem|brez\\s+(?:sprejetja|pla(?:č|c)ila))', 'откажи(?:\\s+всички)?', 'отхвърли(?:\\s+всички)?', 'само\\s+(?:необходимите|задължителните)(?:\\s+бисквитки)?', 'не\\s+приемам', 'отказ', 'назад', 'затвори', 'прекрати(?:\\s+абонамента)?', 'изход', 'отпиши\\s+се', '(?:настройки|управление)\\s+на\\s+бисквитките', 'продължи\\s+(?:пазаруването|без\\s+(?:приемане|плащане))',
     // Lithuanian, Latvian and Estonian. In Estonian "Telli" is an order; joining a newsletter is not.
     'atmesti(?:\\s+visus)?', 'tik\\s+b(?:ū|u)tini(?:\\s+slapukai)?', 'nesutinku', 'at(?:š|s)aukti', 'atgal', 'u(?:ž|z)daryti', 'atsijungti', 'atsisakyti\\s+prenumeratos', '(?:slapuk(?:ų|u)\\s+nustatymai|tvarkyti\\s+slapukus)', 't(?:ę|e)sti\\s+(?:apsipirkim(?:ą|a)|be\\s+(?:sutikimo|apmok(?:ė|e)jimo))', 'noraid(?:ī|i)t(?:\\s+visas?)?', 'tikai\\s+nepiecie(?:š|s)am(?:ā|a)s(?:\\s+s(?:ī|i)kdatnes)?', 'nepiekr(?:ī|i)tu', 'atcelt', 'atpaka(?:ļ|l)', 'aizv(?:ē|e)rt', 'iziet', 'atteikties\\s+no\\s+ab(?:o|on)(?:ē|e)(?:š|s)anas', '(?:s(?:ī|i)kdat(?:ņ|n)u\\s+iestat(?:ī|i)jumi|p(?:ā|a)rvald(?:ī|i)t\\s+s(?:ī|i)kdatnes)', 'turpin(?:ā|a)t\\s+(?:iepirkties|bez\\s+(?:piekri(?:š|s)anas|apmaksas))', 'keeldu(?:\\s+k(?:õ|o)igist)?', 'l(?:ü|u)kka\\s+(?:k(?:õ|o)ik\\s+)?tagasi', 'ainult\\s+vajalikud(?:\\s+k(?:ü|u)psised)?', 'ei\\s+n(?:õ|o)ustu', 't(?:ü|u)hista', 'tagasi', 'sulge', 'logi\\s+v(?:ä|a)lja', 'loobu\\s+tellimusest', '(?:k(?:ü|u)psiste\\s+seaded|halda\\s+k(?:ü|u)psiseid)', 'j(?:ä|a)tka\\s+(?:ostlemist|ilma\\s+(?:n(?:õ|o)usolekuta|maksmata))',
+    // Accepting only the necessary cookies, or only those ticked, is a refusal of the rest (seen on real sites).
+    'accept\\s+(?:only\\s+)?(?:necessary|essential|selected|selection)(?:\\s+cookies)?', 'accetta\\s+(?:solo\\s+)?(?:i\\s+)?(?:necessari|essenziali|selezionati|selezione)',
+    'aceptar\\s+(?:solo\\s+)?(?:las\\s+)?(?:necesarias|seleccionadas|selecci(?:ó|o)n)', '(?:auswahl|ausgew(?:ä|ae)hlte)\\s+(?:akzeptieren|best(?:ä|ae)tigen|erlauben)',
+    'accepter\\s+(?:uniquement\\s+)?(?:la\\s+s(?:é|e)lection|les\\s+(?:cookies\\s+)?(?:n(?:é|e)cessaires|essentiels))', 'selectie\\s+(?:accepteren|toestaan)',
+    'akceptuj\\s+(?:wybrane|niezb(?:ę|e)dne)', 'aceitar\\s+(?:apenas\\s+)?(?:os\\s+)?(?:necess(?:á|a)rios|selecionados)', '(?:acceptera|godk(?:ä|a)nn)\\s+(?:valda|n(?:ö|o)dv(?:ä|a)ndiga)',
+    'accept(?:ă|a)\\s+(?:doar\\s+)?(?:cele\\s+)?(?:necesare|selectate)', 'p(?:ř|r)ijmout\\s+(?:vybran(?:é|e)|nezbytn(?:é|e))', 'accepter\\s+(?:kun\\s+)?(?:valgte|n(?:ø|o)dvendige)',
+    'godta\\s+(?:valgte|n(?:ø|o)dvendige)', 'hyv(?:ä|a)ksy\\s+(?:valitut|v(?:ä|a)ltt(?:ä|a)m(?:ä|a)tt(?:ö|o)m(?:ä|a)t)', 'prija(?:ť|t)\\s+(?:vybran(?:é|e)|nevyhnutn(?:é|e))',
+    'kiv(?:á|a)lasztottak\\s+elfogad(?:á|a)sa', 'csak\\s+a\\s+sz(?:ü|u)ks(?:é|e)gesek', 'αποδοχή\\s+(?:επιλεγμένων|απαραίτητων)', 'prihvati\\s+(?:samo\\s+)?(?:nu(?:ž|z)ne|odabrane)(?:\\s+kola(?:č|c)i(?:ć|c)e)?',
+    'sprejmi\\s+(?:izbrane|nujne)', 'приеми\\s+(?:избраните|необходимите)', 'priimti\\s+(?:tik\\s+b(?:ū|u)tinus|pasirinktus)(?:\\s+slapukus)?', 'pie(?:ņ|n)emt\\s+(?:atlas(?:ī|i)t(?:ā|a)s|tikai\\s+nepiecie(?:š|s)am(?:ā|a)s)',
+    'n(?:õ|o)ustun\\s+valitud(?:ega)?', 'ainult\\s+vajalikud',
   ]);
+
+  /**
+   * Labels that are not buttons of a decision, whatever words they contain
+   * (seen on real sites): a question is an FAQ toggle or an article title
+   * ("Can I upgrade my plan?", "¿Puedo contratar solo fútbol?"); a long number
+   * is a registration or customer code; asking to be called back commits to
+   * nothing; "on tilaa" is Finnish for "there is room"; "köp-filmer" is a noun.
+   */
+  // The question words end at a letter-aware boundary: a plain \\b would find the Czech "proč" inside "Procéder".
+  const NOT_AN_ACTION = more(new RegExp(`[?¿]|\\d{5,}|^\\s*(?:why|how\\s+(?:do|does|can|to)|perch[ée]|pourquoi|por\\s+qu[ée]|warum|waarom|dlaczego|porqu[eê]|varf(?:ö|o)r|hvorfor|miksi|pre(?:č|c)o|pro(?:č|c)|mi(?:é|e)rt|γιατί|za(?:š|s)to|zakaj|защо|kod(?:ė|e)l|k(?:ā|a)p(?:ē|e)c|miks)(?!${W})`, 'i'), [
+    'request\\s+a\\s+call(?:\\s*back)?', 'call\\s*back', 'richiedi\\s+(?:una\\s+)?(?:chiamata|richiamata)', 'solicitar\\s+(?:una\\s+)?llamada', 'r(?:ü|ue)ckruf(?:\\s+anfordern)?',
+    '(?:(?:ê|e)tre\\s+)?rappel(?:(?:é|e)|er)?(?:\\s+gratuit)?', 'zam(?:ó|o)w\\s+rozmow(?:ę|e)', 'zam(?:ó|o)w\\s+(?:przez\\s+telefon|z\\s+doradc(?:ą|a))', 'oddzwo(?:ń|n)\\w*',
+    '(?:on|ei\\s+ole|lis(?:ä|a)(?:ä|a))\\s+tilaa', 'k(?:ö|ø|o)p-\\w+',
+  ]);
+
+  /**
+   * "Reject and subscribe": the cookie wall that asks to pay instead of being
+   * tracked. The refusal is of the cookies; the button starts a paid plan.
+   */
+  const PAY_OR_OK = /(?:rechaz|rifiut|declin|reject|refus|ablehn|weiger|odrzu|rejeit|recus|avvis|afvis|respinge|odm(?:í|i)t)\w*(?:\s+\S+){0,3}?\s+(?:y|e|and|et|und|en|i|och|og|și|si|a|ja)\s+(?:suscrib|abbon|subscri|s['’]abonn|abonnier|abonneer|subskryb|assin|prenumer|abon)\w*/i;
 
   /**
    * Labels about something free and without commitment: newsletters, alerts,
@@ -297,6 +356,8 @@
    */
   function classifyDetail(text) {
     if (!text) return { type: null, weight: 0, vetoed: false };
+    if (PAY_OR_OK.test(text)) return { type: 'subscribe', weight: 4, vetoed: false };
+    if (NOT_AN_ACTION.test(text)) return { type: null, weight: 0, vetoed: true };
     const best = heaviestMatch(text);
     if (optOutWins(text, best)) return { type: null, weight: 0, vetoed: true };
     // A label that only speaks of newsletters or alerts commits to nothing, and

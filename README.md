@@ -222,6 +222,23 @@ For every version that changes the look, regenerate the images and the manual:
 
 Both use a fake server and an invented site: no analysis spent, no real data.
 
+## Real websites
+
+```bash
+xvfb-run -a node tools/real-sites.mjs --workers 8    # the pages in test/real-sites/sites.json
+```
+
+The extension on real websites: on every page in `test/real-sites/sites.json`
+(and up to two pages one level down, where the plan and checkout links lead)
+it clicks the visible buttons for real and records which are held, with what
+action type and what text would be analysed. Nothing happens on the sites:
+every request that is not a read is aborted, the page cannot navigate away
+once loaded, and the AnteFirma server is a local fake that never answers.
+Results go to a temporary folder (`results.jsonl`, `results.json`, `texts/`)
+and are not committed: they hold third-party text. Not run in CI, since real
+sites change daily; run it before a release that touches `actions.js` or
+`detector.js`, with unrestricted network access.
+
 ## Firefox
 
 ```bash

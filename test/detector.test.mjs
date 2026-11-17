@@ -169,3 +169,17 @@ test('the detector on realistic pages', { skip: !chromium && 'Playwright is not 
   console.log(`content scripts executed (bytes): ${lines.join(' · ')}`);
   assert.deepEqual(errors, [], 'JavaScript errors on the pages');
 });
+
+test('every element the extension adds to a page is one the detector never classifies', () => {
+  const src = (f) => readFileSync(join(ROOT, 'src', 'content', f), 'utf8');
+  const ours = new Set([...src('detector.js').match(/const OURS = new Set\(\[([^\]]*)\]\)/)[1].matchAll(/'([^']+)'/g)].map((m) => m[1]));
+  // The custom elements the content scripts create: the warning and the notification.
+  const created = new Set();
+  for (const f of SCRIPTS.filter((x) => x.startsWith('src/content/'))) {
+    const code = readFileSync(join(ROOT, f), 'utf8');
+    for (const m of code.matchAll(/createElement\('([a-z]+-[a-z-]+)'\)/g)) created.add(m[1].toUpperCase());
+    for (const m of code.matchAll(/HOST_TAG = '([a-z]+-[a-z-]+)'/g)) created.add(m[1].toUpperCase());
+  }
+  assert.ok(created.size >= 2, [...created].join(', '));
+  for (const tag of created) assert.ok(ours.has(tag), `${tag} is created by the extension but missing from OURS`);
+});

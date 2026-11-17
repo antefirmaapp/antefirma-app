@@ -1,0 +1,8 @@
+{
+  "intercept": [
+    { "selector": "#attiva", "type": "subscribe" },
+    { "selector": "#iscriviti", "type": "subscribe" },
+    { "selector": "#select", "type": "subscribe" }
+  ],
+  "pass": ["#free-plan", "#attiva-sim", "#get-started", "#faq-upgrade", "#faq-buy", "#callback", "#registro"]
+}

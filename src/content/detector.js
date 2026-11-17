@@ -20,7 +20,7 @@
   const CLICKABLE = 'button, a[href], input[type="submit"], input[type="button"], [role="button"], [type="submit"]';
 
   /** Our own elements: no click inside them is classified. */
-  const OURS = new Set(['VINCOLO-AVVISO', 'VINCOLO-NOTA']);
+  const OURS = new Set(['ANTEFIRMA-ALERT', 'ANTEFIRMA-TOAST']);
 
   /**
    * Classifies an element; returns the action type or null.
@@ -48,6 +48,15 @@
    */
   const GENERIC_RE =
     /^(?:continua|continue|avanti|next|conferma|confermo|confirm|procedi|prosegui|proceed|vai\s+avanti|ok)[\s.!…»>→-]*$/i;
+
+  /**
+   * Seen on real sites: words that open a plan as often as they do something
+   * free. "Attiva" on an offer card at 9,99 €/month, "Iscriviti" on a gym page,
+   * "Select" under a plan's price. Like "Continue", they count only with the
+   * structural proof next to them (a recurring price or card fields).
+   */
+  const PLAN_WORD_RE =
+    /^(?:attiva(?:\s+(?:ora|subito))?|iscriviti(?:\s+subito)?|scegli|seleziona|get\s+started|get\s+it\s+now|select|choose|elegir|elige|jetzt\s+sichern|sichern|w(?:ä|ae)hlen|ausw(?:ä|ae)hlen|choisir|kies|wybierz|escolher|v(?:ä|a)lj|v(?:æ|ae)lg|velg|valitse)[\s.!…»>→-]*$/i;
 
   /**
    * The decision box: the widest container around the button that still talks
@@ -121,7 +130,7 @@
 
   function structuralType(el) {
     const label = labelOf(el);
-    if (!label || !GENERIC_RE.test(label)) return null;
+    if (!label || !(GENERIC_RE.test(label) || PLAN_WORD_RE.test(label))) return null;
 
     const cached = evidence.get(el);
     if (cached && Date.now() - cached.at < 2000) return cached.type;
@@ -131,7 +140,8 @@
       // A recurring price next to a "Continue" is a subscription about to start;
       // without a price but with card fields, it is a purchase.
       const box = decisionBox(el);
-      if (CF.context.pricesIn((box.innerText || '').slice(0, 2000)).some((p) => p.period)) type = 'subscribe';
+      // "$0 per month" is the free plan's price tag, not a charge: it proves nothing.
+      if (CF.context.pricesIn((box.innerText || '').slice(0, 2000)).some((p) => p.period && p.amount > 0)) type = 'subscribe';
       else if (hasPaymentFields(box)) type = 'purchase';
     } catch {
       type = null; // the context must never make interception fail

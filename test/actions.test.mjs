@@ -883,3 +883,36 @@ test('prices, periods and free trials in Lithuanian, Latvian and Estonian', () =
     assert.ok(Math.abs((p.trial?.months ?? 0) - months) < 1e-9, `${text} → ${JSON.stringify(p.trial)}`);
   }
 });
+
+/**
+ * What a run on a hundred real websites found (tools/real-sites.mjs, November
+ * 2026), rewritten in our own words: commitments the tables missed, and
+ * harmless labels they held.
+ */
+test('real sites: commitments that used to slip through', () => {
+  const cases = {
+    'Start a free trial': 'subscribe', 'Start your 30-day free trial': 'subscribe', 'Prova 1 mese a 0 €': 'subscribe',
+    'Suscribir': 'subscribe', 'Contrata': 'subscribe', 'Užsisakyti planą': 'subscribe',
+    'Rechazar todo y suscribirme': 'subscribe', 'Decline and subscribe': 'subscribe', 'Rifiuta e abbonati': 'subscribe',
+    'Buy Plus': 'purchase', 'Buy Unlimited': 'purchase', 'or purchase now': 'purchase',
+    'Bestel nu': 'purchase', 'Bestel iPhone 18 Pro': 'purchase', 'Bestel direct internet': 'purchase',
+    'Kupić nowy numer': 'purchase', 'Tellin kaitse': 'purchase',
+    'Iscriviti con Google': 'oauth', 'Sign up with Apple': 'oauth', 'Nõustun kõigi küpsistega': 'consent',
+  };
+  for (const [label, type] of Object.entries(cases)) assert.equal(classifyText(label), type, label);
+});
+
+test('real sites: questions, codes, call-backs and partial cookie consent are not commitments', () => {
+  for (const label of [
+    'How do I upgrade my plan?', 'Can I change plan during the free trial?', '¿Puedo contratar solo la tele?', 'Où commander un répéteur ?',
+    'Why subscribe?', 'Queres aderir? Saber mais', 'Pourquoi vous demandons-nous d’accepter ces traitements', 'Kokį telefoną pirkti? Gidas',
+    'Cod unic de înregistrare: 1234567', 'Numero cliente 0012345678',
+    'Zamów rozmowę', 'Zamów przez telefon', 'Zamów z doradcą', 'Chcę kupić - oddzwońcie', 'Request a call back', 'Richiedi una chiamata',
+    'Työpaikalla on tilaa perheelle', 'Upptäck fler hyr & köp-filmer',
+    'Prihvati nužne kolačiće', 'Priimti tik būtinus', 'Accepter valgte', 'Accept selected', 'Accetta solo i necessari', 'Akceptuj wybrane',
+  ]) assert.equal(classifyText(label), null, label);
+  // What must not move: real commitments next to the new vetoes.
+  for (const [label, type] of Object.entries({ 'Procéder au paiement': 'purchase', 'Tilaa nyt': 'subscribe', 'Köp nu': 'purchase', 'Accept all cookies': 'consent' })) {
+    assert.equal(classifyText(label), type, label);
+  }
+});
