@@ -193,17 +193,23 @@
       'suscribir(?:me|se)?', 'contrata(?:lo|la)?(?:\\s+(?:ya|ahora|online))?',
       // Lithuanian "order" (a plan, a package).
       'u(?:ž|z)sisakyti', 'u(?:ž|z)sisakyk(?:ite)?',
+      // Second run, on sites the rules had not seen: trials written another way.
+      'start\\s+(?:(?:a|your|my)\\s+)?(?:free\\s+)?\\d+[-\\s]?days?\\s+(?:free\\s+)?trial', 'start\\s+(?:(?:a|your|my)\\s+)?free\\s+\\d+[-\\s]?days?\\s+trial',
+      'try\\s+(?:it\\s+)?risk[-\\s]free\\s+for\\s+\\d+\\s+days', 'try\\s+(?:it\\s+)?for\\s+free', '\\d+\\s+tage\\s+(?:\\S+\\s+)?(?:kostenlos\\s+)?testen',
+      'essayer\\s+(?:maintenant|gratuitement)', 'prova\\s+nu', 'join\\s+the\\s+club',
     ],
     purchase: [
       'purchase\\s+now', '^\\s*buy\\s+(?:\\S+\\s*){1,3}$',
       // Dutch imperative, alone or with what is ordered ("Bestel nu", "Bestel iPhone 18 Pro").
       'bestel(?:\\s+(?:nu|direct|online))?', '^\\s*bestel\\s+(?:\\S+\\s*){1,6}$',
-      'kupi(?:ć|c)', 'dokup(?:\\s+\\S+)?',
+      'kupi(?:ć|c)', 'dokup(?:\\s+\\S+)?', '^\\s*purchase(?:\\s+(?!(?:help|history|terms|policy|faq|support|information|info|options)\\b)(?:\\S+\\s*){1,3})?$',
       // Estonian "I order" and "order".
       'tellin', 'telli\\s+(?:kohe|n(?:ü|u)(?:ü|u)d)', 'tellige',
     ],
     oauth: [`iscriviti\\s+con\\s+(?:il\\s+tuo\\s+account\\s+|l['’]account\\s+)?${OAUTH}`, `reg(?:í|i)strate\\s+con\\s+${OAUTH}`, `sign\\s+up\\s+with\\s+${OAUTH}`],
     consent: ['n(?:õ|o)ustun\\s+k(?:õ|o)igi(?:ga|\\s+k(?:ü|u)psistega)?'],
+    // A free account is a sign-up, as "Sign up for free" already is.
+    signup: ['start\\s+(?:for\\s+)?free', 'join\\s+(?:for\\s+)?free'],
     /**
      * "Aceptar" alone, as "Accepter" and "Accepteren" already are. It used to stay
      * out, so as not to stop every "OK" of a Spanish dialog; on real sites it was
@@ -211,7 +217,7 @@
      * unwarned. The whole label must be the word: "Aceptar y continuar" and the
      * like are already in the table above.
      */
-    accept_terms: ['^\\s*aceptar\\s*$'],
+    accept_terms: ['^\\s*aceptar\\s*$', '^\\s*(?:i\\s+)?accept\\s*$'],
   };
   for (const p of ACTION_PATTERNS) if (SEEN_ON_REAL_SITES[p.type]) p.re = more(p.re, SEEN_ON_REAL_SITES[p.type]);
 
@@ -280,6 +286,8 @@
     'kiv(?:á|a)lasztottak\\s+elfogad(?:á|a)sa', 'csak\\s+a\\s+sz(?:ü|u)ks(?:é|e)gesek', 'αποδοχή\\s+(?:επιλεγμένων|απαραίτητων)', 'prihvati\\s+(?:samo\\s+)?(?:nu(?:ž|z)ne|odabrane)(?:\\s+kola(?:č|c)i(?:ć|c)e)?',
     'sprejmi\\s+(?:izbrane|nujne)', 'приеми\\s+(?:избраните|необходимите)', 'priimti\\s+(?:tik\\s+b(?:ū|u)tinus|pasirinktus)(?:\\s+slapukus)?', 'pie(?:ņ|n)emt\\s+(?:atlas(?:ī|i)t(?:ā|a)s|tikai\\s+nepiecie(?:š|s)am(?:ā|a)s)',
     'n(?:õ|o)ustun\\s+valitud(?:ega)?', 'ainult\\s+vajalikud',
+    // Doing something without an account is the opposite of signing up ("Solicitar asistencia sin registrarse").
+    'sin\\s+registrar(?:se|te)?', 'senza\\s+registra(?:zione|rti|rsi)', 'without\\s+(?:signing\\s+up|registering|an\\s+account)', 'ohne\\s+(?:registrierung|anmeldung|konto)', 'sans\\s+(?:inscription|compte|vous\\s+inscrire)',
   ]);
 
   /**
@@ -294,6 +302,11 @@
     'request\\s+a\\s+call(?:\\s*back)?', 'call\\s*back', 'richiedi\\s+(?:una\\s+)?(?:chiamata|richiamata)', 'solicitar\\s+(?:una\\s+)?llamada', 'r(?:ü|ue)ckruf(?:\\s+anfordern)?',
     '(?:(?:ê|e)tre\\s+)?rappel(?:(?:é|e)|er)?(?:\\s+gratuit)?', 'zam(?:ó|o)w\\s+rozmow(?:ę|e)', 'zam(?:ó|o)w\\s+(?:przez\\s+telefon|z\\s+doradc(?:ą|a))', 'oddzwo(?:ń|n)\\w*',
     '(?:on|ei\\s+ole|lis(?:ä|a)(?:ä|a))\\s+tilaa', 'k(?:ö|ø|o)p-\\w+',
+    // Second run: a consent to the technical cookies only is a refusal of the rest, whatever its verb;
+    // a document to read ("Antes de contratar (PDF)"); a help topic ("Bestellen & Annuleren").
+    '(?:consenti|accetta|accept|allow|permitir|aceptar|autoriser|accepter|zulassen|akzeptieren)\\s+(?:solo|only|s(?:ó|o)lo|uniquement|nur)\\s+(?:(?:i|the|las|los|les)\\s+)?(?:cookies?\\s+)?(?:tecnici|necessari|essenziali|technical|necessary|essential|t(?:é|e)cnicas|necesarias|techniques|n(?:é|e)cessaires|notwendige|technisch\\w*)',
+    'povolit\\s+v(?:ý|y)b(?:ě|e)r', 'pdf',
+    '(?:bestellen|bestelling(?:en)?|orders?|ordering|ordini|pedidos|commandes?|bestellung(?:en)?)\\s*(?:&|and|en|e|y|et|und)\\s*(?:annuleren|cancel\\w*|annull\\w*|cancelar|annuler|stornieren|retour\\w*|returns?|resi|devoluciones|zur(?:ü|u)ck\\w*)',
   ]);
 
   /**

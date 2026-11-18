@@ -56,7 +56,7 @@
    * structural proof next to them (a recurring price or card fields).
    */
   const PLAN_WORD_RE =
-    /^(?:attiva(?:\s+(?:ora|subito))?|iscriviti(?:\s+subito)?|scegli|seleziona|get\s+started|get\s+it\s+now|select|choose|elegir|elige|jetzt\s+sichern|sichern|w(?:ä|ae)hlen|ausw(?:ä|ae)hlen|choisir|kies|wybierz|escolher|v(?:ä|a)lj|v(?:æ|ae)lg|velg|valitse)[\s.!…»>→-]*$/i;
+    /^(?:attiva(?:\s+(?:ora|subito))?|iscriviti(?:\s+subito)?|scegli|seleziona|get\s+started|get\s+it\s+now|select|choose|elegir|elige|jetzt\s+sichern|sichern|join|choose\s+\S+|w(?:ä|ae)hlen|ausw(?:ä|ae)hlen|choisir|kies|wybierz|escolher|v(?:ä|a)lj|v(?:æ|ae)lg|velg|valitse)[\s.!…»>→-]*$/i;
 
   /**
    * The decision box: the widest container around the button that still talks

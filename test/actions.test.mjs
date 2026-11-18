@@ -930,3 +930,25 @@ test('real sites: questions, codes, call-backs and partial cookie consent are no
     assert.equal(classifyText(label), type, label);
   }
 });
+
+/**
+ * The second run (November 2026), on 150 sites the rules had never seen,
+ * rewritten in our own words.
+ */
+test('second real-site run: trials, free accounts, bare "Accept" and "Purchase"', () => {
+  const cases = {
+    'Start 7-day free trial!': 'subscribe', 'Start free 30-day trial': 'subscribe', 'Start my free 14-day trial': 'subscribe',
+    'Try it risk-free for 30 days': 'subscribe', 'Try for free': 'subscribe', 'Jetzt 14 Tage Internet testen': 'subscribe',
+    'Essayer maintenant': 'subscribe', 'Prova nu': 'subscribe', 'Join the club': 'subscribe',
+    'Start for free': 'signup', 'Join for free': 'signup',
+    'I accept': 'accept_terms', 'Accept': 'accept_terms', 'Purchase': 'purchase', 'Purchase a day pass': 'purchase',
+  };
+  for (const [label, type] of Object.entries(cases)) assert.equal(classifyText(label), type, label);
+});
+
+test('second real-site run: technical cookies only, documents, help topics, no account', () => {
+  for (const label of [
+    'Consenti solo i cookie tecnici', 'Allow only necessary cookies', 'Povolit výběr', 'Antes de contratar (PDF)', 'Scarica il contratto PDF',
+    'Bestellen & Annuleren', 'Orders & returns', 'Solicitar ayuda sin registrarse', 'Continue without an account', 'Purchase help', 'Purchase history',
+  ]) assert.equal(classifyText(label), null, label);
+});

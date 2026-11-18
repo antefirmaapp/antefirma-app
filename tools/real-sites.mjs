@@ -3,6 +3,7 @@
  * The extension on real websites: which buttons it holds, which it lets through.
  *
  *     xvfb-run -a node tools/real-sites.mjs [--out dir] [--workers 6] [--only 1-10] [--per-site 16]
+ *                                          [--depth2 2] [--sites list.json] [--ext extension-folder]
  *
  * For every page in test/real-sites/sites.json ([category, lang, url]):
  *  1. opens it in Chromium with the real extension loaded and consent given;
@@ -39,7 +40,11 @@ const PER_SITE = Number(arg('per-site', 16));
 const only = arg('only', '');
 mkdirSync(join(OUT, 'texts'), { recursive: true });
 
-let SITES = JSON.parse(readFileSync(join(ROOT, 'test', 'real-sites', 'sites.json'), 'utf8')).map(([category, lang, url], i) => ({ n: i + 1, category, lang, url, depth: 1 }));
+// --sites another list (e.g. a second set kept apart, to measure on pages the rules were not tuned on);
+// --ext another build of the extension (e.g. an older version, to compare on the same pages).
+const SITES_FILE = arg('sites', join(ROOT, 'test', 'real-sites', 'sites.json'));
+const EXT = arg('ext', ROOT);
+let SITES = JSON.parse(readFileSync(SITES_FILE, 'utf8')).map(([category, lang, url], i) => ({ n: i + 1, category, lang, url, depth: 1 }));
 const DEPTH2 = Number(arg('depth2', 2));
 /** A link that leads towards the commitment: worth opening as a page of its own, one level down. */
 const FUNNEL = /sign-?up|signup|register|registr|checkout|cart|basket|carrello|cesta|warenkorb|panier|plans?\b|plan[-/?]|pricing|subscri|abbon|abonn|abo\b|offert|offer|tarif|order|ordin|buy|acquist|compra|kauf|commerce|join|premium|choose|select|attiva|activ|bestel|bestell|prenum|assin|cadence|upsell|trial|prova|free-trial|user-flow/i;
@@ -146,7 +151,7 @@ async function worker(id, queue, results, texts) {
   const profile = mkdtempSync(join(tmpdir(), `af-real-${id}-`));
   const context = await chromium.launchPersistentContext(profile, {
     headless: false, userAgent: UA, viewport: { width: 1366, height: 900 },
-    args: [`--disable-extensions-except=${ROOT}`, `--load-extension=${ROOT}`, '--headless=new', '--no-sandbox', '--lang=it-IT'],
+    args: [`--disable-extensions-except=${EXT}`, `--load-extension=${EXT}`, '--headless=new', '--no-sandbox', '--lang=it-IT'],
   });
   // The fake AnteFirma server: a token, a free plan, and analyses that never come back.
   let captured = null;
