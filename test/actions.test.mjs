@@ -952,3 +952,27 @@ test('second real-site run: technical cookies only, documents, help topics, no a
     'Bestellen & Annuleren', 'Orders & returns', 'Solicitar ayuda sin registrarse', 'Continue without an account', 'Purchase help', 'Purchase history',
   ]) assert.equal(classifyText(label), null, label);
 });
+
+/**
+ * The third run (November 2026), on 147 more unseen sites chosen to give every
+ * language at least six, rewritten in our own words.
+ */
+test('third real-site run: "accept and close", Romanian "accept all", trials and orders', () => {
+  const cases = {
+    'Sprejmi in zapri': 'consent', 'Sprejmite vse': 'consent', 'Prihvati i zatvori': 'consent', 'Приемане и затваряне': 'consent',
+    'Acceptați toate': 'consent', 'Acceptati tot': 'consent', 'ACCEPT TOATE': 'consent', 'Accept toate și închide': 'consent',
+    'Accetta e chiudi': 'consent', 'Accepter et fermer': 'consent', 'Accept and close': 'consent',
+    'Bliv abonnent nu': 'subscribe', 'Prova 30 dagar gratis': 'subscribe', 'Prova Lydbok gratis': 'subscribe', 'Try Notely for free': 'subscribe',
+    'Order now': 'purchase', 'Contrata MultiSIM': 'subscribe', 'Αγορά τώρα': 'purchase', 'Vásárlás': 'purchase',
+  };
+  for (const [label, type] of Object.entries(cases)) assert.equal(classifyText(label), type, label);
+});
+
+test('third real-site run: questions in every language, newsletters, trade-ins, terms and markets', () => {
+  for (const label of [
+    'Μπορώ να πληρώσω με κάρτα;', 'Jak zaplatit kartou', 'Kako naročiti paket', 'Hur köper jag?', 'Kaip galiu užsisakyti paketą',
+    'Sprejmi obvezne', 'Sutinku su būtinaisiais', 'Užsisakykite naujienas', 'Tilaa uutiskirjeesi täältä →', 'Subscribe to our blog',
+    'Buy Back Telefoane', 'Kup za odkup', 'Program Trade-In', 'Termos e Condições da Compra', 'Terms and conditions of purchase',
+    'Ångra köp gjorda online', 'Τηλεπικοινωνιακή αγορά', 'Η ενιαία ευρωπαϊκή αγορά', 'Online vásárlás', 'El alcalde contrata una empresa',
+  ]) assert.equal(classifyText(label), null, label);
+});
