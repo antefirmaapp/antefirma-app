@@ -422,7 +422,7 @@ test('"Entendido" counts as consent only when it is the whole label', () => {
  */
 test('generic and harmless Spanish buttons stay out', () => {
   const outside = [
-    'Continuar', 'Siguiente', 'Confirmar', 'Aceptar',
+    'Continuar', 'Siguiente', 'Confirmar',
     'Buscar', 'Más información', 'Ver planes', 'Comparar planes', 'Añadir a la cesta',
     'Guardar borrador', 'Compartir', 'Descargar la factura', 'Contacto',
     'Iniciar sesión', 'Formas de pagar', 'Continuar sin pagar',
@@ -430,6 +430,20 @@ test('generic and harmless Spanish buttons stay out', () => {
   for (const text of outside) {
     assert.equal(classifyText(text), null, `false positive on "${text}"`);
   }
+});
+
+/**
+ * "Aceptar" alone was kept out, so as not to stop every "OK" of a Spanish
+ * dialog. On real sites (November 2026) it was the only button of Spanish
+ * cookie banners, and the consent went through unwarned: since 0.20.3 it counts,
+ * like "Accepter" and "Accepteren". Only the bare word: inside a sentence it
+ * says nothing.
+ */
+test('"Aceptar" alone counts, like "Accepter" and "Accepteren"', () => {
+  for (const label of ['Aceptar', 'ACEPTAR', ' Aceptar ']) assert.equal(classifyText(label), 'accept_terms', label);
+  assert.equal(classifyText('Accepter'), 'accept_terms');
+  for (const label of ['Aceptar solo las necesarias', 'Rechazar', 'Configurar cookies sin aceptar']) assert.equal(classifyText(label), null, label);
+  assert.equal(classifyText('Aceptar todas las cookies'), 'consent');
 });
 
 /**

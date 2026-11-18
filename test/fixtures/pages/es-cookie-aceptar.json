@@ -1,0 +1,8 @@
+{
+  "intercept": [
+    { "selector": "#accept", "type": "accept_terms" }
+  ],
+  "pass": [
+    "#config"
+  ]
+}

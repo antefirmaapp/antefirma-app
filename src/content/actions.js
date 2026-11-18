@@ -204,6 +204,14 @@
     ],
     oauth: [`iscriviti\\s+con\\s+(?:il\\s+tuo\\s+account\\s+|l['’]account\\s+)?${OAUTH}`, `reg(?:í|i)strate\\s+con\\s+${OAUTH}`, `sign\\s+up\\s+with\\s+${OAUTH}`],
     consent: ['n(?:õ|o)ustun\\s+k(?:õ|o)igi(?:ga|\\s+k(?:ü|u)psistega)?'],
+    /**
+     * "Aceptar" alone, as "Accepter" and "Accepteren" already are. It used to stay
+     * out, so as not to stop every "OK" of a Spanish dialog; on real sites it was
+     * the only button of Spanish cookie banners, and the consent went through
+     * unwarned. The whole label must be the word: "Aceptar y continuar" and the
+     * like are already in the table above.
+     */
+    accept_terms: ['^\\s*aceptar\\s*$'],
   };
   for (const p of ACTION_PATTERNS) if (SEEN_ON_REAL_SITES[p.type]) p.re = more(p.re, SEEN_ON_REAL_SITES[p.type]);
 
