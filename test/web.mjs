@@ -208,7 +208,8 @@ try {
   const sentPlan = pushPlans[0] || {};
   check('push: switched on, the server gets a push address and the hours of the reminders',
     sentPlan.endpoint === 'https://fcm.googleapis.com/fcm/send/test-address' && sentPlan.times?.length === 3 && sentPlan.times.every((x) => /^20\d\d-/.test(x)), JSON.stringify(sentPlan).slice(0, 200));
-  check('push: and nothing else — no seller, no amount, no keys', JSON.stringify(Object.keys(sentPlan).sort()) === '["endpoint","times"]' && !/Premium|19|120/.test(JSON.stringify(sentPlan.times)));
+  check('push: and nothing else — no seller, no amount, no keys', JSON.stringify(Object.keys(sentPlan).sort()) === '["endpoint","times"]' && (sentPlan.times || []).every((x) => /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(x)), JSON.stringify(sentPlan.times));
+  // The times are dates and nothing else: a check on digits such as "19" or "120" would depend on the day the test runs.
   check('push: the subscription is a visible one, with the server key', await page.evaluate(() => globalThis.__subscribeOptions?.visible === true && globalThis.__subscribeOptions.key === 65));
   const stored = await page.evaluate(() => globalThis.chrome.storage.local.get('pushPlan').then((x) => x.pushPlan));
   check('push: the text of each reminder stays in the browser', stored?.items?.length === 3 && stored.items.every((x) => x.title && x.message && x.url) && Boolean(stored.fallback?.title), JSON.stringify(stored?.items?.[0] || null).slice(0, 160));
