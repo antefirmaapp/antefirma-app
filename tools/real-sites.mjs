@@ -196,7 +196,9 @@ async function worker(id, queue, results, texts) {
       await page.waitForTimeout(1200);
       loaded = true;
     };
-    try {
+    // The visit runs on its own: a page so frozen that even closing it never returns is left
+    // behind after five minutes, and the worker goes on with the next site.
+    const visit = (async () => { try {
       await page.setExtraHTTPHeaders({ 'accept-language': `${LOCALES[site.lang] || 'en-IE'},en;q=0.5` });
       const res = await page.goto(site.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
       rec.httpStatus = res?.status() ?? null;
@@ -266,10 +268,17 @@ async function worker(id, queue, results, texts) {
       }
     } catch (err) {
       rec.status = `unreachable: ${err.message.split('\n')[0].slice(0, 120)}`;
-    }
+    } })();
+    let giveUp;
+    const abandoned = await Promise.race([
+      visit.then(() => false),
+      new Promise((resolve) => { giveUp = setTimeout(() => resolve(true), 5 * 60_000); }),
+    ]);
+    clearTimeout(giveUp);
+    if (abandoned) rec.status = 'stuck: abandoned after 5 minutes';
     // A site that never lets the browser go is closed by the watchdog; the record says so.
     clearTimeout(watchdog);
-    await page.close().catch(() => {});
+    if (!abandoned) await page.close().catch(() => {});
     // One level down: the pages the commitment links lead to, opened as pages of their own.
     if (site.depth === 1 && rec.status === 'ok') {
       const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, '').split('.').slice(-2).join('.'); } catch { return ''; } };
