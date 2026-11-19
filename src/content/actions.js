@@ -198,10 +198,10 @@
       'try\\s+(?:it\\s+)?risk[-\\s]free\\s+for\\s+\\d+\\s+days', 'try\\s+(?:it\\s+)?for\\s+free', '\\d+\\s+tage\\s+(?:\\S+\\s+)?(?:kostenlos\\s+)?testen',
       'essayer\\s+(?:maintenant|gratuitement)', 'prova\\s+nu', 'join\\s+the\\s+club',
       // Third run: Danish "become a subscriber", Swedish trials, a trial named after the product.
-      'bliv\\s+abonnent', 'prova\\s+(?:\\d+\\s+dagar\\s+|\\S+\\s+)?gratis', 'try\\s+\\S+\\s+for\\s+free',
+      'bliv\\s+abonnent', '^\\s*assine(?:\\s+(?:j(?:á|a)|agora))?\\s*$', 'attiva\\s+online', 'prova\\s+(?:\\d+\\s+dagar\\s+|\\S+\\s+)?gratis', 'try\\s+\\S+\\s+for\\s+free',
     ],
     purchase: [
-      'purchase\\s+now', 'order\\s+now', '^\\s*buy\\s+(?:\\S+\\s*){1,3}$',
+      'purchase\\s+now', 'order\\s+now', 'forudbestil(?:\\s+nu)?', 'forh(?:å|a)ndsbestill(?:\\s+n(?:å|a))?', '^\\s*buy\\s+(?:\\S+\\s*){1,3}$',
       // Dutch imperative, alone or with what is ordered ("Bestel nu", "Bestel iPhone 18 Pro").
       'bestel(?:\\s+(?:nu|direct|online))?', '^\\s*bestel\\s+(?:\\S+\\s*){1,6}$',
       'kupi(?:ć|c)', 'dokup(?:\\s+\\S+)?', '^\\s*purchase(?:\\s+(?!(?:help|history|terms|policy|faq|support|information|info|options)\\b)(?:\\S+\\s*){1,3})?$',
@@ -212,9 +212,9 @@
     consent: ['n(?:õ|o)ustun\\s+k(?:õ|o)igi(?:ga|\\s+k(?:ü|u)psistega)?',
       // Third run: "accept and close" and "accept all" as written on Slovenian, Croatian, Bulgarian and Romanian banners.
       'sprejmi(?:te)?\\s+in\\s+zapri', 'sprejmite\\s+vse', 'prihvati\\s+i\\s+zatvori', 'приемане\\s+(?:и\\s+затваряне|на\\s+всички)',
-      'accept(?:ă|a|a(?:ț|ţ|t)i)?\\s+(?:tot|toate|totul)(?:\\s+cookie-urile)?', 'accept\\s+(?:and|&)\\s+close', 'accetta\\s+e\\s+chiudi', 'aceptar\\s+y\\s+cerrar', 'accepter\\s+et\\s+fermer'],
+      'accept(?:ă|a|a(?:ț|ţ|t)i)?\\s+(?:tot|toate|totul)(?:\\s+cookie-urile)?', 'accept\\s+(?:and|&)\\s+close', '^\\s*souhlas\\s*$', 'aceitar\\s+e\\s+fechar', 'accetta\\s+e\\s+chiudi', 'aceptar\\s+y\\s+cerrar', 'accepter\\s+et\\s+fermer'],
     // A free account is a sign-up, as "Sign up for free" already is.
-    signup: ['start\\s+(?:for\\s+)?free', 'join\\s+(?:for\\s+)?free'],
+    signup: ['start\\s+(?:\\w+ing\\s+)?(?:for\\s+)?free', 'registra(?:ti)?\\s+gratis', 'join\\s+(?:for\\s+)?free'],
     /**
      * "Aceptar" alone, as "Accepter" and "Accepteren" already are. It used to stay
      * out, so as not to stop every "OK" of a Spanish dialog; on real sites it was
@@ -222,7 +222,7 @@
      * unwarned. The whole label must be the word: "Aceptar y continuar" and the
      * like are already in the table above.
      */
-    accept_terms: ['^\\s*aceptar\\s*$', '^\\s*(?:i\\s+)?accept\\s*$'],
+    accept_terms: ['^\\s*godkjenn\\s*$', '^\\s*aceptar\\s*$', '^\\s*(?:i\\s+)?accept\\s*$'],
   };
   for (const p of ACTION_PATTERNS) if (SEEN_ON_REAL_SITES[p.type]) p.re = more(p.re, SEEN_ON_REAL_SITES[p.type]);
 
@@ -288,7 +288,7 @@
     'akceptuj\\s+(?:wybrane|niezb(?:ę|e)dne)', 'aceitar\\s+(?:apenas\\s+)?(?:os\\s+)?(?:necess(?:á|a)rios|selecionados)', '(?:acceptera|godk(?:ä|a)nn)\\s+(?:valda|n(?:ö|o)dv(?:ä|a)ndiga)',
     'accept(?:ă|a)\\s+(?:doar\\s+)?(?:cele\\s+)?(?:necesare|selectate)', 'p(?:ř|r)ijmout\\s+(?:vybran(?:é|e)|nezbytn(?:é|e))', 'accepter\\s+(?:kun\\s+)?(?:valgte|n(?:ø|o)dvendige)',
     'godta\\s+(?:valgte|n(?:ø|o)dvendige)', 'hyv(?:ä|a)ksy\\s+(?:valitut|v(?:ä|a)ltt(?:ä|a)m(?:ä|a)tt(?:ö|o)m(?:ä|a)t)', 'prija(?:ť|t)\\s+(?:vybran(?:é|e)|nevyhnutn(?:é|e))',
-    'kiv(?:á|a)lasztottak\\s+elfogad(?:á|a)sa', 'csak\\s+a\\s+sz(?:ü|u)ks(?:é|e)gesek', 'αποδοχή\\s+(?:επιλεγμένων|απαραίτητων)', 'prihvati\\s+(?:samo\\s+)?(?:nu(?:ž|z)ne|odabrane)(?:\\s+kola(?:č|c)i(?:ć|c)e)?',
+    'kiv(?:á|a)lasztottak\\s+elfogad(?:á|a)sa', 'csak\\s+a\\s+sz(?:ü|u)ks(?:é|e)gesek', 'αποδοχ(?:ή|η)\\s+(?:επιλεγμ(?:έ|ε)νων|απαρα(?:ί|ι)τητων)', 'prihvati\\s+(?:samo\\s+)?(?:nu(?:ž|z)ne|odabrane)(?:\\s+kola(?:č|c)i(?:ć|c)e)?',
     'sprejmi\\s+(?:samo\\s+)?(?:izbrane|nujne|obvezne|potrebne)', 'sutinku\\s+(?:tik\\s+)?su\\s+b(?:ū|u)tinais(?:iais)?', 'приеми\\s+(?:избраните|необходимите)', 'priimti\\s+(?:tik\\s+b(?:ū|u)tinus|pasirinktus)(?:\\s+slapukus)?', 'pie(?:ņ|n)emt\\s+(?:atlas(?:ī|i)t(?:ā|a)s|tikai\\s+nepiecie(?:š|s)am(?:ā|a)s)',
     'n(?:õ|o)ustun\\s+valitud(?:ega)?', 'ainult\\s+vajalikud',
     // Doing something without an account is the opposite of signing up ("Solicitar asistencia sin registrarse").
@@ -303,10 +303,14 @@
    * nothing; "on tilaa" is Finnish for "there is room"; "köp-filmer" is a noun.
    */
   // The question words end at a letter-aware boundary: a plain \\b would find the Czech "proč" inside "Procéder".
-  const NOT_AN_ACTION = more(new RegExp(`[?¿]|\\d{5,}|^\\s*(?:why|how\\s+(?:do|does|can|to)|perch[ée]|pourquoi|por\\s+qu[ée]|warum|waarom|dlaczego|porqu[eê]|varf(?:ö|o)r|hvorfor|miksi|pre(?:č|c)o|pro(?:č|c)|mi(?:é|e)rt|γιατί|za(?:š|s)to|zakaj|защо|kod(?:ė|e)l|k(?:ā|a)p(?:ē|e)c|miks|how|come|c(?:ó|o)mo|comment|wie|hoe|jak|ako|kako|cum|hur|hvordan|miten|kuinka|hogyan|π(?:ώ|ω)ς|как|kaip|k(?:ā|a)|kuidas)(?!${W})|[;;]\\s*$`, 'i'), [
+  const NOT_AN_ACTION = more(new RegExp(`[?¿]|\\d{5,}|^\\s*(?:why|how\\s+(?:do|does|can|to)|perch[ée]|pourquoi|por\\s+qu[ée]|warum|waarom|dlaczego|porqu[eê]|varf(?:ö|o)r|hvorfor|miksi|pre(?:č|c)o|pro(?:č|c)|mi(?:é|e)rt|γιατί|za(?:š|s)to|zakaj|защо|kod(?:ė|e)l|k(?:ā|a)p(?:ē|e)c|miks|how|come|c(?:ó|o)mo|comment|wie|hoe|jak|ako|kako|cum|hur|hvordan|miten|kuinka|hogyan|π(?:ώ|ω)ς|как|kaip|k(?:ā|a)|kuidas|τι)(?!${W})|[;;]\\s*$`, 'i'), [
     // Third run: trade-in and buy-back offers, the terms of a purchase, undoing one, a market (Greek) and online shopping as a topic.
     'buy\\s*back', 'odkup\\w*', 'trade[-\\s]?in', 'v(?:ý|y)kup\\w*', '(?:termos|condi(?:ç|c)(?:õ|o)es|terms|conditions|condizioni|condiciones|bedingungen|voorwaarden|warunki|villkor|vilk(?:å|a)r|ehdot|podm(?:í|i)nky|termeni)(?:\\s+(?:e|and|y|et|en|och|og|ja|a|și|si)\\s+\\S+)?\\s+(?:\\S+\\s+)?(?:compra|purchase|acquisto|venta|vente|achat|kauf|aankoop|zakupu|k(?:ö|ø)p|osto|n(?:á|a)kupu|cump(?:ă|a)r(?:ă|a)rii)',
-    '(?:(?:å|a)ngra|fortryd|angre)\\s+\\S+', '\\S+(?:κή|κη|ία|ια)\\s+αγορ(?:ά|α)', 'online\\s+v(?:á|a)s(?:á|a)rl(?:á|a)s',
+    '(?:(?:å|a)ngra|fortryd|angre)\\s+\\S+',
+    // Fourth run: the Norwegian right of return ("open purchase"), a compound noun, a tax to pay,
+    // the subscribers' area, consent to the necessary cookies only (Estonian).
+    '(?:å|a)pent\\s+kj(?:ø|o)p', '\\S+-kj(?:ø|o)p', '(?:imp(?:ô|o)t|montant|somme|reste)\\s+(?:à|a)\\s+payer',
+    'area\\s+abbonat[io]', 'espace\\s+abonn(?:é|e)s?', 'subscriber\\s+area', 'n(?:õ|o)ustun\\s+(?:ainult\\s+)?vajalike(?:\\s+k(?:ü|u)psistega)?', '\\S+(?:κή|κη|ία|ια)\\s+αγορ(?:ά|α)', 'online\\s+v(?:á|a)s(?:á|a)rl(?:á|a)s',
 
     'request\\s+a\\s+call(?:\\s*back)?', 'call\\s*back', 'richiedi\\s+(?:una\\s+)?(?:chiamata|richiamata)', 'solicitar\\s+(?:una\\s+)?llamada', 'r(?:ü|ue)ckruf(?:\\s+anfordern)?',
     '(?:(?:ê|e)tre\\s+)?rappel(?:(?:é|e)|er)?(?:\\s+gratuit)?', 'zam(?:ó|o)w\\s+rozmow(?:ę|e)', 'zam(?:ó|o)w\\s+(?:przez\\s+telefon|z\\s+doradc(?:ą|a))', 'oddzwo(?:ń|n)\\w*',
@@ -339,10 +343,11 @@
     'nyhedsbrev(?:et)?', 'notifikationer', 'giv\\s+mig\\s+besked', 'varsler', 'gi\\s+meg\\s+beskjed', 'uutiskirje\\w*', 'ilmoitukset', 'ilmoita\\s+minulle',
     'odobera(?:ť|t)\\s+novinky', 'prihl(?:á|a)si(?:ť|t)\\s+sa\\s+na\\s+odber(?:\\s+noviniek)?', 'upozornenia', 'upozornite\\s+ma', 'h(?:í|i)rlev(?:é|e)l\\w*', '(?:é|e)rtes(?:í|i)t(?:é|e)sek', '(?:é|e)rtes(?:í|i)ts(?:en)?(?:\\s+engem)?', 'ενημερωτικ(?:ό|ο)\\s+δελτ(?:ί|ι)ο', 'ειδοποι(?:ή|η)σεις', 'ειδοποι(?:ή|η)στε\\s+με',
     '(?:pretplati\\s+se\\s+na\\s+)?(?:newsletter|bilten)', 'obavijesti\\s+me', 'obavijesti', '(?:naro(?:č|c)i\\s+se\\s+na\\s+)?(?:e-?novice|novi(?:č|c)nik)', 'obvesti\\s+me', 'obvestila', 'бюлетин', '(?:абонирай\\s+се\\s+за\\s+)?(?:бюлетина|новините)', 'уведоми\\s+ме', 'известия',
-    'naujien(?:as|os|ų|u)', 'blog(?:s|ul|gen)?', '(?:(?:u(?:ž|z)si)?prenumeruoti\\s+)?naujienlai(?:š|s)k(?:is|į|i|io|ius|iai|ių)?', '(?:ab(?:o|on)(?:ē|e)t\\s+)?jaunumus', '(?:telli|liitu)\\s+uudiskir(?:i|ja|jaga)', 'prane(?:š|s)ti\\s+man', 'prane(?:š|s)imai', 'jaunumi', 'jaunumu\\s+v(?:ē|e)stul(?:e|i|ē|es)?', 'pierakst(?:ī|i)ties\\s+jaunumiem', 'pazi(?:ņ|n)ot\\s+man', 'pazi(?:ņ|n)ojumi', 'uudiskir(?:i|ja|jaga|jad)', 'teavita\\s+mind', 'teavitused',
+    'naujien(?:as|os|ų|u)', 'blog(?:s|ul|gen)?', 'newsletters', 'pod[ck]ast\\w*', '(?:(?:u(?:ž|z)si)?prenumeruoti\\s+)?naujienlai(?:š|s)k(?:is|į|i|io|ius|iai|ių)?', '(?:ab(?:o|on)(?:ē|e)t\\s+)?jaunumus', '(?:telli|liitu)\\s+uudiskir(?:i|ja|jaga)', 'prane(?:š|s)ti\\s+man', 'prane(?:š|s)imai', 'jaunumi', 'jaunumu\\s+v(?:ē|e)stul(?:e|i|ē|es)?', 'pierakst(?:ī|i)ties\\s+jaunumiem', 'pazi(?:ņ|n)ot\\s+man', 'pazi(?:ņ|n)ojumi', 'uudiskir(?:i|ja|jaga|jad)', 'teavita\\s+mind', 'teavitused',
   ]);
 
   const PRICED = /[€$£]|\d/;
+  const HEADLINE = /^(?=(?:\S+\s+){5,}\S)(?:\s*[«“"]|(?=.*\S[:.!]\s+\S))/;
 
   /** Below this weight an action cannot stand against an opt-out. */
   const STRONG_WEIGHT = 3;
@@ -386,8 +391,17 @@
    */
   function classifyDetail(text) {
     if (!text) return { type: null, weight: 0, vetoed: false };
+    // "Want three users? Activate FAMILY": after a question, what follows is the button.
+    const parts = text.split(/[?;;]/);
+    const tail = parts[parts.length - 1].trim();
+    if (parts.length > 1 && tail) return classifyDetail(tail);
     if (PAY_OR_OK.test(text)) return { type: 'subscribe', weight: 4, vetoed: false };
     if (NOT_AN_ACTION.test(text)) return { type: null, weight: 0, vetoed: true };
+    // A headline that links to an article: a long sentence opening with a quote, or with a colon
+    // or a full stop inside, and no commitment in its first words ("Minister: shops will buy…").
+    if (HEADLINE.test(text) && !PRICED.test(text) && !heaviestMatch(text.trim().split(/\s+/).slice(0, 3).join(' '))) {
+      return { type: null, weight: 0, vetoed: true };
+    }
     const best = heaviestMatch(text);
     if (optOutWins(text, best)) return { type: null, weight: 0, vetoed: true };
     // A label that only speaks of newsletters or alerts commits to nothing, and

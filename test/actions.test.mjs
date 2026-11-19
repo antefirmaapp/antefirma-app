@@ -976,3 +976,26 @@ test('third real-site run: questions in every language, newsletters, trade-ins, 
     'Ångra köp gjorda online', 'Τηλεπικοινωνιακή αγορά', 'Η ενιαία ευρωπαϊκή αγορά', 'Online vásárlás', 'El alcalde contrata una empresa',
   ]) assert.equal(classifyText(label), null, label);
 });
+
+/**
+ * The fourth run (November 2026), on 150 more unseen sites, rewritten in our
+ * own words.
+ */
+test('fourth real-site run: pre-orders, bare consent words, a call to action after a question', () => {
+  const cases = {
+    'Forudbestil nu': 'purchase', 'Forhåndsbestill nå': 'purchase', 'Souhlas': 'consent', 'Aceitar e fechar': 'consent',
+    'Godkjenn': 'accept_terms', 'Assine': 'subscribe', 'Assine já': 'subscribe', 'Attiva online': 'subscribe',
+    'Registra gratis': 'signup', 'Start building for free': 'signup', 'New here? Sign up': 'signup', '¿Aún no tienes cuenta? Regístrate': 'signup',
+    'Abbonati: leggi senza limiti e senza pubblicità': 'subscribe',
+  };
+  for (const [label, type] of Object.entries(cases)) assert.equal(classifyText(label), type, label);
+});
+
+test('fourth real-site run: headlines, return rights, subscriber areas, podcasts, necessary cookies', () => {
+  for (const label of [
+    'Ministro: le famiglie dovranno comprare meno energia', 'Il sindaco ha detto. Ora i negozi accettano tutto', '« Je préfère ne pas acheter » : enquête',
+    '60 dager åpent kjøp', 'Retur og åpent kjøp', 'Dagens beste Black Friday-kjøp', "Calculer l'impôt à payer", 'AREA ABBONATI', 'Espace abonnés',
+    'Inscrivez-vous aux newsletters', 'Naročite se na podkast', 'Nõustun vajalike küpsistega', 'ΑΠΟΔΟΧΗ ΕΠΙΛΕΓΜΕΝΩΝ', 'Τι θέλουν οι καταναλωτές από την αγορά',
+    'Can I buy a domain?', 'Vuoi saperne di più? Leggi',
+  ]) assert.equal(classifyText(label), null, label);
+});
