@@ -198,7 +198,7 @@
       'try\\s+(?:it\\s+)?risk[-\\s]free\\s+for\\s+\\d+\\s+days', 'try\\s+(?:it\\s+)?for\\s+free', '\\d+\\s+tage\\s+(?:\\S+\\s+)?(?:kostenlos\\s+)?testen',
       'essayer\\s+(?:maintenant|gratuitement)', 'prova\\s+nu', 'join\\s+the\\s+club',
       // Third run: Danish "become a subscriber", Swedish trials, a trial named after the product.
-      'bliv\\s+abonnent', '^\\s*assine(?:\\s+(?:j(?:á|a)|agora))?\\s*$', 'attiva\\s+online', 'prova\\s+(?:\\d+\\s+dagar\\s+|\\S+\\s+)?gratis', 'try\\s+\\S+\\s+for\\s+free',
+      'bliv\\s+abonnent', 'abo\\s+testen', '^\\s*assine(?:\\s+(?:j(?:á|a)|agora))?\\s*$', 'attiva\\s+online', 'prova\\s+(?:\\d+\\s+dagar\\s+|\\S+\\s+)?gratis', 'try\\s+\\S+\\s+for\\s+free',
     ],
     purchase: [
       'purchase\\s+now', 'order\\s+now', 'forudbestil(?:\\s+nu)?', 'forh(?:å|a)ndsbestill(?:\\s+n(?:å|a))?', '^\\s*buy\\s+(?:\\S+\\s*){1,3}$',
@@ -212,9 +212,9 @@
     consent: ['n(?:õ|o)ustun\\s+k(?:õ|o)igi(?:ga|\\s+k(?:ü|u)psistega)?',
       // Third run: "accept and close" and "accept all" as written on Slovenian, Croatian, Bulgarian and Romanian banners.
       'sprejmi(?:te)?\\s+in\\s+zapri', 'sprejmite\\s+vse', 'prihvati\\s+i\\s+zatvori', 'приемане\\s+(?:и\\s+затваряне|на\\s+всички)',
-      'accept(?:ă|a|a(?:ț|ţ|t)i)?\\s+(?:tot|toate|totul)(?:\\s+cookie-urile)?', 'accept\\s+(?:and|&)\\s+close', '^\\s*souhlas\\s*$', 'aceitar\\s+e\\s+fechar', 'accetta\\s+e\\s+chiudi', 'aceptar\\s+y\\s+cerrar', 'accepter\\s+et\\s+fermer'],
+      'accept(?:ă|a|a(?:ț|ţ|t)i)?\\s+(?:tot|toate|totul)(?:\\s+cookie-urile)?', 'accept\\s+(?:and|&)\\s+close', 'agree\\s+(?:and|&)\\s+close', 'mindent\\s+elfogadok', '^\\s*souhlas\\s*$', 'aceitar\\s+e\\s+fechar', 'accetta\\s+e\\s+chiudi', 'aceptar\\s+y\\s+cerrar', 'accepter\\s+et\\s+fermer'],
     // A free account is a sign-up, as "Sign up for free" already is.
-    signup: ['start\\s+(?:\\w+ing\\s+)?(?:for\\s+)?free', 'registra(?:ti)?\\s+gratis', 'join\\s+(?:for\\s+)?free'],
+    signup: ['start\\s+(?:\\w+ing\\s+)?(?:for\\s+)?free', 'registra(?:ti)?\\s+gratis', '^\\s*tilmeld(?:\\s+dig)?\\s*$', '^\\s*sign-?up\\s*$', 'u(?:ž|z)siregistruok(?:ite|is)', 'join\\s+(?:for\\s+)?free'],
     /**
      * "Aceptar" alone, as "Accepter" and "Accepteren" already are. It used to stay
      * out, so as not to stop every "OK" of a Spanish dialog; on real sites it was
@@ -309,7 +309,7 @@
     '(?:(?:å|a)ngra|fortryd|angre)\\s+\\S+',
     // Fourth run: the Norwegian right of return ("open purchase"), a compound noun, a tax to pay,
     // the subscribers' area, consent to the necessary cookies only (Estonian).
-    '(?:å|a)pent\\s+kj(?:ø|o)p', '\\S+-kj(?:ø|o)p', '(?:imp(?:ô|o)t|montant|somme|reste)\\s+(?:à|a)\\s+payer',
+    '(?:å|a)pent\\s+kj(?:ø|o)p', '(?:ö|o)ppet\\s+k(?:ö|o)p', '(?:å|a)ngerr(?:ä|a)tt', '[Ͱ-Ͽ]+[;;](?=\\s)', '(?:godt|gode|bra|bästa|bedste|beste)\\s+(?:\\S+-)?k(?:j(?:ø|o)|ø|ö)p\\w*', '\\S+-kj(?:ø|o)p', '(?:imp(?:ô|o)t|montant|somme|reste)\\s+(?:à|a)\\s+payer',
     'area\\s+abbonat[io]', 'espace\\s+abonn(?:é|e)s?', 'subscriber\\s+area', 'n(?:õ|o)ustun\\s+(?:ainult\\s+)?vajalike(?:\\s+k(?:ü|u)psistega)?', '\\S+(?:κή|κη|ία|ια)\\s+αγορ(?:ά|α)', 'online\\s+v(?:á|a)s(?:á|a)rl(?:á|a)s',
 
     'request\\s+a\\s+call(?:\\s*back)?', 'call\\s*back', 'richiedi\\s+(?:una\\s+)?(?:chiamata|richiamata)', 'solicitar\\s+(?:una\\s+)?llamada', 'r(?:ü|ue)ckruf(?:\\s+anfordern)?',
@@ -347,7 +347,9 @@
   ]);
 
   const PRICED = /[€$£]|\d/;
-  const HEADLINE = /^(?=(?:\S+\s+){5,}\S)(?:\s*[«“"]|(?=.*\S[:.!]\s+\S))/;
+  const HEADLINE = /^(?=(?:\S+\s+){5,}\S)(?:\s*[«“"]|(?=.*\S\s?[:.!]\s+\S))/;
+  // A price, not any number: headlines are full of figures ("18 things", "51.7%").
+  const PRICE = /[€$£]|\d(?:[\d.,]*)\s*(?:eur|kr|zł|zl|lei|ft|kn|kč|лв|,-|:-)(?![\p{L}])/iu;
 
   /** Below this weight an action cannot stand against an opt-out. */
   const STRONG_WEIGHT = 3;
@@ -394,13 +396,16 @@
     // "Want three users? Activate FAMILY": after a question, what follows is the button.
     const parts = text.split(/[?;;]/);
     const tail = parts[parts.length - 1].trim();
-    if (parts.length > 1 && tail) return classifyDetail(tail);
+    if (parts.length > 1 && tail && tail.split(/\s+/).length <= 5) return classifyDetail(tail);
     if (PAY_OR_OK.test(text)) return { type: 'subscribe', weight: 4, vetoed: false };
     if (NOT_AN_ACTION.test(text)) return { type: null, weight: 0, vetoed: true };
     // A headline that links to an article: a long sentence opening with a quote, or with a colon
     // or a full stop inside, and no commitment in its first words ("Minister: shops will buy…").
-    if (HEADLINE.test(text) && !PRICED.test(text) && !heaviestMatch(text.trim().split(/\s+/).slice(0, 3).join(' '))) {
-      return { type: null, weight: 0, vetoed: true };
+    // A short last sentence that is a commitment is the button's own call ("… sparen. Jetzt
+    // abonnieren!", "Link to: Join"), and keeps the label.
+    if (HEADLINE.test(text) && !PRICE.test(text) && !heaviestMatch(text.trim().split(/\s+/).slice(0, 3).join(' '))) {
+      const last = text.trim().split(/\s?[:.!]\s+/).pop().split(/\s+/);
+      if (!(last.length <= 5 && heaviestMatch(last.slice(-2).join(' ')))) return { type: null, weight: 0, vetoed: true };
     }
     const best = heaviestMatch(text);
     if (optOutWins(text, best)) return { type: null, weight: 0, vetoed: true };

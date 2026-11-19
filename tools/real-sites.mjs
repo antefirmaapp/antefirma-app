@@ -175,7 +175,13 @@ async function worker(id, queue, results, texts) {
     const rec = { ...site, status: 'ok', attempts: [], errors: [], blockedRequests: 0 };
     let loaded = false;
     let navAttempts = [];
-    const page = await context.newPage();
+    let page;
+    try { page = await context.newPage(); } catch (err) {
+      // The browser itself is gone (usually out of memory): the sites left are said, not lost silently.
+      queue.unshift(site);
+      console.log(`[w${id}] browser closed (${err.message.split('\n')[0].slice(0, 80)}); not visited: ${queue.map((s) => `#${s.n}`).join(' ')}`);
+      return;
+    }
     const watchdog = setTimeout(() => { rec.status = 'stuck: closed after 4 minutes'; page.close().catch(() => {}); }, 4 * 60_000);
     page.on('dialog', (d) => d.dismiss().catch(() => {}));
     page.on('console', (m) => { if (m.type() === 'error' && /chrome-extension:\/\//.test(m.location()?.url || '')) rec.errors.push(m.text().slice(0, 300)); });

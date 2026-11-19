@@ -999,3 +999,26 @@ test('fourth real-site run: headlines, return rights, subscriber areas, podcasts
     'Can I buy a domain?', 'Vuoi saperne di più? Leggi',
   ]) assert.equal(classifyText(label), null, label);
 });
+
+/**
+ * The fifth run (November 2026), on 160 more unseen sites, rewritten in our
+ * own words. It also caught the headline rule of 0.20.6 silencing a real call
+ * at the end of a promotional sentence.
+ */
+test('fifth real-site run: the call at the end of a sentence, "agree and close", sign-ups', () => {
+  const cases = {
+    'Lesen und sparen. Jetzt abonnieren!': 'subscribe', 'Link to: Subscribe now Subscribe now': 'subscribe',
+    'Drama, Série, Sur CANAL+, S\'abonner': 'subscribe', 'Agree and close': 'consent', 'Agree & Close': 'consent',
+    'MINDENT ELFOGADOK': 'consent', 'Tilmeld': 'signup', 'Signup': 'signup', 'užsiregistruokite!': 'signup', 'Abo testen': 'subscribe',
+    'Θέλετε περισσότερα; Αγορά τώρα': 'purchase',
+  };
+  for (const [label, type] of Object.entries(cases)) assert.equal(classifyText(label), type, label);
+});
+
+test('fifth real-site run: return rights, headlines with figures, long sentences after a question', () => {
+  for (const label of [
+    'Ångerrätt och öppet köp', '50 dagars öppet köp för medlemmar', 'Bästa köpet', 'Veldig godt kjøp!',
+    'Immobilier : comment acheter en viager', 'MĀJAS 18 lietas, kuras neiesaka pirkt: dažas var sagādāt', 'Il pesce rincara del 60% a Natale: le date chiave per comprarlo prima',
+    'Πόσο κοστίζει; Όσα πρέπει να γνωρίζετε πριν την αγορά!', 'Lue lisää : Siirry helposti e-laskuun – hyväksy ehdotus verkkopankissa!',
+  ]) assert.equal(classifyText(label), null, label);
+});
