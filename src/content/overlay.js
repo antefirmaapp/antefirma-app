@@ -469,7 +469,9 @@
       const bigFind = cost.understated && (cost.worstCase || 0) >= 100;
       const upsellBlock = free && !verdict.cached && (left === 0 || left === 1 || bigFind)
         ? `<div class="upsell soft"><p>${esc(left === 0 ? t('wasLastFreeAnalysisMonth') : left === 1 ? t('haveOneFreeAnalysisLeftMonth') : t('antefirmaJustShowedXCommitmentPage', { x: cost.worstCaseLabel }))}</p>
-             <button class="upgrade" type="button" data-upgrade>${esc(t('upgradePro50AnalysesMonth'))}</button><p class="upsell-note" aria-live="polite"></p></div>`
+             ${q?.sales === false
+    ? `<button class="upgrade" type="button" data-upgrade data-wait="1">${esc(t('notifyMeWhenProArrives'))}</button>`
+    : `<button class="upgrade" type="button" data-upgrade>${esc(t('upgradePro50AnalysesMonth'))}</button>`}<p class="upsell-note" aria-live="polite"></p></div>`
         : '';
       this.model = verdict.engine?.model || null;
       // Kept for the report: the same verdict on a page of its own (see bind()).
@@ -652,11 +654,27 @@
         });
       }
       const up = this.root.querySelector('[data-upgrade]');
+      // Before Pro is on sale the same button offers "tell me when it arrives" (the error
+      // card does not know yet: it asks, and changes the button if so).
+      if (up && !up.dataset.wait) {
+        CF.bridge.send('GET_SALES').then((s) => {
+          if (s && !s.open && up.isConnected) { up.dataset.wait = '1'; up.textContent = t('notifyMeWhenProArrives'); }
+        }).catch(() => {});
+      }
       up?.addEventListener('click', async (e) => {
         e.preventDefault();
         e.stopPropagation();
         up.setAttribute('aria-disabled', 'true');
         const note = this.root.querySelector('.upsell-note');
+        if (up.dataset.wait === '1') {
+          try {
+            const r = await CF.bridge.send('SET_WAITLIST', { on: true });
+            if (note) note.textContent = r?.error ? r.message : t('illTellYouWhenProArrives');
+          } catch (err) {
+            if (note) note.textContent = err?.message || t('iCanTOpenPaymentPage');
+          }
+          return;
+        }
         try {
           const r = await CF.bridge.send('UPGRADE');
           if (note) note.textContent = r?.error ? r.message : r?.where === 'options'

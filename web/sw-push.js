@@ -52,7 +52,42 @@ async function afShowDue(now = Date.now()) {
   try { await afDone((await afStore('readwrite')).put({ ...plan, items }, AF_PLAN)); } catch { /* shown anyway */ }
 }
 
-self.addEventListener('push', (e) => { e.waitUntil(afShowDue()); });
+/**
+ * "Tell me when Pro arrives": the same content-free wake-up is also sent once
+ * the paid plans go on sale. If the person asked, the worker checks the public
+ * /v1/notice and, if sales are open, says so in the words the page left
+ * (src/background/plan.js). Returns true when it showed something.
+ */
+async function afTellPro() {
+  let waiting = false;
+  let words = null;
+  try {
+    const store = await afStore('readonly');
+    waiting = await afDone(store.get('waitPro'));
+    words = await afDone((await afStore('readonly')).get('waitProNotice'));
+  } catch { return false; }
+  if (!waiting || !words?.api) return false;
+  let open = false;
+  try { open = (await (await fetch(`${words.api}/v1/notice`)).json())?.sales === true; } catch { return false; }
+  if (!open) return false;
+  await self.registration.showNotification(words.title, { body: words.message, icon: '/src/icons/icon128.png', tag: 'antefirma-pro', data: { url: words.url || '/' } });
+  try { await afDone((await afStore('readwrite')).put(false, 'waitPro')); } catch { /* told anyway */ }
+  return true;
+}
+
+async function afOnPush() {
+  const told = await afTellPro();
+  // Reminders still go out; the generic notice is only for a wake-up that had nothing else to say.
+  const { items } = await afPlanItems();
+  if (told && !afDue(items, Date.now()).length) return;
+  await afShowDue();
+}
+
+async function afPlanItems() {
+  try { return (await afDone((await afStore('readonly')).get(AF_PLAN))) || {}; } catch { return {}; }
+}
+
+self.addEventListener('push', (e) => { e.waitUntil(afOnPush()); });
 
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();

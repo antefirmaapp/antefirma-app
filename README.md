@@ -159,6 +159,18 @@ The check of terms already accepted re-reads the public document and, only if
 the text changed, has the server read it again (it can be turned off in
 settings: then it only says the text changed).
 
+### Before the paid plans are on sale
+
+The server says in every plan answer whether Pro, Max and Team can be bought
+(`sales`, the panel's "Sales open" switch). While they cannot, the extension and
+the web app show "Pro coming soon" with a "Tell me when Pro arrives" switch in
+place of the payment (settings, the warning when analyses run out, the side
+panel). The switch sends one flag (`POST /v1/waitlist`), no address. When sales
+open, whoever asked gets one notification: the extension finds out by itself
+(an alarm every six hours while waiting, and at start-up), the web app also
+through the content-free push wake-up, for those who have push reminders on.
+Keys already issued (gifts from the panel) can still be entered.
+
 ---
 
 ## Developer and tester package

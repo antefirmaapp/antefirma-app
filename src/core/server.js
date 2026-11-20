@@ -36,8 +36,10 @@ const COUNTRY_MAP = { IT: 'IT', ES: 'ES', DE: 'DE', AT: 'AT', FR: 'FR', BE: 'BE'
  * `message` is for the user (the extension's own text, never the server's).
  */
 export class ServerError extends Error {
-  constructor(code, { status = 0, retryAfter = null, detail = '' } = {}) {
+  constructor(code, { status = 0, retryAfter = null, detail = '', sales } = {}) {
     super(messageFor(code));
+    // "This month's analyses are used up" also says whether Pro can be bought yet.
+    this.sales = sales;
     this.name = 'ServerError';
     this.code = code;
     this.status = status;
@@ -56,6 +58,7 @@ const MESSAGES = {
   key_inactive: 'keySLicenceNotActive',
   activations: 'keyAlreadyActiveMaximumNumberBrowsers',
   billing_off: 'paidPlansNotActiveYet',
+  sales_off: 'paidPlansNotActiveYet',
   paused: 'freeAnalysesPausedTodayTheyResume',
   timeout: 'analysisTookTooLong',
   network: 'antefirmaServerCanTReachedCheck',
@@ -205,6 +208,8 @@ export const pushRemote = (plan, o) => authed('/v1/push', plan, o);
 export const startCheckout = (plan, o, lang) => authed('/v1/pro/checkout', { plan, ...(lang ? { lang } : {}) }, o);
 export const activateLicense = (key, o) => authed('/v1/license/activate', { key: String(key || '').trim() }, o);
 export const deactivateLicense = (o) => authed('/v1/license/deactivate', {}, o);
+/** "Tell me when Pro arrives": one flag on the server, no address. `{ on, sales }` */
+export const joinWaitlist = (on, o) => authed('/v1/waitlist', { on: Boolean(on) }, o);
 /** "Wrong warning?": only the category, to improve the analysis. */
 export const sendFeedback = (category, model, o) => authed('/v1/feedback', { category: String(category || '').slice(0, 40), model: model ? String(model).slice(0, 60) : undefined }, o);
 
@@ -236,5 +241,6 @@ function errorFrom(res, body) {
     status: res.status,
     retryAfter: Number.isFinite(retry) && retry > 0 ? retry : null,
     detail: body?.message || '',
+    sales: typeof body?.sales === 'boolean' ? body.sales : undefined,
   });
 }

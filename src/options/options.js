@@ -174,10 +174,24 @@ async function showPlan() {
     $('#plan-summary').textContent = `${planName(lic.plan)}.${left}${where}${when}`;
   }
   const paid = lic.plan !== 'free';
-  $('#plan-buy').hidden = paid;
-  $('#plan-buy-note').hidden = paid;
+  // Before the paid plans are on sale: "Pro coming soon" and the switch, in place of the payment.
+  const soon = !paid && lic.sales === false;
+  $('#plan-buy').hidden = paid || soon;
+  $('#plan-buy-note').hidden = paid || soon;
+  $('#plan-soon').hidden = !soon;
+  if (soon) $('#wait-pro').checked = (await send('GET_SALES')).waiting;
   $('#plan-remove').hidden = !paid;
 }
+
+$('#wait-pro').addEventListener('change', async (e) => {
+  const on = e.target.checked;
+  try {
+    const r = await send('SET_WAITLIST', { on });
+    if (r.error) { e.target.checked = !on; planStatus(r.message, false); return; }
+    planStatus(t(on ? 'illTellYouWhenProArrives' : 'okNoNoticeAboutPro'), true);
+    if (r.sales) showPlan();
+  } catch (err) { e.target.checked = !on; planStatus(err.message, false); }
+});
 
 document.querySelectorAll('#plan-buy [data-plan]').forEach((b) => b.addEventListener('click', async () => {
   b.disabled = true;

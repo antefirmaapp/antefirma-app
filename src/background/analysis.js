@@ -8,6 +8,7 @@ import { t } from '../i18n/index.js';
 import { isAllowlisted, getCached, setCached, pushHistory } from '../core/storage.js';
 import { fetchDocument } from './changes.js';
 import { readRemote } from '../core/server.js';
+import { noteSales } from './plan.js';
 import { ANALYSIS_BUDGET_MS, TERMS_FETCH_BUDGET_MS, cacheKey, failure, getSettings, showQuotaBadge, updateBadge } from './settings.js';
 
 export async function analyzeAction(payload = {}, sender) {
@@ -51,6 +52,7 @@ export async function analyzeAction(payload = {}, sender) {
       });
     } catch (err) {
       console.warn('[AnteFirma] analisi non riuscita', err?.code, err?.detail || err);
+      await noteSales(err?.sales);
       return failure(err);
     }
     await setCached(key, verdict);
@@ -89,6 +91,7 @@ export async function analyzeAction(payload = {}, sender) {
 
   await updateBadge(sender?.tab?.id, verdict.level);
   await showQuotaBadge(verdict.engine?.quota);
+  await noteSales(verdict.engine?.quota?.sales);
 
   const proceedCount = verdict.host ? ((await chrome.storage.local.get('proceedByHost')).proceedByHost?.[verdict.host] || 0) : 0;
   return { skip: false, blocking, verdict: { ...verdict, historyId: id, proceedCount } };
@@ -131,6 +134,7 @@ export async function analyzeText(payload = {}) {
   // Manual analyses can become commitments to watch, too.
   const id = await rememberManual(verdict, text);
   await showQuotaBadge(verdict.engine?.quota);
+  await noteSales(verdict.engine?.quota?.sales);
   return { ...verdict, historyId: id };
 }
 

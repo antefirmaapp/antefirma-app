@@ -26,7 +26,7 @@ import { recordDecision, commitmentFromVerdict, updateAndReschedule, removeCommi
 import { checkChanges, watchAllCommitments, fetchDocument } from './changes.js';
 import { letterFor, icsFor, proofFor } from './exit-kit.js';
 import { syncPush, pushSupported } from './push.js';
-import { CHECKOUT_ALARM, watchCheckout, checkCheckout, upgrade } from './plan.js';
+import { CHECKOUT_ALARM, watchCheckout, checkCheckout, upgrade, noteSales, salesState, checkWaitProIfStale, setWaitPro, checkWaitPro, WAITPRO_ALARM, PRO_NOTICE_PREFIX, openPlanSettings } from './plan.js';
 
 // ── lifecycle ───────────────────────────────────────────────────────────────
 
@@ -182,12 +182,17 @@ async function handle(msg, sender) {
     // The page receives neither the purchase code nor the token.
     case 'UPGRADE':
       return upgrade();
+    // Before Pro is on sale: what to offer in its place, and "tell me when it arrives".
+    case 'GET_SALES':
+      return salesState();
+    case 'SET_WAITLIST':
+      return withCode(setWaitPro(Boolean(msg.payload?.on)));
     case 'FEEDBACK':
       return withCode(sendFeedback(msg.payload?.category, msg.payload?.model));
 
     // ── plan (extension pages only) ───────────────────────────────────────
     case 'GET_LICENSE':
-      return withCode(getLicense());
+      return withCode(getLicense().then(async (lic) => { await noteSales(lic?.sales); return lic; }));
     case 'START_CHECKOUT':
       return withCode(getSettings().then((s) => startCheckout(['pro', 'max', 'team'].includes(msg.payload?.plan) ? msg.payload.plan : 'pro', undefined, s.uiLang))
         .then(async (r) => { await chrome.tabs.create({ url: r.url }); await watchCheckout(); return { opened: true }; }));
@@ -243,15 +248,19 @@ if (pushSupported()) setTimeout(() => { syncPush().catch(() => {}); }, 3000);
 
 // ── alarms ──────────────────────────────────────────────────────────────────
 
+// Waiting for Pro: one check at start-up, if the last one is old (plan.js).
+checkWaitProIfStale().catch(() => {});
+
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === CHECKOUT_ALARM) return void (await checkCheckout());
+  if (alarm.name === WAITPRO_ALARM) return void (await checkWaitPro());
   if (alarm.name === SWEEP_ALARM) return void (await sweep());
   if (alarm.name === WATCH_ALARM) return void (await watchAllCommitments());
 });
 
 // ── notifications ───────────────────────────────────────────────────────────
 
-chrome.notifications?.onClicked.addListener((id) => openCommitment(id));
+chrome.notifications?.onClicked.addListener((id) => (String(id).startsWith(PRO_NOTICE_PREFIX) ? openPlanSettings() : openCommitment(id)));
 chrome.notifications?.onButtonClicked.addListener(async (id, index) => {
   const { commitmentId, kind } = await notifTarget(id);
   if (kind === 'reminder' && index === 1 && commitmentId) {

@@ -315,6 +315,8 @@ function quotaOut() {
     <button class="primary" id="qo-plans">${esc(t('seePlans'))}</button></span>`;
   $('#qo-sample').addEventListener('click', () => { status(null); runSample('gym'); });
   $('#qo-plans').addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#piano') }));
+  // Before Pro is on sale there are no plans to see: the same button leads to "tell me when it arrives".
+  send('GET_SALES').then((s) => { if (s && !s.open && $('#qo-plans')) $('#qo-plans').textContent = t('proComingSoon'); }).catch(() => {});
   paintQuota({ month: { limit: Number($('#quota')?.dataset.limit) || 5, remaining: 0 } });
 }
 

@@ -1,3 +1,4 @@
+/* global chrome -- used inside sw.evaluate(), which runs in the extension */
 /**
  * The end-to-end scenarios beyond the main path (test/smoke.mjs), each on a
  * fresh browser profile with the fake server of harness.mjs.
@@ -161,6 +162,45 @@ const SCENARIOS = {
     await opt.waitForTimeout(1200);
     const summary = await opt.textContent('#plan-summary');
     h.check('an active licence shows as Pro in settings', /Pro/.test(summary) && !/gratuito/i.test(summary), summary.trim().slice(0, 80));
+  },
+
+  // Before Pro is on sale: "Pro coming soon" and the waiting list in place of the payment,
+  // then, once sales open, one notification and the plans back.
+  async sales(h) {
+    h.fake.sales = false;
+    h.fake.license = { plan: 'free', active: false, sales: false, quota: { month: { limit: 5, remaining: 4 } } };
+    const opt = await h.settings({ consent: true });
+    await opt.reload();
+    await opt.waitForTimeout(1200);
+    const soon = await opt.isVisible('#plan-soon');
+    const buy = await opt.isVisible('#plan-buy');
+    h.check('sales closed: settings offer "tell me when Pro arrives", no payment', soon && !buy);
+    await opt.locator('#wait-pro + span').click();
+    await opt.waitForTimeout(800);
+    h.check('the switch joins the waiting list, with no address', h.fake.waitlist.at(-1) === true && (await opt.textContent('#plan-status')).length > 0, JSON.stringify(h.fake.waitlist));
+
+    const pg = await h.open('checkout.html', 'checkout');
+    await pg.waitForTimeout(600);
+    h.fake.mode = 'quota';
+    await pg.click('button.cta');
+    await pg.waitForFunction(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('[data-upgrade][data-wait="1"]'), null, { timeout: 10000 }).catch(() => {});
+    const label = await h.shadow(pg, '[data-upgrade]');
+    h.check('analyses used up with sales closed: the warning offers the waiting list, not the payment', label && !/Pro ·/.test(label) && Boolean(await pg.evaluate(() => document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('[data-wait="1"]'))), label);
+    const before = h.fake.waitlist.length;
+    await h.alert(pg).locator('[data-upgrade]').click();
+    await pg.waitForTimeout(800);
+    h.check('…and its button joins the list too', h.fake.waitlist.length === before + 1 && (await h.shadow(pg, '.upsell-note')).length > 0);
+    await act(h, pg, 'cancel');
+    h.fake.mode = 'ok';
+
+    // Sales open: the next answer says so, the person is told once, the plans come back.
+    h.fake.sales = true;
+    h.fake.license = { ...h.fake.license, sales: true };
+    await opt.reload();
+    await opt.waitForTimeout(1500);
+    const waiting = await h.sw.evaluate(() => chrome.storage.local.get('waitPro').then((g) => g.waitPro));
+    h.check('sales open: waiting cleared after the notice, plans visible again', waiting === false && await opt.isVisible('#plan-buy') && !(await opt.isVisible('#plan-soon')));
+    h.fake.license = { plan: 'free', active: false, sales: true, quota: { month: { limit: 5, remaining: 4 } } };
   },
 
   async pages(h) {

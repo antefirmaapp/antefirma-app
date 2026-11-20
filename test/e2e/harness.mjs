@@ -57,7 +57,10 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
     engine: 'keywords', fixed: null, byText: null, mode: 'ok', delay: 0, notice: null,
     readCalls: 0, readMode: 'ok', lastFiles: [], readText: null,
     analyzeCalls: 0, pending: 0, registerCalls: 0, lastLang: null, lastText: '', feedback: [], served401: 0,
-    license: { plan: 'free', active: false, quota: { month: { limit: 5, remaining: 4 } } },
+    license: { plan: 'free', active: false, sales: true, quota: { month: { limit: 5, remaining: 4 } } },
+    // Whether Pro is on sale: the free-only period is the 'sales' scenario's.
+    sales: true,
+    waitlist: [],
     quota: { plan: 'free', remaining: 4, month: { limit: 5, remaining: 4 } },
   };
   async function api(route) {
@@ -84,7 +87,7 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
         if (mode === 'slow' || delay) await new Promise((r) => setTimeout(r, delay || 5000));
         if (mode === '500') return await json(500, { error: 'upstream', message: 'boom' });
         if (mode === 'malformed') return await route.fulfill({ status: 200, contentType: 'application/json', body: '{"findings": [ {"category": "auto_ren' });
-        if (mode === 'quota') return await json(429, { error: 'quota_month', message: 'server' });
+        if (mode === 'quota') return await json(429, { error: 'quota_month', message: 'server', sales: fake.sales });
         // `byText`: an answer of its own for the text that matches, to tell two contracts apart.
         const answer = fake.byText?.find(([re]) => re.test(body.text || ''))?.[1] || fake.fixed || { findings: keywordFindings(body.text || '', body.uiLang), terms: EMPTY_TERMS, summary: '' };
         return await json(200, { dropped: 0, truncated: false, model: 'fake', cached: false, quota: fake.quota, ...answer, notice: fake.notice });
@@ -102,6 +105,8 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
     }
     if (path === '/v1/feedback') { fake.feedback.push(JSON.parse(req.postData() || '{}').category); return json(200, { ok: true }); }
     if (path === '/v1/license') return json(200, fake.license);
+    if (path === '/v1/waitlist') { const on = JSON.parse(req.postData() || '{}').on; fake.waitlist.push(on); return json(200, { on, sales: fake.sales }); }
+    if (path === '/v1/pro/checkout' && !fake.sales) return json(503, { error: 'sales_off', message: 'server' });
     if (path === '/v1/pro/checkout') return json(200, { claim: 'c'.repeat(32), url: `https://antefirma.app/pro/#c=${'c'.repeat(32)}&p=pro` });
     return json(404, { error: 'not_found' });
   }

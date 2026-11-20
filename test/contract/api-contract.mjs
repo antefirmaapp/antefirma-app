@@ -24,11 +24,12 @@ export const CONTRACT = {
       extra_fees: [{ label: 'string?', value: 'number', per_cycle: 'boolean?', quote: 'string?' }],
     },
     summary: 'string',
-    '?quota': { month: { limit: 'number', remaining: 'number', '?': true }, '?': true },
+    '?quota': { month: { limit: 'number', remaining: 'number', '?': true }, sales: 'boolean?', '?': true },
   },
-  licenseFree: { plan: 'string', active: 'boolean', quota: { month: { limit: 'number', remaining: 'number' } } },
+  // `sales`: whether Pro, Max and Team can be bought now (the panel's "Sales open" switch).
+  licenseFree: { plan: 'string', active: 'boolean', sales: 'boolean', quota: { month: { limit: 'number', remaining: 'number' } } },
   licensePaid: {
-    plan: 'string', status: 'string?', active: 'boolean', periodEnd: 'string?',
+    plan: 'string', status: 'string?', active: 'boolean', periodEnd: 'string?', sales: 'boolean',
     activations: { used: 'number', limit: 'number', here: 'boolean' },
     quota: { month: { limit: 'number', remaining: 'number' }, day: { limit: 'number', remaining: 'number', '?': true } },
   },
