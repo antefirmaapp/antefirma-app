@@ -56,6 +56,12 @@ button pressed ──► content script (holds the click, reads the page)
 - **Personal profile, EU/IT protections, score, deadlines**: all local.
 - **If the server doesn't answer**, the warning says so and lets the user choose.
   There is no fallback verdict: faking "all fine" would be worse.
+- **Buttons inside small frames** (a newspaper's "Subscribe" widget, a payment
+  button in an iframe no bigger than itself): the click is held in the frame, but
+  the warning opens on the top page, full size, through the service worker
+  (`RemoteOverlay` in `src/content/overlay.js`), and the decision goes back to the
+  frame. A frame smaller than 600×450 counts as small; if the top page does not
+  answer, the warning stays in the frame as before.
 
 ### Consent
 

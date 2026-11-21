@@ -315,7 +315,7 @@
   }
 
   async function handleAction(found, event) {
-    const overlay = new CF.overlay.Overlay();
+    const overlay = await CF.overlay.create();
     const waiting = overlay.wait();
     let decision = 'cancel';
     let current = null;
@@ -439,7 +439,7 @@
   }
 
   async function handleSubmit(form, submitter, type) {
-    const overlay = new CF.overlay.Overlay();
+    const overlay = await CF.overlay.create();
     const waiting = overlay.wait();
     let decision = 'cancel';
     let current = null;
@@ -585,6 +585,11 @@
   /** Queues a notification. Only one stays visible: the others wait their turn. */
   function flash(verdict) {
     if (!verdict?.level || verdict.level.id === 'safe') return;
+    // In a frame as small as a button the notification would be clipped: the top page shows it.
+    if (CF.overlay.isSmallFrame()) {
+      CF.bridge.send('FRAME_OVERLAY', { id: 'flash', op: 'flash', args: [verdict] }).catch(() => {});
+      return;
+    }
     // Pressing three buttons in a row must not produce three overlapping
     // warnings, nor an endless queue to work through: the latest count, not all.
     if (toast.queue.length >= 3) toast.queue.shift();
@@ -778,6 +783,59 @@
 
   document.addEventListener('click', onClick, true);
   document.addEventListener('submit', onSubmit, true);
+
+  /**
+   * The top page shows the warnings of its small frames (see RemoteOverlay in
+   * overlay.js). Only the top frame listens, and only to the service worker:
+   * a web page cannot send these messages.
+   */
+  let isTop = false;
+  try { isTop = window === window.top; } catch { isTop = false; }
+  if (isTop && chrome.runtime?.onMessage) {
+    const remote = new Map();
+    const gone = new Set();
+    const RENDER = new Set(['showLoading', 'showVerdict', 'showError']);
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+      if (msg?.type !== 'AF_FRAME_OVERLAY' || sender?.id !== chrome.runtime.id || sender?.tab) return undefined;
+      (async () => {
+        const { id, op, args = [], seq = 0 } = msg;
+        if (op === 'ping') return 'pong';
+        if (op === 'flash') { await CF.bridge.texts().catch(() => {}); flash(args[0]); return null; }
+        if (gone.has(id)) return op === 'wait' ? 'cancel' : null;
+        let entry = remote.get(id);
+        if (!entry) {
+          if (op === 'destroy') { gone.add(id); return null; }
+          await CF.bridge.texts().catch(() => {});
+          entry = { overlay: new CF.overlay.Overlay(), seq: 0 };
+          remote.set(id, entry);
+        }
+        const o = entry.overlay;
+        if (op === 'wait') {
+          const decision = await o.wait();
+          remote.delete(id);
+          gone.add(id);
+          return decision;
+        }
+        if (op === 'askConsent') return o.askConsent();
+        if (op === 'destroy') {
+          const resolve = o.resolve;
+          o.destroy();
+          resolve?.('cancel');
+          remote.delete(id);
+          gone.add(id);
+          return null;
+        }
+        if (RENDER.has(op)) {
+          if (seq < entry.seq) return null; // an older drawing arriving late
+          entry.seq = seq;
+          o[op](...args);
+          return null;
+        }
+        throw new Error('unknown operation');
+      })().then((result) => sendResponse({ ok: true, result }), (err) => sendResponse({ ok: false, error: String(err?.message || err) }));
+      return true;
+    });
+  }
 
   CF.detector = { classify, classifyText, findTarget, structuralType, contrast, palette };
 })();

@@ -111,6 +111,22 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   return true;
 });
 
+/**
+ * A small frame's warning, shown by the top page of the same tab (see
+ * RemoteOverlay in content/overlay.js). Only from a sub-frame, only these
+ * operations; the answer (a decision, a consent) goes back to the frame.
+ */
+const FRAME_OPS = new Set(['ping', 'flash', 'showLoading', 'showVerdict', 'showError', 'askConsent', 'destroy', 'wait']);
+async function relayToTopFrame(payload, sender) {
+  const tabId = sender?.tab?.id;
+  if (tabId == null || !sender.frameId) throw new Error('only a frame inside a page can ask this');
+  if (!FRAME_OPS.has(payload?.op)) throw new Error('unknown operation');
+  const { id, op, args = [], seq = 0 } = payload;
+  const res = await chrome.tabs.sendMessage(tabId, { type: 'AF_FRAME_OVERLAY', id: String(id).slice(0, 80), op, args, seq }, { frameId: 0 });
+  if (!res?.ok) throw new Error(res?.error || 'the page did not answer');
+  return res.result;
+}
+
 async function handle(msg, sender) {
   /**
    * `GET_SETTINGS` used to return the **whole** object — API key, name,
@@ -147,6 +163,8 @@ async function handle(msg, sender) {
       return setSettings({ remoteConsentAt: null });
     case 'ANALYZE_ACTION':
       return analyzeAction(msg.payload, sender);
+    case 'FRAME_OVERLAY':
+      return relayToTopFrame(msg.payload, sender);
     case 'ANALYZE_TEXT':
       return analyzeText(msg.payload);
     case 'READ_FILES':

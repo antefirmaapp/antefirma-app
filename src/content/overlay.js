@@ -751,5 +751,63 @@
     </li>`;
   }
 
-  CF.overlay = { Overlay, sevColor };
+  /**
+   * A warning shown by the top page on behalf of a small frame.
+   *
+   * A button can live in an iframe no bigger than itself (a newspaper's
+   * "Subscribe" widget, a payment button): there the full-screen warning was
+   * clipped to the button's box, and all one could see was "Go back". So a small
+   * frame asks the top page to show the warning, through the service worker,
+   * and gets the decision back; the click stays held and is replayed (or not)
+   * where it happened. Same methods as `Overlay`, so the detector doesn't change.
+   */
+  class RemoteOverlay {
+    constructor() {
+      this.id = (globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`);
+      // Messages may overtake each other: the top page ignores a drawing older than the last one shown.
+      this.seq = 0;
+    }
+
+    call(op, args = []) {
+      return CF.bridge.send('FRAME_OVERLAY', { id: this.id, op, args, seq: ++this.seq });
+    }
+
+    showLoading(...args) { this.call('showLoading', args).catch(() => {}); }
+    showVerdict(...args) { this.call('showVerdict', args).catch(() => {}); }
+    showError(...args) { this.call('showError', args).catch(() => {}); }
+    /** No answer means no consent: nothing is sent, and the action is not held for ever. */
+    askConsent() { return this.call('askConsent').catch(() => 'decline'); }
+    destroy() { this.call('destroy').catch(() => {}); }
+    isOpen() { return true; }
+    /** A lost answer counts as "Go back": the click is not performed without a decision. */
+    wait() { return this.call('wait').catch(() => 'cancel'); }
+  }
+
+  /** Too small to show the warning: a frame narrower or lower than the card needs. */
+  function isSmallFrame() {
+    try {
+      if (window === window.top) return false;
+    } catch { /* a cross-origin top can't be compared: certainly a frame */ }
+    return (window.innerWidth || 0) < 600 || (window.innerHeight || 0) < 450;
+  }
+
+  /**
+   * The warning for this frame: here, or in the top page if this frame is too
+   * small for it. If the top page doesn't answer (no content script there, a
+   * browser page), the warning stays here, as before: better a cramped warning
+   * than a click swallowed with nothing on screen.
+   */
+  async function create() {
+    if (!isSmallFrame()) return new Overlay();
+    try {
+      const pong = await Promise.race([
+        CF.bridge.send('FRAME_OVERLAY', { id: 'ping', op: 'ping' }),
+        new Promise((resolve) => setTimeout(() => resolve(null), 1500)),
+      ]);
+      if (pong === 'pong') return new RemoteOverlay();
+    } catch { /* falls back below */ }
+    return new Overlay();
+  }
+
+  CF.overlay = { Overlay, RemoteOverlay, create, isSmallFrame, sevColor };
 })();

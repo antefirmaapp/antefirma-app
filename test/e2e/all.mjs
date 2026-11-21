@@ -203,6 +203,41 @@ const SCENARIOS = {
     h.fake.license = { plan: 'free', active: false, sales: true, quota: { month: { limit: 5, remaining: 4 } } };
   },
 
+  // A "Subscribe" button in an iframe no bigger than itself, from another origin (a
+  // newspaper's paywall widget): the warning opens on the top page, full size, and
+  // the decision goes back to the frame.
+  async smallFrame(h) {
+    await h.settings({ consent: true });
+    const other = h.BASE.replace('127.0.0.1', 'localhost');
+    h.pages['/widget.html'] = `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Widget</title>
+      <style>body{margin:0;overflow:hidden} p{position:absolute;left:-9999px}</style></head><body>
+      <p>Abbonamento digitale a 9,99 € al mese. L'abbonamento si rinnova automaticamente ogni mese. Penale di recesso anticipato di 50 euro. Disdetta con preavviso di 30 giorni.</p>
+      <button id="sub" style="width:300px;height:60px">Abbonati ora</button>
+      <script>window.__subs = 0; document.getElementById('sub').addEventListener('click', () => { window.__subs += 1; });</script></body></html>`;
+    h.pages['/news.html'] = `<!doctype html><html lang="it"><head><meta charset="utf-8"><title>Giornale</title></head><body>
+      <h1>Il giornale</h1><nav>Politica · Esteri · Cronache</nav>
+      <iframe id="w" src="${other}widget.html" style="width:320px;height:70px;border:0"></iframe></body></html>`;
+    const pg = await h.open('news.html', 'small frame');
+    await pg.waitForTimeout(1500);
+    const widget = () => pg.frames().find((f) => f.url().endsWith('/widget.html'));
+    await pg.frameLocator('#w').locator('#sub').click();
+    const onTop = await verdictShown(pg);
+    const inFrame = await widget()?.evaluate(() => Boolean(document.querySelector('antefirma-alert')));
+    h.check('a button in a frame as small as itself: the warning opens on the top page, not in the frame', onTop && inFrame === false, `top ${onTop}, frame ${inFrame}`);
+    const size = await pg.evaluate(() => { const c = document.querySelector('antefirma-alert')?.shadowRoot?.querySelector('dialog, .card'); const r = c?.getBoundingClientRect(); return r ? [Math.round(r.width), Math.round(r.height)] : null; });
+    h.check('…at full size', size && size[0] > 320 && size[1] > 200, JSON.stringify(size));
+    await act(h, pg, 'cancel');
+    await pg.waitForTimeout(700);
+    h.check('"Go back" on the top page: the click in the frame does not happen', (await widget().evaluate(() => window.__subs)) === 0 && !(await pg.evaluate(() => Boolean(document.querySelector('antefirma-alert')))));
+
+    await pg.frameLocator('#w').locator('#sub').click();
+    await verdictShown(pg);
+    await pg.waitForTimeout(3300); // the button arms after a moment
+    await act(h, pg, 'proceed');
+    await pg.waitForTimeout(900);
+    h.check('"Continue" on the top page: the click happens in the frame, once', (await widget().evaluate(() => window.__subs)) === 1);
+  },
+
   async pages(h) {
     await h.settings({ consent: true });
     // A single-page app: the button appears after loading, and again after a route change.
