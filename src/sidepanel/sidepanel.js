@@ -725,3 +725,9 @@ document.addEventListener('click', (e) => {
   const pending = await send('GET_PENDING_PANEL_REQUEST').catch(() => null);
   if (pending) handlePanelRequest(pending);
 })();
+
+// "How did it go?" lives in settings: the side panel only leads there.
+document.getElementById('open-opinion')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  chrome.tabs.create({ url: chrome.runtime.getURL('src/options/options.html#parere') });
+});

@@ -61,6 +61,7 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
     // Whether Pro is on sale: the free-only period is the 'sales' scenario's.
     sales: true,
     waitlist: [],
+    opinions: [],
     quota: { plan: 'free', remaining: 4, month: { limit: 5, remaining: 4 } },
   };
   async function api(route) {
@@ -105,6 +106,7 @@ export async function startStack({ lang = 'it', locale = 'it-IT' } = {}) {
     }
     if (path === '/v1/feedback') { fake.feedback.push(JSON.parse(req.postData() || '{}').category); return json(200, { ok: true }); }
     if (path === '/v1/license') return json(200, fake.license);
+    if (path === '/v1/opinion') { fake.opinions.push(JSON.parse(req.postData() || '{}')); return json(200, { ok: true }); }
     if (path === '/v1/waitlist') { const on = JSON.parse(req.postData() || '{}').on; fake.waitlist.push(on); return json(200, { on, sales: fake.sales }); }
     if (path === '/v1/pro/checkout' && !fake.sales) return json(503, { error: 'sales_off', message: 'server' });
     if (path === '/v1/pro/checkout') return json(200, { claim: 'c'.repeat(32), url: `https://antefirma.app/pro/#c=${'c'.repeat(32)}&p=pro` });

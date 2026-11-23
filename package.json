@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "node --test test/*.test.mjs",
+    "store-zip": "node tools/store-zip.mjs",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=90 --test-coverage-functions=85 test/*.test.mjs",
     "test:e2e": "node test/smoke.mjs",
     "lint": "eslint .",

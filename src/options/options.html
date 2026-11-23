@@ -173,6 +173,21 @@
       <div id="plan-status" class="key-status" hidden></div>
     </section>
 
+    <section class="card" id="parere">
+      <h2>Com’è andata?</h2>
+      <p class="lead">Dicci com’è andata con AnteFirma: ci aiuta a correggerla. Il parere arriva senza legame con questa installazione; non scrivere dati personali.</p>
+      <div class="row mood" role="group" aria-label="Com’è andata?">
+        <button type="button" class="secondary" data-mood="good" aria-pressed="false"><span aria-hidden="true">😊 </span>Bene</button>
+        <button type="button" class="secondary" data-mood="ok" aria-pressed="false"><span aria-hidden="true">😐 </span>Così così</button>
+        <button type="button" class="secondary" data-mood="bad" aria-pressed="false"><span aria-hidden="true">🙁 </span>Male</button>
+      </div>
+      <label class="field"><span>Vuoi aggiungere qualcosa? (facoltativo)</span>
+        <textarea id="opinion-text" rows="3" maxlength="600" placeholder="Che cosa ti è stato utile, che cosa no"></textarea>
+      </label>
+      <div class="row"><button class="primary" id="opinion-send" type="button" disabled>Invia</button></div>
+      <div id="opinion-status" class="key-status" hidden></div>
+    </section>
+
     <section class="card">
       <h2 data-help="data">Analisi</h2>
       <p class="lead">Quando premi un pulsante che ti impegna, AnteFirma manda il testo della pagina e il suo indirizzo al proprio server, che lo fa leggere a un modello di intelligenza artificiale (Claude, di Anthropic). Il server risponde con le clausole che ti impegnano, ciascuna con la frase esatta della pagina, e scarta ogni avviso la cui frase non c'è.</p>

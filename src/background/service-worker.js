@@ -16,7 +16,7 @@
 import { isAllowed } from '../core/sender.js';
 import { jurisdictionFor } from '../core/jurisdiction.js';
 import { COMMITMENT_STATUS } from '../core/commitments.js';
-import { register, installId, getLicense, startCheckout, activateLicense, deactivateLicense, sendFeedback } from '../core/server.js';
+import { register, installId, getLicense, startCheckout, activateLicense, deactivateLicense, sendFeedback, sendOpinion } from '../core/server.js';
 import { t } from '../i18n/index.js';
 import { openReport } from '../core/report.js';
 import { getSettings as readSettings, setSettings, clearCache, getHistory, clearHistory, getCommitments } from '../core/storage.js';
@@ -209,6 +209,8 @@ async function handle(msg, sender) {
       return withCode(sendFeedback(msg.payload?.category, msg.payload?.model));
 
     // ── plan (extension pages only) ───────────────────────────────────────
+    case 'SEND_OPINION':
+      return withCode(sendOpinion({ mood: msg.payload?.mood, text: msg.payload?.text, lang: globalThis.AF_I18N?.lang, v: chrome.runtime.getManifest().version }));
     case 'GET_LICENSE':
       return withCode(getLicense().then(async (lic) => { await noteSales(lic?.sales); return lic; }));
     case 'START_CHECKOUT':

@@ -238,6 +238,25 @@ const SCENARIOS = {
     h.check('"Continue" on the top page: the click happens in the frame, once', (await widget().evaluate(() => window.__subs)) === 1);
   },
 
+  // "How did it go?": a choice and a few words, from settings and from the side panel's link.
+  async opinion(h) {
+    const opt = await h.settings({ consent: true });
+    await opt.goto(h.extUrl('src/options/options.html#parere'));
+    await opt.waitForTimeout(900);
+    h.check('"Send" waits for a choice', await opt.isDisabled('#opinion-send'));
+    await opt.click('#parere [data-mood="ok"]');
+    await opt.fill('#opinion-text', 'Utile sulla palestra, lento sul giornale.');
+    await opt.click('#opinion-send');
+    await opt.waitForTimeout(900);
+    const got = h.fake.opinions.at(-1);
+    h.check('the opinion goes out with the choice, the words, the language and the version', got?.mood === 'ok' && got.text === 'Utile sulla palestra, lento sul giornale.' && got.lang === 'it' && /^\d+\.\d+\.\d+$/.test(got.v || ''), JSON.stringify(got));
+    h.check('…and settings say thank you', /Grazie/.test(await opt.textContent('#opinion-status')));
+    const panel = await h.open(h.extUrl('src/sidepanel/sidepanel.html'), 'side panel');
+    await panel.waitForTimeout(700);
+    const [tab] = await Promise.all([h.context.waitForEvent('page', { timeout: 6000 }), panel.click('#open-opinion')]);
+    h.check('the side panel leads to it', /options\.html#parere$/.test(tab.url()), tab.url());
+  },
+
   async pages(h) {
     await h.settings({ consent: true });
     // A single-page app: the button appears after loading, and again after a route change.

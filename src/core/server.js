@@ -208,6 +208,8 @@ export const pushRemote = (plan, o) => authed('/v1/push', plan, o);
 export const startCheckout = (plan, o, lang) => authed('/v1/pro/checkout', { plan, ...(lang ? { lang } : {}) }, o);
 export const activateLicense = (key, o) => authed('/v1/license/activate', { key: String(key || '').trim() }, o);
 export const deactivateLicense = (o) => authed('/v1/license/deactivate', {}, o);
+/** "How did it go?": a choice and an optional text, kept with no link to this installation. */
+export const sendOpinion = ({ mood, text, lang, v }, o) => authed('/v1/opinion', { mood, text: String(text || '').slice(0, 600), lang, v }, o);
 /** "Tell me when Pro arrives": one flag on the server, no address. `{ on, sales }` */
 export const joinWaitlist = (on, o) => authed('/v1/waitlist', { on: Boolean(on) }, o);
 /** "Wrong warning?": only the category, to improve the analysis. */

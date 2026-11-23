@@ -409,3 +409,26 @@ let initialLang = 'auto';
   showPlan();
   showInstallId();
 })();
+
+// "How did it go?": a choice and, if wanted, a few words. Sent with no link to this installation.
+let mood = null;
+document.querySelectorAll('#parere [data-mood]').forEach((b) => b.addEventListener('click', () => {
+  mood = b.dataset.mood;
+  document.querySelectorAll('#parere [data-mood]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  $('#opinion-send').disabled = false;
+}));
+$('#opinion-send').addEventListener('click', async () => {
+  if (!mood) return;
+  const el = $('#opinion-status');
+  $('#opinion-send').disabled = true;
+  try {
+    const r = await send('SEND_OPINION', { mood, text: $('#opinion-text').value.trim() });
+    el.hidden = false;
+    if (r?.error) { el.className = 'key-status err'; el.textContent = r.message; $('#opinion-send').disabled = false; return; }
+    el.className = 'key-status ok';
+    el.textContent = t('opinionThanks');
+    $('#opinion-text').value = '';
+  } catch (err) {
+    el.hidden = false; el.className = 'key-status err'; el.textContent = err.message; $('#opinion-send').disabled = false;
+  }
+});
